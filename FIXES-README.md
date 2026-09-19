@@ -68,6 +68,8 @@ The separate `/super-admin` control centre is intentionally stricter than `/admi
 
 The Super Bet dashboard maps the backend's actual metric keys (`totalDepositsAllTime`, `totalDepositsThisMonth`, `totalDepositCount`, and corresponding withdrawal values) into formatted cards and summary rows instead of rendering raw JSON. `SUPER_ADMIN` sessions are also routed away from the regular `/admin` panel so admin-only affiliate requests cannot generate a 403 while the Super Admin centre is open.
 
+The Super Admin administrator list now falls back from `/api/super-admin/admins/with-commission` to `/api/super-admin/admins` when an older backend returns HTTP 500 for the optional commission projection. The dashboard also has explicit Binance, bank, simple, and user-deposit queue shortcuts. Both the regular Admin Panel and the Super Admin panel include a **How to use** guide describing each icon/tab and its permitted workflow.
+
 ## PowerShell installation
 
 Copy the ZIP into Downloads, then run this in PowerShell. It creates a backup before replacing the project files.

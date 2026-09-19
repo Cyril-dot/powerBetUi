@@ -1224,7 +1224,16 @@ export const superAdminAffiliateWithdrawals = {
 
 export const superAdmin = {
   listAdmins: () => get<Record<string, unknown>[]>("/api/super-admin/admins"),
-  listAdminsWithCommission: () => get<Record<string, unknown>[]>("/api/super-admin/admins/with-commission"),
+  listAdminsWithCommission: async () => {
+    try {
+      return await get<Record<string, unknown>[]>("/api/super-admin/admins/with-commission");
+    } catch {
+      // Older deployments expose the base administrators list but not the
+      // optional commission projection. Keep the Admins tab usable and let
+      // the detail/rate actions use their dedicated endpoints.
+      return get<Record<string, unknown>[]>("/api/super-admin/admins");
+    }
+  },
   createAdmin: (body: Record<string, string>) => post<Record<string, unknown>>("/api/super-admin/admins", body),
   getAdminDetail: (adminId: string) => get<Record<string, unknown>>(`/api/super-admin/admins/${adminId}`),
   setAdminCommissionRate: (adminId: string, body: { commissionRate: number }) => patch<Record<string, unknown>>(`/api/super-admin/admins/${adminId}/commission-rate`, body),
