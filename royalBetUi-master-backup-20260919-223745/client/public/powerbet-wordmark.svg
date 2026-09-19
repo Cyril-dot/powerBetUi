@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 170">
+  <defs>
+    <linearGradient id="sealFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#232323"/>
+      <stop offset="100%" stop-color="#050505"/>
+    </linearGradient>
+    <linearGradient id="swoosh" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1e6bff" stop-opacity="0"/>
+      <stop offset="12%" stop-color="#1e6bff" stop-opacity="0.9"/>
+      <stop offset="88%" stop-color="#1e6bff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#1e6bff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- brush-stroke blade: tapered to a point at both ends, thick at center -->
+  <path d="M20 148 Q 330 124 616 140 Q 330 150 20 152 Z" fill="url(#swoosh)"/>
+
+  <!-- seal / chop mark: angular cut-corner block, echoes the bolt icon -->
+  <path d="M14 26 L54 26 L66 38 L66 82 L26 82 L14 70 Z" fill="url(#sealFill)" stroke="#1e6bff" stroke-width="2"/>
+  <path d="M42 34 L27 58 L34 58 L31 76 L47 52 L40 52 Z" fill="#F4F1F0"/>
+
+  <!-- wordmark -->
+  <text x="86" y="108" font-family="'Barlow Condensed','DejaVu Sans Condensed',sans-serif" font-weight="800"
+        font-size="88" letter-spacing="-2" transform="skewX(-6)">
+    <tspan fill="#F4F1F0">SUPER</tspan><tspan fill="#1e6bff">BET</tspan>
+  </text>
+</svg>

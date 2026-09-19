@@ -1,0 +1,1841 @@
+/* Super UI / Black Gold Fieldhouse: metallic gold authority, black terminal density, lemon/nature green live actions, sharp betting cells, purposeful motion. */
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+@custom-variant dark (&:is(.dark *));
+
+:root{font-family:'DM Sans',sans-serif;color:#f5f0e7;background:#090a08;font-synthesis:none;text-rendering:optimizeLegibility;--ink:#eef0f4;--panel:#20232c;--panel-2:#292d38;--panel-3:#343946;--line:rgba(33,39,52,.18);--line-bright:rgba(30,107,255);--gold:#1e6bff;--gold-hi:#4d8dff;--lemon:#b8f33c;--nature:#0da653;--cream:#20242d;--muted:#737986;--blue:#1e6bff;--shadow:0 12px 30px rgba(28,33,43,.12)}
+*{box-sizing:border-box}html{background:var(--ink);scroll-behavior:smooth}body{margin:0;min-width:320px;background:#eef0f4;color:var(--cream)}button,input{font:inherit}button{border:0;color:inherit}a{text-decoration:none;color:inherit;cursor:pointer}.wrap{max-width:1440px;margin:0 auto;padding-left:26px;padding-right:26px}.utility{height:32px;background:#1e6bff;border-bottom:1px solid rgba(255,255,255,.12);font-size:11px;color:rgba(255,255,255,.82)}.utility-inner,.utility-links{display:flex;align-items:center;justify-content:space-between;height:100%}.utility a{color:rgba(255,255,255,.88);transition:color .18s ease}.utility a:hover{color:#c7f63a}.utility .balance-link{color:#c7f63a;font-weight:700}.utility-links{gap:18px}.flag{color:var(--lemon);letter-spacing:.08em}.flag-emoji{margin-right:5px;font-size:15px}.flag-img{width:20px;height:15px;object-fit:cover;border-radius:2px;margin-right:6px;vertical-align:middle;box-shadow:0 0 0 1px rgba(255,255,255,.35)}.utility-brand{display:inline-flex;align-items:center;white-space:nowrap}.utility-brand .flag-img,.utility-brand .flag-emoji{margin-right:6px;flex-shrink:0}.header{position:sticky;top:0;z-index:20;background:rgba(30,107,255);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}.header-inner{height:74px;display:flex;align-items:center;gap:28px}.brand{display:flex;align-items:center;gap:6px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:26px;letter-spacing:-.055em;font-weight:800;white-space:nowrap}.brand img{width:22px;height:22px}.header .brand img{display:none}.brand img{width:27px;height:27px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(242,200,102,.3))}.brand span span{color:#ffe08a}.main-nav{display:flex;align-items:stretch;height:100%;gap:4px;flex:1}.main-nav a{display:flex;position:relative;align-items:center;gap:6px;padding:0 17px;color:rgba(255,255,255,.78);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:15px;transition:color .2s ease}.main-nav a:hover,.main-nav a.active{color:var(--gold-hi)}.main-nav a.active:after{content:"";position:absolute;left:16px;right:16px;bottom:0;height:2px;background:linear-gradient(90deg,var(--lemon),var(--gold));box-shadow:0 0 13px rgba(199,246,58,.45)}.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--lemon);box-shadow:0 0 0 0 rgba(199,246,58,.5);animation:livePulse 1.8s infinite}.header-actions{display:flex;align-items:center;gap:13px}.icon-button,.mobile-menu{display:grid;place-items:center;background:transparent;color:#fff;cursor:pointer}.icon-button:hover{color:var(--gold-hi)}.login-link{font-size:13px;color:#fff}
+.header-balance{display:flex;align-items:center;font-size:13px;font-weight:800;color:var(--lemon);padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);white-space:nowrap}.gold-button,.ghost-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:0 17px;border-radius:3px;font-size:12px;font-weight:700;letter-spacing:.03em;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}.gold-button{color:#fff;background:var(--blue);box-shadow:inset 0 1px rgba(255,255,255,.4),0 8px 25px rgba(216,168,78,.15)}.gold-button:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(216,168,78,.28)}.gold-button:active,.ghost-button:active{transform:scale(.97)}.ghost-button{color:var(--gold-hi);background:rgba(216,168,78,.07);border:1px solid var(--line-bright)}.ghost-button:hover{background:rgba(216,168,78,.13)}.full{width:100%}.mobile-menu{display:none}.sport-strip{background:#fff;border-bottom:1px solid rgba(255,255,255,.08);box-shadow:0 10px 30px rgba(0,0,0,.24)}.sport-strip-inner{height:42px;display:flex;align-items:center;gap:27px;overflow:auto;scrollbar-width:none}.sport-strip span{flex:0 0 auto;display:flex;gap:4px;align-items:center;color:#969990;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}.sport-strip .strip-active{color:var(--lemon)}.page-grid{display:grid;grid-template-columns:190px minmax(0,1fr) 280px;gap:18px;padding-top:18px;padding-bottom:50px}.panel{background:#fff;color:#20242d;border:1px solid var(--line);box-shadow:var(--shadow);position:relative}.panel:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.38;background:repeating-linear-gradient(118deg,transparent 0,transparent 5px,rgba(242,200,102,.022) 6px,transparent 7px)}.side-nav{height:max-content;position:sticky;top:142px}.side-title{display:flex;align-items:center;gap:8px;padding:15px 16px 12px;color:var(--blue);font:700 14px 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid rgba(255,255,255,.08)}.side-nav>a{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;color:#5f6673;font-size:11px;border-bottom:1px solid rgba(255,255,255,.045);transition:color .2s ease,background .2s ease}.side-nav>a:hover{background:rgba(216,168,78,.08);color:var(--gold-hi)}.side-title.spaced{margin-top:10px}.main-column{min-width:0}.right-column{display:flex;flex-direction:column;gap:18px}.hero{position:relative;min-height:304px;overflow:hidden;background:#12140f;border:1px solid var(--line);box-shadow:0 24px 80px rgba(0,0,0,.42)}.hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.82;filter:saturate(.92) contrast(1.06)}.hero-sheen{position:absolute;inset:0;background:linear-gradient(90deg,#080a08 0%,rgba(9,10,8,.86) 23%,rgba(8,9,8,.18) 68%,rgba(8,9,8,.52) 100%)}.hero-copy{position:relative;z-index:1;padding:48px 46px;max-width:470px}.eyebrow{display:block;color:var(--gold-hi);font:700 11px 'DM Sans',sans-serif;letter-spacing:.15em;text-transform:uppercase}.eyebrow.green{color:var(--lemon)}h1,h2,h3,h4,p{margin:0}.hero h1,.casino-hero h1{margin-top:11px;font:800 56px/ .88 'Barlow Condensed',sans-serif;letter-spacing:-.045em;text-transform:uppercase}
+.simple-page>h1{margin-top:11px;font:800 44px/1.05 'DM Sans',sans-serif;letter-spacing:-.02em;text-transform:none}.hero h1,.casino-hero h1{color:#fff}.simple-page>h1{color:#20242d}.hero h1 em,.casino-hero h1 em{font-style:normal;color:#ffe08a}.simple-page>h1 em{font-style:normal;color:var(--blue)}.hero p{margin-top:17px;color:#c4c3b9;font-size:13px;line-height:1.6;max-width:315px}.hero-buttons{display:flex;gap:10px;margin-top:25px}.hero-progress{position:absolute;right:25px;bottom:20px;display:flex;gap:6px}.hero-progress span{width:22px;height:3px;background:rgba(255,255,255,.25)}.hero-progress span.active{background:var(--lemon)}.wide-banner{display:block;width:100%;height:74px;object-fit:cover;margin:15px 0;border:1px solid var(--line);filter:saturate(.75)}.betting-section,.live-section{margin-top:18px;padding:17px}.live-section{background:#20232c;color:#f4f5f7;border-color:rgba(31,138,76,.35)} .live-section .match-meta strong{color:#fff}.live-section .match-meta small{color:#b5bbc6}.section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:15px}.section-head h2{margin-top:2px;font:700 24px 'Barlow Condensed',sans-serif;letter-spacing:.01em}.section-tools{display:flex;gap:8px}.section-tools button{display:flex;align-items:center;gap:5px;padding:7px 9px;background:#f3f4f6;color:#5f6673;font-size:10px;cursor:pointer}.league-tabs{display:flex;gap:21px;align-items:center;overflow:auto;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:12px;scrollbar-width:none}.league-tabs span{flex:0 0 auto;position:relative;padding:0 0 10px;font-size:11px;color:#8d9288}.league-tabs span.active{color:var(--gold-hi);font-weight:700}.league-tabs span.active:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--gold-hi)}.league-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:15px}.league-cards>div{min-height:42px;padding:7px;background:#1f221e;border:1px solid transparent}.league-cards>div.selected{border-color:rgba(199,246,58,.65);background:rgba(31,138,76,.14)}.league-cards small,.league-cards b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.league-cards small{font-size:9px;color:#9b9e96}.league-cards b{margin-top:2px;font-size:10px;color:#e0ded3}.table-head,.match-row{display:grid;grid-template-columns:minmax(180px,1.8fr) repeat(3,minmax(54px,1fr)) minmax(40px,.7fr);gap:6px;align-items:center}.table-head{padding:0 6px 8px;color:#777b72;font:700 10px 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em}.table-head span:not(:first-child){text-align:center}.match-row{padding:10px 6px;border-top:1px solid rgba(255,255,255,.065);min-height:64px}.match-meta{display:grid;grid-template-columns:1fr auto;gap:2px 8px;min-width:0}.match-meta small{grid-column:1/-1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#737986;font-size:9px}.match-meta>span{grid-column:2;grid-row:2;color:#b8bcb3;font-size:10px}.match-meta strong{grid-column:1;grid-row:2;line-height:1.35;color:#20242d;font-size:11px;font-weight:600}.hot{margin-left:6px;padding:2px 4px;color:#15160d;background:var(--lemon);font-size:8px;font-weight:800}.odd{min-height:31px;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 8px;color:#ccd0c4;background:rgba(31,138,76,.25);border:1px solid rgba(31,138,76,.45);cursor:pointer;transition:transform .16s ease,background .16s ease,border .16s ease}.odd span{font-size:9px;color:#9ba096}.odd b{font-size:11px;color:var(--cream)}.odd:hover{transform:translateY(-2px);background:rgba(199,246,58,.25);border-color:var(--lemon)}.more-odds{display:flex;align-items:center;justify-content:center;gap:3px;color:var(--gold-hi);background:transparent;font-size:10px;cursor:pointer}.section-footer{display:flex;justify-content:center;align-items:center;gap:5px;padding:14px 4px 2px;color:var(--gold-hi);font-size:11px}.live-pulse{color:#10140d;background:var(--lemon);padding:4px 7px;font-size:9px;font-weight:800;letter-spacing:.08em;animation:softPulse 2s infinite}.live-row{display:grid;grid-template-columns:minmax(150px,1.4fr) 58px repeat(3,minmax(54px,1fr)) 45px;gap:6px;align-items:center;padding:11px 4px;border-top:1px solid rgba(255,255,255,.08)}.live-row .score{font:700 18px 'Barlow Condensed',sans-serif;color:#f3efe4;text-align:center}.live-clock{display:flex;align-items:center;gap:5px}.betslip{position:sticky;top:142px;min-height:245px}.betslip-tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid rgba(255,255,255,.1)}.betslip-tabs span{padding:15px;text-align:center;color:#90968b;font:700 14px 'Barlow Condensed',sans-serif}.betslip-tabs span.active{color:var(--gold-hi);border-bottom:2px solid var(--gold-hi)}.betslip-tabs b{display:inline-grid;place-items:center;width:16px;height:16px;margin-left:4px;color:#111;background:var(--lemon);border-radius:50%;font:700 10px 'DM Sans'}.empty-slip{display:flex;flex-direction:column;align-items:center;gap:10px;padding:30px 21px;text-align:center;color:#858a80}.empty-slip svg{color:var(--gold);opacity:.8}.empty-slip h3{font:700 20px 'Barlow Condensed',sans-serif;color:#ddd9cc}.empty-slip p{max-width:190px;font-size:11px;line-height:1.5}.empty-slip .ghost-button{margin-top:7px}.slip-header{display:flex;justify-content:space-between;padding:12px 13px;color:#b4b8ae;font-size:11px;border-bottom:1px solid rgba(255,255,255,.08)}.slip-header button{background:transparent;color:var(--gold-hi);font-size:10px;cursor:pointer}.slip-pick{display:grid;grid-template-columns:1fr auto auto;gap:9px;align-items:center;padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06)}.slip-pick b,.slip-pick small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.slip-pick b{font-size:10px}.slip-pick small{margin-top:3px;color:#8d9388;font-size:9px}.slip-pick strong{color:var(--lemon);font-size:11px}.slip-pick button{display:grid;place-items:center;background:transparent;color:#7f847a;cursor:pointer}.slip-summary{padding:13px}.slip-summary>div{display:flex;justify-content:space-between;margin-bottom:10px;color:#93988e;font-size:10px}.slip-summary>div b{color:var(--gold-hi);font-size:13px}.slip-summary label{display:flex;justify-content:space-between;align-items:center;color:#a4a89e;font-size:10px}.slip-summary input{width:95px;padding:7px 8px;color:#fff;background:#22251f;border:1px solid rgba(255,255,255,.12);outline:0}.slip-summary .gold-button{margin-top:12px}.mini-games,.winners{padding-bottom:12px}.mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:11px}.mini-card{position:relative;overflow:hidden;aspect-ratio:1.22;border:1px solid rgba(255,255,255,.12);background:#10110e}.mini-card img{width:100%;height:100%;object-fit:cover;transition:transform .25s ease}.mini-card:hover img{transform:scale(1.06)}.mini-card span{position:absolute;left:6px;right:6px;bottom:5px;color:#fff;font-size:9px;font-weight:700;text-shadow:0 1px 4px #000}.winners .winner{margin:0 12px;padding:10px 2px;border-bottom:1px solid rgba(255,255,255,.07)}.winner b,.winner span{display:block}.winner b{color:var(--nature);font-size:14px}.winner span{margin-top:3px;color:#8c9288;font-size:9px}.winner small{float:right;color:#686d65}.casino-page{padding-top:25px;padding-bottom:60px}.casino-hero{min-height:270px;position:relative;overflow:hidden;display:flex;align-items:center;padding:38px 52px;border:1px solid var(--line);background:#11130f}.casino-hero img{position:absolute;right:0;top:0;width:44%;height:100%;object-fit:cover;opacity:.78}.casino-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#0d0e0b 26%,rgba(13,14,11,.88) 51%,transparent 100%)}.casino-hero>div{position:relative;z-index:1}.casino-hero p{max-width:330px;margin-top:14px;color:#b5b7ad;font-size:13px;line-height:1.6}.casino-toolbar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 0;border-bottom:1px solid var(--line)}.casino-tabs{display:flex;gap:7px;flex-wrap:wrap}.casino-tabs button{padding:9px 13px;background:#181b16;color:#9da298;border:1px solid rgba(255,255,255,.07);font-size:11px;cursor:pointer}.casino-tabs button.active{color:#16170f;background:var(--gold-hi);border-color:var(--gold-hi)}.search-box{display:flex;align-items:center;gap:8px;min-width:210px;padding:9px 11px;border:1px solid var(--line);background:#11130f;color:#8b9186}.search-box input{width:100%;border:0;outline:0;color:#fff;background:transparent;font-size:11px}.game-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;padding-top:19px}.game-tile{overflow:hidden;background:#11130f;border:1px solid rgba(255,255,255,.09);transition:transform .2s ease,border .2s ease,box-shadow .2s ease}.game-tile:hover{transform:translateY(-5px);border-color:var(--gold);box-shadow:0 15px 35px rgba(0,0,0,.35)}.game-tile img{display:block;width:100%;aspect-ratio:1/1.22;object-fit:cover}.game-tile{background:linear-gradient(180deg,#151711,#0c0e0b)}.game-tile div{display:flex;justify-content:space-between;align-items:center;gap:5px;padding:9px 8px}.game-tile b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px}.game-tile span{display:flex;align-items:center;gap:2px;flex:0 0 auto;color:var(--gold-hi);font-size:9px}.simple-page{padding-top:52px;padding-bottom:70px;min-height:620px;background:radial-gradient(circle at 72% 10%,rgba(216,168,78,.07),transparent 28rem)}.simple-page:has(.auth-card){display:flex;flex-direction:column;align-items:center}.simple-page:has(.auth-card)>h1,.simple-page:has(.auth-card)>.eyebrow{text-align:center}.simple-page:has(.auth-card) .simple-grid{display:flex;justify-content:center;width:100%}.simple-page:has(.auth-card) .auth-card{width:min(100%,460px);max-width:460px}.simple-page:has(.auth-card) .auth-card input{min-height:48px}.simple-page>h1{font-size:44px;margin-bottom:26px}.simple-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}.simple-card{padding:27px;min-height:190px}.simple-grid>.panel{min-height:220px}.module-title{display:flex;align-items:center;justify-content:space-between;gap:12px}.module-title h3{font:800 17px 'DM Sans',sans-serif;letter-spacing:-.01em}.text-action{display:flex;align-items:center;gap:4px;background:transparent;color:var(--gold-hi);font-size:10px}.wallet-kicker{display:block;margin:16px 0 3px;color:#9da398;font-size:10px;text-transform:uppercase;letter-spacing:.1em}.activity-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid rgba(255,255,255,.07)}.activity-row>div{flex:1}.activity-row b,.activity-row small{display:block}.activity-row b{font-size:11px}.activity-row small{margin-top:3px;color:#7f857b;font-size:9px}.activity-icon{display:grid;place-items:center;width:28px;height:28px;color:var(--gold-hi);background:rgba(216,168,78,.1)}.status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px}.status-grid>div{padding:12px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)}.status-grid span,.status-grid b{display:block}.status-grid span{color:#858c81;font-size:9px}.status-grid b{margin-top:7px;color:var(--gold-hi);font:700 19px 'Barlow Condensed',sans-serif}.status-grid b.status-good{color:var(--lemon)}.live-rail{margin-top:15px}.simple-card svg{color:var(--gold-hi);margin-bottom:17px}.simple-card h2{font:800 22px 'DM Sans',sans-serif;letter-spacing:-.01em}.simple-card h3{font:800 17px 'DM Sans',sans-serif;letter-spacing:-.01em}.simple-card p{margin-top:9px;max-width:52ch;color:#a9ada2;font-size:13px;line-height:1.6}.wallet-card h2{color:var(--gold-hi);font:800 40px 'DM Sans',sans-serif;letter-spacing:-.02em}.wallet-card>p{margin-top:-5px}.wallet-actions{display:flex;gap:9px;margin-top:25px}.auth-card{max-width:410px;display:flex;flex-direction:column;gap:11px;padding:34px 28px}.auth-card .gold-button{min-height:46px}.auth-card input{padding:13px 12px;color:#fff;background:#0f110e;border:1px solid var(--line);outline:0}.auth-card input:focus{border-color:var(--gold)}.auth-card a{color:var(--gold-hi)}.promo-card{min-height:245px;padding:36px;background:linear-gradient(120deg,rgba(31,138,76,.36),rgba(13,14,11,.94)),url('https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?q=80&w=1600&auto=format&fit=crop') center/cover;border:1px solid rgba(199,246,58,.35)}.promo-card h2{max-width:400px;margin:10px 0 10px;font:800 42px/.9 'Barlow Condensed',sans-serif;text-transform:uppercase}.promo-card p{max-width:340px;margin-bottom:20px;color:#d1d1c8;font-size:13px;line-height:1.6}footer{padding-top:42px;background:#20232c;border-top:1px solid var(--line)}.footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:30px;padding-bottom:40px}.footer-brand{font-size:26px}.footer-grid h4{margin:4px 0 15px;color:var(--gold-hi);font:700 16px 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em}.footer-grid a:not(.brand){display:flex;align-items:center;gap:7px;margin:10px 0;color:#969b90;font-size:11px}.muted{color:#80867d;font-size:11px}.partner-badge{display:flex;align-items:center;gap:10px;margin-top:26px;color:#d6d2c8;font:700 14px/1 'Barlow Condensed',sans-serif;text-transform:uppercase}.partner-badge svg{color:var(--gold-hi)}.footer-bottom{display:flex;justify-content:space-between;padding-top:17px;padding-bottom:17px;border-top:1px solid rgba(255,255,255,.07);color:#70766d;font-size:10px}
+@keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(199,246,58,.5)}50%{box-shadow:0 0 0 5px rgba(199,246,58,0)}}@keyframes softPulse{0%,100%{box-shadow:0 0 0 0 rgba(199,246,58,.22)}50%{box-shadow:0 0 0 7px rgba(199,246,58,0)}}
+@media(max-width:1100px){.page-grid{grid-template-columns:160px minmax(0,1fr) 250px;gap:12px}.wrap{padding-left:16px;padding-right:16px}.header-inner{gap:20px}.main-nav a{padding:0 10px}.game-grid{grid-template-columns:repeat(5,1fr)}}
+@media(max-width:820px){.utility-links{gap:8px}.utility-links span:nth-child(n+2){display:none}.header-inner{height:62px;gap:13px}.mobile-menu{display:grid}.main-nav{display:none}.menu-open .main-nav{display:flex;position:absolute;left:0;right:0;top:94px;height:auto;flex-direction:column;gap:0;padding:8px 12px;background:#1e6bff;box-shadow:0 14px 28px rgba(15,18,27,.2)}.menu-open .main-nav a{min-height:42px;padding:0 12px;border-bottom:1px solid rgba(255,255,255,.14)}.header-actions{margin-left:auto}.login-link{display:none}.header-balance{font-size:11px;padding:5px 9px}.sport-strip-inner{gap:20px}.page-grid{grid-template-columns:1fr}.side-nav{display:none}.right-column{display:grid;grid-template-columns:1fr 1fr;align-items:start}.betslip{position:static;grid-column:1/-1}.hero{min-height:350px}.hero-copy{padding:48px 30px}.hero h1{font-size:55px}.game-grid{grid-template-columns:repeat(4,1fr)}.simple-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.wrap{padding-left:11px;padding-right:11px}.brand{font-size:25px}.brand img{width:23px;height:23px}.header-actions .icon-button{display:none}.gold-button{padding:0 12px}.wide-banner{height:55px}.hero{min-height:370px}.hero-copy{padding:42px 22px}.hero h1{font-size:52px}.hero p{font-size:12px}.section-head h2{font-size:22px}.league-cards{grid-template-columns:repeat(3,1fr);overflow:hidden}.league-cards>div:nth-child(n+4){display:none}.table-head,.match-row{grid-template-columns:minmax(135px,1.65fr) repeat(3,minmax(43px,1fr)) 34px;gap:4px}.table-head span:nth-child(5){display:none}.match-row .more-odds{font-size:0}.match-row .more-odds svg{width:14px}.odd{padding:0 5px}.odd span{display:none}.odd b{width:100%;text-align:center}.live-row{grid-template-columns:minmax(120px,1.4fr) 43px repeat(3,43px) 20px;gap:3px}.live-row .more-odds{font-size:0}.live-row .more-odds svg{width:13px}.live-row .odd{padding:0 3px}.right-column{display:flex}.casino-hero{min-height:290px;padding:29px 22px}.casino-hero img{width:63%;opacity:.55}.casino-hero h1{font-size:51px}.casino-toolbar{display:block}.search-box{margin-top:12px}.game-grid{grid-template-columns:repeat(3,1fr);gap:7px}.game-tile div{padding:7px 6px}.game-tile b{font-size:9px}.game-tile span{font-size:0}.simple-page>h1{font-size:56px}.footer-grid{grid-template-columns:1fr 1fr;gap:16px}.footer-bottom{display:block;line-height:1.7}.footer-bottom span{display:block}.footer-bottom span+span{margin-top:5px}}
+@media(prefers-blueuced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+
+/* Super UI refinement: SportyBet clay-glass surfaces. Keep blue, white, charcoal, and live green dominant; use depth only to clarify hierarchy. */
+:root{--glass-white:rgba(255,255,255,.78);--glass-border:rgba(255,255,255,.72);--clay-shadow:12px 14px 28px rgba(35,42,55,.14),-8px -8px 18px rgba(255,255,255,.72);--inset-soft:inset 0 1px rgba(255,255,255,.75),inset 0 -1px rgba(35,42,55,.06)}
+body{background:radial-gradient(circle at 14% 4%,rgba(255,255,255,.96),transparent 28rem),linear-gradient(135deg,#eef0f4 0%,#e5e8ed 100%)}
+.utility{box-shadow:0 3px 14px rgba(18,59,120)}
+.header{box-shadow:0 10px 24px rgba(18,59,120)}
+.header-inner{padding-top:2px}.header .brand{filter:drop-shadow(0 2px 0 rgba(18,59,120))}.main-nav a,.header-actions a,.header-actions button{transition:transform .18s ease,color .18s ease,background .18s ease,box-shadow .18s ease}.main-nav a:hover,.header-actions a:hover{transform:translateY(-1px)}
+.sport-strip{background:rgba(255,255,255,.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 8px 22px rgba(37,44,59,.12)}
+.panel{border-radius:12px;background:var(--glass-white);border:1px solid var(--glass-border);box-shadow:var(--clay-shadow);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.panel:before{border-radius:12px;opacity:.22}.side-nav>a,.side-title{transition:background .18s ease,transform .18s ease}.side-nav>a:hover{transform:translateX(3px);border-radius:8px}
+.hero,.casino-hero{border-radius:14px;box-shadow:16px 18px 34px rgba(13,16,20,.22),inset 0 1px rgba(255,255,255,.18)}
+.wide-banner{border-radius:10px;box-shadow:var(--clay-shadow)}
+.betting-section,.live-section{border-radius:14px}.live-section{box-shadow:12px 14px 26px rgba(17,24,38,.25),inset 0 1px rgba(255,255,255,.08)}
+.odd,.gold-button,.ghost-button,.casino-tabs button,.section-tools button{border-radius:8px;box-shadow:var(--inset-soft)}
+.odd:hover,.gold-button:hover,.ghost-button:hover{box-shadow:0 9px 18px rgba(30,107,255),var(--inset-soft)}
+.betslip,.mini-games,.winners{border-radius:14px}.mini-card,.game-tile{border-radius:10px}.game-tile{box-shadow:8px 10px 18px rgba(22,27,34,.18),inset 0 1px rgba(255,255,255,.12)}.game-tile:hover{box-shadow:0 16px 28px rgba(22,27,34,.24),inset 0 1px rgba(255,255,255,.2)}
+.auth-card{border-radius:16px;box-shadow:18px 20px 36px rgba(36,43,57,.16),-8px -8px 18px rgba(255,255,255,.76),inset 0 1px rgba(255,255,255,.7)}
+.auth-card input{border-radius:8px;box-shadow:inset 3px 3px 8px rgba(0,0,0,.18),inset -2px -2px 6px rgba(255,255,255,.04)}
+.simple-card,.promo-card{border-radius:14px}.footer-grid{position:relative}.footer-grid a:not(.brand){transition:color .18s ease,transform .18s ease}.footer-grid a:not(.brand):hover{transform:translateX(3px);color:#fff}
+@media(max-width:820px){.menu-open .main-nav{border-radius:0 0 14px 14px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}.panel{box-shadow:8px 10px 22px rgba(35,42,55,.12),-5px -5px 12px rgba(255,255,255,.62)}}
+
+/* Preserve the reference's dark live-betting terminal against the lighter glass shell. */
+.live-section.panel{background:#20232c;color:#f4f5f7;border-color:rgba(31,138,76,.45);box-shadow:12px 14px 26px rgba(17,24,38,.25),inset 0 1px rgba(255,255,255,.08)}
+.live-section.panel .section-head h2,.live-section.panel .match-meta strong{color:#f4f5f7}.live-section.panel .league-tabs span{color:#adb3bd}.live-section.panel .league-tabs span.active{color:#4d8dff}.live-section.panel .live-row{border-top-color:rgba(255,255,255,.09)}
+
+/* Super Bet mobile rail: keep secondary modules in the content flow with no blank side gutters. */
+@media(max-width:820px){.right-column{width:100%;display:flex;flex-direction:column;gap:12px}.right-column>.panel{width:100%;min-width:0}.right-column .betslip{order:0}.right-column .mini-games{order:1}.right-column .winners{order:2}.right-column .mini-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.right-column .winners{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding-bottom:10px}.right-column .winners .side-title{grid-column:1/-1}.right-column .winners .winner{margin:0 10px;padding:11px 2px}.right-column .winners .winner:nth-of-type(even){margin-right:14px}.right-column .winners .winner:nth-of-type(odd){margin-left:14px}}
+@media(max-width:560px){.right-column .mini-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.right-column .winners{grid-template-columns:repeat(2,minmax(0,1fr))}.right-column .winners .winner b{font-size:13px}.right-column .winners .winner span{font-size:9px}.right-column .betslip{min-height:0}.right-column .empty-slip{padding:24px 18px 22px}}
+.brand img{border-radius:7px;object-fit:contain;background:linear-gradient(145deg,#f2c866,#1e6bff);padding:2px;box-shadow:0 3px 10px rgba(0,0,0,.18)}
+
+/* Active top navigation must remain fully legible on every subpage. */
+.header .main-nav a.active{color:#fff!important;opacity:1!important;font-weight:800;text-shadow:0 1px 1px rgba(11,46,112)}
+.header .main-nav a.active::after{background:#c7f63a!important;opacity:1!important;box-shadow:0 0 0 1px rgba(255,255,255,.15),0 0 10px rgba(199,246,58,.45)}
+.header .main-nav a.active:hover{color:#fff!important}
+@media(max-width:820px){.menu-open .main-nav a.active{color:#fff!important;background:rgba(255,255,255,.12);opacity:1!important}}
+
+/* Desktop rail scroll fix: only the betslip pins below the sticky header; sibling cards remain in normal flow. */
+@media(min-width:821px){.page-grid{align-items:start}.right-column{position:relative;align-self:start;min-width:0;isolation:isolate}.right-column .betslip{position:sticky;top:142px;z-index:3;align-self:stretch}.right-column .mini-games,.right-column .winners{position:relative;z-index:1;transform:none}.right-column .winners{margin-top:0}footer{position:relative;z-index:5;clear:both}}
+@media(max-width:820px){.right-column .betslip{position:static;top:auto;z-index:auto}.right-column .mini-games,.right-column .winners{position:static;z-index:auto}}
+
+/* Super Bet account surfaces: composed two-column auth layout, readable fields, and centered mobile flow. */
+.auth-page{max-width:1180px;margin:0 auto;min-height:calc(100vh - 210px);padding:72px 28px 86px;display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,470px);gap:72px;align-items:center}.auth-intro{max-width:520px}.auth-intro h1{margin:12px 0 18px;font:800 clamp(60px,7vw,104px)/.86 'Barlow Condensed',sans-serif;letter-spacing:-.045em;color:#20232c;text-transform:uppercase}.auth-intro h1 em{color:#1e6bff;font-style:normal}.auth-intro p{max-width:430px;color:#6d7480;font-size:16px;line-height:1.65}.auth-benefits{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}.auth-benefits span{display:inline-flex;align-items:center;gap:7px;padding:9px 12px;border:1px solid rgba(30,107,255);border-radius:999px;background:rgba(255,255,255,.56);color:#525965;font-size:11px;font-weight:700;box-shadow:4px 5px 12px rgba(40,46,60,.08)}.auth-benefits svg{color:#1e6bff}.auth-card-premium{width:100%;padding:28px;box-sizing:border-box;background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.8)}.auth-card-head{display:flex;align-items:center;gap:13px;margin-bottom:22px}.auth-card-head h2{margin:4px 0 0;color:#20232c;font:800 30px/.9 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.01em}.auth-crown{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#f6cf74,#1e6bff);color:#fff;box-shadow:5px 6px 12px rgba(26,55,105)}.auth-card .eyebrow{font-size:10px}.auth-card form{display:grid;gap:15px}.auth-field{display:block}.auth-field>span{display:block;margin:0 0 6px;color:#4d5663;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}.auth-field input,.auth-field select{width:100%;height:46px;box-sizing:border-box;background:#f7f8fa;border:1px solid #dde1e7!important;border-radius:10px!important;color:#20232c!important;padding:0 14px!important;font:500 14px 'DM Sans',sans-serif;box-shadow:inset 2px 2px 6px rgba(31,37,47,.06)!important}
+.auth-field select{appearance:auto;cursor:pointer}
+.auth-field input:focus,.auth-field select:focus{border-color:#1e6bff!important;outline:none;box-shadow:0 0 0 3px rgba(30,107,255),inset 2px 2px 6px rgba(31,37,47,.06)!important}.auth-input-wrap{position:relative}.auth-input-wrap input{padding-right:62px!important}.auth-input-wrap button{position:absolute;right:8px;top:7px;height:32px;padding:0 9px;border-radius:7px;background:transparent;color:#1e6bff;font-size:11px;font-weight:800}.auth-input-wrap button:hover{background:rgba(30,107,255)}.auth-row,.check-row{display:flex;align-items:center;gap:8px}.auth-row{justify-content:space-between;color:#777f89;font-size:11px}.auth-row a,.auth-switch a,.terms-row a{color:#1e6bff;font-weight:800}.check-row{color:#737b85;font-size:11px}.check-row input{width:15px!important;height:15px!important;accent-color:#1e6bff}.auth-submit{display:flex;align-items:center;justify-content:center;gap:8px;height:46px}.auth-notice{padding:10px 12px;border-radius:9px;background:#eef5ff;color:#2f6fd6;font-size:12px;font-weight:700}.auth-switch{margin:20px 0 0;color:#737b85;font-size:12px;text-align:center}.auth-safe{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;color:#959ca5;font-size:10px;text-align:center}.auth-safe svg{color:#1f9d62}.auth-steps{display:flex;align-items:center;gap:10px;margin:-2px 0 22px}.auth-steps span{display:flex;align-items:center;gap:5px;color:#a0a6ae;font-size:12px;font-weight:800}.auth-steps span.active,.auth-steps span.done{color:#1e6bff}.auth-steps i{height:1px;flex:1;background:#e0e3e7}.auth-steps i.active{background:#1e6bff}.auth-steps small{font-size:10px;font-weight:700}.auth-two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}.terms-row{align-items:flex-start;line-height:1.5}.auth-back{display:flex;align-items:center;gap:4px;margin:17px auto 0;background:none;color:#1e6bff;font-size:11px;font-weight:800}.auth-back svg{transform:rotate(180deg)}
+@media(max-width:820px){.auth-page{grid-template-columns:1fr;gap:28px;min-height:0;padding:42px 18px 56px}.auth-intro{max-width:none;text-align:center}.auth-intro h1{font-size:64px}.auth-intro p{margin:0 auto}.auth-benefits{justify-content:center}.auth-card-premium{max-width:520px;margin:0 auto}.auth-card-head{justify-content:center}.auth-card-head>div:last-child{text-align:left}}
+@media(max-width:560px){.auth-page{padding:30px 12px 48px;gap:20px}.auth-intro h1{font-size:57px}.auth-intro p{font-size:13px}.auth-benefits{gap:6px}.auth-benefits span{padding:7px 9px;font-size:10px}.auth-card-premium{padding:21px 16px;border-radius:16px}.auth-card-head h2{font-size:27px}.auth-two-col{grid-template-columns:1fr}.auth-row{align-items:flex-start;gap:10px}.auth-row a{white-space:nowrap}}
+
+/* Odds accessibility: readable labels in dark live panels and an unmistakable selected state. */
+.odd{color:#17211d!important;background:rgba(183,232,207,.9)!important;border:1px solid rgba(31,138,76,.45);font-weight:800;box-shadow:inset 0 1px rgba(255,255,255,.62),0 2px 7px rgba(16,42,29,.12)}.odd span{color:#52655b!important;font-weight:800}.odd b{color:#13251c!important;font-weight:900;letter-spacing:.01em}.odd:hover{background:#d8f5e3!important;border-color:#168a50!important;transform:translateY(-1px)}.odd.selected,.live-section .odd.selected{color:#fff!important;background:linear-gradient(135deg,#1e6bff,#2f6fd6)!important;border-color:#ffd75e!important;box-shadow:0 0 0 2px rgba(255,215,94,.3),0 7px 15px rgba(30,72,150),inset 0 1px rgba(255,255,255,.35);transform:translateY(-1px)}.odd.selected span,.odd.selected b,.live-section .odd.selected span,.live-section .odd.selected b{color:#fff!important}.live-section .odd{color:#eafff1!important;background:rgba(36,105,75,.78)!important;border-color:rgba(116,226,158,.42)}.live-section .odd span{color:#b8efcb!important}.live-section .odd b{color:#f2fff5!important}.live-section .odd:hover{background:rgba(50,136,94,.9)!important}
+
+/* Desktop rail correction: pin the complete sidebar as one unit; never let a sticky child cover its siblings. */
+@media(min-width:821px){.right-column{position:sticky;top:142px;align-self:start;z-index:4;display:flex;flex-direction:column;gap:18px}.right-column .betslip{position:static;top:auto;z-index:auto;flex:none}.right-column .mini-games,.right-column .winners{position:static;z-index:auto;flex:none}}
+@media(max-width:820px){.right-column{position:static;top:auto;z-index:auto}}
+
+/* Super Bet sport-strip refinement: desktop keeps the full inline list; mobile shows a compact first row and an accessible More sports disclosure. */
+.sport-links{display:flex;align-items:center;gap:27px;min-width:0}.sport-links a{flex:0 0 auto;color:#30343b;font-size:14px;white-space:nowrap}.sport-links .strip-active{color:var(--lemon)}.mobile-sport-toggle{display:none}
+@media(max-width:820px){.sport-strip-inner{gap:10px;align-items:flex-start;height:auto;min-height:42px}.sport-links{flex:1;gap:20px;min-width:0;min-height:42px;overflow:hidden;align-items:center}.sport-links a{font-size:12px}.sport-links a:nth-child(n+4){display:none}.sport-links.is-open{flex-wrap:wrap;overflow:visible;align-content:center;padding:9px 0;gap:12px 18px}.sport-links.is-open a:nth-child(n){display:flex}.mobile-sport-toggle{display:flex;flex:0 0 auto;align-items:center;align-self:stretch;gap:4px;padding:0 2px;background:transparent;color:#5f6673;font-size:11px;font-weight:700;white-space:nowrap}.mobile-sport-toggle svg{transition:transform .18s ease}.mobile-sport-toggle.is-open svg{transform:rotate(180deg)}}
+
+/* Super Bet typography refinement: use a firmer reading weight for body copy and controls while retaining the existing display-heading hierarchy. */
+body{font-weight:500}.utility,.utility a,.login-link,.muted,.section-footer,.winner span,.search-box input,.simple-card p,.promo-card p{font-weight:500}.sport-strip{display:none}
+
+/* Super Bet compact type pass: small labels should read as intentional, dark, and confident rather than thin. */
+body{font-weight:600}.utility,.utility a,.login-link,.side-nav>a,.section-tools button,.league-cards small,.table-head,.match-meta small,.match-meta>span,.odd span,.more-odds,.section-footer,.slip-header,.slip-header button,.slip-pick b,.slip-pick small,.slip-summary>div,.slip-summary label,.mini-card span,.winner span,.winner small,.casino-tabs button,.search-box input,.game-tile b,.game-tile span,.wallet-kicker,.activity-row b,.activity-row small,.text-action{font-weight:600}.betting-section .match-meta small,.betting-section .match-meta>span,.betting-section .table-head{color:#535b68}.betting-section .league-cards small{color:#59616d}.betting-section .odd span{color:#426350}.simple-card p,.promo-card p,.empty-slip p{font-weight:600}
+
+/* Super Bet scale and mobile menu repair: larger UI type, seamless header-to-menu transition, and stronger menu rows. */
+body{font-size:16px}.utility{font-size:12px}.utility-links{gap:20px}.main-nav a{font-size:16px}.login-link{font-size:14px}.gold-button,.ghost-button{font-size:13px}.side-nav>a{font-size:12px}.eyebrow{font-size:12px}.hero p,.casino-hero p{font-size:14px}.section-head h2{font-size:26px}.section-tools button{font-size:11px}.league-cards small{font-size:10px}.league-cards b{font-size:11px}.table-head{font-size:11px}.match-meta small{font-size:10px}.match-meta>span{font-size:11px}.odd span{font-size:10px}.odd b{font-size:12px}.more-odds{font-size:11px}.section-footer{font-size:12px}.live-pulse{font-size:10px}.slip-header{font-size:12px}.slip-header button{font-size:11px}.slip-pick b{font-size:11px}.slip-pick small{font-size:10px}.slip-summary>div,.slip-summary label{font-size:11px}.mini-card span{font-size:10px}.winner span{font-size:10px}.casino-tabs button,.search-box input{font-size:12px}.game-tile b{font-size:11px}.game-tile span{font-size:10px}.wallet-kicker,.activity-row small{font-size:11px}.activity-row b{font-size:12px}.text-action{font-size:11px}.empty-slip p,.simple-card p,.promo-card p{font-size:12px}
+@media(max-width:820px){.menu-open .main-nav{top:0;z-index:30;padding:72px 12px 14px;min-height:100vh;box-shadow:0 18px 40px rgba(15,18,27,.34)}.menu-open .main-nav a{min-height:52px;padding:0 12px;font-size:17px}.header{z-index:40}.main-nav{z-index:30}.utility{font-size:11px}.brand{font-size:27px}.hero p,.casino-hero p{font-size:13px}.section-head h2{font-size:24px}.side-nav>a{font-size:12px}.odd b{font-size:12px}.empty-slip p{font-size:12px}}
+@media(max-width:560px){body{font-size:15px}.utility{font-size:10px}.brand{font-size:25px}.gold-button,.ghost-button{font-size:12px}.hero p,.casino-hero p{font-size:13px}.section-head h2{font-size:23px}.match-meta small{font-size:10px}.match-meta>span{font-size:10px}.table-head{font-size:10px}.odd b{font-size:12px}.game-tile b{font-size:10px}.game-tile span{font-size:9px}.empty-slip p,.simple-card p,.promo-card p{font-size:12px}}
+
+/* Compact mobile menu refinement: overlay the header without a gap, but keep the expanded navigation card-sized. */
+@media(max-width:820px){.menu-open .main-nav{top:0;min-height:0;height:auto;max-height:calc(100vh - 20px);padding:62px 12px 10px;background:#1e6bff;border-radius:0 0 12px 12px;box-shadow:0 18px 40px rgba(15,18,27,.34);overflow:hidden}.menu-open .main-nav a{min-height:42px;padding:0 12px;font-size:16px}.menu-open .main-nav a:last-child{border-bottom:0}}
+
+/* ============================================================================
+   SPORTSBOOK — full match list (all sports, admin special games, synthetic
+   odds, live odds). Real odds are clickable; synthetic/live odds show at
+   full color but are display-only (no dimming, no pointer events).
+   ============================================================================ */
+.sb-wrap{margin-top:0}
+.sb-tabs{display:flex;align-items:center;overflow-x:auto;scrollbar-width:none;background:#16170f;border:1px solid rgba(255,255,255,.08);border-top:none}
+.sb-tabs::-webkit-scrollbar{display:none}
+.sb-tab{flex:1 0 auto;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 14px;border-radius:0;background:transparent;color:#9da298;border:none;border-right:1px solid rgba(255,255,255,.08);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .16s ease,color .16s ease}
+.sb-tab-swatch{display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;color:#fff;flex-shrink:0}
+.sb-tab:hover{background:rgba(255,255,255,.05);color:#d8d5c8}
+.sb-tab.active{color:var(--lemon);background:rgba(184,243,60,.1)}
+.sb-tab.active .sb-tab-swatch{box-shadow:0 0 0 2px var(--lemon)}
+.sb-refresh{flex:0 0 auto;display:grid;place-items:center;width:40px;height:40px;border-radius:0;background:transparent;color:var(--lemon);border:none;cursor:pointer}
+.sb-refresh .spin{animation:sbSpin .9s linear infinite}
+@keyframes sbSpin{to{transform:rotate(360deg)}}
+.sb-section{margin-top:16px;padding:0;overflow:hidden;border-radius:0}
+.sb-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-section-title{display:flex;align-items:center;gap:8px;font:800 13px 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em;color:#3a3f2e}
+.sb-section-title b{color:#8d9288;font-weight:700;letter-spacing:0}
+.sb-live-section{background:#20232c}
+.sb-live-section .sb-section-head{border-bottom-color:rgba(255,255,255,.1)}
+.sb-live-section .sb-section-title{color:#f4f5f7}
+.sb-section-body{padding:2px 0 6px}
+.sb-empty{padding:20px 16px;color:#8d9288;font-size:12px}
+.sb-live-section .sb-empty{color:#aeb3bd}
+
+/* Power Specials — deep crimson/charcoal treatment using the site's ACTUAL
+   brand colors (--gold-hi is real crimson blue #4d8dff, --lemon is the lime
+   accent) instead of literal gold hex values that didn't match anything
+   else in the UI. Lime accent against deep blue reads as premium/curated
+   without looking like a disconnected gold skin bolted onto a blue site. */
+.sb-special-section{background:linear-gradient(165deg,#0a1a2a 0%,#08121f 100%);border:1px solid rgba(77,141,255);box-shadow:0 0 0 1px rgba(77,141,255),0 10px 24px rgba(0,0,0,.32)}
+.sb-special-section .sb-section-head{background:linear-gradient(120deg,rgba(77,141,255),rgba(184,243,60,.05));border-bottom-color:rgba(77,141,255)}
+.sb-special-section .sb-section-title{color:#d7e6ff}
+.sb-special-section .sb-section-title svg{color:var(--lemon)}
+.sb-special-section .sb-section-title b{color:rgba(215,230,255)}
+.sb-special-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:9px;font-weight:800;letter-spacing:.08em;background:var(--lemon);color:#16170f}
+.sb-special-section .sb-empty{color:#b6cfff}
+.sb-special-section .sb-league-hdr{background:rgba(77,141,255);color:#d4e3ff;border-top-color:rgba(77,141,255)}
+.sb-special-section .sb-row{border-top-color:rgba(77,141,255)}
+.sb-special-section .sb-row.is-admin{background:rgba(77,141,255)}
+.sb-special-section .sb-row-badges small{color:#b6cfff}
+.sb-special-section .sb-team-name{color:#eef5ff}
+.sb-special-section .sb-row-time{color:var(--lemon)}
+.sb-special-section .sb-countdown{color:#a8c4f5}
+.sb-special-section .sb-fav{color:#91b2ef}
+.sb-special-section .sb-fav.active{color:var(--lemon)}
+.sb-special-section .sb-odd{background:rgba(184,243,60,.08);border-color:rgba(184,243,60,.3)}
+.sb-special-section .sb-odd span{color:#b6cfff}
+.sb-special-section .sb-odd b{color:#eef5ff}
+.sb-special-section .sb-odd:hover{background:rgba(184,243,60,.16);border-color:var(--lemon)}
+.sb-special-section .sb-crest{background:rgba(77,141,255);border-color:rgba(77,141,255)}
+
+.sb-badge.special{display:inline-flex;align-items:center;gap:2px;background:var(--lemon);color:#16170f}
+.sb-league-hdr{display:flex;justify-content:space-between;padding:8px 16px;background:rgba(0,0,0,.03);border-top:1px solid rgba(255,255,255,.06);font:700 10px 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;color:#7d8378}
+.sb-league-hdr b{color:#a7ac9f;font-weight:700}
+.sb-live-section .sb-league-hdr{background:rgba(255,255,255,.03);color:#adb3bd}
+.sb-row{display:flex;flex-direction:column;gap:8px;padding:12px 15px;border-top:1px solid rgba(255,255,255,.06)}
+.sb-live-section .sb-row{border-top-color:rgba(255,255,255,.08)}
+.sb-row.is-admin{background:rgba(212,160,23,.08)}
+
+.sb-row-top{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%}
+.sb-row-badges{display:flex;align-items:center;gap:7px;min-width:0;flex:1}
+.sb-fav{flex-shrink:0;display:flex;align-items:center;justify-content:center;background:transparent;color:#c2c6ce;cursor:pointer;padding:2px}
+.sb-fav.active{color:var(--gold-hi)}
+.sb-live-section .sb-fav{color:#5c6470}
+.sb-live-section .sb-fav.active{color:var(--lemon)}
+.sb-row-badges small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#777b72;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;min-width:0}
+.sb-live-section .sb-row-badges small{color:#9ba3b0}
+.sb-row-time{flex-shrink:0;display:flex;align-items:center;gap:5px;color:var(--blue);font-size:12px;font-weight:900;letter-spacing:.01em}
+.sb-live-section .sb-row-time{color:var(--lemon)}
+.sb-countdown{margin-left:6px;color:#9aa0a8;font-weight:600}
+.sb-live-section .sb-countdown{color:#c7ccd6}
+
+.sb-fixture{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:inherit;cursor:pointer}
+.sb-team-line{display:flex;align-items:center;gap:8px;min-width:0}
+.sb-team-line+.sb-team-line{margin-top:0}
+.sb-team-name{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:700;color:#20242d}
+.sb-live-section .sb-team-name{color:#fff}
+.sb-team-line em{flex-shrink:0;margin-left:6px;font-style:normal;font-weight:800;color:var(--gold-hi)}
+
+.sb-badge{display:inline-flex;align-items:center;flex-shrink:0;padding:1px 6px;border-radius:999px;font-size:8px;font-weight:800;letter-spacing:.04em}
+.sb-badge.synth{background:rgba(11,110,79,.18);color:var(--nature);border:1px solid rgba(11,110,79,.35)}
+.sb-live-section .sb-badge.synth{background:rgba(199,246,58,.16);color:var(--lemon);border-color:rgba(199,246,58,.35)}
+.sb-badge.ft{background:rgba(120,125,116,.18);color:#7d8378;border:1px solid rgba(120,125,116,.35);font-weight:900}
+.sb-row.is-ended{opacity:.92}
+.sb-row.is-ended .sb-team-name{font-weight:700}
+.sb-ended-note{display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 0 2px;font-size:11px;font-weight:700;color:#8d9288;text-decoration:none}
+.sb-ended-note:hover{color:var(--gold-hi)}
+
+.sb-odds-row{display:flex;align-items:stretch;gap:7px;width:100%}
+.sb-odd{flex:1;min-width:0;min-height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:0;background:rgba(31,138,76,.12);border:1px solid rgba(31,138,76,.3);color:#20242d;cursor:pointer;transition:transform .14s ease,background .14s ease,border-color .14s ease;opacity:1}
+.sb-odd span{font-size:8.5px;font-weight:700;color:#6f8b7a}
+.sb-odd b{font-size:12px;font-weight:800;color:#173224}
+.sb-odd:hover:not(.display-only):not(.empty){transform:translateY(-2px);background:rgba(199,246,58,.28);border-color:var(--lemon)}
+.sb-odd.sel{background:linear-gradient(135deg,var(--blue),#2f6fd6);border-color:#ffd75e}
+.sb-odd.sel span,.sb-odd.sel b{color:#fff}
+.sb-odd.display-only{cursor:default;pointer-events:none;opacity:1}
+.sb-odd.empty{opacity:.4;cursor:default;pointer-events:none}
+.sb-live-section .sb-odd{background:rgba(36,105,75,.55);border-color:rgba(116,226,158,.4)}
+.sb-live-section .sb-odd span{color:#b8efcb}
+.sb-live-section .sb-odd b{color:#f2fff5}
+.sb-more{flex-shrink:0;width:34px;display:flex;align-items:center;justify-content:center;color:var(--gold-hi);cursor:pointer}
+.sb-row.is-live .sb-row-time .live-dot{margin-right:2px}
+.sb-skel{display:flex;flex-direction:column;gap:8px;padding:12px 15px}
+.sb-skel-block{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.14) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:sbShine 1.3s ease-in-out infinite;border-radius:6px}
+@keyframes sbShine{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media(max-width:820px){
+  .sb-row{padding:10px 12px;gap:7px}
+  .sb-section-head{padding:11px 12px}
+  .sb-league-hdr{padding:7px 12px}
+  .sb-odd{min-height:34px;border-radius:0;gap:0}
+  .sb-odd b{font-size:10.5px}
+  .sb-odd span{display:none}
+  .sb-team-name{font-size:12px}
+}
+@media(max-width:560px){
+  .sb-row{padding:9px 10px;gap:6px}
+  .sb-odd{min-height:30px;border-radius:0;gap:0;padding:0 2px}
+  .sb-odd b{font-size:9.5px}
+  .sb-odds-row{gap:5px}
+  .sb-row-time{font-size:10.5px;gap:3px;font-weight:900}
+  .sb-row-badges small{font-size:8px}
+  .sb-team-name{font-size:11px}
+  .sb-crest{width:16px;height:16px}
+  .sb-fav{padding:2px}
+}
+
+/* ============================================================================
+   WALLET / DEPOSIT forms
+   ============================================================================ */
+.wallet-actions .icon-only{padding:0;width:38px}
+.wallet-withdraw-form{display:grid;gap:12px;margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08)}
+.wallet-withdraw-form select,.deposit-form select{width:100%;height:46px;box-sizing:border-box;background:#f7f8fa;border:1px solid #dde1e7;border-radius:10px;color:#20232c;padding:0 12px;font:500 14px 'DM Sans',sans-serif}
+.deposit-card{display:flex;flex-direction:column;gap:16px}
+.deposit-tabs{margin-bottom:2px}
+.deposit-form{display:grid;gap:14px}
+.deposit-quick-amounts{display:flex;gap:8px;flex-wrap:wrap}
+.deposit-quick-amounts button{padding:7px 12px;border-radius:999px;background:#181b16;color:#9da298;border:1px solid rgba(255,255,255,.09);font-size:11px;font-weight:700;cursor:pointer}
+.deposit-quick-amounts button.active{color:#16170f;background:var(--gold-hi);border-color:var(--gold-hi)}
+.deposit-note{display:flex;align-items:flex-start;gap:7px;margin-top:4px;color:#8d9288;font-size:11px;line-height:1.6}
+.deposit-note svg{flex-shrink:0;margin-top:1px;color:var(--nature)}
+
+/* ============================================================================
+   SUPPORT CENTRE
+   ============================================================================ */
+.support-page{padding-top:44px;padding-bottom:64px}
+.support-search-card{text-align:center;display:flex;flex-direction:column;align-items:center;padding:34px 28px}
+.support-search-card svg{color:var(--gold-hi)}
+.support-search{max-width:460px;width:100%;margin:18px auto 0}
+.support-cats{justify-content:center;margin-top:14px}
+.support-grid{margin-top:22px;grid-template-columns:1.4fr .9fr}
+.support-side{display:flex;flex-direction:column;gap:18px}
+.faq-list{margin-top:6px}
+.faq-item{border-top:1px solid rgba(255,255,255,.08)}
+.faq-q{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:14px 2px;background:transparent;color:#20242d;text-align:left;font-size:13px;font-weight:700;cursor:pointer}
+.faq-chevron{flex-shrink:0;color:var(--gold-hi);font-size:16px;font-weight:800}
+.faq-a{margin:-4px 0 14px;padding-right:20px;color:#6d7480;font-size:12px;line-height:1.7}
+.support-contact-card svg{color:var(--gold-hi)}
+.support-channels{display:grid;gap:10px;margin-top:14px}
+.support-channel{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:10px;background:rgba(216,168,78,.07);border:1px solid rgba(30,107,255);color:#20242d;font-size:12px;font-weight:700}
+.support-channel svg{color:var(--gold-hi)}
+.support-quicklinks{display:grid;gap:8px;margin-top:14px}
+.support-quicklinks a{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:9px;background:rgba(31,138,76,.08);color:#20242d;font-size:12px;font-weight:700}
+.support-quicklinks svg{color:var(--nature)}
+@media(max-width:820px){.support-grid{grid-template-columns:1fr}.support-search-card{padding:26px 18px}}
+
+/* ============================================================================
+   MOBILE BOTTOM NAVIGATION
+   ============================================================================ */
+.mobile-bottom-nav{display:none}
+@media(max-width:820px){
+  .mobile-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:grid;grid-template-columns:repeat(5,1fr);background:rgba(15,17,14,.97);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(255,255,255,.09);padding-bottom:env(safe-area-inset-bottom,0)}
+  .mbn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 2px 8px;color:#8d9288;font-size:9.5px;font-weight:700;min-height:54px}
+  .mbn-item.active{color:var(--gold-hi)}
+  .mbn-icon-wrap{position:relative;display:flex}
+  .mbn-badge{position:absolute;top:-5px;right:-8px;min-width:15px;height:15px;padding:0 3px;border-radius:999px;background:var(--blue);color:#fff;font-size:8.5px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px rgba(15,17,14,.97)}
+  .mbn-label{letter-spacing:.02em}
+  body{padding-bottom:calc(58px + env(safe-area-inset-bottom,0))}
+  footer{margin-bottom:0}
+}
+
+/* ============================================================================
+   BETSLIP PAGE
+   ============================================================================ */
+.betslip-page{padding-top:34px;padding-bottom:64px;min-height:520px}
+.bp-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.bp-header h1{display:flex;align-items:center;gap:10px;font:800 34px 'Barlow Condensed',sans-serif;color:#20232c;text-transform:uppercase;letter-spacing:-.02em}
+.bp-count{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font-size:13px;font-weight:800}
+.bp-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:48px 24px}
+.bp-empty svg{color:var(--gold-hi);margin-bottom:10px}
+.bp-empty h3{font:700 24px 'Barlow Condensed',sans-serif;color:#20232c;margin:6px 0}
+.bp-empty p{max-width:320px;color:#6d7480;font-size:13px;margin-bottom:16px}
+.bp-grid{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+.bp-list{display:flex;flex-direction:column;gap:12px}
+.bp-card{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--clay-shadow);padding:14px 16px}
+.bp-league{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8d9288;margin-bottom:6px}
+.bp-teams{display:flex;align-items:center;gap:8px;font:700 14px 'DM Sans',sans-serif;color:#20232c}
+.bp-vs{color:#a7ac9f;font-size:11px;font-weight:600}
+.bp-meta-row{margin-top:6px}
+.bp-live{display:inline-flex;align-items:center;gap:5px;color:var(--blue);font-size:11px;font-weight:800}
+.bp-countdown{color:#6d7480;font-size:11px;font-weight:700}
+.bp-selection-row{display:flex;align-items:center;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.bp-selection-row>div{flex:1;min-width:0}
+.bp-selection-row small{display:block;color:#8d9288;font-size:10px;font-weight:600}
+.bp-selection-row b{display:block;margin-top:2px;font-size:13px;color:#20232c}
+.bp-selection-row strong{color:var(--gold-hi);font-size:15px;font-weight:800}
+.bp-remove{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:rgba(30,107,255);color:var(--blue);cursor:pointer}
+.bp-summary{position:sticky;top:100px;padding:18px;border-radius:14px;background:#fff}
+.bp-summary-row{display:flex;justify-content:space-between;padding:8px 0;color:#6d7480;font-size:12px;font-weight:700}
+.bp-summary-row b{color:#20232c;font-size:13px}
+.bp-summary-row.highlight{border-top:1px dashed var(--line);margin-top:6px;padding-top:12px}
+.bp-summary-row.highlight b{color:var(--gold-hi);font-size:18px}
+.bp-stake-field{display:block;margin-top:6px}
+.bp-stake-field span{display:block;margin-bottom:6px;color:#4d5663;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+.bp-stake-field input{width:100%;height:46px;box-sizing:border-box;background:#f7f8fa;border:1px solid #dde1e7;border-radius:10px;color:#20232c;padding:0 14px;font:600 15px 'DM Sans',sans-serif}
+.bp-stake-hint{margin-top:6px;color:#9aa0a8;font-size:10px}
+.bp-summary .gold-button{margin-top:14px}
+.bp-success{background:#eafaf1!important;color:#0b6e4f!important}
+@media(max-width:960px){.bp-grid{grid-template-columns:1fr}.bp-summary{position:static}}
+@media(max-width:560px){.betslip-page{padding-top:22px}.bp-header h1{font-size:27px}}
+
+/* ============================================================================
+   ACCOUNT / PROFILE
+   ============================================================================ */
+.account-overview{display:flex;flex-direction:column;gap:16px}
+.account-overview-top{display:flex;align-items:center;gap:14px}
+.profile-avatar{width:52px;height:52px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#f6cf74,#1e6bff);color:#fff}
+.account-balance-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:10px;background:rgba(31,138,76,.08);border:1px solid rgba(31,138,76,.18)}
+.account-balance-row span{color:#4d5663;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.account-balance-row b{color:var(--nature);font-size:18px;font-weight:800}
+.account-menu-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.account-menu-item{display:flex;align-items:center;gap:12px;padding:13px;border-radius:12px;background:#f7f8fa;border:1px solid var(--line);text-align:left;cursor:pointer;transition:background .15s ease,transform .15s ease}
+.account-menu-item:hover{background:rgba(30,107,255);transform:translateY(-1px)}
+.account-menu-item span:not(.account-menu-icon){flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.account-menu-item b{font-size:12.5px;color:#20232c}
+.account-menu-item small{font-size:10.5px;color:#8d9288}
+.account-menu-icon{flex-shrink:0;width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:rgba(216,168,78,.12);color:var(--gold-hi)}
+.account-menu-chevron{flex-shrink:0;color:#c2c6ce}
+.account-logout{background:rgba(30,107,255)}
+.account-logout .account-menu-icon{background:rgba(30,107,255);color:var(--blue)}
+.profile-card{align-items:flex-start}
+.profile-verify-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);font-size:12px;color:#4d5663}
+.verify-label{display:flex;align-items:center;gap:6px;font-weight:700}
+.verify-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:800}
+.verify-pill.ok{background:rgba(31,138,76,.12);color:var(--nature)}
+.verify-pill.pending,.verify-pill.unknown{background:rgba(30,107,255);color:var(--blue)}
+@media(max-width:560px){.account-menu-grid{grid-template-columns:1fr}}
+
+/* ============================================================================
+   SPORTSBOOK — pagination
+   ============================================================================ */
+.sb-load-more{display:block;width:calc(100% - 32px);margin:10px 16px 14px;padding:10px;border-radius:9px;background:#181b16;color:var(--gold-hi);border:1px solid rgba(255,255,255,.09);font-size:11px;font-weight:800;cursor:pointer;text-align:center}
+.sb-live-section .sb-load-more{background:rgba(255,255,255,.06);color:var(--lemon)}
+
+/* ============================================================================
+   SPORTS PAGE — hub layout, sidebar, competitions & hero
+   ============================================================================ */
+.sports-page-grid{display:grid;grid-template-columns:248px minmax(0,1fr);gap:20px;padding-top:18px;padding-bottom:50px;align-items:start}
+
+/* --- Sidebar shell --- */
+.sports-sidebar{position:sticky;top:142px;height:max-content;max-height:calc(100vh - 160px);padding-bottom:4px;display:flex;flex-direction:column;overflow:hidden}
+.sports-sport-list{display:flex;flex-direction:column;gap:2px;padding:6px 8px}
+.sports-sidebar-item{position:relative;display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;background:transparent;color:#5f6673;font-size:11.5px;font-weight:700;border-radius:9px;border:1px solid transparent;text-align:left;cursor:pointer;transition:background .16s ease,color .16s ease,transform .12s ease,border-color .16s ease}
+.sports-sidebar-item:hover{background:rgba(30,107,255);color:var(--gold-hi);transform:translateX(2px)}
+.sports-sidebar-item.active{color:#fff;font-weight:800;background:linear-gradient(120deg,var(--blue),#2f6fd6);border-color:rgba(255,215,94,.4);box-shadow:0 8px 18px rgba(30,107,255)}
+.sports-sidebar-item.active .sports-sidebar-icon{background:rgba(255,255,255,.2);color:#fff}
+.sports-sidebar-icon{display:grid;place-items:center;flex-shrink:0;width:24px;height:24px;border-radius:7px;background:rgba(30,107,255);color:var(--blue)}
+.sports-sidebar-live{margin-left:auto;flex-shrink:0}
+.sports-sidebar-empty{padding:10px 16px;color:#a7ac9f;font-size:10.5px}
+
+/* --- Competition search + list --- */
+.sports-comp-search{display:flex;align-items:center;gap:7px;margin:2px 12px 8px;padding:8px 10px;border-radius:9px;background:rgba(0,0,0,.035);border:1px solid rgba(0,0,0,.07);color:#8d9288}
+.sports-comp-search input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:#20242d;font-size:11.5px;font-weight:600}
+.sports-comp-search input::placeholder{color:#9aa0a8}
+.sports-comp-search button{flex-shrink:0;display:grid;place-items:center;color:#8d9288;cursor:pointer}
+.sports-comp-search button:hover{color:var(--gold-hi)}
+.sports-comp-search:focus-within{border-color:rgba(30,107,255);background:rgba(30,107,255)}
+
+.sports-comp-list{max-height:340px;overflow-y:auto;padding:0 8px 4px;scrollbar-width:thin}
+.sports-comp-list::-webkit-scrollbar{width:5px}
+.sports-comp-list::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:99px}
+.sports-sidebar-item.comp{justify-content:space-between;font-weight:600;color:#4d5560}
+.sports-sidebar-item.comp.active{color:#fff}
+.sports-comp-count{flex-shrink:0;min-width:20px;padding:2px 6px;border-radius:99px;background:rgba(0,0,0,.06);color:#6d7480;font-size:9.5px;font-weight:800;text-align:center}
+.sports-sidebar-item.comp.active .sports-comp-count{background:rgba(255,255,255,.22);color:#fff}
+
+/* --- Sports command bar (retractable, replaces the old fixed hero) --- */
+.sports-command{margin-bottom:14px;border-radius:12px;background:linear-gradient(120deg,#181b16 0%,#20232c 65%,#181b16 100%);border:1px solid rgba(255,255,255,.08);box-shadow:0 10px 26px rgba(0,0,0,.22);overflow:hidden}
+.sports-command-bar{display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;background:transparent;color:#fff;cursor:pointer;text-align:left}
+.sports-command-icon{display:grid;place-items:center;flex-shrink:0;width:30px;height:30px;border-radius:9px;background:linear-gradient(145deg,var(--gold-hi),var(--blue));color:#fff;box-shadow:0 6px 14px rgba(30,107,255)}
+.sports-command-title{flex-shrink:0;font:800 15px 'Barlow Condensed',sans-serif;letter-spacing:.01em;text-transform:uppercase}
+.sports-command-scope{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#8b93a5;font-size:11px;font-weight:600}
+.sports-command-quick{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.sports-command-live{display:flex;align-items:center;gap:5px;color:var(--gold-hi);font-size:11px;font-weight:800}
+.sports-command-today{color:#9199a5;font-size:11px;font-weight:700}
+.sports-command-chevron{flex-shrink:0;color:#8b93a5;transition:transform .22s ease}
+.sports-command.expanded .sports-command-chevron{transform:rotate(180deg);color:var(--gold-hi)}
+
+.sports-command-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s ease}
+.sports-command.expanded .sports-command-body{grid-template-rows:1fr}
+.sports-command-body-inner{overflow:hidden;min-height:0}
+.sports-command.expanded .sports-command-body-inner{padding:2px 16px 16px}
+.sports-command-body-inner p{max-width:520px;color:#b5b9c2;font-size:12px;line-height:1.55}
+.sports-hero-stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.sp-stat{display:flex;align-items:center;gap:7px;padding:9px 13px;border-radius:11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);min-width:84px}
+.sp-stat b{color:#fff;font:800 17px 'Barlow Condensed',sans-serif}
+.sp-stat span{color:#9199a5;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.sp-stat-dot{width:7px;height:7px;border-radius:50%;background:var(--lemon)}
+.sp-stat-live b{color:var(--gold-hi)}
+.sp-stat-today .sp-stat-dot{background:var(--lemon)}
+.sp-stat-upcoming .sp-stat-dot{background:#8b93a3}
+
+.sports-filter-chip{display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;padding:8px 13px;border-radius:999px;background:rgba(30,107,255);border:1px solid rgba(30,107,255);color:var(--blue);font-size:11px;font-weight:700}
+.sports-filter-chip b{color:#20242d;font-weight:800}
+.sports-filter-chip button{display:grid;place-items:center;margin-left:2px;color:var(--blue);cursor:pointer}
+.sports-filter-chip button:hover{opacity:.7}
+
+@media(max-width:960px){
+  .sports-page-grid{grid-template-columns:1fr}
+  .sports-sidebar{position:static;max-height:none;padding-bottom:8px}
+}
+@media(max-width:560px){
+  .sports-command-title{display:none}
+  .sports-command-today{display:none}
+  .sports-hero-stats{width:100%}
+  .sp-stat{flex:1;min-width:0}
+}
+
+/* ============================================================================
+   MATCH DETAILS PAGE
+   ============================================================================ */
+.match-details-page{padding-top:26px;padding-bottom:64px}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--gold-hi);font-size:12px;font-weight:800;margin-bottom:16px}
+.md-hero{padding:22px 24px;margin-bottom:16px;background:linear-gradient(135deg,#20232c,#12140f);color:#fff;border-radius:14px}
+.md-hero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.md-league{display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.68)}
+.md-hero .sb-fav{color:rgba(255,255,255,.55)}
+.md-hero .sb-fav.active{color:var(--gold-hi)}
+.md-teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px}
+.md-team{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.md-team-name{font:800 18px 'Barlow Condensed',sans-serif;letter-spacing:-.01em}
+.md-team.winning .md-team-name{color:var(--gold-hi)}
+.md-score{font:800 30px 'Barlow Condensed',sans-serif}
+.md-status{display:flex;flex-direction:column;align-items:center;gap:5px}
+.md-time{font-size:13px;font-weight:800}
+.md-countdown{font-size:10.5px;color:rgba(255,255,255,.65);font-weight:700}
+.md-live{display:flex;align-items:center;gap:6px;color:var(--blue);font-weight:800;font-size:13px}
+.md-synth-note{margin:16px 0 0;padding:10px 12px;border-radius:9px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.72);font-size:11px;line-height:1.6}
+.md-markets{margin-top:0}
+.md-odds-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
+.md-odd{min-height:58px;flex-direction:column}
+.md-odd span{font-size:10px}
+.md-odd b{font-size:16px}
+
+/* ── Extra markets: Half Time / Correct Score / Handicap ── */
+.md-market-section{margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,.08)}
+.md-market-title{font:800 12px 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#7d8378;margin-bottom:10px}
+.md-odds-wrap{grid-template-columns:repeat(auto-fill,minmax(90px,1fr))}
+
+.md-cs-group{margin-bottom:12px}
+.md-cs-group:last-child{margin-bottom:0}
+.md-cs-head{font:700 10px 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em;color:#8d9288;margin-bottom:6px}
+.md-cs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.md-cs-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:8px;background:rgba(31,138,76,.1);border:1px solid rgba(31,138,76,.28);cursor:pointer;color:#20242d;transition:background .14s ease,border-color .14s ease}
+.md-cs-btn span{font:700 12px 'Barlow Condensed',sans-serif}
+.md-cs-btn b{font-size:11px;color:#1f8a4c}
+.md-cs-btn.sel{background:var(--gold-hi);border-color:var(--gold-hi)}
+.md-cs-btn.sel span,.md-cs-btn.sel b{color:#16170f}
+.md-cs-btn.display-only{cursor:default;opacity:.85}
+
+.md-hc-group{margin-bottom:10px}
+.md-hc-group:last-child{margin-bottom:0}
+.md-hc-line-label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8d9288;margin-bottom:6px}
+.md-hc-row{display:flex;align-items:center;justify-content:space-between;width:100%;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);cursor:pointer;margin-bottom:6px;color:inherit}
+.md-hc-row:last-child{margin-bottom:0}
+.md-hc-team{display:flex;flex-direction:column;align-items:flex-start;gap:2px;font-size:12.5px;font-weight:700}
+.md-hc-team em{font-style:normal;font-size:10.5px;font-weight:700;color:#1f8a4c}
+.md-hc-row b{font:800 16px 'Barlow Condensed',sans-serif}
+.md-hc-row.sel{background:var(--gold-hi);border-color:var(--gold-hi);color:#16170f}
+.md-hc-row.sel .md-hc-team em{color:#16170f;opacity:.7}
+.md-hc-row.display-only{cursor:default;opacity:.85}
+@media(max-width:560px){.md-cs-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.md-teams{grid-template-columns:1fr auto 1fr;gap:8px}.md-team-name{font-size:14px}.md-hero{padding:18px}}
+
+/* ============================================================================
+   TRANSACTIONS / SEARCH / NOTIFICATIONS misc
+   ============================================================================ */
+.tx-pagination{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.tx-pagination button{padding:7px 14px;border-radius:8px;background:#f3f4f6;color:#5f6673;font-size:11px;font-weight:700;cursor:pointer}
+.tx-pagination button:disabled{opacity:.4;cursor:default}
+.tx-pagination span{font-size:11px;color:#8d9288;font-weight:700}
+
+.search-page{padding-top:28px;padding-bottom:56px}
+.search-page-bar{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:12px;background:#fff;border:1px solid var(--line);box-shadow:var(--clay-shadow);margin-bottom:18px;color:#8d9288}
+.search-page-bar input{flex:1;border:0;outline:0;background:transparent;font:600 15px 'DM Sans',sans-serif;color:#20232c}
+.search-page-bar button{display:flex;color:#8d9288;cursor:pointer}
+.search-recent-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.search-recent-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;background:#f3f4f6;color:#5f6673;font-size:11px;font-weight:700;cursor:pointer}
+.search-result-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);color:inherit}
+.search-result-row:last-child{border-bottom:none}
+.search-result-row:hover{background:#f7f8fa}
+.search-result-row small{display:block;color:#8d9288;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.search-result-row b{display:block;margin-top:3px;font-size:13px;color:#20232c}
+.search-result-time{font-size:11px;color:#6d7480;font-weight:700}
+.search-result-live{display:flex;align-items:center;gap:5px;color:var(--blue);font-size:11px;font-weight:800}
+
+.notice-row{cursor:pointer;position:relative}
+.notice-row.unread{background:rgba(30,107,255)}
+.notice-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;align-self:center}
+
+/* ============================================================================
+   API-UNREACHABLE BANNER — makes network/CORS failures visible instead of
+   silently looking like "no matches available".
+   ============================================================================ */
+.sb-error-banner{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;margin-bottom:14px;border-radius:10px;background:#f1f6ff;border:1px solid rgba(30,107,255);color:#123b78}
+.sb-error-banner svg{flex-shrink:0;margin-top:1px;color:var(--blue)}
+.sb-error-banner div{flex:1;display:flex;flex-direction:column;gap:2px}
+.sb-error-banner b{font-size:12.5px}
+.sb-error-banner span{font-size:11px;line-height:1.5;color:#41628f}
+.sb-error-banner button{flex-shrink:0;padding:6px 14px;border-radius:8px;background:var(--blue);color:#fff;font-size:11px;font-weight:800;cursor:pointer;align-self:center}
+
+/* ============================================================================
+   TEAM CRESTS — real logos with generated-initial fallback
+   ============================================================================ */
+.sb-crest{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#f0f1ee;border:1px solid rgba(0,0,0,.06)}
+.sb-crest img{width:100%;height:100%;object-fit:cover;display:block}
+@media(max-width:560px){.sb-team-name{font-size:10.5px;white-space:normal;overflow:visible;text-overflow:clip;word-break:break-word;line-height:1.25}}
+.sb-live-section .sb-crest{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.12)}
+.md-team .sb-crest{width:34px;height:34px;margin-bottom:6px}
+/* ═══════════════════════════════════════════════
+   HOME QUICK-NAV SHELL (promo carousel, icon nav,
+   quick filter pills, feature tabs, league strip)
+═══════════════════════════════════════════════ */
+.home-quick-nav{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+
+.promo-carousel{display:flex;gap:4px;overflow-x:auto;padding:2px 2px 4px;scrollbar-width:none}
+.promo-carousel::-webkit-scrollbar{display:none}
+.promo-card-chip{position:relative;flex:0 0 auto;width:112px;height:78px;border-radius:2px;overflow:hidden;text-decoration:none;color:#fff;box-shadow:0 4px 10px rgba(0,0,0,.24);display:flex;align-items:flex-end;background:linear-gradient(160deg,var(--accent,var(--gold-hi)),#16170f 130%)}
+/* Once real banner images are supplied, set them via style={{backgroundImage:`url(...)`}} on this element — the gradient above is a stand-in so cards aren't blank until then. */
+.promo-card-chip:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.72) 0%,rgba(0,0,0,.05) 55%)}
+.promo-card-chip:hover{transform:translateY(-2px)}
+.promo-tag{position:absolute;top:6px;right:6px;z-index:1;padding:2px 6px;border-radius:999px;font-size:8px;font-weight:800;letter-spacing:.04em;color:#fff;background:var(--blue)}
+.promo-icon-wrap{position:absolute;top:6px;left:7px;z-index:1;display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;color:#fff;background:rgba(255,255,255,.18);backdrop-filter:blur(4px)}
+.promo-label{position:relative;z-index:1;padding:7px 8px;font-size:10px;font-weight:800;line-height:1.2;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+
+.joined-nav-block{background:var(--glass-white);border:1px solid var(--glass-border);border-radius:0;box-shadow:var(--clay-shadow)}
+
+.icon-nav-row{display:flex;overflow-x:auto;scrollbar-width:none}
+.icon-nav-row::-webkit-scrollbar{display:none}
+.icon-nav-item{flex:1 0 auto;display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 14px;border-radius:0;background:transparent;border:none;border-right:1px solid rgba(35,42,55,.1);text-decoration:none;color:#40453e;font-size:9.5px;font-weight:700;white-space:nowrap;transition:color .16s ease,background .16s ease}
+.icon-nav-item:last-child{border-right:none}
+.icon-nav-item:hover{color:var(--blue);background:rgba(216,168,78,.12)}
+.icon-nav-icon{display:flex;align-items:center;justify-content:center;color:var(--blue)}
+
+.quick-pills{display:flex;overflow-x:auto;scrollbar-width:none;border-top:1px solid rgba(35,42,55,.12)}
+.quick-pills::-webkit-scrollbar{display:none}
+.quick-pill{flex:1 0 auto;padding:10px 14px;border-radius:0;background:transparent;border:none;border-right:1px solid rgba(35,42,55,.1);color:#3a3f38;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.01em;cursor:pointer;white-space:nowrap;transition:background .16s ease,color .16s ease}
+.quick-pill:last-child{border-right:none}
+.quick-pill:hover{background:rgba(216,168,78,.12)}
+.quick-pill.active{background:var(--blue);color:#fff}
+
+@media(max-width:820px){
+  .home-quick-nav{margin-top:12px}
+  .promo-card-chip{width:74px}
+}
+
+/* ═══════════════════════════════════════════════
+   FEATUBLUE MATCH CAROUSEL — distinct horizontally-
+   swipeable section, separate from the vertical
+   Live/Today/Upcoming lists below it
+═══════════════════════════════════════════════ */
+.featured-carousel-wrap{margin-top:16px}
+.featured-carousel-hdr{display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:8px;background:#16170f;border-radius:0}
+.featured-carousel-hdr-icon{display:flex;align-items:center;justify-content:center;color:var(--gold-hi)}
+.featured-carousel-hdr-text{flex:1;font:800 13px 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;color:#fff}
+.featured-carousel-hdr-count{display:flex;align-items:center;justify-content:center;min-width:22px;height:20px;padding:0 6px;border-radius:0;background:var(--gold-hi);color:#fff;font:800 11px 'DM Sans',sans-serif}
+
+.featured-carousel{display:flex;overflow-x:auto;padding:2px 2px 6px;scroll-snap-type:x proximity;scrollbar-width:none}
+.featured-carousel::-webkit-scrollbar{display:none}
+.featured-card{flex:0 0 auto;width:250px;scroll-snap-align:start;border-radius:0;background:var(--glass-white);border:1px solid var(--glass-border);border-right:2px solid rgba(35,42,55,.16);box-shadow:none;padding:12px 12px 13px;display:flex;flex-direction:column;gap:9px}
+.featured-card.is-live{background:rgba(77,141,255)}
+.featured-card-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.featured-card-league{font-size:9px;font-weight:800;color:#7d8378;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.featured-card-status-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:0;font-size:8px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:var(--blue)}
+.featured-card-status-badge.live{background:var(--blue)}
+.featured-card-status-badge.best{background:var(--nature)}
+.featured-card-status-badge.synth{background:#7d8378}
+.featured-card-fixture{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;text-decoration:none;color:inherit}
+.featured-card-side{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;text-align:center}
+.featured-card-side-label{font-size:7px;font-weight:800;letter-spacing:.08em;color:#a5aa9e;text-transform:uppercase}
+.featured-card-team-name{font-size:10.5px;font-weight:700;color:#20242d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.featured-card-side em{font-style:normal;font-size:15px;font-weight:800;color:var(--blue)}
+.featured-card-mid{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:#3a3f38}
+.featured-card-mid b{font-size:13px;font-weight:800}
+.featured-card-mid small{font-size:9px;color:#7d8378}
+.featured-card-market-label{display:inline-block;align-self:center;padding:2px 8px;font-size:8.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:#3a3f38;border-radius:0}
+.featured-card-odds{display:grid;grid-auto-flow:column;gap:6px}
+
+/* ═══════════════════════════════════════════════
+   LIVE SECTION SUB-NAV — its own sport-filter and
+   market-filter rows, sitting above the live rows
+═══════════════════════════════════════════════ */
+.live-subnav{padding:2px 4px 10px;display:flex;flex-direction:column;gap:8px}
+.live-subnav-sports{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.live-subnav-sports::-webkit-scrollbar{display:none}
+.live-subnav-sport{flex:0 0 auto;display:flex;align-items:center;gap:5px;padding:6px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#c9cabf;font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .16s ease,color .16s ease,border-color .16s ease}
+.live-subnav-sport.active{background:var(--nature);border-color:var(--nature);color:#fff}
+.live-subnav-markets{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.live-subnav-markets::-webkit-scrollbar{display:none}
+.live-subnav-market{flex:0 0 auto;padding:6px 11px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#8d9288;font-size:10.5px;font-weight:700;white-space:nowrap}
+.live-subnav-market.active{color:var(--gold-hi);border-color:var(--gold-hi);background:rgba(77,141,255)}
+.live-subnav-market.disabled{opacity:.4;cursor:not-allowed}
+
+@media(max-width:820px){
+  .featured-card{width:220px}
+}
+
+/* Hero has two images stacked — the main banner and a secondary
+   "virtual" wide banner directly under it. On mobile that's just visual
+   clutter competing with the main image for a tiny viewport — the sub
+   image is dropped entirely below 820px, main hero image stays. */
+@media(max-width:820px){
+  .wide-banner{display:none}
+}
+/* ============================================================================
+   SUPER BET REBRAND — dark blue/black authority palette, angular pointy
+   corners (single cut-corner "notch" motif replacing all border-radius),
+   and a new wordmark/mark lockup. Appended last so it wins the cascade
+   without having to touch every scattered rule above.
+   ============================================================================ */
+:root{
+  --pb-blue:#1e6bff; --pb-blue-deep:#1246a8; --pb-blue-shadow:#0b2e70;
+  --pb-bg:#0A0A0A; --pb-panel:#141414; --pb-panel-2:#1B1B1B;
+  --pb-ink:#F4F1F0; --pb-muted:#9A9A9A; --pb-faint:#6E6E6E;
+  --pb-line:rgba(255,255,255,.08); --pb-line-bright:rgba(30,107,255);
+  --pb-live:#2FB8F0; --pb-win:#1FB870; --pb-navy:#192636;
+  --notch:16px; --notch-md:10px; --notch-sm:6px;
+  --ink:var(--pb-ink); --panel:var(--pb-panel); --panel-2:var(--pb-panel-2); --panel-3:#232323;
+  --line:var(--pb-line); --line-bright:var(--pb-line-bright);
+  --gold:var(--pb-blue); --gold-hi:var(--pb-blue); --blue:var(--pb-blue);
+  --lemon:var(--pb-live); --nature:var(--pb-win); --cream:var(--pb-ink); --muted:var(--pb-muted);
+  --shadow:6px 6px 0 rgba(0,0,0,.4);
+}
+
+/* Rounded corners sitewide — every surface gets real border-radius instead
+   of the earlier angular cut-corner treatment. Scaled by surface size: big
+   panels/heroes get the roomiest radius, small chips/tiles a tighter one. */
+.panel,.hero,.casino-hero,.betting-section,.live-section,.betslip,.mini-games,.winners,
+.auth-card-premium,.simple-card,.promo-card,.wide-banner,.sb-special-section,.sb-section{
+  border-radius:20px!important; clip-path:none!important;
+}
+.game-tile,.mini-card,.status-grid>div,.auth-benefits span,.search-box,.casino-tabs button,
+.activity-icon,.mobile-sport-toggle{
+  border-radius:14px!important; clip-path:none!important;
+}
+.gold-button,.ghost-button,.header-balance,.auth-crown,.wc-view-ticket,.wc-details,.wc-showoff,
+.wc-close,.sb-tab-swatch{
+  border-radius:var(--radius-control,12px)!important; clip-path:none!important;
+}
+.live-dot{clip-path:none;transform:none;border-radius:50%;background:var(--pb-live)!important;box-shadow:0 0 0 0 rgba(47,184,240,.5)!important}
+.betslip-tabs b{clip-path:none;border-radius:50%;background:var(--pb-blue)!important;color:#fff!important}
+.flag-img{clip-path:none;border-radius:4px}
+.panel:before{display:none!important}
+
+/* Base surfaces */
+html,body{background:var(--pb-bg)!important}
+body{background:var(--pb-bg)!important}
+.panel{background:var(--pb-panel)!important;border:1px solid var(--pb-line)!important;box-shadow:6px 6px 0 rgba(0,0,0,.4)!important;backdrop-filter:none!important;color:var(--pb-ink)!important}
+.hero,.casino-hero{box-shadow:8px 8px 0 rgba(0,0,0,.5)!important}
+.betting-section,.live-section{box-shadow:none!important}
+.betslip,.mini-games,.winners{box-shadow:6px 6px 0 rgba(0,0,0,.4)!important}
+.auth-card-premium{box-shadow:8px 8px 0 rgba(0,0,0,.5)!important;background:var(--pb-panel)!important;border:1px solid var(--pb-line)!important}
+.simple-card,.promo-card{box-shadow:6px 6px 0 rgba(0,0,0,.4)!important}
+.wide-banner{box-shadow:none!important}
+.auth-benefits span{box-shadow:none!important}
+
+/* Utility bar / header / footer -> black with blue trim (fixes the new
+   wordmark, which needs a dark backdrop to read). */
+.utility{background:var(--pb-bg)!important;border-bottom:1px solid var(--pb-line)!important;box-shadow:none!important}
+.utility a:hover{color:var(--pb-blue)!important}
+.utility .balance-link{color:var(--pb-blue)!important}
+.header{background:rgba(10,10,10,.95)!important;box-shadow:0 10px 30px rgba(0,0,0,.55),0 1px 0 rgba(30,107,255)!important;border-bottom:1px solid rgba(30,107,255)!important}
+.header .brand{filter:none!important}
+.header .brand img{display:block!important}
+.brand img{width:172px;height:auto;object-fit:contain;filter:drop-shadow(0 2px 10px rgba(30,107,255))!important;background:none!important;padding:0!important;box-shadow:none!important}
+.footer-brand img{width:160px;height:auto}
+.main-nav a:hover,.main-nav a.active{color:var(--pb-blue)!important}
+.main-nav a.active:after{background:var(--pb-blue)!important;box-shadow:0 0 12px rgba(30,107,255)!important}
+.header .main-nav a.active{color:#fff!important;text-shadow:none!important}
+.header .main-nav a.active::after{background:var(--pb-blue)!important;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 0 10px rgba(30,107,255)!important}
+.icon-button:hover{color:var(--pb-blue)!important}
+.login-link{color:var(--pb-ink)!important}
+.header-balance{background:rgba(30,107,255)!important;border:1px solid rgba(30,107,255)!important;color:var(--pb-blue)!important}
+.gold-button{background:linear-gradient(135deg,var(--pb-blue),var(--pb-blue-deep))!important;box-shadow:inset 0 1px rgba(255,255,255,.25)!important}
+.gold-button:hover{box-shadow:0 10px 24px rgba(30,107,255)!important}
+.ghost-button{color:var(--pb-blue)!important;background:rgba(30,107,255)!important;border:1px solid rgba(30,107,255)!important}
+.ghost-button:hover{background:rgba(30,107,255)!important}
+.sport-strip{background:rgba(20,20,20,.92)!important;box-shadow:0 8px 22px rgba(0,0,0,.4)!important}
+.sport-links a{color:#c9c9c9!important}
+.sport-links .strip-active{color:var(--pb-blue)!important}
+.mobile-sport-toggle{color:var(--pb-muted)!important;background:var(--pb-panel-2)!important}
+@media(max-width:820px){.menu-open .main-nav{background:var(--pb-bg)!important;box-shadow:0 18px 40px rgba(0,0,0,.6)!important}}
+@media(max-width:560px){.brand img{width:132px}}
+
+/* Section chrome, text colors, panels */
+.side-title{color:var(--pb-blue)!important;border-bottom-color:var(--pb-line)!important}
+.side-nav>a{color:#b7b7b7!important;border-bottom-color:rgba(255,255,255,.05)!important}
+.side-nav>a:hover{background:rgba(30,107,255)!important;color:var(--pb-blue)!important}
+.section-tools button{background:var(--pb-panel-2)!important;color:#b7b7b7!important}
+.league-tabs span.active{color:var(--pb-blue)!important}
+.league-tabs span.active:after{background:var(--pb-blue)!important}
+.league-cards>div{background:var(--pb-panel-2)!important}
+.league-cards>div.selected{border-color:rgba(30,107,255)!important;background:rgba(30,107,255)!important}
+.league-cards small{color:#8b8b8b!important}
+.league-cards b{color:#e8e6e3!important}
+.table-head{color:#7c7c7c!important}
+.match-meta small{color:#7c7c7c!important}
+.match-meta>span{color:#b3b3b3!important}
+.match-meta strong{color:var(--pb-ink)!important}
+.hot{background:var(--pb-blue)!important;color:#fff!important}
+.more-odds{color:var(--pb-blue)!important}
+.section-footer{color:var(--pb-blue)!important}
+.live-pulse{background:var(--pb-live)!important;color:#04222e!important}
+.live-row .score{color:var(--pb-ink)!important}
+.betting-section .match-meta small,.betting-section .match-meta>span,.betting-section .table-head{color:#8b8b8b!important}
+.betting-section .league-cards small{color:#8b8b8b!important}
+.betting-section .odd span{color:#9a9a9a!important}
+
+/* Odds — dark chips, blue = selected/brand, blue = live */
+.odd{background:var(--pb-panel-2)!important;border:1px solid var(--pb-line)!important;color:var(--pb-ink)!important;box-shadow:none!important}
+.odd span{color:#9a9a9a!important;font-weight:600!important}
+.odd b{color:var(--pb-ink)!important;font-weight:800!important}
+.odd:hover{background:#202020!important;border-color:var(--pb-blue)!important;transform:translateY(-2px)}
+.odd.selected,.live-section .odd.selected{background:linear-gradient(135deg,var(--pb-blue),var(--pb-blue-deep))!important;border-color:var(--pb-blue)!important;color:#fff!important;box-shadow:0 7px 15px rgba(30,107,255)!important}
+.odd.selected span,.odd.selected b,.live-section .odd.selected span,.live-section .odd.selected b{color:#fff!important}
+.live-section .odd{background:rgba(47,184,240,.12)!important;border-color:rgba(47,184,240,.35)!important;color:#eafbff!important}
+.live-section .odd span{color:#bfe9f7!important}
+.live-section .odd b{color:#fff!important}
+.live-section .odd:hover{background:rgba(47,184,240,.2)!important}
+.live-section,.live-section.panel{background:var(--pb-panel)!important;color:var(--pb-ink)!important;border-color:rgba(47,184,240,.28)!important}
+.live-section .section-head h2,.live-section .match-meta strong{color:var(--pb-ink)!important}
+.live-section .league-tabs span{color:#9a9a9a!important}
+.live-section .league-tabs span.active{color:var(--pb-blue)!important}
+.live-section .live-row{border-top-color:rgba(255,255,255,.09)!important}
+
+/* Betslip / mini games / winners rail */
+.betslip-tabs span.active{color:var(--pb-blue)!important;border-bottom-color:var(--pb-blue)!important}
+.empty-slip{color:#8f8f8f!important}
+.empty-slip svg{color:var(--pb-blue)!important}
+.empty-slip h3{color:#e8e6e3!important}
+.slip-header{color:#a8a8a8!important}
+.slip-header button{color:var(--pb-blue)!important}
+.slip-pick strong{color:var(--pb-blue)!important}
+.slip-pick button{color:#7f847a!important}
+.slip-summary>div b{color:var(--pb-blue)!important}
+.slip-summary input{background:var(--pb-panel-2)!important;border-color:rgba(255,255,255,.12)!important;color:#fff!important}
+.mini-card{background:var(--pb-panel)!important;border-color:var(--pb-line)!important}
+.winner b{color:var(--pb-win)!important}
+.winner span{color:#8c9288!important}
+
+/* Casino */
+.casino-hero{background:var(--pb-bg)!important;border-color:var(--pb-line)!important}
+.casino-tabs button{background:var(--pb-panel-2)!important;color:#9a9a9a!important;border-color:var(--pb-line)!important}
+.casino-tabs button.active{background:var(--pb-blue)!important;color:#fff!important;border-color:var(--pb-blue)!important}
+.search-box{background:var(--pb-panel)!important;border-color:var(--pb-line)!important;color:#8b8b8b!important}
+.search-box input{color:#fff!important}
+.game-tile{background:linear-gradient(180deg,#171717,#0c0c0c)!important;border:1px solid var(--pb-line)!important;box-shadow:4px 4px 0 rgba(0,0,0,.4)!important}
+.game-tile:hover{border-color:var(--pb-blue)!important;box-shadow:6px 6px 0 rgba(30,107,255)!important;transform:translateY(-3px)}
+.game-tile span{color:var(--pb-blue)!important}
+
+/* Simple pages, wallet, status grids */
+.simple-page{background:radial-gradient(circle at 72% 10%,rgba(30,107,255),transparent 28rem)!important}
+.simple-page>h1{color:var(--pb-ink)!important}
+.simple-page>h1 em{color:var(--pb-blue)!important}
+.text-action{color:var(--pb-blue)!important}
+.wallet-kicker{color:#8b8b8b!important}
+.activity-row small{color:#7f857b!important}
+.activity-icon{color:var(--pb-blue)!important;background:rgba(30,107,255)!important}
+.status-grid>div{background:rgba(255,255,255,.03)!important;border-color:var(--pb-line)!important}
+.status-grid span{color:#8b8b8b!important}
+.status-grid b{color:var(--pb-blue)!important}
+.status-grid b.status-good{color:var(--pb-win)!important}
+.simple-card svg{color:var(--pb-blue)!important}
+.simple-card h2,.simple-card h3{color:var(--pb-ink)!important}
+.simple-card p,.promo-card p,.empty-slip p{color:#a8a8a8!important}
+.wallet-card h2{color:var(--pb-blue)!important}
+
+/* Auth pages */
+.auth-intro h1{color:var(--pb-ink)!important}
+.auth-intro h1 em{color:var(--pb-blue)!important}
+.auth-intro p{color:#a8a8a8!important}
+.auth-benefits span{background:var(--pb-panel)!important;border-color:rgba(30,107,255)!important;color:#c9c9c9!important}
+.auth-benefits svg{color:var(--pb-blue)!important}
+.auth-card-head h2{color:var(--pb-ink)!important}
+.auth-crown{background:linear-gradient(145deg,var(--pb-blue-deep),var(--pb-blue))!important;box-shadow:5px 5px 0 rgba(0,0,0,.35)!important}
+.auth-card .eyebrow{color:var(--pb-blue)!important}
+.auth-field>span{color:#9a9a9a!important}
+.auth-field input,.auth-field select{background:var(--pb-bg)!important;border:1px solid rgba(255,255,255,.14)!important;color:var(--pb-ink)!important;box-shadow:none!important}
+.auth-field input:focus,.auth-field select:focus{border-color:var(--pb-blue)!important;box-shadow:0 0 0 3px rgba(30,107,255)!important}
+.auth-input-wrap button{color:var(--pb-blue)!important}
+.auth-input-wrap button:hover{background:rgba(30,107,255)!important}
+.auth-row{color:#9a9a9a!important}
+.auth-row a,.auth-switch a,.terms-row a{color:var(--pb-blue)!important}
+.check-row{color:#9a9a9a!important}
+.check-row input{accent-color:var(--pb-blue)!important}
+.auth-notice{background:rgba(30,107,255)!important;color:#75a9ff!important}
+.auth-switch{color:#9a9a9a!important}
+.auth-safe{color:#7c7c7c!important}
+.auth-safe svg{color:var(--pb-win)!important}
+.auth-steps span{color:#6e6e6e!important}
+.auth-steps span.active,.auth-steps span.done{color:var(--pb-blue)!important}
+.auth-steps i{background:#2a2a2a!important}
+.auth-steps i.active{background:var(--pb-blue)!important}
+.auth-back{color:var(--pb-blue)!important}
+.auth-card input{background:var(--pb-bg)!important;border-color:var(--pb-line)!important;color:#fff!important}
+.auth-card input:focus{border-color:var(--pb-blue)!important}
+.auth-card a{color:var(--pb-blue)!important}
+
+/* Footer */
+footer{background:var(--pb-bg)!important;border-top-color:var(--pb-line)!important}
+.footer-grid h4{color:var(--pb-blue)!important}
+.footer-grid a:not(.brand){color:#9a9a9a!important}
+.footer-grid a:not(.brand):hover{color:#fff!important}
+.muted{color:#7c7c7c!important}
+.partner-badge{color:#c9c9c9!important}
+.partner-badge svg{color:var(--pb-blue)!important}
+.footer-bottom{color:#5a5a5a!important;border-top-color:var(--pb-line)!important}
+
+/* Sportsbook tab rail */
+.sb-tabs{background:var(--pb-bg)!important;border-color:var(--pb-line)!important}
+.sb-tab{color:#9a9a9a!important;border-right-color:var(--pb-line)!important}
+.sb-tab:hover{background:rgba(255,255,255,.05)!important;color:#e8e6e3!important}
+.sb-tab.active{color:var(--pb-blue)!important;background:rgba(30,107,255)!important}
+.sb-tab.active .sb-tab-swatch{box-shadow:0 0 0 2px var(--pb-blue)!important}
+.sb-refresh{color:var(--pb-blue)!important}
+.sb-section-title{color:#e8e6e3!important}
+.sb-section-title b{color:#8b8b8b!important}
+.sb-live-section{background:var(--pb-panel)!important}
+.sb-live-section .sb-section-title{color:var(--pb-ink)!important}
+.sb-empty{color:#8b8b8b!important}
+.sb-live-section .sb-empty{color:#aeb3bd!important}
+.sb-special-section{background:linear-gradient(165deg,#0a1a2a 0%,#0a0a0a 100%)!important;border:1px solid rgba(30,107,255)!important;box-shadow:0 10px 24px rgba(0,0,0,.4)!important}
+
+/* ── Final sweep — page-specific classes (sportsbook rows, betslip page,
+   search, account menu, match details, transactions, mobile nav) that
+   were still carrying their original light-theme text/background colors.
+   Generated by diffing every rule in the pre-rebrand stylesheet against
+   the new palette. ── */
+.sport-strip span{color:#9a9a9a!important}
+.league-tabs span{color:#9a9a9a!important}
+.simple-card p{color:#a8a8a8!important}
+.sb-fav{color:#6e6e6e!important}
+.sb-row-badges small{color:#9a9a9a!important}
+.sb-team-name{color:#F4F1F0!important}
+.sb-ended-note{color:#9a9a9a!important}
+.sb-odd{color:#F4F1F0!important}
+.wallet-withdraw-form select,.deposit-form select{color:#F4F1F0!important;background:#0A0A0A!important;border-color:rgba(255,255,255,.14)!important}
+.deposit-note{color:#9a9a9a!important}
+.faq-q{color:#F4F1F0!important}
+.support-channel{color:#F4F1F0!important}
+.support-quicklinks a{color:#F4F1F0!important}
+.mbn-item{color:#9a9a9a!important}
+.bp-header h1{color:#F4F1F0!important}
+.bp-empty h3{color:#F4F1F0!important}
+.bp-card{background:#141414!important}
+.bp-league{color:#9a9a9a!important}
+.bp-teams{color:#F4F1F0!important}
+.bp-selection-row small{color:#9a9a9a!important}
+.bp-selection-row b{color:#F4F1F0!important}
+.bp-summary{background:#141414!important}
+.bp-summary-row b{color:#F4F1F0!important}
+.bp-stake-field input{color:#F4F1F0!important;background:#0A0A0A!important;border-color:rgba(255,255,255,.14)!important}
+.account-menu-item{background:#0A0A0A!important}
+.account-menu-item b{color:#F4F1F0!important}
+.account-menu-item small{color:#9a9a9a!important}
+.account-menu-chevron{color:#6e6e6e!important}
+.sports-sidebar-item{color:#9a9a9a!important}
+.sports-comp-search{color:#9a9a9a!important}
+.sports-comp-search input{color:#F4F1F0!important}
+.sports-comp-search button{color:#9a9a9a!important}
+.sports-filter-chip b{color:#F4F1F0!important}
+.md-cs-head{color:#9a9a9a!important}
+.md-cs-btn{color:#F4F1F0!important}
+.md-hc-line-label{color:#9a9a9a!important}
+.tx-pagination button{color:#9a9a9a!important;background:#1B1B1B!important}
+.tx-pagination span{color:#9a9a9a!important}
+.search-page-bar{color:#9a9a9a!important;background:#141414!important}
+.search-page-bar input{color:#F4F1F0!important}
+.search-page-bar button{color:#9a9a9a!important}
+.search-recent-chip{color:#9a9a9a!important;background:#1B1B1B!important}
+.search-result-row:hover{background:#1B1B1B!important}
+.search-result-row small{color:#9a9a9a!important}
+.search-result-row b{color:#F4F1F0!important}
+.sb-error-banner{background:rgba(30,107,255)!important}
+.featured-card-team-name{color:#F4F1F0!important}
+.live-subnav-market{color:#9a9a9a!important}
+
+/* ── Second gold-rgba sweep — a few icon/hover backgrounds using the old
+   gold tint that weren't caught by hex-literal detection. ── */
+.account-menu-icon{background:rgba(30,107,255)!important;color:var(--pb-blue)!important}
+.icon-nav-item:hover{background:rgba(30,107,255)!important;color:var(--pb-blue)!important}
+.quick-pill:hover{background:rgba(30,107,255)!important}
+
+/* ── Third sweep — headline emphasis + profile avatar gradient still on
+   old gold; .brand span span is dead CSS now (logo is a single <img>) but
+   harmless to override anyway. ── */
+.brand span span{color:#fff!important}
+.hero h1 em,.casino-hero h1 em{color:var(--pb-blue)!important}
+.profile-avatar{background:linear-gradient(145deg,#5b9bff,#1246a8)!important;color:#fff!important}
+
+/* ============================================================================
+   SUPER BET — UI redesign pass 2: match/game cards, buttons, header, and the
+   icon-nav "hero" strip that never got the dark palette (still used the old
+   --glass-white/--clay-shadow tokens). Also fixes .sb-odd, the actual odds
+   button used on every match card, which still had dark-green text left
+   over from the original light theme.
+   ============================================================================ */
+:root{
+  --glass-white:#141414; --glass-border:rgba(255,255,255,.08);
+  --clay-shadow:6px 6px 0 rgba(0,0,0,.4); --inset-soft:inset 0 1px rgba(255,255,255,.14);
+  --radius-control:11px;
+}
+
+/* ── Critical fix: .sb-odd is the odds button on every match card. Its
+   value/label text was still dark-green from the old light theme and was
+   essentially invisible against the new dark cards. ── */
+.sb-odd{background:#1B1B1B!important;border:1px solid var(--pb-line)!important;color:#F4F1F0!important;box-shadow:none!important}
+.sb-odd span{color:#9a9a9a!important;font-weight:700!important}
+.sb-odd b{color:#F4F1F0!important;font-weight:800!important}
+.sb-odd:hover{background:#202020!important;border-color:var(--pb-blue)!important;transform:translateY(-2px)}
+.sb-odd.sel{background:linear-gradient(135deg,var(--pb-blue),var(--pb-blue-deep))!important;border-color:var(--pb-blue)!important;box-shadow:0 6px 16px rgba(30,107,255)!important}
+.sb-odd.sel span,.sb-odd.sel b{color:#fff!important}
+.sb-live-section .sb-odd{background:rgba(47,184,240,.12)!important;border-color:rgba(47,184,240,.35)!important}
+.sb-live-section .sb-odd span{color:#bfe9f7!important}
+.sb-live-section .sb-odd b{color:#fff!important}
+.sb-special-section .sb-odd{background:rgba(30,107,255)!important;border-color:rgba(30,107,255)!important}
+.sb-special-section .sb-odd span{color:#a9c9ff!important}
+.sb-special-section .sb-odd b{color:#fff!important}
+
+/* ── Buttons & interactive controls: sharp structural cards stay angular,
+   but hands-on controls (buttons, pills, tabs, chips, inputs) get a
+   little rounding and a lot more polish — gradient depth, shine sweep on
+   hover, a real lift. This is deliberately a different shape language
+   from the cards, not an inconsistency: sharp stage, soft controls. ── */
+.gold-button,.ghost-button,.wc-view-ticket,.wc-details,.wc-showoff,.wc-close,
+.casino-tabs button,.quick-pill,.sb-load-more,.header-balance,.mobile-sport-toggle,
+.section-tools button,.icon-nav-item,.tx-pagination button,.search-recent-chip{
+  clip-path:none!important; border-radius:var(--radius-control)!important;
+}
+.gold-button{
+  position:relative; overflow:hidden; border:none!important;
+  background:linear-gradient(135deg,#4d8dff 0%,var(--pb-blue) 45%,var(--pb-blue-deep) 100%)!important;
+  box-shadow:0 8px 20px rgba(30,107,255), inset 0 1px rgba(255,255,255,.3)!important;
+  font-weight:800!important; letter-spacing:.02em!important;
+}
+.gold-button:before{
+  content:""; position:absolute; top:0; left:-60%; width:40%; height:100%;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,.4),transparent);
+  transform:skewX(-20deg); transition:left .5s ease; pointer-events:none;
+}
+.gold-button:hover:before{left:130%}
+.gold-button:hover{transform:translateY(-2px)!important;box-shadow:0 14px 30px rgba(30,107,255),inset 0 1px rgba(255,255,255,.3)!important}
+.gold-button:active{transform:translateY(0) scale(.98)!important}
+.ghost-button{
+  background:rgba(255,255,255,.04)!important; border:1.5px solid rgba(30,107,255)!important;
+  color:#fff!important; font-weight:800!important;
+}
+.ghost-button:hover{background:rgba(30,107,255)!important;border-color:var(--pb-blue)!important;transform:translateY(-2px)}
+.ghost-button:active{transform:translateY(0) scale(.98)!important}
+.quick-pill.active{border-radius:var(--radius-control)!important}
+.casino-tabs button.active{border-radius:var(--radius-control)!important}
+.auth-field input,.auth-field select,.slip-summary input,.bc-input,.search-box,.search-page-bar{
+  border-radius:var(--radius-control)!important;
+}
+.auth-crown{border-radius:14px!important;clip-path:none!important}
+
+/* ── Icon-nav "hero" strip (All Sports / Live / Booking / Casino / Promos /
+   More) — this was still on the old light --glass-white token, invisible
+   against the dark shell. Rebuilt as its own dark card with a proper icon
+   chip per item instead of plain text links. ── */
+.joined-nav-block{
+  background:var(--pb-panel)!important; border:1px solid var(--pb-line)!important;
+  box-shadow:6px 6px 0 rgba(0,0,0,.35)!important;
+  clip-path:none!important; border-radius:18px!important;
+}
+.icon-nav-row{padding:10px}
+.icon-nav-item{
+  color:#c9c9c9!important; border-right:none!important; gap:7px!important;
+  padding:12px 10px!important; background:transparent!important;
+}
+.icon-nav-icon{
+  display:flex; align-items:center; justify-content:center; width:38px; height:38px;
+  background:rgba(255,255,255,.06); color:#F4F1F0!important;
+  border:1px solid rgba(255,255,255,.14); transition:background .16s ease,border-color .16s ease,transform .16s ease;
+}
+.icon-nav-item:hover .icon-nav-icon{background:var(--pb-blue)!important;border-color:var(--pb-blue)!important;color:#fff!important;transform:translateY(-2px)}
+.icon-nav-item:hover{background:transparent!important;color:#fff!important}
+.quick-pills{border-top:1px solid var(--pb-line)!important}
+.quick-pill{color:#9a9a9a!important;border-right:1px solid var(--pb-line)!important;font-weight:800!important}
+.quick-pill:last-child{border-right:none!important}
+.quick-pill.active{background:var(--pb-blue)!important;color:#fff!important;box-shadow:0 4px 12px rgba(30,107,255)!important}
+
+/* ── Match cards (.sb-row) — from a flat divided list row to an actual
+   card: its own surface, a colored accent bar keyed to state (blue =
+   normal/selectable, blue = live, blue-gold = special), hover lift. ── */
+.sb-section-body{display:flex;flex-direction:column;gap:10px}
+.sb-row{
+  position:relative; padding:14px 16px 14px 20px!important; margin:0;
+  background:#131313; border:1px solid var(--pb-line); border-top:1px solid var(--pb-line)!important;
+  box-shadow:4px 4px 0 rgba(0,0,0,.32);
+  transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;
+}
+.sb-row:before{
+  content:""; position:absolute; left:0; top:0; bottom:0; width:4px;
+  background:var(--pb-blue);
+}
+.sb-row.is-live:before{background:var(--pb-live)}
+.sb-row.is-admin:before{background:linear-gradient(180deg,var(--pb-blue),#ffb300)}
+.sb-row.is-ended:before{background:#3a3a3a}
+.sb-row:hover{transform:translateY(-2px);box-shadow:6px 8px 0 rgba(0,0,0,.4);border-color:rgba(30,107,255)}
+.sb-row.is-live{background:linear-gradient(135deg,rgba(47,184,240,.08),#131313 55%)}
+.sb-row.is-admin{background:linear-gradient(135deg,rgba(30,107,255),#131313 55%)!important}
+.sb-more{color:var(--pb-blue)!important;background:rgba(30,107,255);width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-more:hover{background:rgba(30,107,255)}
+.sb-fav{color:#6e6e6e}
+.sb-fav.active{color:var(--pb-blue)!important}
+.sb-badge.special{background:linear-gradient(135deg,var(--pb-blue),#ffb300)!important;color:#141414!important;font-weight:900!important}
+.sb-badge.synth{background:rgba(255,176,32,.16)!important;color:#FFB020!important;border:1px solid rgba(255,176,32,.35)!important}
+.sb-badge.ft{background:rgba(255,255,255,.08)!important;color:#9a9a9a!important;border:1px solid rgba(255,255,255,.15)!important}
+
+/* ── Featured match cards (carousel) — same card language as .sb-row,
+   scaled up: notch corner, accent top edge, richer odds row. ── */
+.featured-card{
+  background:var(--pb-panel)!important; border:1px solid var(--pb-line)!important;
+  box-shadow:0 6px 18px rgba(0,0,0,.35)!important;
+  clip-path:none; border-radius:14px;
+  position:relative; transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;
+}
+.featured-card:before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--pb-blue);border-radius:14px 14px 0 0}
+.featured-card.is-live:before{background:var(--pb-live)}
+.featured-card:hover{transform:translateY(-5px);box-shadow:0 18px 36px rgba(0,0,0,.5),0 0 0 1px rgba(30,107,255)}
+.featured-card-league{color:#9a9a9a!important;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+.featured-card-status-badge{border-radius:999px!important;font-weight:800}
+.featured-card-status-badge.live{background:rgba(47,184,240,.16)!important;color:#2FB8F0!important}
+.featured-card-status-badge.synth{background:rgba(255,176,32,.16)!important;color:#FFB020!important}
+.featured-card-status-badge.best{background:rgba(30,107,255)!important;color:var(--pb-blue)!important}
+.featured-card-mid{color:#e8e6e3!important}
+.featured-card-side-label{color:#6e6e6e!important;font-size:8px;font-weight:800;letter-spacing:.08em}
+.featured-card-market-label{color:#6e6e6e!important;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+
+/* ── Game cards (casino) — same accent-bar treatment as match cards for a
+   unified "card" language across the whole product, not just sportsbook. ── */
+.game-tile{position:relative;background:linear-gradient(180deg,#171717,#0c0c0c)!important;box-shadow:4px 4px 0 rgba(0,0,0,.4)!important}
+.game-tile:before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--pb-blue),#ffb300);z-index:1}
+.game-tile:hover{border-color:var(--pb-blue)!important;box-shadow:6px 6px 0 rgba(30,107,255)!important;transform:translateY(-4px)}
+
+/* ── Header polish — layered depth instead of a flat bar: gradient wash,
+   brighter active-tab treatment, a crisper divider glow. ── */
+.header{
+  background:linear-gradient(180deg,rgba(20,20,20,.97),rgba(8,8,8,.97))!important;
+  border-bottom:1px solid rgba(30,107,255)!important;
+  box-shadow:0 1px 0 rgba(30,107,255),0 14px 34px rgba(0,0,0,.55)!important;
+}
+.header:after{
+  content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(30,107,255) 20%,rgba(30,107,255) 80%,transparent);
+}
+.header{position:sticky!important}
+.main-nav a{font-weight:600;position:relative}
+.main-nav a.active{font-weight:800!important}
+.header-balance{background:linear-gradient(135deg,rgba(30,107,255),rgba(30,107,255))!important;font-weight:900!important}
+.icon-button{border-radius:var(--radius-control)!important;transition:background .16s ease,color .16s ease}
+.icon-button:hover{background:rgba(30,107,255)!important}
+.utility{background:linear-gradient(90deg,#0A0A0A,#141414,#0A0A0A)!important}
+
+@keyframes fab-pop{0%{transform:scale(0) rotate(-15deg)}70%{transform:scale(1.12) rotate(3deg)}100%{transform:scale(1) rotate(0)}}
+
+/* Now that estimated-but-priced odds are clickable, the only remaining
+   non-interactive states are ended and genuinely empty odds —
+   these should read as visibly disabled rather than full-color/misleading. */
+.sb-odd.display-only{opacity:.5!important;cursor:not-allowed!important;pointer-events:none!important;filter:grayscale(.3)}
+.sb-odd.empty{opacity:.35!important;cursor:not-allowed!important;pointer-events:none!important}
+.odd.display-only{opacity:.5!important;cursor:not-allowed!important;pointer-events:none!important;filter:grayscale(.3)}
+.odd.empty{opacity:.35!important;cursor:not-allowed!important;pointer-events:none!important}
+
+/* ============================================================================
+   HOMEPAGE HERO — v3: a genuinely different composition, not a filter pass
+   on the same "photo + text overlay" layout. The stock photo is confined to
+   a diagonal band on the right instead of filling the whole banner; the
+   left two-thirds is a solid dark panel carrying angular brand-shape
+   accents (echoing the faceted shield in the logo) so the section reads as
+   designed rather than a generic photo hero. "Winning" sits inside a bold
+   skewed marker-highlight block instead of just being colored text.
+   ============================================================================ */
+.hero{position:relative;background:#0A0A0A}
+.hero>img{display:none}
+.hero-photo-mask{position:absolute;inset:0;z-index:0}
+.hero-photo-mask img{width:100%;height:100%;object-fit:cover;opacity:.7;filter:saturate(.85) contrast(1.1)}
+.hero-photo-mask:after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(90deg,#0A0A0A 0%,rgba(10,10,10,.88) 32%,rgba(10,10,10,.5) 60%,rgba(10,10,10,.25) 100%),
+             linear-gradient(0deg,rgba(10,10,10,.5),transparent 45%);
+}
+.hero-shapes{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none}
+.hero-shape{position:absolute;display:block}
+.hero-shape-a{
+  width:420px;height:420px;top:-160px;right:8%;
+  background:linear-gradient(135deg,rgba(30,107,255),rgba(11,46,112) 70%);
+  clip-path:polygon(28% 0,100% 0,100% 72%,72% 100%,0 100%,0 28%);
+  transform:rotate(8deg);
+}
+.hero-shape-b{
+  width:220px;height:220px;bottom:-90px;left:6%;
+  background:linear-gradient(135deg,rgba(255,255,255,.06),transparent 70%);
+  clip-path:polygon(22% 0,100% 22%,78% 100%,0 78%);
+  transform:rotate(-10deg);
+}
+.hero-dots{
+  position:absolute;inset:0;opacity:.1;
+  background-image:radial-gradient(rgba(255,255,255,.5) 1px,transparent 1px);
+  background-size:20px 20px;
+  mask-image:linear-gradient(115deg,transparent 0%,#000 30%,#000 65%,transparent 90%);
+}
+.hero-sheen{display:none}
+.hero-shimmer{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.hero-shimmer:before{
+  content:""; position:absolute; top:-60%; left:-30%; width:22%; height:220%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.06),transparent);
+  transform:rotate(12deg); animation:hero-shimmer-sweep 7s ease-in-out infinite;
+}
+@keyframes hero-shimmer-sweep{0%,8%{left:-30%}55%,100%{left:120%}}
+.hero-copy{z-index:2}
+.hero h1{color:#fff;position:relative}
+.hero-mark{position:relative;display:inline-block;padding:0 10px;margin-left:-2px}
+.hero-mark:before{
+  content:""; position:absolute; left:-4px; right:-4px; top:10%; bottom:6%; z-index:-1;
+  background:linear-gradient(100deg,var(--pb-blue-deep),var(--pb-blue) 55%,#5b9bff);
+  clip-path:polygon(2% 12%,100% 0,98% 88%,0 100%);
+}
+.hero-mark em{color:#fff!important;font-style:normal;-webkit-text-fill-color:#fff!important;background:none!important;filter:none!important}
+.hero-live-chip{
+  position:absolute; top:18px; right:20px; z-index:2; display:inline-flex; align-items:center; gap:6px;
+  padding:6px 12px; background:rgba(10,10,10,.6); border:1px solid rgba(255,255,255,.16);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  color:rgba(244,241,240,.92); font-size:10px; font-weight:700; letter-spacing:.03em;
+  clip-path:none; border-radius:999px;
+}
+.hero-progress span.active{background:var(--pb-blue)!important}
+.hero-stats{display:flex;flex-wrap:wrap;gap:16px;margin-top:22px;position:relative;z-index:1}
+.hero-stats span{display:flex;align-items:center;gap:6px;color:#c9c9c9;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.hero-stats span svg{color:#F4F1F0;flex-shrink:0;opacity:.85}
+@media(max-width:820px){.hero-live-chip{top:14px;right:14px;font-size:9px;padding:5px 9px}.hero-stats{gap:12px;margin-top:18px}.hero-stats span{font-size:9.5px}}
+@media(max-width:560px){.hero-stats span:nth-child(3){display:none}}
+
+/* ============================================================================
+   HERO SECTIONS — every "hero" band across the site (homepage hero, casino
+   hero, match-details header, and the solid-blue banners on Account/Deposit/
+   Profile/Wallet), plus .simple-hero which had no styling at all. Shared
+   language: a diagonal shine sweep, a soft ambient glow, and an angular
+   bottom notch instead of the rounded corners the global radius reset was
+   silently flattening into an abrupt square cut.
+   ============================================================================ */
+.acct-hero,.dep-hero,.pf-hero,.wal-hero{
+  position:relative; overflow:hidden;
+  clip-path:none; border-radius:0 0 22px 22px;
+  box-shadow:inset 0 -1px 0 rgba(255,255,255,.4);
+}
+.acct-hero:before,.dep-hero:before,.pf-hero:before,.wal-hero:before{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(circle at 88% -10%, rgba(255,255,255,.22), transparent 55%),
+    repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 2px, transparent 2px 42px),
+    linear-gradient(115deg,transparent 35%,rgba(255,255,255,.14) 48%,transparent 60%);
+}
+.acct-hero:after,.dep-hero:after,.pf-hero:after,.wal-hero:after{
+  content:""; position:absolute; left:-10%; bottom:-40%; width:55%; aspect-ratio:1;
+  background:rgba(0,0,0,.14);
+  clip-path:polygon(22% 0,100% 22%,78% 100%,0 78%);
+  transform:rotate(-6deg);
+}
+.acct-hero>*,.dep-hero>*,.pf-hero>*,.wal-hero>*{position:relative;z-index:1}
+
+/* Match-details header — was an unrelated dark-navy gradient with no brand
+   presence; brought in line with the blue family the rest of the site uses. */
+.md-hero{
+  position:relative; overflow:hidden;
+  background:linear-gradient(135deg,#1c1c1c 0%,var(--pb-blue-deep) 78%,var(--pb-blue) 130%)!important;
+  clip-path:none; border-radius:20px;
+}
+.md-hero:before{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(circle at 85% 0%,rgba(255,255,255,.18),transparent 55%),
+    repeating-linear-gradient(115deg, rgba(255,255,255,.04) 0 2px, transparent 2px 42px);
+}
+.md-hero:after{
+  content:""; position:absolute; right:-8%; top:-45%; width:45%; aspect-ratio:1; pointer-events:none;
+  background:rgba(0,0,0,.16); clip-path:polygon(28% 0,100% 0,100% 72%,72% 100%,0 100%,0 28%); transform:rotate(10deg);
+}
+.md-hero>*{position:relative;z-index:1}
+.md-league{color:rgba(255,255,255,.85)!important;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.md-team-name{color:#fff!important}
+.md-time{color:rgba(255,255,255,.9)!important}
+
+/* Casino hero — same glow treatment as the homepage hero for consistency. */
+.casino-hero{position:relative}
+.casino-hero:before{
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:2;
+  background:radial-gradient(ellipse 55% 75% at 85% 15%, rgba(30,107,255), transparent 60%);
+}
+.casino-hero img{z-index:0}
+.casino-hero .hero-shapes{z-index:1;position:absolute}
+.casino-hero:after{z-index:2}
+.casino-hero>div{position:relative;z-index:3}
+
+/* .simple-hero (Promos, Affiliate, Support, Sports, Live) had no styling
+   anywhere — just bare stacked text. Gave it a real header treatment: an
+   accent rule under the eyebrow and a blue underline flourish below the
+   heading, consistent with the rest of the "hero" family. */
+.simple-page{position:relative;overflow:hidden}
+.simple-hero{position:relative; padding-bottom:20px; margin-bottom:6px}
+.simple-hero:before{
+  content:""; position:absolute; right:-6%; top:-60%; width:280px; aspect-ratio:1; pointer-events:none; z-index:0;
+  background:linear-gradient(135deg,rgba(30,107,255),transparent 70%);
+  clip-path:polygon(28% 0,100% 0,100% 72%,72% 100%,0 100%,0 28%); transform:rotate(10deg);
+}
+.simple-hero>*{position:relative;z-index:1}
+.simple-hero .eyebrow{
+  display:inline-flex; align-items:center; gap:6px; padding-bottom:2px;
+}
+.simple-hero .eyebrow:before{content:"";display:inline-block;width:16px;height:2px;background:var(--pb-blue)}
+.simple-hero h1{position:relative; display:inline-block}
+.simple-hero:after{
+  content:""; position:absolute; left:0; bottom:0; width:64px; height:3px;
+  background:linear-gradient(90deg,var(--pb-blue),transparent);
+}
+
+@media(max-width:560px){
+  .acct-hero,.dep-hero,.pf-hero,.wal-hero{border-radius:0 0 16px 16px}
+}
+
+/* Photo now renders full-bleed at every size (no more diagonal band to
+   hide on mobile), so no viewport-specific override needed here. */
+
+/* ============================================================================
+   MATCH CARDS — legibility pass: bump the text sizes up a notch (they'd
+   drifted quite small across several rounds of edits) and layer in more blue
+   accents beyond just the left edge bar, so the cards read as more clearly
+   "branded" at a glance.
+   ============================================================================ */
+.sb-row-badges small{font-size:10.5px!important}
+.sb-row-time{font-size:13px!important;font-weight:800!important}
+.sb-team-name{font-size:14.5px!important;font-weight:800!important}
+.sb-badge{font-size:9px!important;padding:2px 7px!important}
+.sb-ended-note{font-size:12px!important}
+.sb-odd span{font-size:9.5px!important}
+.sb-odd b{font-size:13.5px!important}
+.sb-more{color:var(--pb-blue)!important}
+.sb-row:hover .sb-team-name{color:#fff!important}
+.sb-row:before{width:5px!important}
+.sb-row-time svg,.sb-row-time i.live-dot{color:var(--pb-blue)}
+.sb-fav.active,.sb-fav:hover{color:var(--pb-blue)!important}
+.sb-league-hdr{border-bottom:2px solid rgba(30,107,255)!important}
+.sb-league-hdr b{color:var(--pb-blue)!important}
+
+.featured-card-team-name{font-size:12px!important;font-weight:800!important}
+.featured-card-league{font-size:10.5px!important}
+.featured-card-mid{font-size:12px!important}
+.featured-card-mid b{color:var(--pb-blue)!important;font-size:13px!important}
+.featured-card-market-label{font-size:9.5px!important}
+.featured-card-side-label{font-size:8px!important}
+.featured-card:hover{border-color:rgba(30,107,255)!important}
+
+@media(max-width:560px){
+  .sb-team-name{font-size:13px!important}
+  .sb-row-time{font-size:11.5px!important}
+  .sb-row-badges small{font-size:9px!important}
+  .sb-odd b{font-size:11.5px!important}
+  .sb-odd span{font-size:8.5px!important}
+}
+
+/* Explicit header label fallback: keep the brand name visible even when the SVG logo is unavailable. */
+.header .brand-label{display:inline-block;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:26px;line-height:1;font-weight:800;letter-spacing:-.045em;white-space:nowrap}
+.header .brand-label::first-letter{color:var(--pb-blue)}
+@media(max-width:560px){.header .brand-label{font-size:23px}}
+
+/* Custom square logo mark sizing. */
+.header .brand img{width:38px!important;height:38px!important;object-fit:contain!important}
+.footer-brand img{width:42px!important;height:42px!important;object-fit:contain!important}
+
+/* Header cleanup: icon-only brand mark and guaranteed-visible action label. */
+.header .brand-label{display:none!important}
+.header .header-join-button{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:96px!important;min-height:40px!important;padding:0 18px!important;color:#fff!important;background:linear-gradient(135deg,#1e6bff,#1246a8)!important;font-size:13px!important;font-weight:800!important;line-height:1!important;text-align:center!important;white-space:nowrap!important;opacity:1!important;visibility:visible!important}
+.header .header-join-button span{display:inline-block!important;color:#fff!important;visibility:visible!important;opacity:1!important}
+
+/* Final header action treatment: no filled blue block; use a clear outlined text link. */
+.header .header-join-button{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:auto!important;min-width:0!important;height:36px!important;min-height:36px!important;padding:0 14px!important;margin:0!important;box-sizing:border-box!important;border:1px solid #4d8dff!important;border-radius:999px!important;background:transparent!important;background-image:none!important;box-shadow:none!important;color:#fff!important;font-family:'DM Sans',sans-serif!important;font-size:13px!important;font-weight:800!important;line-height:1!important;letter-spacing:.01em!important;text-align:center!important;text-indent:0!important;white-space:nowrap!important;overflow:visible!important;opacity:1!important;visibility:visible!important}
+.header .header-join-button:hover{background:rgba(30,107,255,.16)!important;color:#fff!important;border-color:#75a9ff!important}
+.header .header-join-button span{display:contents!important}
+
+/* Final header fix: icon-only custom mark and visible outlined Join now action. */
+.header .brand-label{display:none!important}
+.header .brand img{display:block!important;width:38px!important;height:38px!important;object-fit:contain!important}
+.header .header-join-button{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:auto!important;min-width:0!important;height:36px!important;min-height:36px!important;padding:0 14px!important;margin:0!important;box-sizing:border-box!important;border:1px solid #4d8dff!important;border-radius:999px!important;background:transparent!important;background-image:none!important;box-shadow:none!important;color:#fff!important;font-family:'DM Sans',sans-serif!important;font-size:13px!important;font-weight:800!important;line-height:1!important;letter-spacing:.01em!important;text-align:center!important;text-indent:0!important;white-space:nowrap!important;overflow:visible!important;opacity:1!important;visibility:visible!important}
+.header .header-join-button:hover{background:rgba(30,107,255,.16)!important;color:#fff!important;border-color:#75a9ff!important}
+.footer-brand img{width:42px!important;height:42px!important;object-fit:contain!important}
+
+/* Full wordmark: show the Super Bet name beside the custom icon. */
+.header .brand-label{display:inline-block!important;color:#fff!important;font-family:'Barlow Condensed',sans-serif!important;font-size:26px!important;line-height:1!important;font-weight:800!important;letter-spacing:-.045em!important;white-space:nowrap!important}
+@media(max-width:560px){.header .brand-label{font-size:22px!important}}
+
+/* Final white-and-blue theme */
+:root{
+  --pb-bg:#f4f8ff; --pb-panel:#ffffff; --pb-panel-2:#f7faff;
+  --pb-ink:#102a43; --pb-muted:#5f7489; --pb-faint:#7890a6;
+  --pb-line:rgba(30,107,255,.16); --pb-line-bright:rgba(30,107,255,.35);
+  --ink:#102a43; --panel:#fff; --panel-2:#f7faff; --cream:#102a43; --muted:#5f7489;
+  --line:rgba(30,107,255,.16); --line-bright:rgba(30,107,255,.35);
+}
+html,body{background:#f4f8ff!important;color:#102a43!important}
+body{background:linear-gradient(180deg,#f8fbff 0%,#eef5ff 100%)!important}
+.utility{background:#1e6bff!important;color:#fff!important;border-bottom:1px solid rgba(255,255,255,.3)!important}
+.utility a,.utility-brand{color:#fff!important}.utility a:hover{color:#dceaff!important}
+.header{background:rgba(255,255,255,.97)!important;border-bottom:1px solid rgba(30,107,255,.22)!important;box-shadow:0 8px 24px rgba(30,107,255,.12)!important}
+.header .brand{color:#102a43!important}.header .brand-label{color:#102a43!important}
+.main-nav a{color:#35536d!important}.main-nav a:hover,.main-nav a.active{color:#1e6bff!important}
+.header-actions .icon-button,.header-actions .login-link,.mobile-menu{color:#102a43!important}
+.header-actions .icon-button:hover,.header-actions .login-link:hover{color:#1e6bff!important}
+.header-balance{background:#eaf2ff!important;border-color:#9cc0ff!important;color:#1246a8!important}
+.header .header-join-button{color:#fff!important;background:#1e6bff!important;border-color:#1e6bff!important;box-shadow:0 6px 14px rgba(30,107,255,.2)!important}
+.header .header-join-button:hover{background:#1246a8!important;border-color:#1246a8!important}
+.sport-strip{background:#fff!important;border-bottom:1px solid rgba(30,107,255,.12)!important;box-shadow:0 5px 16px rgba(30,107,255,.08)!important}
+.sport-strip span{color:#5f7489!important}.sport-strip .strip-active{color:#1e6bff!important}
+.panel,.simple-card,.promo-card,.betslip,.mini-games,.winners,.auth-card-premium,.auth-card{background:#fff!important;color:#102a43!important;border-color:rgba(30,107,255,.15)!important;box-shadow:0 8px 24px rgba(30,107,255,.1)!important}
+.side-title,.section-head h2,.simple-card h2,.simple-card h3,.wallet-card h2,.auth-card-head h2{color:#102a43!important}
+.side-title,.league-tabs{border-color:rgba(30,107,255,.14)!important}.side-nav>a{color:#5f7489!important;border-color:rgba(30,107,255,.1)!important}.side-nav>a:hover{background:#eaf2ff!important;color:#1e6bff!important}
+.section-tools button,.mobile-sport-toggle{background:#f1f6ff!important;color:#35536d!important;border:1px solid rgba(30,107,255,.14)!important}
+.hero,.casino-hero{background:linear-gradient(135deg,#1246a8 0%,#1e6bff 58%,#75a9ff 100%)!important;border-color:#1e6bff!important;box-shadow:0 12px 30px rgba(30,107,255,.24)!important}
+.hero-sheen,.casino-hero:after{background:linear-gradient(90deg,rgba(10,50,120,.72),rgba(30,107,255,.2),rgba(255,255,255,.05))!important}
+.hero h1,.casino-hero h1,.hero p,.casino-hero p,.hero .eyebrow,.casino-hero .eyebrow{color:#fff!important}.hero h1 em,.casino-hero h1 em{color:#dceaff!important}
+.gold-button{background:linear-gradient(135deg,#1e6bff,#1246a8)!important;color:#fff!important;box-shadow:0 8px 18px rgba(30,107,255,.22)!important}.ghost-button{background:#fff!important;color:#1e6bff!important;border-color:#1e6bff!important}.ghost-button:hover{background:#eaf2ff!important}
+.betting-section,.live-section{background:#fff!important;color:#102a43!important;border-color:rgba(30,107,255,.15)!important}.live-section{box-shadow:0 8px 24px rgba(30,107,255,.1)!important}
+.league-tabs span,.table-head,.match-meta small,.match-meta>span,.sb-row-badges small,.sb-ended-note{color:#5f7489!important}.league-tabs span.active{color:#1e6bff!important}.league-tabs span.active:after{background:#1e6bff!important}
+.league-cards>div,.sb-row,.featured-card,.game-tile,.mini-card{background:#f7faff!important;border-color:rgba(30,107,255,.14)!important;color:#102a43!important}.league-cards>div.selected{background:#eaf2ff!important;border-color:#1e6bff!important}.league-cards small{color:#5f7489!important}.league-cards b,.match-meta strong,.sb-team-name,.featured-card-team-name{color:#102a43!important}
+.match-row,.live-row{border-color:rgba(30,107,255,.1)!important}.odd,.sb-odd{background:#eef5ff!important;color:#102a43!important;border-color:#b7d0ff!important}.odd span,.sb-odd span{color:#5f7489!important}.odd b,.sb-odd b{color:#1246a8!important}.odd:hover,.sb-odd:hover{background:#dceaff!important;border-color:#1e6bff!important}.sb-odd.sel{background:#1e6bff!important;color:#fff!important}.sb-odd.sel span,.sb-odd.sel b{color:#fff!important}
+.betslip-tabs,.betslip-tabs span,.slip-header,.slip-pick,.slip-summary>div{border-color:rgba(30,107,255,.12)!important}.betslip-tabs span{color:#5f7489!important}.betslip-tabs span.active{color:#1e6bff!important;border-color:#1e6bff!important}.empty-slip{color:#5f7489!important}.empty-slip h3{color:#102a43!important}.slip-pick b,.slip-summary label{color:#102a43!important}.slip-pick small,.slip-summary>div{color:#5f7489!important}.slip-pick strong,.slip-summary>div b{color:#1e6bff!important}.slip-summary input,.auth-field input,.auth-field select,.search-box,.search-page-bar{background:#f7faff!important;color:#102a43!important;border-color:#b7d0ff!important}
+.auth-intro h1,.auth-card-head h2,.auth-field>span,.auth-row,.check-row,.auth-switch{color:#102a43!important}.auth-intro p,.auth-safe{color:#5f7489!important}.auth-benefits span{background:#f7faff!important;color:#35536d!important;border-color:#b7d0ff!important}.auth-field input:focus,.auth-field select:focus{border-color:#1e6bff!important;box-shadow:0 0 0 3px rgba(30,107,255,.15)!important}
+footer{background:#fff!important;color:#102a43!important;border-top-color:rgba(30,107,255,.18)!important}.footer-grid h4{color:#1e6bff!important}.footer-grid a:not(.brand),.footer-bottom{color:#5f7489!important}.footer-grid a:not(.brand):hover{color:#1e6bff!important}
+@media(max-width:820px){.menu-open .main-nav{background:#fff!important;box-shadow:0 12px 26px rgba(30,107,255,.16)!important}}
+
+/* Super Bet image wordmark: use the complete white-and-blue logo image in the header. */
+.header .brand{gap:0!important}
+.header .brand img{display:block!important;width:150px!important;height:38px!important;object-fit:contain!important;filter:none!important}
+.header .brand-label{display:none!important}
+@media(max-width:560px){.header .brand img{width:122px!important;height:34px!important}}
+
+/* Super Bet final polish: left-align the brand and guarantee readable card labels. */
+.header-inner{gap:16px!important}
+.header .brand{margin-left:-14px!important}
+.header .brand img{width:170px!important;height:40px!important;object-fit:contain!important;display:block!important;filter:none!important}
+.header .brand-label{display:none!important}
+.sb-row,.featured-card,.game-tile{color:#102a43!important}
+.sb-row{background:#fff!important;border-color:rgba(30,107,255,.18)!important;box-shadow:0 8px 20px rgba(30,107,255,.1)!important}
+.sb-row:hover{border-color:#1e6bff!important;box-shadow:0 10px 24px rgba(30,107,255,.16)!important}
+.sb-row:hover .sb-team-name,.sb-team-name{color:#102a43!important}
+.sb-row-badges small,.sb-row-time,.sb-ended-note{color:#5f7489!important}
+.sb-row-time svg{color:#1e6bff!important}
+.featured-card{background:#fff!important;border-color:rgba(30,107,255,.18)!important;box-shadow:0 8px 20px rgba(30,107,255,.1)!important}
+.featured-card-league,.featured-card-side-label,.featured-card-market-label{color:#5f7489!important;opacity:1!important;visibility:visible!important}
+.featured-card-team-name,.featured-card-mid,.featured-card-mid b,.featured-card-mid small{color:#102a43!important;opacity:1!important;visibility:visible!important}
+.game-tile{background:#fff!important;border:1px solid rgba(30,107,255,.18)!important;box-shadow:0 8px 18px rgba(30,107,255,.1)!important}
+.game-tile div,.game-tile b,.game-tile span{color:#102a43!important;opacity:1!important;visibility:visible!important}
+.game-tile span{display:inline-flex!important;font-size:10px!important;color:#1e6bff!important}
+.game-tile b{display:block!important;font-size:12px!important;font-weight:800!important;line-height:1.2!important}
+.sb-odd span{display:block!important;color:#5f7489!important;opacity:1!important;visibility:visible!important}
+.sb-odd b{display:block!important;color:#1246a8!important;opacity:1!important;visibility:visible!important}
+.match-row .more-odds{font-size:10px!important;color:#1e6bff!important}
+.match-row .more-odds svg{width:14px!important}
+@media(max-width:560px){.header-inner{gap:10px!important}.header .brand{margin-left:-8px!important}.header .brand img{width:140px!important;height:36px!important}.sb-team-name{font-size:13px!important}.game-tile b{font-size:11px!important}.game-tile span{font-size:9px!important}}
+
+/* Final visibility polish: header, hero icons, tabs, and card content */
+.header-inner{padding-left:8px!important;gap:10px!important}
+.header .brand{margin-left:-18px!important}
+.header .brand img{width:190px!important;height:46px!important;object-fit:contain!important;display:block!important}
+.joined-nav-block{background:#fff!important;border:1px solid rgba(30,107,255,.18)!important;box-shadow:0 8px 20px rgba(30,107,255,.1)!important}
+.icon-nav-row{background:#fff!important}
+.icon-nav-item{color:#102a43!important;background:#fff!important;opacity:1!important;visibility:visible!important}
+.icon-nav-item span,.icon-nav-item b,.icon-nav-item svg{color:#102a43!important;opacity:1!important;visibility:visible!important}
+.icon-nav-icon{background:#eaf2ff!important;color:#1e6bff!important;border:1px solid #9cc0ff!important;opacity:1!important;visibility:visible!important}
+.icon-nav-item:hover .icon-nav-icon,.icon-nav-item.active .icon-nav-icon{background:#1e6bff!important;color:#fff!important;border-color:#1e6bff!important}
+.sb-tabs{background:#fff!important;border-color:rgba(30,107,255,.2)!important;box-shadow:0 5px 14px rgba(30,107,255,.08)!important}
+.sb-tab{color:#5f7489!important;background:#fff!important;border-right-color:rgba(30,107,255,.14)!important;font-weight:800!important;opacity:1!important;visibility:visible!important}
+.sb-tab:hover{background:#eaf2ff!important;color:#1246a8!important}
+.sb-tab.active{background:#1e6bff!important;color:#fff!important;box-shadow:inset 0 -3px 0 #1246a8,0 5px 14px rgba(30,107,255,.18)!important}
+.sb-tab.active .sb-tab-swatch{box-shadow:0 0 0 2px #fff!important}
+.sb-tab.active svg{color:#fff!important}
+.sb-odds-row,.featured-card-odds{display:grid!important;visibility:visible!important;opacity:1!important}
+.sb-odd,.odd{min-height:34px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;visibility:visible!important;opacity:1!important}
+.sb-odd span,.sb-odd b,.odd span,.odd b{display:block!important;visibility:visible!important;opacity:1!important}
+.sb-odd span,.odd span{color:#5f7489!important;font-size:10px!important}
+.sb-odd b,.odd b{color:#1246a8!important;font-size:13px!important;font-weight:900!important}
+.featured-card-odds .sb-odd{background:#eef5ff!important;border-color:#b7d0ff!important}
+.featured-card-odds .sb-odd span{color:#5f7489!important}
+.featured-card-odds .sb-odd b{color:#1246a8!important}
+.game-tile div{display:flex!important;visibility:visible!important;opacity:1!important;color:#102a43!important}
+.game-tile b,.game-tile span{display:block!important;visibility:visible!important;opacity:1!important;color:#102a43!important}
+.game-tile span{color:#1e6bff!important;font-size:10px!important}
+@media(max-width:560px){.header-inner{padding-left:4px!important;gap:6px!important}.header .brand{margin-left:-10px!important}.header .brand img{width:164px!important;height:40px!important}.icon-nav-icon{width:34px!important;height:34px!important}.sb-tab{padding:10px 11px!important;font-size:10px!important}.sb-odd span,.odd span{font-size:9px!important}.sb-odd b,.odd b{font-size:12px!important}.game-tile b{font-size:11px!important}}
+
+/* Focused mobile header and black odds text patch */
+@media(max-width:560px){
+  .header-inner{padding-left:0!important;gap:2px!important}
+  .header .brand{margin-left:-12px!important;min-width:0!important;flex:0 1 auto!important}
+  .header .brand img{width:184px!important;height:44px!important;object-fit:contain!important}
+}
+.sb-odd span,.sb-odd b,.odd span,.odd b,.featured-card-odds span,.featured-card-odds b{color:#000!important}
+
+/* Odds row layout correction: keep label and value side by side */
+.sb-odd,.odd{flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:6px!important}
+.sb-odd span,.odd span{display:block!important;flex:0 1 auto!important;text-align:left!important}
+.sb-odd b,.odd b{display:block!important;flex:0 0 auto!important;text-align:right!important}
+
+/* Final logo and sportsbook/live odds visibility fix */
+.header .brand{margin-left:-28px!important;min-width:0!important}
+.header .brand img{width:220px!important;height:52px!important;object-fit:contain!important;display:block!important}
+.sb-odd,.odd,.sb-live-section .sb-odd,.live-row .odd,.featured-card-odds .sb-odd{opacity:1!important;visibility:visible!important;filter:none!important;color:#000!important}
+.sb-odd span,.sb-odd b,.odd span,.odd b,.sb-live-section .sb-odd span,.sb-live-section .sb-odd b,.live-row .odd span,.live-row .odd b,.featured-card-odds .sb-odd span,.featured-card-odds .sb-odd b{display:block!important;opacity:1!important;visibility:visible!important;color:#000!important;text-shadow:none!important}
+@media(max-width:560px){
+  .header-inner{padding-left:0!important;gap:0!important}
+  .header .brand{margin-left:-18px!important}
+  .header .brand img{width:204px!important;height:48px!important}
+}
+
+/* Exact layout fix: cropped logo, horizontal mobile header, equal odds row */
+.header-inner{display:flex!important;flex-direction:row!important;align-items:center!important;flex-wrap:nowrap!important}
+.header .brand{margin-left:-30px!important;flex:0 1 auto!important;min-width:0!important;width:auto!important;overflow:visible!important}
+.header .brand img{width:224px!important;height:52px!important;object-fit:contain!important;display:block!important}
+.header-actions{margin-left:auto!important;flex:0 0 auto!important;display:flex!important;align-items:center!important}
+.sb-odds-row,.featured-card-odds{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch!important;gap:6px!important;width:100%!important}
+.sb-odds-row .sb-odd,.featured-card-odds .sb-odd{flex:1 1 0!important;width:0!important;min-width:0!important;min-height:48px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;text-align:center!important;padding:5px 4px 6px!important;gap:3px!important;opacity:1!important;visibility:visible!important}
+.sb-odds-row .sb-more{flex:0 0 30px!important;width:30px!important;min-width:30px!important;align-self:stretch!important}
+.sb-odds-row .sb-odd span,.featured-card-odds .sb-odd span{order:0!important;display:block!important;width:100%!important;text-align:center!important;color:#000!important;font-size:10px!important;line-height:1.1!important;font-weight:800!important}
+.sb-odds-row .sb-odd b,.featured-card-odds .sb-odd b{order:1!important;display:block!important;width:100%!important;text-align:center!important;color:#000!important;font-size:13px!important;line-height:1.1!important;font-weight:900!important}
+@media(max-width:560px){
+  .header-inner{height:62px!important;padding-left:0!important;padding-right:8px!important;gap:0!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important}
+  .mobile-menu{display:grid!important;flex:0 0 32px!important;width:32px!important;height:40px!important}
+  .header .brand{margin-left:-20px!important;flex:0 1 auto!important;min-width:0!important}
+  .header .brand img{width:210px!important;height:48px!important}
+  .main-nav{display:none!important}
+  .header-actions{margin-left:auto!important;flex:0 0 auto!important}
+  .sb-odds-row,.featured-card-odds{gap:4px!important}
+  .sb-odds-row .sb-odd,.featured-card-odds .sb-odd{min-height:46px!important;padding:5px 2px 6px!important}
+  .sb-odds-row .sb-odd span,.featured-card-odds .sb-odd span{font-size:9px!important}
+  .sb-odds-row .sb-odd b,.featured-card-odds .sb-odd b{font-size:12px!important}
+}
+
+/* Header hamburger removed: logo starts at the left edge; odds action icon visible */
+.header-inner{padding-left:0!important}
+.header .brand{margin-left:0!important}
+.sb-odds-row .sb-more{display:flex!important;align-items:center!important;justify-content:center!important;visibility:visible!important;opacity:1!important;background:#1e6bff!important;border:1px solid #1246a8!important;color:#fff!important;border-radius:8px!important}
+.sb-odds-row .sb-more svg{display:block!important;visibility:visible!important;opacity:1!important;color:#fff!important;stroke:#fff!important}
+@media(max-width:820px){
+  .header-inner{padding-left:0!important;padding-right:8px!important;gap:0!important;flex-direction:row!important;flex-wrap:nowrap!important}
+  .header .brand{margin-left:0!important}
+}
+
+/* Final physical alignment: logo left and odds icon full height */
+.header .brand{position:relative!important;left:-26px!important;margin-left:0!important}
+.sb-odds-row .sb-more{height:auto!important;min-height:48px!important;align-self:stretch!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important}
+@media(max-width:560px){
+  .header .brand{left:-22px!important;margin-left:0!important}
+  .sb-odds-row .sb-more{min-height:46px!important;height:auto!important}
+}
+
+/* Match details page: final white-blue layout and visibility polish */
+.match-details-page{max-width:980px!important;padding-top:22px!important;padding-bottom:60px!important}
+.match-details-page .back-link{color:#1e6bff!important;margin-bottom:14px!important}
+.md-hero{border-radius:16px!important;padding:24px!important;background:linear-gradient(135deg,#1246a8 0%,#1e6bff 72%,#4d8dff 130%)!important;box-shadow:0 14px 34px rgba(30,107,255,.18)!important}
+.md-hero-top{margin-bottom:22px!important}
+.md-league{color:rgba(255,255,255,.92)!important}
+.md-hero .sb-fav{width:34px!important;height:34px!important;display:grid!important;place-items:center!important;border:1px solid rgba(255,255,255,.35)!important;border-radius:8px!important;background:rgba(255,255,255,.12)!important;color:#fff!important}
+.md-hero .sb-fav.active{color:#fff!important;background:#1246a8!important}
+.md-teams{grid-template-columns:minmax(0,1fr) minmax(84px,auto) minmax(0,1fr)!important;gap:20px!important}
+.md-team{min-width:0!important;gap:8px!important}
+.md-team .sb-crest{width:54px!important;height:54px!important;background:#fff!important;border:3px solid rgba(255,255,255,.8)!important;box-shadow:0 5px 14px rgba(0,0,0,.18)!important}
+.md-team-name{max-width:100%!important;color:#fff!important;font-size:20px!important;line-height:1.05!important;overflow-wrap:anywhere!important}
+.md-score{color:#fff!important;font-size:34px!important;line-height:1!important}
+.md-status{min-width:84px!important;padding:10px 8px!important;border:1px solid rgba(255,255,255,.28)!important;border-radius:10px!important;background:rgba(0,0,0,.14)!important}
+.md-time{color:#fff!important;text-align:center!important;font-size:12px!important;line-height:1.25!important}
+.md-countdown{color:rgba(255,255,255,.86)!important;text-align:center!important}
+.md-live{color:#fff!important}
+.md-live .live-dot{background:#b8f33c!important}
+.md-synth-note{background:rgba(0,0,0,.16)!important;border:1px solid rgba(255,255,255,.16)!important;color:rgba(255,255,255,.9)!important}
+.md-markets{margin-top:0!important;padding:24px!important;background:#fff!important;color:#102a43!important;border:1px solid rgba(30,107,255,.18)!important;box-shadow:0 10px 24px rgba(30,107,255,.08)!important}
+.md-markets .module-title{padding-bottom:14px!important;border-bottom:2px solid #eaf2ff!important}
+.md-markets .module-title h3{color:#1246a8!important;font-size:20px!important}
+.md-odds-row{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;margin-top:14px!important}
+.md-odd{min-width:0!important;min-height:68px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;gap:5px!important;padding:9px 6px!important;border-radius:9px!important;background:#eef5ff!important;border:1px solid #b7d0ff!important;color:#102a43!important;opacity:1!important;visibility:visible!important}
+.md-odd span{width:100%!important;color:#35536d!important;text-align:center!important;font-size:10px!important;font-weight:800!important;line-height:1.2!important;overflow-wrap:anywhere!important}
+.md-odd b{width:100%!important;color:#1246a8!important;text-align:center!important;font-size:17px!important;line-height:1!important;font-weight:900!important}
+.md-odd:hover{background:#e1edff!important;border-color:#1e6bff!important;transform:translateY(-1px)!important}
+.md-odd.sel{background:#1e6bff!important;border-color:#1246a8!important;box-shadow:0 6px 14px rgba(30,107,255,.22)!important}
+.md-odd.sel span,.md-odd.sel b{color:#fff!important}
+.md-odd.display-only{cursor:not-allowed!important;opacity:.72!important;filter:none!important}
+.md-market-section{margin-top:24px!important;padding-top:20px!important;border-top:1px solid #dbe8fb!important}
+.md-market-title{color:#1246a8!important;font-size:14px!important;margin-bottom:12px!important}
+.md-cs-head,.md-hc-line-label{color:#5f7489!important}
+.md-cs-btn{background:#f7faff!important;border:1px solid #c7dcfa!important;color:#102a43!important;opacity:1!important}
+.md-cs-btn span{color:#102a43!important}
+.md-cs-btn b{color:#1246a8!important}
+.md-cs-btn:hover{background:#eaf2ff!important;border-color:#1e6bff!important}
+.md-cs-btn.sel{background:#1e6bff!important;border-color:#1246a8!important}
+.md-cs-btn.sel span,.md-cs-btn.sel b{color:#fff!important}
+.md-hc-row{background:#f7faff!important;border:1px solid #c7dcfa!important;color:#102a43!important;opacity:1!important}
+.md-hc-row:hover{background:#eaf2ff!important;border-color:#1e6bff!important}
+.md-hc-row b{color:#1246a8!important}
+.md-hc-team em{color:#1e6bff!important}
+.md-hc-row.sel{background:#1e6bff!important;border-color:#1246a8!important;color:#fff!important}
+.md-hc-row.sel b,.md-hc-row.sel .md-hc-team em{color:#fff!important}
+.md-state-card{background:#fff!important;border:1px solid rgba(30,107,255,.18)!important;color:#102a43!important}
+.md-state-card h3{color:#1246a8!important}
+@media(max-width:560px){
+  .match-details-page{padding-top:14px!important}
+  .md-hero,.md-markets{padding:16px!important}
+  .md-teams{grid-template-columns:minmax(0,1fr) 66px minmax(0,1fr)!important;gap:7px!important}
+  .md-team .sb-crest{width:44px!important;height:44px!important}
+  .md-team-name{font-size:15px!important}
+  .md-status{min-width:66px!important;padding:8px 4px!important}
+  .md-time{font-size:10px!important}
+  .md-countdown{font-size:9px!important}
+  .md-odds-row{gap:6px!important}
+  .md-odd{min-height:62px!important;padding:8px 3px!important}
+  .md-odd span{font-size:9px!important}
+  .md-odd b{font-size:15px!important}
+  .md-cs-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+
+/* Match Details football pitch backdrop */
+body:has(.match-details-page){
+  background-color:#061522!important;
+  background-image:linear-gradient(rgba(3,18,31,.78),rgba(3,18,31,.84)),url('/match-pitch-background.png')!important;
+  background-size:cover!important;
+  background-position:center!important;
+  background-attachment:fixed!important;
+}
+.match-details-page{background:transparent!important}
+.match-details-page .md-hero{box-shadow:0 18px 42px rgba(0,15,28,.3),0 0 0 1px rgba(255,255,255,.12)!important}
+.match-details-page .md-markets{box-shadow:0 16px 36px rgba(0,15,28,.24)!important}
+@media(max-width:560px){
+  body:has(.match-details-page){background-position:center top!important;background-attachment:scroll!important}
+}
+
+/* Match hero uses pitch directly; page backdrop reset */
+body:has(.match-details-page){background:#eef0f4!important;background-image:none!important}
+.md-hero{
+  background-image:linear-gradient(rgba(3,18,31,.42),rgba(3,18,31,.58)),url('/match-pitch-background.png')!important;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+}
+.md-hero:before{background:linear-gradient(90deg,rgba(3,18,31,.22),rgba(3,18,31,.06),rgba(3,18,31,.22))!important}
+.md-hero:after{background:rgba(0,12,24,.12)!important}
+
+/* Mobile hero height reduction */
+@media(max-width:560px){
+  .hero{min-height:300px!important}
+  .hero-copy{padding:30px 20px 24px!important}
+  .hero h1{font-size:44px!important;line-height:.9!important}
+  .hero p{margin-top:12px!important}
+  .hero-buttons{margin-top:17px!important}
+  .hero-stats{margin-top:16px!important;gap:9px!important}
+}
+
+/* Compact mobile hero: reduced copy and no CTA buttons */
+.hero-buttons{display:none!important}
+@media(max-width:560px){
+  .hero{min-height:260px!important}
+  .hero-copy{padding:22px 18px 18px!important}
+  .hero h1{font-size:38px!important;line-height:.9!important}
+  .hero-stats{margin-top:12px!important;gap:7px!important;font-size:9px!important}
+  .hero-live-chip{font-size:9px!important;padding:6px 9px!important}
+}
+
+/* Center remaining mobile hero content */
+@media(max-width:560px){
+  .hero-copy{width:100%!important;text-align:center!important;align-items:center!important}
+  .hero h1{width:100%!important;text-align:center!important}
+  .hero-live-chip{left:50%!important;right:auto!important;transform:translateX(-50%)!important;white-space:nowrap!important}
+  .hero-stats{width:100%!important;justify-content:center!important;text-align:center!important}
+  .hero-stats span{justify-content:center!important;text-align:center!important}
+}
+
+/* Restore left mobile hero and add Bet now CTA */
+.hero-bet-now{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  margin-top:14px;padding:10px 17px;border-radius:9px;
+  background:#1e6bff;color:#fff;font-size:12px;font-weight:800;
+  border:1px solid #8db8ff;box-shadow:0 5px 12px rgba(30,107,255,.2);
+}
+.hero-bet-now:hover{background:#1246a8;color:#fff}
+@media(max-width:560px){
+  .hero-copy{width:auto!important;text-align:left!important;align-items:flex-start!important}
+  .hero h1{width:auto!important;text-align:left!important}
+  .hero-live-chip{left:auto!important;right:18px!important;transform:none!important}
+  .hero-stats{width:auto!important;justify-content:flex-start!important;text-align:left!important}
+  .hero-stats span{justify-content:flex-start!important;text-align:left!important}
+  .hero-bet-now{margin-top:12px;padding:9px 15px}
+}
+
+/* Center mobile hero as a vertical column */
+@media(max-width:560px){
+  .hero{min-height:230px!important}
+  .hero-copy{width:100%!important;text-align:center!important;align-items:center!important;padding:17px 14px 13px!important}
+  .hero h1{width:100%!important;text-align:center!important;font-size:34px!important;line-height:.88!important}
+  .hero-live-chip{left:50%!important;right:auto!important;transform:translateX(-50%)!important;font-size:8px!important;padding:5px 8px!important}
+  .hero-bet-now{align-self:center!important;margin-top:9px!important;padding:8px 14px!important;font-size:11px!important}
+  .hero-stats{width:100%!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;margin-top:9px!important;font-size:8px!important;text-align:center!important}
+  .hero-stats span{justify-content:center!important;text-align:center!important}
+}
+
+/* Reverse mobile hero to a compact left-aligned column */
+@media(max-width:560px){
+  .hero{min-height:200px!important}
+  .hero-copy{width:100%!important;text-align:left!important;align-items:flex-start!important;padding:14px 14px 10px!important}
+  .hero h1{width:100%!important;text-align:left!important;font-size:31px!important;line-height:.86!important}
+  .hero-live-chip{left:14px!important;right:auto!important;transform:none!important;font-size:8px!important;padding:4px 7px!important}
+  .hero-bet-now{align-self:flex-start!important;margin-top:7px!important;padding:7px 13px!important;font-size:11px!important}
+  .hero-stats{width:100%!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:3px!important;margin-top:7px!important;font-size:8px!important;text-align:left!important}
+  .hero-stats span{justify-content:flex-start!important;text-align:left!important}
+}
+
+/* Widen mobile hero content to fill the section */
+@media(max-width:560px){
+  .hero-copy{width:100%!important;padding-left:14px!important;padding-right:10px!important}
+  .hero h1{width:100%!important;white-space:nowrap!important;font-size:30px!important;letter-spacing:.01em!important}
+  .hero h1 br{display:none!important}
+  .hero-mark{padding-left:3px!important;padding-right:3px!important;margin-left:0!important}
+  .hero-stats{width:100%!important}
+  .hero-stats span{width:100%!important}
+}
+
+/* Hero supporting line beneath headline */
+.hero-subtext{
+  margin:8px 0 0!important;color:rgba(255,255,255,.86)!important;
+  font-size:12px!important;font-weight:600!important;line-height:1.25!important;
+  letter-spacing:.02em!important;
+}
+@media(max-width:560px){
+  .hero-subtext{width:100%!important;margin-top:6px!important;font-size:10px!important;line-height:1.2!important}
+}
+
+/* Match hero subtext typography to headline */
+.hero-subtext{
+  font-family:'Barlow Condensed',sans-serif!important;
+  font-size:17px!important;font-weight:800!important;
+  line-height:1!important;letter-spacing:.02em!important;
+  text-transform:uppercase!important;color:#fff!important;
+}
+@media(max-width:560px){
+  .hero-subtext{font-size:14px!important;line-height:1!important;margin-top:7px!important}
+}
+
+/* Add breathing room between mobile hero elements */
+@media(max-width:560px){
+  .hero-copy{padding-top:17px!important;padding-bottom:14px!important}
+  .hero h1{margin-bottom:9px!important}
+  .hero-subtext{margin-top:9px!important;margin-bottom:4px!important}
+  .hero-bet-now{margin-top:12px!important;margin-bottom:4px!important}
+  .hero-stats{margin-top:12px!important;gap:6px!important}
+}
+
+/* Super Bet betting pages — clean white and blue refresh */
+.sports-page-grid,.betslip-page,.support-page{color:var(--pb-ink)!important}
+.sports-page-grid .panel,.betslip-page .panel,.support-page .panel{
+  background:#fff!important;border:1px solid #dfe7f3!important;
+  box-shadow:0 8px 22px rgba(34,74,128,.07)!important;color:#20242d!important;
+}
+
+/* Live matches: remove glow, motion, lift, and heavy shadow effects */
+.sb-live-section{background:#f8fbff!important;border:1px solid #bdd4f5!important;box-shadow:none!important}
+.sb-live-section *{animation:none!important;transition:none!important}
+.sb-live-section .sb-section-head{background:#fff!important;border-bottom:1px solid #e5edf8!important}
+.sb-live-section .sb-section-title{color:#1246a8!important;font-weight:800!important}
+.sb-live-section .sb-section-title b{color:#71809a!important}
+.sb-live-section .live-pulse{background:#eaf2ff!important;color:#1246a8!important;border:1px solid #b8d1f5!important;box-shadow:none!important}
+.sb-live-section .live-dot,.sports-sidebar-live{animation:none!important;box-shadow:none!important}
+.sb-live-section .sb-section-body{background:#f8fbff!important}
+.sb-live-section .sb-league-group,.sb-live-section .sb-match-row,.sb-live-section .sb-match-card{background:#fff!important;border-color:#e2eaf5!important;box-shadow:none!important}
+.sb-live-section .sb-team-name,.sb-live-section .sb-row-badges small{color:#20242d!important}
+.sb-live-section .sb-odd,.sb-live-section .odd{background:#f5f8fd!important;border:1px solid #c8d8ee!important;color:#111827!important;box-shadow:none!important;transform:none!important}
+.sb-live-section .sb-odd:hover,.sb-live-section .odd:hover{background:#edf4ff!important;border-color:#1e6bff!important;transform:none!important}
+.sb-live-section .sb-odd span,.sb-live-section .odd span{color:#68768b!important}
+.sb-live-section .sb-odd b,.sb-live-section .odd b{color:#111827!important}
+.sb-live-section .sb-odd.selected,.sb-live-section .odd.selected{background:#1e6bff!important;border-color:#1e6bff!important;color:#fff!important;box-shadow:none!important}
+.sb-live-section .sb-odd.selected span,.sb-live-section .sb-odd.selected b,.sb-live-section .odd.selected span,.sb-live-section .odd.selected b{color:#fff!important}
+.live-subnav{background:#fff!important;border-color:#e1e9f4!important;box-shadow:none!important}
+.live-subnav-market{background:#fff!important;border-color:#cbd9ec!important;color:#6c7890!important}
+.live-subnav-market.active{background:#eaf2ff!important;border-color:#1e6bff!important;color:#1246a8!important}
+
+/* Booking Code page */
+.simple-page{color:#20242d!important}
+.simple-page h1,.simple-page h2,.simple-page h3{color:#20242d!important}
+.simple-page .panel{background:#fff!important;border-color:#dfe7f3!important;box-shadow:0 8px 22px rgba(34,74,128,.07)!important}
+.simple-page .panel input{background:#f7faff!important;color:#20242d!important;border-color:#cbd9ec!important}
+.bc-panel{background:#fff!important;border:1px solid #dfe7f3!important;box-shadow:0 8px 22px rgba(34,74,128,.07)!important}
+.bc-title h3{color:#1246a8!important}
+.bc-title svg{color:#1e6bff!important}
+.bc-sub{color:#68768b!important}
+.bc-input-row{background:#f7faff!important;border-color:#cbd9ec!important;box-shadow:none!important}
+.bc-input-row:focus-within{border-color:#1e6bff!important}
+.bc-input{color:#20242d!important}
+.bc-input::placeholder{color:#8a98ab!important}
+.bc-load-btn{background:#1e6bff!important;color:#fff!important;box-shadow:none!important}
+.bc-error{background:#fff2f2!important;border-color:#f0c7c7!important;color:#c23b3b!important}
+.bc-preview{background:#fff!important;border-color:#dfe7f3!important;box-shadow:none!important}
+.bc-preview-code,.bc-preview-row span{color:#1246a8!important}
+.bc-preview-meta,.bc-preview-row small{color:#71809a!important}
+.bc-preview-row b{color:#20242d!important}
+
+/* Betslip page */
+.betslip-page{background:#f7faff!important}
+.betslip-page .bp-header h1{color:#20242d!important}
+.betslip-page .bp-header .eyebrow{color:#1e6bff!important}
+.bp-card,.bp-summary,.bp-empty{background:#fff!important;border:1px solid #dfe7f3!important;box-shadow:0 8px 22px rgba(34,74,128,.07)!important}
+.bp-card *,.bp-summary *,.bp-empty *{text-shadow:none!important}
+.bp-league{color:#71809a!important}
+.bp-teams,.bp-selection-row b,.bp-summary-row b,.bp-empty h3{color:#20242d!important}
+.bp-vs,.bp-selection-row small,.bp-stake-hint{color:#71809a!important}
+.bp-live{color:#1246a8!important;background:#eaf2ff!important;border-color:#bdd4f5!important;box-shadow:none!important}
+.bp-countdown{color:#68768b!important}
+.bp-selection-row{border-top-color:#e1e9f4!important}
+.bp-selection-row strong,.bp-summary-row.highlight b{color:#1246a8!important}
+.bp-remove{color:#71809a!important;background:transparent!important;box-shadow:none!important}
+.bp-summary{background:#fff!important}
+.bp-stake-field input{background:#f7faff!important;color:#20242d!important;border-color:#cbd9ec!important;box-shadow:none!important}
+.bp-success{color:#16854b!important}
+
+/* Open Bets page */
+.support-page{background:#f7faff!important}
+.support-page .bp-header h1{color:#20242d!important}
+.support-page .bp-header .eyebrow{color:#1e6bff!important}
+.support-page .simple-card{background:#fff!important;border-color:#dfe7f3!important;box-shadow:0 8px 22px rgba(34,74,128,.07)!important}
+.support-page .activity-row{border-color:#e1e9f4!important;background:#fff!important}
+.support-page .activity-row b{color:#20242d!important}
+.support-page .activity-row small,.support-page .muted{color:#71809a!important}
+.ob-empty{background:#fff!important}
+.ob-empty-emoji{filter:none!important}
+.ob-empty h3{color:#20242d!important}
+.ob-empty p{color:#71809a!important}
+.rc-section{background:#fff!important}
+.rc-card{background:#f8fbff!important;border-color:#d4e0f1!important;box-shadow:none!important}
+.rc-card-head,.rc-code,.rc-meta b,.rc-leg b{color:#20242d!important}
+.rc-meta,.rc-leg small,.rc-more{color:#71809a!important}
+.rc-reward{background:#eaf2ff!important;color:#1246a8!important}
+.rc-leg{border-top-color:#e1e9f4!important}
+.rc-leg span{color:#1246a8!important}
+.rc-share{background:#fff!important;border:1px solid #cbd9ec!important;color:#52647d!important;box-shadow:none!important}
+.rc-add{background:#1e6bff!important;color:#fff!important;box-shadow:none!important}
+
+/* Final consistency pass for betting page controls */
+.sports-page-grid .panel,.betslip-page .panel,.support-page .panel,.simple-page .panel{border-radius:14px!important}
+.betslip-page .gold-button,.support-page .gold-button,.simple-page .gold-button,.sports-page-grid .gold-button{
+  background:#1e6bff!important;color:#fff!important;border:1px solid #1e6bff!important;
+  box-shadow:none!important;border-radius:9px!important;font-weight:800!important;
+}
+.betslip-page .gold-button:hover,.support-page .gold-button:hover,.simple-page .gold-button:hover,.sports-page-grid .gold-button:hover{background:#1246a8!important;border-color:#1246a8!important}
+.betslip-page .text-action,.support-page .text-action,.simple-page .text-action{color:#1246a8!important}
+.simple-page>button:first-child{color:#52647d!important}
+.support-page .activity-row strong{color:#1246a8!important}
+.simple-page strong[style*="gold-hi"],.support-page strong[style*="gold-hi"]{color:#1246a8!important}
+@media(max-width:560px){
+  .sports-page-grid,.betslip-page,.support-page,.simple-page{padding-left:12px!important;padding-right:12px!important}
+  .sports-page-grid .panel,.betslip-page .panel,.support-page .panel,.simple-page .panel{border-radius:12px!important}
+}
+
+/* Final all-bets consistency and no-glow pass */
+/* Sports live-match source cleanup: no glow, motion, lift, or shadow anywhere */
+.sports-page-grid .sb-live-section,.simple-page .sb-live-section,.sports-page-grid .sb-special-section{
+  box-shadow:none!important;filter:none!important;text-shadow:none!important;
+}
+.sports-page-grid .sb-live-section *,.simple-page .sb-live-section *,.sports-page-grid .sb-special-section *{
+  animation:none!important;transition:none!important;box-shadow:none!important;text-shadow:none!important;filter:none!important;
+}
+.sports-page-grid .sb-live-section .live-dot,.sports-page-grid .sb-live-section .live-dot::before,.sports-page-grid .sb-live-section .live-dot::after,
+.simple-page .sb-live-section .live-dot,.simple-page .sb-live-section .live-dot::before,.simple-page .sb-live-section .live-dot::after{
+  animation:none!important;box-shadow:none!important;filter:none!important;
+}
+
+/* /bets and /open-bets history workspace */
+.bc-page{min-height:70vh!important;background:#f7faff!important;color:#20242d!important;padding:0 0 44px!important}
+.bc-tabs{max-width:1180px!important;margin:0 auto!important;padding:18px 24px 0!important;background:#f7faff!important;gap:8px!important}
+.bc-tabs button{background:#fff!important;color:#71809a!important;border:1px solid #dfe7f3!important;border-radius:10px!important;box-shadow:none!important;transition:none!important}
+.bc-tabs button.active{background:#1e6bff!important;color:#fff!important;border-color:#1e6bff!important;box-shadow:none!important}
+.bc-toolbar{max-width:1180px!important;margin:16px auto 0!important;padding:12px 24px!important;background:#fff!important;border-top:1px solid #dfe7f3!important;border-bottom:1px solid #dfe7f3!important}
+.bh-filter{background:#f7faff!important;border-color:#cbd9ec!important;box-shadow:none!important}
+.bh-filter select{color:#20242d!important;background:transparent!important}
+.bc-icon-btn{background:#fff!important;color:#1246a8!important;border:1px solid #cbd9ec!important;box-shadow:none!important}
+.bc-auto-banner{background:#eaf2ff!important;color:#1246a8!important;border:1px solid #cbd9ec!important;box-shadow:none!important}
+.bc-chip{background:#fff!important;color:#68768b!important;border:1px solid #cbd9ec!important;box-shadow:none!important}
+.bc-chip.active{background:#1e6bff!important;color:#fff!important;border-color:#1e6bff!important}
+.bc-body{max-width:1180px!important;margin:0 auto!important;background:#fff!important;border-left:1px solid #dfe7f3!important;border-right:1px solid #dfe7f3!important}
+.bc-pad,.ob-empty{color:#71809a!important;background:#fff!important}
+.ob-empty svg{color:#1e6bff!important}
+.ob-empty h3{color:#20242d!important}
+.bc-days,.bc-flat-list{padding:22px 24px 0!important}
+.bh-day-label{color:#71809a!important}
+.bh-day-label b{color:#1246a8!important}
+.bh-card{background:#fff!important;border:1px solid #dfe7f3!important;box-shadow:none!important;transition:none!important}
+.bh-card:hover{transform:none!important;box-shadow:none!important}
+.bh-card-head,.bh-card-head.bh-open-head{background:#eaf2ff!important;color:#1246a8!important;border-bottom:1px solid #cbd9ec!important}
+.bh-card-top .bh-type,.bh-type{color:#20242d!important}
+.bh-type em,.bh-totals span,.bh-more,.bh-card-foot small,.bh-leg-info small{color:#71809a!important}
+.bh-totals{border-color:#dfe7f3!important}
+.bh-totals b,.bh-match,.bh-leg-info b{color:#20242d!important}
+.bh-card-foot{border-color:#dfe7f3!important;color:#1246a8!important}
+.bh-dot{background:#1e6bff!important}
+.bh-pill.bh-pending{background:#dbeafe!important;color:#1246a8!important}
+.bh-pill.bh-won,.bh-pill.bh-cashed{background:#e4f7ed!important;color:#16854b!important}
+.bh-pill.bh-lost,.bh-pill.bh-void{background:#eef2f7!important;color:#52647d!important}
+.bh-share,.bh-toggle-details{color:#1246a8!important}
+.bh-leg-check{background:#1e6bff!important}
+.bh-cashout-btn{background:#eef4fc!important;color:#71809a!important;border:1px solid #cbd9ec!important}
+
+/* Consistent page structure for Booking Code and Betslip */
+.simple-page,.betslip-page{background:#f7faff!important}
+.simple-page .simple-hero,.betslip-page .bp-header{max-width:1180px!important;margin-left:auto!important;margin-right:auto!important}
+.simple-page .simple-grid{max-width:1180px!important;margin-left:auto!important;margin-right:auto!important}
+.betslip-page .bp-grid{gap:18px!important}
+.betslip-page .bp-card,.betslip-page .bp-summary,.betslip-page .bp-empty,.simple-page .panel{box-shadow:none!important}
+.betslip-page .bp-summary{border-left:3px solid #1e6bff!important}
+.betslip-page .bp-card{border-left:3px solid #1e6bff!important}
+@media(max-width:560px){
+  .bc-tabs{padding:14px 12px 0!important}
+  .bc-toolbar{padding:10px 12px!important}
+  .bc-body{border-left:none!important;border-right:none!important}
+  .bc-days,.bc-flat-list{padding:16px 12px 0!important}
+}
+
+
+/* Final mobile navigation treatment: count badges live only on the home slip FAB. */
+@media(max-width:820px){
+  .mobile-bottom-nav{background:rgba(255,255,255,.98);border-top:1px solid #dbe8fb;box-shadow:0 -8px 24px rgba(18,70,168,.1)}
+  .mbn-item{color:#71809a;font-weight:800}
+  .mbn-item.active{color:#1246a8}
+  .mbn-item svg{stroke:currentColor}
+  .mbn-badge{display:none!important}
+}
+.wg-progress-caption{margin:12px 0 7px;color:#52647d;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+
+
+/* Sportsbook progressively reveals the next match batch as this sentinel enters view. */
+.sb-load-sentinel{height:2px;width:100%;pointer-events:none}
