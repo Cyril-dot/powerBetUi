@@ -13,7 +13,7 @@ import {
   LogOut, Plus, Receipt, HeartHandshake, SlidersHorizontal, Ticket, TrendingUp, UserRound,
   WalletCards, Zap, ShieldCheck,
 } from "lucide-react";
-import { useSession, pickUserField, isAdminUser, isSuperAdminUser } from "@/lib/session";
+import { useSession, pickUserField, isAdminUser, isSuperAdminUser, userRole } from "@/lib/session";
 import { emojiForSeed } from "@/lib/avatars";
 
 interface MenuRow { icon: ReactNode; label: string; href: string; hint?: string; badge?: { text: string; tone: "blue" | "green" | "gold" } }
@@ -66,7 +66,7 @@ export default function AccountCenter() {
 
   useEffect(() => {
     if (!user) return;
-    const role = String(user.role ?? "").toUpperCase();
+    const role = userRole(user);
     const userId = pickUserField(user, "id", "userId", "accountId");
     const email = pickUserField(user, "email", "emailAddress", "username");
 

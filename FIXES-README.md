@@ -66,6 +66,8 @@ Match images are selected from the administrator's device; there are no logo URL
 
 The separate `/super-admin` control centre is intentionally stricter than `/admin`: the page renders only when the session resolves to the exact `SUPER_ADMIN` authority. It exposes the reference ZIP's finance queues and irreversible account/financial controls behind that guard, with API failures shown in-page and successful operations refreshed back into their tables. The sidebar and header use the requested **Super Bet** name.
 
+The Super Bet dashboard maps the backend's actual metric keys (`totalDepositsAllTime`, `totalDepositsThisMonth`, `totalDepositCount`, and corresponding withdrawal values) into formatted cards and summary rows instead of rendering raw JSON. `SUPER_ADMIN` sessions are also routed away from the regular `/admin` panel so admin-only affiliate requests cannot generate a 403 while the Super Admin centre is open.
+
 ## PowerShell installation
 
 Copy the ZIP into Downloads, then run this in PowerShell. It creates a backup before replacing the project files.
