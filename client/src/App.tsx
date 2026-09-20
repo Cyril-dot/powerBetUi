@@ -256,16 +256,20 @@ function Hero(){
 }
 function BetSlip({ picks, setPicks, onPlace }: { picks: Pick[]; setPicks: (p: Pick[])=>void; onPlace: (stake: number)=>Promise<void> }){ const [stake,setStake]=useState(10); const [placing,setPlacing]=useState(false); const [notice,setNotice]=useState(""); const total=picks.reduce((a,b)=>a*b.odd,1); const place=async()=>{ setNotice(""); setPlacing(true); try { await onPlace(stake); setPicks([]); setNotice("Bet placed successfully."); } catch (error) { setNotice(error instanceof ApiError ? error.message : "We could not place this bet. Please try again."); } finally { setPlacing(false); } }; return <aside className="betslip panel"><div className="betslip-tabs"><span className="active">Betslip</span><span>Cashout</span></div>{picks.length===0?<div className="empty-slip"><WalletCards size={34}/><h3>Your betslip is empty</h3><p>{notice || "Click on the odds to add selections and build your bet."}</p><Link href="/" className="ghost-button">Browse matches</Link></div>:<><div className="slip-header"><span>Singles</span><button onClick={()=>setPicks([])}>Clear all</button></div>{picks.map(p=><div className="slip-pick" key={`${p.id}-${p.selection}`}><div><b>{p.match}</b><small>{p.market} · {p.selection}</small></div><strong>{p.odd.toFixed(2)}</strong><button onClick={()=>setPicks(picks.filter(x=>x!==p))}><X size={14}/></button></div>)}<div className="slip-summary"><div><span>Potential return</span><b>GHS {(stake*total).toFixed(2)}</b></div><label>Stake<input value={stake} onChange={e=>setStake(Number(e.target.value)||0)} type="number" min="1"/></label><button className="gold-button full" onClick={place} disabled={placing}>{placing ? "Placing…" : "Place bet"} <Zap size={15}/></button>{notice&&<small className="auth-notice" role="alert">{notice}</small>}</div></>}</aside> }
 /**
- * Floating betslip shortcut — hidden until there's at least one selection,
- * then jumps straight to the betslip page. Kept deliberately simple: one
- * icon, one count badge, no label clutter.
+ * Floating slip shortcut — always visible so customers can either load a
+ * booking code or open the current slip. With no selections it opens the
+ * booking-code page; once odds are selected it opens the staking slip.
  */
 function BetslipFAB({ count }: { count: number }) {
-  if (count <= 0) return null;
+  const hasSelections = count > 0;
+  const destination = hasSelections ? "/betslip" : "/booking-code";
+  const label = hasSelections
+    ? `Open betslip, ${count} selection${count === 1 ? "" : "s"}`
+    : "Load a booking code";
   return (
     <Link
-      href="/betslip"
-      aria-label={`Open betslip, ${count} selection${count === 1 ? "" : "s"}`}
+      href={destination}
+      aria-label={label}
       style={{
         position: "fixed",
         bottom: "calc(64px + 16px)",
@@ -287,16 +291,16 @@ function BetslipFAB({ count }: { count: number }) {
       onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1.08)"; }}
       onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
     >
-      <span
-        style={{
-          position: "absolute", top: -4, right: -4, minWidth: 20, height: 20, padding: "0 4px",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          background: "#141414", color: "#fff", fontSize: 10, fontWeight: 900,
-          border: "2px solid #fff", borderRadius: 999,
-        }}
-      >
-        {count > 99 ? "99+" : count}
-      </span>
+      {hasSelections && <span
+          style={{
+            position: "absolute", top: -4, right: -4, minWidth: 20, height: 20, padding: "0 4px",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: "#141414", color: "#fff", fontSize: 10, fontWeight: 900,
+            border: "2px solid #fff", borderRadius: 999,
+          }}
+        >
+          {count > 99 ? "99+" : count}
+        </span>}
       <Ticket size={22} strokeWidth={2.2} />
     </Link>
   );
