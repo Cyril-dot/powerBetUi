@@ -5,8 +5,8 @@
 // survives page refreshes, tab closes, and app restarts.
 //
 // GATE STAGES (in order — each must be completed before the next is shown):
-//   0  blocked   — user has never won a settled bet; gate is entirely hidden
-//   1  deposit   — user won; a GHS 500 deposit and GHS 2,000 total stake are required
+//   0  blocked   — reserved legacy stage; the gate is shown on withdrawal attempt
+//   1  deposit   — a GHS 500 deposit and GHS 2,000 deposit-funded stake are required
 //   2  unlocked  — all done; withdrawal form is available
 //
 // The old activation-fee stage and the KYC/ID-verification stage have both
@@ -15,7 +15,7 @@
 // total across several deposits like an earlier version of this gate.
 //
 // Country rules:
-//   Ghana   — one-time deposit GHS 500 and total stake GHS 2,000 | min withdrawal GHS 350
+//   Ghana   — one-time deposit GHS 500 and deposit-funded stake GHS 2,000 | min withdrawal GHS 500
 //   Nigeria — one-time deposit NGN 73,200 and scaled total stake   | min withdrawal NGN 44,000
 //   (NG's figure wasn't given explicitly — it's scaled from GH's the same
 //   way the old per-deposit amounts were. Adjust
@@ -45,7 +45,7 @@ export const COUNTRY_CONFIGS: Record<string, CountryConfig> = {
     qualifyingStakeAmount: 2000,
     minDeposit: 350,
     minStake: 100,
-    minWithdrawal: 350,
+    minWithdrawal: 500,
   },
   NG: {
     currency: "NGN",
@@ -130,7 +130,6 @@ function writeGateState(userId: string, state: GateState): GateState {
 
 /** Compute the correct stage from the raw fields. */
 export function deriveStage(state: GateState): GateStage {
-  if (!state.hasWon) return "blocked";
   const cfg = COUNTRY_CONFIGS[state.country] ?? DEFAULT_CONFIG;
   if (state.bestSingleDeposit < cfg.qualifyingDepositAmount) return "deposit";
   if (state.totalStake < cfg.qualifyingStakeAmount) return "deposit";
@@ -176,8 +175,9 @@ export function syncBestSingleDeposit(userId: string, largestSingleDeposit: numb
 /** Sync cumulative stake from the user's bet history without allowing it to decrease. */
 export function syncTotalStake(userId: string, totalStake: number): GateState {
   const state = readGateState(userId);
-  if (totalStake <= state.totalStake) return state;
-  return syncAndSave(userId, { ...state, totalStake });
+  const nextStake = Math.max(0, Number(totalStake) || 0);
+  if (nextStake === state.totalStake) return state;
+  return syncAndSave(userId, { ...state, totalStake: nextStake });
 }
 
 /**

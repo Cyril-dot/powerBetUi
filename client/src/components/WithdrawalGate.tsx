@@ -59,6 +59,7 @@ function PanelDeposit({
   const requiredStake = cfg.qualifyingStakeAmount;
   const bestSoFar = gate.bestSingleDeposit;
   const stakeSoFar = gate.totalStake;
+  const depositComplete = bestSoFar >= requiredDeposit;
   const depositPct = Math.min(100, Math.round((bestSoFar / requiredDeposit) * 100));
   const stakePct = Math.min(100, Math.round((stakeSoFar / requiredStake) * 100));
 
@@ -87,14 +88,47 @@ function PanelDeposit({
     return largest;
   };
 
-  const findTotalStake = async (): Promise<number> => {
+  const findDepositFundedStake = async (): Promise<number> => {
+    const firstTransactions = await api.wallet.getTransactions(0, 100);
+    const transactionPages = [firstTransactions.content ?? []];
+    for (let page = 1; page < (firstTransactions.totalPages ?? 1); page += 1) {
+      const next = await api.wallet.getTransactions(page, 100);
+      transactionPages.push(next.content ?? []);
+    }
+    const deposits = transactionPages.flat()
+      .filter((tx) => String(tx.kind).toUpperCase() === "DEPOSIT")
+      .filter((tx) => !["FAILED", "REJECTED", "CANCELLED"].includes(String(tx.status ?? "").toUpperCase()))
+      .map((tx) => ({ amount: Math.max(0, Number(tx.amount || 0)), at: new Date(tx.createdAt).getTime() || 0 }))
+      .filter((tx) => tx.amount > 0)
+      .sort((a, b) => a.at - b.at);
+
     const first = await api.bets.getMine(0, 100);
     const pages = [first.content ?? []];
     for (let page = 1; page < (first.totalPages ?? 1); page += 1) {
       const next = await api.bets.getMine(page, 100);
       pages.push(next.content ?? []);
     }
-    return pages.flat().reduce((sum, bet) => sum + Math.max(0, Number(bet.stake || 0)), 0);
+
+    // Treat deposits as the only funding source. Bets consume the available
+    // deposited principal in time order; winnings and bonus balances never
+    // replenish this pool and therefore cannot inflate gate progress.
+    const bets = pages.flat()
+      .map((bet) => ({ stake: Math.max(0, Number(bet.stake || 0)), at: new Date(bet.placedAt).getTime() || 0 }))
+      .filter((bet) => bet.stake > 0)
+      .sort((a, b) => a.at - b.at);
+    let depositBalance = 0;
+    let depositIndex = 0;
+    let fundedStake = 0;
+    for (const bet of bets) {
+      while (depositIndex < deposits.length && deposits[depositIndex].at <= bet.at) {
+        depositBalance += deposits[depositIndex].amount;
+        depositIndex += 1;
+      }
+      const funded = Math.min(bet.stake, depositBalance);
+      fundedStake += funded;
+      depositBalance -= funded;
+    }
+    return fundedStake;
   };
 
   const handleCheck = async (opts?: { silent?: boolean }) => {
@@ -103,7 +137,7 @@ function PanelDeposit({
     if (!silent) setNotice("");
 
     try {
-      const [largest, totalStake] = await Promise.all([findLargestDeposit(), findTotalStake()]);
+      const [largest, totalStake] = await Promise.all([findLargestDeposit(), findDepositFundedStake()]);
       syncBestSingleDeposit(userId, largest);
       const updated = syncTotalStake(userId, totalStake);
 
@@ -113,18 +147,13 @@ function PanelDeposit({
       } else {
         if (!silent) {
           if (updated.bestSingleDeposit < requiredDeposit) {
-            setNotice(
-              `Your largest deposit is ${formatAmount(updated.bestSingleDeposit, cfg.currencyCode)}. ` +
-              `Make a single deposit of ${formatAmount(requiredDeposit, cfg.currencyCode)}. ` +
-              `You have also staked ${formatAmount(updated.totalStake, cfg.currencyCode)} of ${formatAmount(requiredStake, cfg.currencyCode)} required.`
-            );
+            setNotice(`Deposit ${formatAmount(requiredDeposit - updated.bestSingleDeposit, cfg.currencyCode)} more to complete step 1.`);
           } else if (updated.totalStake < requiredStake) {
             setNotice(
-              `Deposit requirement complete. Stake ${formatAmount(requiredStake - updated.totalStake, cfg.currencyCode)} more ` +
-              `to reach the ${formatAmount(requiredStake, cfg.currencyCode)} total stake requirement.`
+              `Stake ${formatAmount(requiredStake - updated.totalStake, cfg.currencyCode)} more using deposited funds.`
             );
           } else {
-            setNotice("Complete both requirements, then check again to unlock withdrawals.");
+            setNotice("Complete the current step, then check again.");
           }
         }
       }
@@ -148,15 +177,17 @@ function PanelDeposit({
         <Wallet size={28} />
       </div>
 
-      <h3>Complete withdrawal requirements</h3>
+      <div className="wg-step-kicker">{depositComplete ? "Step 2 of 2" : "Step 1 of 2"}</div>
+      <h3>{depositComplete ? "Complete your qualifying stake" : "Make your first qualifying deposit"}</h3>
 
       <p className="wg-desc">
-        Make a single deposit of at least <strong>{formatAmount(requiredDeposit, cfg.currencyCode)}</strong>{" "}
-        and complete <strong>{formatAmount(requiredStake, cfg.currencyCode)}</strong> in total stakes.
+        {depositComplete
+          ? <>Stake <strong>{formatAmount(requiredStake, cfg.currencyCode)}</strong> using deposited funds. Only stakes funded by completed deposits count.</>
+          : <>First make one deposit of at least <strong>{formatAmount(requiredDeposit, cfg.currencyCode)}</strong>. Then the stake step will open.</>}
       </p>
 
       {/* Progress bar */}
-      <div className="wg-dep-progress-wrap">
+      {!depositComplete && <div className="wg-dep-progress-wrap">
         <div className="wg-dep-progress-bar">
           <span className="wg-dep-progress-fill" style={{ width: `${depositPct}%` }} />
         </div>
@@ -165,8 +196,8 @@ function PanelDeposit({
           <span>{depositPct}%</span>
           <span>{formatAmount(requiredDeposit, cfg.currencyCode)}</span>
         </div>
-      </div>
-      <div className="wg-dep-progress-wrap">
+      </div>}
+      {depositComplete && <div className="wg-dep-progress-wrap">
         <div className="wg-progress-caption">Total stake progress</div>
         <div className="wg-dep-progress-bar">
           <span className="wg-dep-progress-fill" style={{ width: `${stakePct}%` }} />
@@ -176,14 +207,15 @@ function PanelDeposit({
           <span>{stakePct}%</span>
           <span>{formatAmount(requiredStake, cfg.currencyCode)}</span>
         </div>
-      </div>
+      </div>}
 
       {/* Info callout */}
       <div className="wg-info-box">
         <AlertCircle size={15} />
         <span>
-          Deposit <strong>{formatAmount(requiredDeposit, cfg.currencyCode)}</strong> in one transaction
-          and stake <strong>{formatAmount(requiredStake, cfg.currencyCode)}</strong> in total to unlock withdrawals.
+          {depositComplete
+            ? <>Remaining qualifying stake: <strong>{formatAmount(Math.max(0, requiredStake - stakeSoFar), cfg.currencyCode)}</strong>. Only deposit-funded stakes count.</>
+            : <>Complete the deposit step first. Your stake requirement will appear next.</>}
         </span>
       </div>
 
@@ -386,6 +418,7 @@ function GateStyles() {
         letter-spacing: -.01em;
         color: #F4F1F0;
       }
+      .wg-step-kicker { margin-bottom: 5px; color: #68e49a; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
       .wg-desc {
         margin: 0;
         font-size: .84rem;

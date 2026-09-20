@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import api, { ApiError, type Transaction, type WithdrawalRequest } from "@/lib/api";
 import { useSession, pickUserField } from "@/lib/session";
-import { readGateState, markBetWon, type GateState } from "@/lib/withdrawalGate";
+import { readGateState, markBetWon, configFor, type GateState } from "@/lib/withdrawalGate";
 import WithdrawalGate from "./WithdrawalGate";
 
 // ---------------------------------------------------------------------------
@@ -211,9 +211,8 @@ export default function WalletCenter() {
 
   // ── Gate helpers ─────────────────────────────────────────────────────────
 
-  const gateHasWon   = gate?.hasWon  ?? false;
   const gateUnlocked = gate?.stage   === "unlocked";
-  const canWithdraw  = isAdmin || gateHasWon;
+  const canWithdraw  = isAdmin || Boolean(gate);
 
   const handleWithdrawClick = () => {
     if (!canWithdraw) return;
@@ -232,7 +231,12 @@ export default function WalletCenter() {
     e.preventDefault();
     setWithdrawNotice("");
     const amount = Number(withdrawForm.amount);
-    if (!amount || amount <= 0 || !withdrawForm.accountNumber || !withdrawForm.accountName) {
+    const minimumWithdrawal = configFor(gate ?? readGateState(userId || "guest", country)).minWithdrawal;
+    if (!amount || amount < minimumWithdrawal) {
+      setWithdrawNotice(`The minimum withdrawal is ${currencyCode} ${minimumWithdrawal.toFixed(2)}.`);
+      return;
+    }
+    if (!withdrawForm.accountNumber || !withdrawForm.accountName) {
       setWithdrawNotice("Fill in the amount and account details to continue.");
       return;
     }
@@ -369,7 +373,7 @@ export default function WalletCenter() {
           </button>
         </div>
 
-        {showGate && !isAdmin && gateHasWon && !gateUnlocked && (
+        {showGate && !isAdmin && !gateUnlocked && (
           <WithdrawalGate
             onUnlocked={() => {
               const updated = readGateState(userId, country);
@@ -444,7 +448,7 @@ export default function WalletCenter() {
                 <span>Amount ({currencyCode})</span>
                 <input
                   type="number"
-                  min="1"
+                  min={configFor(gate ?? readGateState(userId || "guest", country)).minWithdrawal}
                   value={withdrawForm.amount}
                   onChange={(e) =>
                     setWithdrawForm((f) => ({ ...f, amount: e.target.value }))
