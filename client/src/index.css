@@ -2248,3 +2248,28 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
   .admin-game-odd{font-size:12px!important}
   .sb-live-section .sb-odds-row .sb-odd b{font-size:13px!important}
 }
+
+
+/* Maximum readable emphasis: bold, deep, and larger match-card text. */
+.sb-team-name,
+.featured-card-team-name,
+.admin-game-team b{font-size:12px!important;font-weight:950!important;color:#071f45!important;letter-spacing:-.015em!important;text-shadow:0 .2px 0 currentColor}
+.sb-team-line em{font-size:16px!important;font-weight:950!important;color:#061c43!important}
+.sb-odds-row .sb-odd b,
+.featured-card-odds .sb-odd b,
+.admin-game-odd{font-size:15px!important;font-weight:950!important;color:#041d4b!important;letter-spacing:-.02em!important;text-shadow:0 .2px 0 currentColor}
+.sb-live-section .sb-team-name{font-size:12.5px!important;font-weight:950!important;color:#063b82!important}
+.sb-live-section .sb-team-line em{font-size:18px!important;font-weight:950!important;color:#033b91!important}
+.sb-live-section .sb-odds-row .sb-odd b{font-size:16px!important;font-weight:950!important;color:#033b91!important}
+@media(max-width:560px){
+  .sb-team-name,
+  .featured-card-team-name,
+  .admin-game-team b{font-size:10.5px!important}
+  .sb-team-line em{font-size:14px!important}
+  .sb-odds-row .sb-odd b,
+  .featured-card-odds .sb-odd b,
+  .admin-game-odd{font-size:13px!important}
+  .sb-live-section .sb-team-name{font-size:11px!important}
+  .sb-live-section .sb-team-line em{font-size:16px!important}
+  .sb-live-section .sb-odds-row .sb-odd b{font-size:14px!important}
+}
