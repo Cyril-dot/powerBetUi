@@ -2136,3 +2136,46 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
   .sb-odds-row .sb-odd,.featured-card-odds .sb-odd{min-height:29px!important}
   .sb-odds-row .sb-odd b{font-size:11px!important}
 }
+
+
+/* Live state polish: make active fixtures immediately distinguishable. */
+.sb-live-section{background:#eef6ff!important;border:1px solid #8db8ee!important;border-radius:12px!important;box-shadow:0 5px 14px rgba(30,107,255,.12)!important}
+.sb-live-section .sb-section-head{background:#dcecff!important;border-bottom:1px solid #a9c9f2!important;padding:8px 10px!important}
+.sb-live-section .sb-section-title{color:#0e4eaa!important;font-weight:950!important}
+.sb-live-section .sb-row{background:#fff!important;border-color:#9cc2f0!important;box-shadow:0 3px 10px rgba(30,107,255,.10)!important}
+.sb-live-section .sb-row:after{content:"LIVE";position:absolute;right:8px;top:7px;padding:2px 5px;border-radius:999px;background:#1e6bff;color:#fff;font-size:7px;font-weight:950;letter-spacing:.08em;line-height:1}
+.sb-live-section .sb-row-top{padding-right:34px!important}
+.sb-live-section .sb-row-time{color:#0759bd!important;font-weight:950!important}
+.sb-live-section .sb-team-line em{color:#0759bd!important;font-size:12px!important;font-weight:950!important}
+.sb-live-section .sb-fixture-vs{color:#0759bd!important}
+.sb-live-section .sb-odds-row .sb-odd{border-color:#a7c9f0!important;background:#f5f9ff!important}
+.sb-live-section .sb-odds-row .sb-odd b{color:#0759bd!important}
+
+/* Additional proportional reduction: less internal whitespace and lower visual scale. */
+.sb-row{padding:6px!important;gap:5px!important}
+.sb-row-top{gap:5px!important}
+.sb-fixture{gap:5px!important}
+.sb-team-line .sb-crest{width:27px!important;height:27px!important}
+.sb-team-line .sb-crest img{width:21px!important;height:21px!important}
+.sb-team-name{font-size:8.5px!important}
+.sb-fixture-vs{font-size:10px!important}
+.sb-odds-row{gap:3px!important}
+.sb-odds-row .sb-odd{min-height:29px!important}
+.sb-odds-row .sb-odd b{font-size:11px!important;padding:4px 2px!important}
+.featured-card{padding:6px!important;gap:5px!important}
+.featured-card-side .sb-crest{width:29px!important;height:29px!important}
+.featured-card-side .sb-crest img{width:22px!important;height:22px!important}
+.featured-card-team-name{font-size:7.5px!important}
+.featured-card-mid,.featured-card-mid b{font-size:10px!important}
+.admin-game-card{padding:8px!important}
+.admin-game-fixture{margin:8px 0 6px!important}
+.admin-game-team img{width:30px!important;height:30px!important}
+.admin-game-team b{font-size:8px!important}
+.admin-game-mid strong{font-size:10px!important}
+@media(max-width:560px){
+  .sb-row{padding:5px!important}
+  .sb-team-line .sb-crest,.featured-card-side .sb-crest{width:24px!important;height:24px!important}
+  .sb-team-line .sb-crest img,.featured-card-side .sb-crest img{width:18px!important;height:18px!important}
+  .sb-team-name{font-size:8px!important}
+  .sb-fixture-vs{font-size:9px!important}
+}

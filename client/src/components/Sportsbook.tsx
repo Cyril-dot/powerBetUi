@@ -194,7 +194,6 @@ function MatchRow({
             onClick={() => pick(label as string, val as number)}
           />
         ))}
-        <Link href={matchHref} className="sb-more" aria-label="View match details"><ChevronRight size={14} /></Link>
       </div>
       )}
     </div>
@@ -387,7 +386,6 @@ function PaginatedLeagueList({
     shown += slice.length;
     rows.push(
       <div key={league}>
-        <div className="sb-league-hdr">{league} <b>{matches.length}</b></div>
         {slice.map((m: EnrichedMatch) => <MatchRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} />)}
       </div>
     );
@@ -531,13 +529,6 @@ export default function Sportsbook({
           </div>
           <button onClick={() => load(sport)} type="button">Retry</button>
         </div>
-      )}
-
-      {mode === "all" && !hideFeatured && (
-        <FeaturedMatchCarousel
-          list={hideLive ? applyFilter(grouped.today) : [...applyFilter(grouped.live), ...applyFilter(grouped.today)]}
-          hasDraw={hasDraw} picks={picks} onPick={onPick}
-        />
       )}
 
       {mode === "all" && sport === "football" && !leagueFilter && adminMatches.length > 0 && (
