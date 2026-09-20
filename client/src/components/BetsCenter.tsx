@@ -64,20 +64,20 @@ function HistoryCard({ bet, scores }: { bet: Bet; scores: Record<string, Match> 
         <span className="bh-type">{isMultiple ? "Multiple" : "Singles"} <em>· {bet.selections.length} pick{bet.selections.length !== 1 ? "s" : ""}</em></span>
         <span className={`bh-pill ${STATUS_CLASS[bet.status]}`}>{won && <Trophy size={12} />} {STATUS_LABEL[bet.status]}</span>
       </div>
-      {won && <span className="bh-won-badge" aria-label="Won"><Trophy size={15} /><small>WON</small></span>}
-      <div className="bh-card-body">
-        <div className="bh-totals">
-          <div><span>Stake</span><b>GHS {bet.stake.toFixed(2)}</b></div>
-          <div><span>Odds</span><b>{bet.totalOdds.toFixed(2)}×</b></div>
-          <div><span>Return</span><b className={won ? "bh-return-won" : ""}>GHS {totalReturn.toFixed(2)}</b></div>
-        </div>
-        <div className="bh-matches">
-          {visible.map((s, i) => (
-            <div className="bh-match" key={s.id ?? i}><span className="bh-dot" />{matchLine(s)}</div>
-          ))}
-          {rest > 0 && <div className="bh-more">…and {rest} other match{rest > 1 ? "es" : ""}</div>}
-        </div>
-        <div className="bh-card-foot">
+	      {won && <span className="bh-won-badge" aria-label="Won"><Trophy size={15} /><small>WON</small></span>}
+	      <div className="bh-card-body">
+	        <div className="bh-matches">
+	          {visible.map((s, i) => (
+	            <div className="bh-match" key={s.id ?? i}><span className="bh-dot" />{matchLine(s)}</div>
+	          ))}
+	          {rest > 0 && <div className="bh-more">…and {rest} other match{rest > 1 ? "es" : ""}</div>}
+	        </div>
+	        <div className="bh-totals">
+	          <div><span>Stake</span><b>GHS {bet.stake.toFixed(2)}</b></div>
+	          <div><span>Odds</span><b>{bet.totalOdds.toFixed(2)}×</b></div>
+	          <div className="bh-payout-row"><span>{won || bet.status === "CASHED_OUT" ? "Amount won" : "Potential return"}</span><b className={won ? "bh-return-won" : ""}>GHS {totalReturn.toFixed(2)}</b></div>
+	        </div>
+	        <div className="bh-card-foot">
           <span>View ticket</span><ChevronRight size={14} />
         </div>
       </div>
@@ -387,12 +387,34 @@ function BetsCenterStyles() {
       .bh-pill.bh-void{ background:#8b8b8b; }
       .bh-pill.bh-cashed{ background:#0da653; }
 
-      .bh-card-body{ padding:12px 16px 14px; }
-      .bh-totals{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; padding-bottom:12px; margin-bottom:12px; border-bottom:1px dashed var(--line); }
-      .bh-totals div{ display:flex; flex-direction:column; gap:3px; }
-      .bh-totals span{ font-size:.62rem; color:#8b8b8b; text-transform:uppercase; letter-spacing:.04em; }
-      .bh-totals b{ font-size:.86rem; color:#F4F1F0; }
-      .bh-return-won{ color:var(--nature); }
+	      .bh-card-body{ padding:12px 16px 14px; }
+	      .bh-totals{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; padding-bottom:12px; margin-top:12px; margin-bottom:12px; border-bottom:1px dashed var(--line); }
+	      .bh-totals div{ display:flex; flex-direction:column; gap:3px; }
+	      .bh-totals span{ font-size:.62rem; color:#8b8b8b; text-transform:uppercase; letter-spacing:.04em; }
+	      .bh-totals b{ font-size:.86rem; color:#F4F1F0; }
+	      .bh-return-won{ color:var(--nature); }
+	      .bh-totals .bh-payout-row{
+	        grid-column:1 / -1;
+	        display:flex;
+	        flex-direction:row;
+	        align-items:center;
+	        justify-content:space-between;
+	        gap:12px;
+	        min-width:0;
+	        margin-top:4px;
+	        padding:11px 13px;
+	        border:1px solid #d97706;
+	        border-radius:10px;
+	        background:linear-gradient(135deg,#f59e0b 0%,#ffb703 100%);
+	        box-shadow:0 4px 12px rgba(217,119,6,.22);
+	      }
+	      .bh-totals .bh-payout-row span,
+	      .bh-totals .bh-payout-row b{
+	        color:#2b1600!important;
+	        text-shadow:none;
+	      }
+	      .bh-totals .bh-payout-row span{ font-weight:900; }
+	      .bh-totals .bh-payout-row b{ max-width:70%; overflow-wrap:anywhere; text-align:right; font-size:1rem; font-weight:900; font-variant-numeric:tabular-nums; }
 
       .bh-matches{ display:flex; flex-direction:column; gap:6px; }
       .bh-match{ display:flex; align-items:center; gap:8px; font-size:.8rem; color:#F4F1F0; font-weight:600; }
@@ -474,8 +496,8 @@ function BetsCenterStyles() {
       .bh-won-badge small{ font-size:8px; font-weight:900; letter-spacing:.1em; line-height:1; }
       .bh-card.bh-won .bh-card-top{ padding-right:78px; }
       .bh-card.bh-won .bh-return-won{ color:#d78317!important; font-size:1rem; font-weight:900; text-shadow:0 1px 0 rgba(255,255,255,.7); }
-      .bh-card.bh-won .bh-totals div:last-child{ padding:7px 9px; margin:-7px -4px -7px 0; border-radius:9px; background:linear-gradient(135deg,#fff7dc,#fff0c0); border:1px solid #f0d28a; }
-      .bh-card.bh-won .bh-totals div:last-child span{ color:#9a6a1d; }
+	      .bh-card.bh-won .bh-totals .bh-payout-row{ padding:11px 13px; margin-top:4px; background:linear-gradient(135deg,#f59e0b 0%,#ffb703 100%); border-color:#d97706; }
+	      .bh-card.bh-won .bh-totals .bh-payout-row span{ color:#2b1600!important; }
       .bh-card.bh-won .bh-dot{ background:#c9962c; box-shadow:0 0 0 3px rgba(201,150,44,.13); }
       .bh-card.bh-lost .bh-pill{ background:#eeeef1; color:#656774; border:1px solid #d8d8df; }
       .bh-card.bh-lost .bh-return-won{ color:#747681!important; }
@@ -483,7 +505,7 @@ function BetsCenterStyles() {
       .bh-card.bh-cashed::before{ background:linear-gradient(#4f91c9,#9ac3e5); }
       .bh-card.bh-cashed .bh-return-won{ color:#2877ad!important; }
 
-      @media(max-width:560px){ .bh-card-head{ padding:10px 13px; } .bh-card-body{ padding:12px 13px 14px; } }
+	      @media(max-width:560px){ .bh-card-head{ padding:10px 13px; } .bh-card-body{ padding:12px 13px 14px; } .bh-totals .bh-payout-row{ padding:10px 11px; } .bh-totals .bh-payout-row b{ max-width:64%; font-size:.94rem; } }
     `}</style>
   );
 }
