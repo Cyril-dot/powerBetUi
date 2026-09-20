@@ -455,10 +455,18 @@ function unwrapList(raw: unknown, sport: SportKey): EnrichedMatch[] {
   if (!raw) return [];
   if (Array.isArray(raw)) return raw.map((m) => normalizeMatch(m, sport)).filter((m): m is EnrichedMatch => !!m);
   const obj = raw as Record<string, unknown>;
-  if (!obj.success || !obj.data) return [];
-  if (Array.isArray(obj.data)) return obj.data.map((m) => normalizeMatch(m, sport)).filter((m): m is EnrichedMatch => !!m);
+  // api.ts normally strips { success, data } before this function receives a
+  // response. Keep the wrapped case for direct callers, but do not reject an
+  // already-unwrapped object such as the aggregate /matches payload:
+  // { live: [...], today: [...], upcoming: [...], results: [...] }.
+  const data = obj.success === true && obj.data != null ? obj.data : raw;
+  if (Array.isArray(data)) return data.map((m) => normalizeMatch(m, sport)).filter((m): m is EnrichedMatch => !!m);
   const all: unknown[] = [];
-  if (typeof obj.data === "object") for (const v of Object.values(obj.data as Record<string, unknown>)) if (Array.isArray(v)) all.push(...v);
+  if (data && typeof data === "object") {
+    for (const v of Object.values(data as Record<string, unknown>)) {
+      if (Array.isArray(v)) all.push(...v);
+    }
+  }
   return all.map((m) => normalizeMatch(m, sport)).filter((m): m is EnrichedMatch => !!m);
 }
 
@@ -467,7 +475,8 @@ function unwrapWithOdds(raw: unknown, sport: SportKey): Array<{ match: EnrichedM
   const obj = raw as Record<string, unknown>;
   // get() in api.ts already unwraps { success, data }, so raw is normally
   // the data array here. Keep support for the wrapped shape for direct use.
-  const data: unknown = Array.isArray(raw) ? raw : obj.success ? obj.data : undefined;
+  // Accept both the raw API envelope and api.ts's already-unwrapped payload.
+  const data: unknown = Array.isArray(raw) ? raw : obj.success === true && obj.data != null ? obj.data : raw;
   if (!data) return [];
   const items: Array<{ match: EnrichedMatch; odds: unknown[] }> = [];
   const process = (item: unknown) => {
