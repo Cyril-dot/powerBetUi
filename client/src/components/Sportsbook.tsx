@@ -142,6 +142,7 @@ function MatchRow({
             <Star size={13} fill={favored ? "currentColor" : "none"} />
           </button>
           {isAdmin && <span className="sb-badge special"><Zap size={9} /> POWER</span>}
+          {match.leagueLogo && <img className="sb-competition-mark" src={match.leagueLogo} alt="" loading="lazy" referrerPolicy="no-referrer" />}
           <small>{match.league || match.sport || "Match"}</small>
           {match.isSyntheticOdds && !isLive && !ended && <span className="sb-badge synth">EST. ODDS</span>}
         </span>
@@ -161,6 +162,7 @@ function MatchRow({
           <span className="sb-team-name">{match.homeTeam}</span>
           {showScore && match.scoreHome != null && <em>{match.scoreHome}</em>}
         </span>
+        <span className="sb-fixture-vs" aria-hidden="true">VS</span>
         <span className="sb-team-line">
           <TeamCrest url={match.displayAwayLogo} name={match.awayTeam ?? ""} />
           <span className="sb-team-name">{match.awayTeam}</span>
@@ -281,7 +283,7 @@ function FeaturedMatchCard({ match, hasDraw, picks, onPick }: { match: EnrichedM
   return (
     <div className={`featured-card${isLive ? " is-live" : ""}`}>
       <div className="featured-card-top">
-        <span className="featured-card-league">{match.league || match.sport || "Match"}</span>
+        <span className="featured-card-league">{match.leagueLogo && <img className="sb-competition-mark" src={match.leagueLogo} alt="" loading="lazy" referrerPolicy="no-referrer" />}{match.league || match.sport || "Match"}</span>
         {isLive ? (
           <span className="featured-card-status-badge live"><i className="live-dot" /> LIVE</span>
         ) : match.isSyntheticOdds ? (

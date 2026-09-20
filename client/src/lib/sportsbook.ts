@@ -6,6 +6,7 @@
 // =============================================================================
 
 import api, { type Match } from "./api";
+import { resolveCompetition } from "./competitionCatalog";
 
 export type SportKey = "football" | "basketball" | "tennis" | "baseball" | "nfl" | "mma";
 
@@ -19,6 +20,9 @@ export interface EnrichedMatch extends Match {
   oddsMap?: OddsMap;
   isSyntheticOdds?: boolean;
   isAdmin?: boolean;
+  competitionKey?: string;
+  competitionTier?: "league" | "cup";
+  competitionCountry?: string;
   displayHomeLogo?: string;
   displayAwayLogo?: string;
 }
@@ -410,7 +414,9 @@ function normalizeMatch(raw: unknown, sport: SportKey): EnrichedMatch | null {
   const awayTeam = String(r.awayTeam ?? r.away_team ?? r.awayName ?? awayObj?.name ?? awayObj?.displayName ?? awayObj?.teamName ?? "").trim();
   if (!homeTeam && !awayTeam) return null;
 
-  const league = String(r.league ?? r.leagueName ?? r.competition ?? "");
+  const rawLeague = String(r.league ?? r.leagueName ?? r.competition ?? "").trim();
+  const resolvedCompetition = resolveCompetition(rawLeague, homeTeam, awayTeam, sport);
+  const league = resolvedCompetition?.label || rawLeague;
   const status = String(r.status ?? r.matchStatus ?? "");
   const kickoffAt = String(r.kickoffAt ?? r.kickoff_at ?? r.startTime ?? r.date ?? "");
   let scoreHome = numberValue(r.scoreHome ?? r.score_home ?? r.homeScore ?? homeObj?.score);
@@ -437,7 +443,11 @@ function normalizeMatch(raw: unknown, sport: SportKey): EnrichedMatch | null {
     id,
     externalId: String(r.externalId ?? r.external_id ?? r.eventId ?? r.event_id ?? "") || undefined,
     source: (r.source as Match["source"]) ?? "ESPN", homeTeam, awayTeam, league, status,
+    leagueLogo: sanitizeLogo(String(r.leagueLogo ?? r.league_logo ?? (r.competition && typeof r.competition === "object" ? ((r.competition as Record<string, unknown>).logo ?? (r.competition as Record<string, unknown>).logoUrl ?? "") : ""))),
     kickoffAt, scoreHome, scoreAway, homeLogo, awayLogo, sport, minutePlayed, createdAt: String(r.createdAt ?? ""),
+    competitionKey: resolvedCompetition?.key,
+    competitionTier: resolvedCompetition?.tier,
+    competitionCountry: resolvedCompetition?.country,
   } as EnrichedMatch;
 }
 
