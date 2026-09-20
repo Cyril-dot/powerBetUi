@@ -2216,3 +2216,14 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
   .sb-row{margin-left:0!important;margin-right:0!important}
 }
 .header-balance{font-variant-numeric:tabular-nums}
+
+
+/* Upcoming-only card width polish: remove excess side whitespace. */
+.sb-row{padding-left:4px!important;padding-right:4px!important}
+.admin-featured-grid{padding-left:6px!important;padding-right:6px!important}
+.admin-game-card{width:100%!important;max-width:390px!important;margin-left:auto!important;margin-right:auto!important}
+@media(max-width:560px){
+  .admin-featured-grid{grid-template-columns:minmax(0,360px)!important;justify-content:center!important;padding-left:2px!important;padding-right:2px!important}
+  .admin-game-card{max-width:360px!important}
+  .sb-row{padding-left:3px!important;padding-right:3px!important}
+}

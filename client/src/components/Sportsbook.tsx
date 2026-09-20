@@ -26,6 +26,8 @@ export const SPORT_TABS: { key: SportKey; label: string; icon: typeof Trophy; sw
 
 const PAGE_SIZE = 15;
 const ENDED_PAGE_SIZE = 5;
+// This sportsbook surface intentionally exposes upcoming fixtures only.
+const UPCOMING_ONLY = true;
 const TOP_SIX_LEAGUE_KEYS = new Set(TOP_SIX_COMPETITIONS.filter((c) => c.tier === "league").map((c) => c.key));
 const topSixFirst = (a: EnrichedMatch, b: EnrichedMatch) => {
   const aTop = a.competitionKey && TOP_SIX_LEAGUE_KEYS.has(a.competitionKey) ? 0 : 1;
@@ -543,7 +545,7 @@ export default function Sportsbook({
         </SectionShell>
       )}
 
-      {!hideLive && <SectionShell id="sb-section-live" title="Live Now" icon={<i className="live-dot" />} count={applyFilter(grouped.live).length} live>
+      {!UPCOMING_ONLY && !hideLive && <SectionShell id="sb-section-live" title="Live Now" icon={<i className="live-dot" />} count={applyFilter(grouped.live).length} live>
         {mode === "all" && (
           <div className="live-league-tabs" role="tablist" aria-label="Filter live matches by league">
             <button type="button" className={!liveLeagueTab ? "active" : ""} onClick={() => setLiveLeagueTab(null)}>All live</button>
@@ -564,13 +566,13 @@ export default function Sportsbook({
 
       {mode === "all" && (
         <>
-          <SectionShell id="sb-section-today" title="Today" icon={<Trophy size={14} />} count={applyFilter(grouped.today).length}>
+          {!UPCOMING_ONLY && <SectionShell id="sb-section-today" title="Today" icon={<Trophy size={14} />} count={applyFilter(grouped.today).length}>
             {loading && grouped.today.length === 0 ? (
               <SkeletonRows />
             ) : (
               <PaginatedLeagueList list={applyFilter(grouped.today)} hasDraw={hasDraw} picks={picks} onPick={onPick} emptyLabel="No matches scheduled for today." />
             )}
-          </SectionShell>
+          </SectionShell>}
 
           <SectionShell id="sb-section-upcoming" title="Upcoming" icon={<Trophy size={14} />} count={applyFilter(grouped.upcoming).length}>
             {loading && grouped.upcoming.length === 0 ? (
@@ -580,7 +582,7 @@ export default function Sportsbook({
             )}
           </SectionShell>
 
-          {applyFilter(grouped.ended).length > 0 && (
+          {!UPCOMING_ONLY && applyFilter(grouped.ended).length > 0 && (
             <SectionShell id="sb-section-ended" title="Recently Ended" icon={<Trophy size={14} />} count={applyFilter(grouped.ended).length}>
               <EndedMatchList list={applyFilter(grouped.ended)} hasDraw={hasDraw} picks={picks} onPick={onPick} />
             </SectionShell>
