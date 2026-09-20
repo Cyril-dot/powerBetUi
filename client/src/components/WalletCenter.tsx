@@ -8,6 +8,7 @@ import {
   ArrowUpRight,
   CalendarDays,
   Check,
+  CircleCheckBig,
   Clock3,
   CreditCard,
   Lock,
@@ -486,23 +487,29 @@ export default function WalletCenter() {
                   "DEPOSIT", "BET_WIN", "REFERRAL_COMMISSION",
                   "WITHDRAWAL_REFUND", "VIP_CASHBACK", "WELCOME_BONUS",
                 ].includes(tx.kind);
+                const txStatus = String(tx.status ?? "").toUpperCase();
+                const isSuccessfulWithdrawal = tx.kind === "WITHDRAW" && [
+                  "SETTLED", "COMPLETED", "SUCCESS", "SUCCESSFUL", "PAID",
+                ].includes(txStatus);
 
                 return (
-                  <div className="wal-activity-row" key={tx.id}>
-                    <span className={`wal-activity-icon${isCredit ? " is-credit" : ""}`}>
-                      {isCredit
+                  <div className={`wal-activity-row${isSuccessfulWithdrawal ? " is-withdrawal-success" : ""}`} key={tx.id}>
+                    <span className={`wal-activity-icon${isCredit ? " is-credit" : ""}${isSuccessfulWithdrawal ? " is-withdrawal-success" : ""}`}>
+                      {isSuccessfulWithdrawal
+                        ? <CircleCheckBig size={18} strokeWidth={2.5} />
+                        : isCredit
                         ? <ArrowDownRight size={15} />
                         : <ArrowUpRight   size={15} />
                       }
                     </span>
                     <div className="wal-activity-text">
-                      <b>{KIND_LABEL[tx.kind] ?? tx.kind}</b>
+                      <b>{isSuccessfulWithdrawal ? "Withdrawal successful" : KIND_LABEL[tx.kind] ?? tx.kind}</b>
                       <small>
                         {new Date(tx.createdAt).toLocaleString()}
-                        {tx.status ? ` · ${tx.status}` : ""}
+                        {tx.status ? ` · ${isSuccessfulWithdrawal ? "SETTLED" : tx.status}` : ""}
                       </small>
                     </div>
-                    <strong className={isCredit ? "is-credit" : ""}>
+                    <strong className={`${isCredit ? "is-credit" : ""}${isSuccessfulWithdrawal ? " is-withdrawal-success" : ""}`}>
                       {isCredit ? "+" : "-"}
                       {currencyCode} {Math.abs(numeric(tx.amount) ?? 0).toFixed(2)}
                     </strong>
@@ -677,6 +684,12 @@ function WalStyles() {
       .wal-submit:disabled { opacity: .6; cursor: default; }
       .wal-notice { color: #9a9a9a; font-size: .76rem; }
       .wal-muted  { color: #8b8b8b; font-size: .8rem; }
+      .wal-activity-row.is-withdrawal-success { position: relative; margin: 5px -10px; padding: 13px 10px; border: 1px solid rgba(139,92,246,.28); border-radius: 14px; background: linear-gradient(100deg, rgba(139,92,246,.1), rgba(45,212,191,.08)); box-shadow: 0 6px 18px rgba(76,29,149,.1); }
+      .wal-activity-row.is-withdrawal-success::before { content: ""; position: absolute; left: -1px; top: 8px; bottom: 8px; width: 3px; border-radius: 3px; background: linear-gradient(180deg, #8b5cf6, #2dd4bf); }
+      .wal-activity-icon.is-withdrawal-success { display: grid; place-items: center; color: #7c3aed; background: linear-gradient(145deg, #ede9fe, #ccfbf1); border: 1px solid rgba(124,58,237,.25); box-shadow: 0 0 0 4px rgba(139,92,246,.08); }
+      .wal-activity-row.is-withdrawal-success .wal-activity-text b { color: #5b21b6; letter-spacing: .01em; }
+      .wal-activity-row.is-withdrawal-success .wal-activity-text small { color: #64748b; }
+      .wal-activity-row strong.is-withdrawal-success { color: #0f9f8a; font-weight: 900; }
 
       /* ── Withdrawal success / pending state ── */
       .wal-withdraw-success { padding: 28px 4px 8px; text-align: center; color: #20242d; }
@@ -782,6 +795,7 @@ function WalStyles() {
       .wal-action svg,.wal-refresh svg{color:currentColor}
       @media(max-width:560px){.wal-body{padding-left:12px;padding-right:12px}.wal-card{padding:18px}}
       @media(max-width:560px){.wal-withdraw-success{padding-top:20px}.wal-success-lead{font-size:.9rem}.wal-success-amount strong{font-size:1.85rem}.wal-pending-card{padding:17px 11px 13px}.wal-pending-track>span:not(:last-child)::after{width:78%}.wal-pending-track b{font-size:.62rem}.wal-estimate{font-size:.7rem}}
+      @media(max-width:560px){.wal-activity-row.is-withdrawal-success{margin-left:-5px;margin-right:-5px;padding-left:8px;padding-right:8px}.wal-activity-icon.is-withdrawal-success{width:32px;height:32px}}
     `}</style>
   );
 }
