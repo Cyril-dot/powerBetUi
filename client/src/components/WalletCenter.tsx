@@ -16,6 +16,7 @@ import {
   ReceiptText,
   RefreshCw,
   Smartphone,
+  WalletCards,
   Wifi,
 } from "lucide-react";
 import api, { ApiError, type Transaction, type WithdrawalRequest } from "@/lib/api";
@@ -110,6 +111,11 @@ export default function WalletCenter() {
     reference: string;
     date: string;
   } | null>(null);
+  const [withdrawalPaid, setWithdrawalPaid] = useState<{
+    amount: number;
+    destination: string;
+    reference: string;
+  } | null>(null);
 
   // ── Data loader ──────────────────────────────────────────────────────────
 
@@ -128,6 +134,24 @@ export default function WalletCenter() {
       ]);
       setSummary(wallet as Record<string, unknown>);
       setTransactions(txs.content ?? []);
+
+      // A settled withdrawal is the user-facing payment confirmation. Show it
+      // once when the wallet data reflects the Super Admin settlement.
+      const settledWithdrawal = (txs.content ?? []).find((tx) =>
+        tx.kind === "WITHDRAW" && ["SETTLED", "COMPLETED", "SUCCESS", "SUCCESSFUL", "PAID"].includes(String(tx.status ?? "").toUpperCase())
+      );
+      if (settledWithdrawal && typeof window !== "undefined") {
+        const paidKey = `powerbet:withdrawal-paid:${settledWithdrawal.id}`;
+        if (window.sessionStorage.getItem(paidKey) !== "1") {
+          window.sessionStorage.setItem(paidKey, "1");
+          setWithdrawalSuccess(null);
+          setWithdrawalPaid({
+            amount: Math.abs(Number(settledWithdrawal.amount) || 0),
+            destination: "Your wallet destination",
+            reference: settledWithdrawal.id ? `WD-${String(settledWithdrawal.id).slice(-8).toUpperCase()}` : "WD-PAID",
+          });
+        }
+      }
 
       if (userId && !isAdmin) {
         const allTxs   = txs.content ?? [];
@@ -229,14 +253,21 @@ export default function WalletCenter() {
       // request body. The modal must still appear after the request succeeds.
       const requestData = request as Partial<WithdrawalRequest> | null | undefined;
       const requestDate = requestData?.createdAt ? new Date(requestData.createdAt) : new Date();
-      setWithdrawalSuccess({
+      const isAlreadyPaid = ["SETTLED", "COMPLETED", "SUCCESS", "SUCCESSFUL", "PAID"].includes(String(requestData?.status ?? "").toUpperCase());
+      const destination = withdrawForm.method === "MOBILE_MONEY"
+        ? `${withdrawForm.network === "AIRTELTIGO" ? "AirtelTigo" : withdrawForm.network === "TELECEL" ? "Telecel" : "MTN"} Mobile Money`
+        : "Bank transfer";
+      const reference = requestData?.id ? `WD-${String(requestData.id).slice(-8).toUpperCase()}` : "WD-PENDING";
+      if (isAlreadyPaid) {
+        setWithdrawalPaid({ amount, destination, reference });
+      } else {
+        setWithdrawalSuccess({
         amount,
-        destination: withdrawForm.method === "MOBILE_MONEY"
-          ? `${withdrawForm.network === "AIRTELTIGO" ? "AirtelTigo" : withdrawForm.network === "TELECEL" ? "Telecel" : "MTN"} Mobile Money`
-          : "Bank transfer",
-        reference: requestData?.id ? `WD-${String(requestData.id).slice(-8).toUpperCase()}` : "WD-PENDING",
+        destination,
+        reference,
         date: requestDate.toLocaleDateString("en-GH", { day: "2-digit", month: "short", year: "numeric" }),
-      });
+        });
+      }
       setShowWithdrawForm(false);
       setWithdrawNotice("");
       setWithdrawForm({
@@ -385,6 +416,23 @@ export default function WalletCenter() {
             <button className="wal-success-done" type="button" onClick={() => setWithdrawalSuccess(null)}>Done</button>
             <Link className="wal-success-wallet" href="/wallet">View wallet</Link>
           </section>
+          </div>
+        )}
+
+        {withdrawalPaid && (
+          <div className="wal-success-modal wal-paid-modal" role="dialog" aria-modal="true" aria-labelledby="wal-paid-title">
+            <button className="wal-success-backdrop" type="button" aria-label="Close withdrawal paid confirmation" onClick={() => setWithdrawalPaid(null)} />
+            <section className="wal-paid-card" aria-live="polite">
+              <div className="wal-paid-brand">super bet</div>
+              <div className="wal-paid-icon" aria-hidden><Check size={32} strokeWidth={3} /></div>
+              <h2 id="wal-paid-title">Withdrawal paid</h2>
+              <strong className="wal-paid-amount">{currencyCode} {withdrawalPaid.amount.toFixed(2)}</strong>
+              <div className="wal-paid-row"><Smartphone size={18} /><b>{withdrawalPaid.destination}</b></div>
+              <div className="wal-paid-row"><WalletCards size={18} /><span><b>Your wallet</b><small>{currencyCode} {withdrawalPaid.amount.toFixed(2)}</small></span></div>
+              <div className="wal-paid-row wal-paid-complete"><Check size={18} /><b>Settlement complete</b></div>
+              <button className="wal-success-done" type="button" onClick={() => setWithdrawalPaid(null)}>Done</button>
+              <button className="wal-paid-receipt" type="button" onClick={() => { setWithdrawalPaid(null); window.location.assign("/transactions"); }}>View receipt</button>
+            </section>
           </div>
         )}
 
@@ -729,6 +777,16 @@ function WalStyles() {
       .wal-estimate svg { flex: 0 0 auto; }
       .wal-success-done { width: 100%; min-height: 48px; margin-top: 24px; border: 0; border-radius: 10px; background: #245eb4; color: #fff; font-size: .9rem; font-weight: 800; cursor: pointer; }
       .wal-success-wallet { display: block; margin: 15px 0 2px; color: #245eb4; font-size: .9rem; font-weight: 800; }
+      .wal-paid-card { position: relative; z-index: 1; width: min(100%, 520px); box-sizing: border-box; padding: 18px 24px 20px; text-align: center; color: #123b75; background: #fff; border-radius: 18px; box-shadow: 0 24px 70px rgba(8,25,53,.3); }
+      .wal-paid-brand { margin: -18px -24px 18px; padding: 18px 14px; border-radius: 18px 18px 0 0; background: linear-gradient(135deg,#1246a8,#1e6bff); color: #fff; font-size: 1.12rem; font-style: italic; font-weight: 900; letter-spacing: -.04em; }
+      .wal-paid-icon { display: grid; place-items: center; width: 64px; height: 64px; margin: 4px auto 13px; border-radius: 50%; background: #25b969; color: #fff; box-shadow: 0 0 0 9px #dff7e9; }
+      .wal-paid-card h2 { margin: 0 0 7px; font-size: clamp(1.45rem, 5vw, 2rem); letter-spacing: -.04em; }
+      .wal-paid-amount { display: block; margin-bottom: 16px; color: #1e6bff; font-size: 2rem; letter-spacing: -.04em; }
+      .wal-paid-row { display: flex; align-items: center; gap: 13px; padding: 13px 4px; border-bottom: 1px solid #e2eaf4; text-align: left; color: #1e6bff; }
+      .wal-paid-row b { color: #123b75; font-size: .92rem; }
+      .wal-paid-row span { display: grid; gap: 2px; }.wal-paid-row small { color: #71809a; font-size: .76rem; }
+      .wal-paid-complete { color: #18a05b; }.wal-paid-complete b { color: #18a05b; }
+      .wal-paid-card .wal-success-done { margin-top: 18px; }.wal-paid-receipt { width: 100%; min-height: 44px; margin-top: 10px; border: 1px solid #1e6bff; border-radius: 10px; background: #fff; color: #1e6bff; font-size: .86rem; font-weight: 800; cursor: pointer; }
 
       /* ── Activity list ── */
       .wal-activity-list { display: flex; flex-direction: column; }
@@ -802,7 +860,8 @@ function WalStyles() {
       .wal-hero svg,.wal-card svg{color:#fff}
       .wal-action svg,.wal-refresh svg{color:currentColor}
       @media(max-width:560px){.wal-body{padding-left:12px;padding-right:12px}.wal-card{padding:18px}}
-      @media(max-width:560px){.wal-success-modal{padding:10px}.wal-withdraw-success{max-height:94vh;padding:22px 16px 16px;border-radius:16px}.wal-success-lead{font-size:.9rem}.wal-success-amount strong{font-size:1.85rem}.wal-pending-card{padding:17px 11px 13px}.wal-pending-track>span:not(:last-child)::after{width:78%}.wal-pending-track b{font-size:.62rem}.wal-estimate{font-size:.7rem}}
+      @media(max-width:560px){.wal-success-modal{padding:8px}.wal-withdraw-success{box-sizing:border-box;max-height:none;overflow:hidden;padding:16px 13px 12px;border-radius:16px}.wal-success-icon{width:54px;height:54px;margin-bottom:10px}.wal-success-icon svg{width:28px;height:28px}.wal-withdraw-success h2{font-size:1.35rem}.wal-success-lead{margin:7px auto 12px;font-size:.78rem;line-height:1.35}.wal-success-amount{margin-bottom:10px}.wal-success-amount span,.wal-success-details small{font-size:.66rem}.wal-success-amount strong{margin-top:2px;font-size:1.45rem}.wal-success-details{gap:8px;margin-bottom:11px}.wal-success-details>div{gap:9px}.wal-success-details svg{width:17px;height:17px}.wal-success-details b{margin-top:1px;font-size:.78rem}.wal-pending-card{padding:10px 9px 9px;border-radius:10px}.wal-pending-title{gap:6px;font-size:.82rem}.wal-pending-title svg{width:18px;height:18px}.wal-pending-track{margin:11px 0 9px}.wal-pending-track>span{gap:4px;font-size:.55rem}.wal-pending-track i{width:19px;height:19px}.wal-pending-track>span:not(:last-child)::after{top:9px;width:78%;height:2px}.wal-pending-track b{font-size:.55rem}.wal-estimate{gap:6px;padding:7px 8px;font-size:.62rem}.wal-estimate svg{width:13px;height:13px}.wal-success-done{min-height:40px;margin-top:12px;font-size:.78rem}.wal-success-wallet{margin:8px 0 0;font-size:.75rem}}
+      @media(max-width:560px){.wal-paid-card{width:100%;padding:13px 14px 14px;border-radius:15px}.wal-paid-brand{margin:-13px -14px 14px;padding:14px;border-radius:15px 15px 0 0;font-size:1rem}.wal-paid-icon{width:50px;height:50px;margin-bottom:9px}.wal-paid-icon svg{width:25px;height:25px}.wal-paid-card h2{font-size:1.35rem}.wal-paid-amount{margin-bottom:9px;font-size:1.65rem}.wal-paid-row{gap:9px;padding:9px 2px}.wal-paid-row b{font-size:.78rem}.wal-paid-row small{font-size:.68rem}.wal-paid-card .wal-success-done{margin-top:12px}.wal-paid-receipt{min-height:39px;margin-top:7px;font-size:.76rem}}
       @media(max-width:560px){.wal-activity-row.is-withdrawal-success{margin-left:-5px;margin-right:-5px;padding-left:8px;padding-right:8px}.wal-activity-icon.is-withdrawal-success{width:32px;height:32px}}
     `}</style>
   );
