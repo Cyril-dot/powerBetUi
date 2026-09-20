@@ -2329,3 +2329,17 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 @media(max-width:560px){
   .sb-row{width:96%!important;max-width:none!important}
 }
+
+
+/* Kickoff-time breathing room: keep start times away from card borders. */
+.sb-row-time{margin:3px 6px 6px!important;padding:4px 8px!important;min-height:20px!important;border-radius:6px!important;background:rgba(238,246,255,.8)!important;line-height:1.25!important}
+.sb-row-time .sb-countdown{display:inline-block!important;padding:1px 3px!important}
+.featured-card-mid{padding:5px 8px!important;min-width:64px!important;border-radius:7px!important;background:rgba(238,246,255,.8)!important;line-height:1.25!important}
+.featured-card-mid small{display:block!important;margin-top:4px!important}
+.admin-game-mid{padding:4px 7px!important;min-width:56px!important;border-radius:6px!important;background:rgba(22,58,78,.55)!important;line-height:1.25!important}
+.admin-game-mid small{display:block!important;margin-top:4px!important}
+@media(max-width:560px){
+  .sb-row-time{margin:3px 5px 5px!important;padding:3px 6px!important;min-height:18px!important}
+  .featured-card-mid{padding:4px 6px!important;min-width:54px!important}
+  .admin-game-mid{padding:3px 5px!important;min-width:48px!important}
+}
