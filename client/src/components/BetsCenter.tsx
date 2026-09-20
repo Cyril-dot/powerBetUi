@@ -64,7 +64,7 @@ function HistoryCard({ bet, scores }: { bet: Bet; scores: Record<string, Match> 
         <span className="bh-type">{isMultiple ? "Multiple" : "Singles"} <em>· {bet.selections.length} pick{bet.selections.length !== 1 ? "s" : ""}</em></span>
         <span className={`bh-pill ${STATUS_CLASS[bet.status]}`}>{won && <Trophy size={12} />} {STATUS_LABEL[bet.status]}</span>
       </div>
-      {(bet.status === "WON" || bet.status === "LOST") && <div className="bh-outcome-ribbon">{bet.status === "WON" ? <><Trophy size={14} /> Winning ticket</> : <><X size={14} /> Ticket settled</>}</div>}
+      {won && <span className="bh-won-badge" aria-label="Won"><Trophy size={15} /><small>WON</small></span>}
       <div className="bh-card-body">
         <div className="bh-totals">
           <div><span>Stake</span><b>GHS {bet.stake.toFixed(2)}</b></div>
@@ -461,6 +461,27 @@ function BetsCenterStyles() {
       .bh-pill.bh-void{ background:#879b93; color:#fff; }
       .bh-pill.bh-won,.bh-pill.bh-cashed{ box-shadow:0 3px 10px rgba(13,166,83,.2); }
       .bh-return-won{ color:#148448!important; }
+
+      /* Premium settled-ticket finish: neutral card surfaces, restrained status accents, and a clear win marker. */
+      .bh-card{ background:linear-gradient(145deg,#ffffff 0%,#f7f7f9 100%); border-color:#dedee5; box-shadow:0 9px 24px rgba(22,25,34,.08); }
+      .bh-card::before{ width:3px; background:#c8c9d2; }
+      .bh-card:hover{ border-color:#c9a75d; box-shadow:0 15px 30px rgba(31,34,45,.13); }
+      .bh-card.bh-won{ background:linear-gradient(145deg,#ffffff 0%,#fbfaf7 100%); border-color:#d9c28f; box-shadow:0 11px 28px rgba(131,96,29,.12); }
+      .bh-card.bh-won::before{ width:4px; background:linear-gradient(#d3a83b,#f0c96a); }
+      .bh-card.bh-lost{ background:linear-gradient(145deg,#ffffff 0%,#faf9fa 100%); border-color:#d9d8df; box-shadow:0 9px 24px rgba(40,42,51,.08); }
+      .bh-card.bh-lost::before{ width:4px; background:linear-gradient(#a9aab4,#d8d8df); }
+      .bh-won-badge{ position:absolute; top:12px; right:13px; z-index:2; display:flex; align-items:center; gap:5px; padding:6px 8px 6px 7px; border-radius:9px; color:#fff; background:linear-gradient(145deg,#19a957,#08743c); box-shadow:0 5px 12px rgba(12,111,58,.24); }
+      .bh-won-badge small{ font-size:8px; font-weight:900; letter-spacing:.1em; line-height:1; }
+      .bh-card.bh-won .bh-card-top{ padding-right:78px; }
+      .bh-card.bh-won .bh-return-won{ color:#d78317!important; font-size:1rem; font-weight:900; text-shadow:0 1px 0 rgba(255,255,255,.7); }
+      .bh-card.bh-won .bh-totals div:last-child{ padding:7px 9px; margin:-7px -4px -7px 0; border-radius:9px; background:linear-gradient(135deg,#fff7dc,#fff0c0); border:1px solid #f0d28a; }
+      .bh-card.bh-won .bh-totals div:last-child span{ color:#9a6a1d; }
+      .bh-card.bh-won .bh-dot{ background:#c9962c; box-shadow:0 0 0 3px rgba(201,150,44,.13); }
+      .bh-card.bh-lost .bh-pill{ background:#eeeef1; color:#656774; border:1px solid #d8d8df; }
+      .bh-card.bh-lost .bh-return-won{ color:#747681!important; }
+      .bh-card.bh-cashed{ border-color:#c4d8ec; }
+      .bh-card.bh-cashed::before{ background:linear-gradient(#4f91c9,#9ac3e5); }
+      .bh-card.bh-cashed .bh-return-won{ color:#2877ad!important; }
 
       @media(max-width:560px){ .bh-card-head{ padding:10px 13px; } .bh-card-body{ padding:12px 13px 14px; } }
     `}</style>
