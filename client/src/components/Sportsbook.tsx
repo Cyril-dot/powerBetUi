@@ -391,11 +391,11 @@ function PaginatedLeagueList({
 
 export default function Sportsbook({
   picks, onPick, mode = "all", sport: sportProp, onSportChange, leagueFilter, hoursFilter,
-  onMeta, hideLive = false,
+  onMeta, hideLive = false, hideFeatured = false,
 }: {
   picks: Pick[]; onPick: (p: Pick) => void; mode?: "all" | "live-only";
   sport?: SportKey; onSportChange?: (s: SportKey) => void; leagueFilter?: string | null;
-  hideLive?: boolean;
+  hideLive?: boolean; hideFeatured?: boolean;
   /** Only used for the "Today" section — caps it to matches kicking off
    * within this many hours from now (e.g. 3, for a "Football in next 3
    * hours" quick filter). Ignored for Live/Upcoming/Ended since "starting
@@ -518,7 +518,7 @@ export default function Sportsbook({
         </div>
       )}
 
-      {mode === "all" && (
+      {mode === "all" && !hideFeatured && (
         <FeaturedMatchCarousel
           list={hideLive ? applyFilter(grouped.today) : [...applyFilter(grouped.live), ...applyFilter(grouped.today)]}
           hasDraw={hasDraw} picks={picks} onPick={onPick}
