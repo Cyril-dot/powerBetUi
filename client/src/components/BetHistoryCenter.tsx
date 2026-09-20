@@ -45,21 +45,21 @@ function BetCard({ bet, onRemix }: { bet: Bet; onRemix: (bet: Bet) => void }) {
       </div>
 	      <div className="bh-card-body">
 	        <div className="bh-ticket-meta"><span>Ticket #{bet.id.slice(0, 10).toUpperCase()}</span><span>{new Date(bet.placedAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</span></div>
-	        <div className="bh-totals">
-	          <div><span>Total Stake (GHS)</span><b>{bet.stake.toFixed(2)}</b></div>
-	          <div><span>{bet.status === "WON" || bet.status === "CASHED_OUT" ? "Amount won" : "Potential return"}</span><b>{totalReturn.toFixed(2)}</b></div>
-	          <div><span>Total Odds</span><b>{bet.totalOdds.toFixed(2)}</b></div>
-        </div>
-        <div className="bh-selections">
-          {bet.selections.map((s, i) => {
-            const result = s.result ?? (bet.status === "WON" ? "Won" : bet.status === "LOST" ? "Lost" : STATUS_LABEL[bet.status]);
+	        <div className="bh-selections">
+	          {bet.selections.map((s, i) => {
+	            const result = s.result ?? (bet.status === "WON" ? "Won" : bet.status === "LOST" ? "Lost" : STATUS_LABEL[bet.status]);
             return <div className="bh-selection" key={s.id ?? i}>
               <div className="bh-selection-main"><small>Sport · {s.market}</small><b>{s.homeTeam && s.awayTeam ? `${s.homeTeam} v ${s.awayTeam}` : s.market}</b><span>{s.selection}</span></div>
               <div className="bh-selection-side"><b>{s.oddsLocked.toFixed(2)}</b><span className={`bh-result ${STATUS_CLASS[bet.status]}`}>{result}</span></div>
-            </div>;
-          })}
-        </div>
-        <div className="bh-card-foot">
+	            </div>;
+	          })}
+	        </div>
+	        <div className="bh-totals">
+	          <div><span>Total Stake (GHS)</span><b>{bet.stake.toFixed(2)}</b></div>
+	          <div className="bh-payout-row"><span>{bet.status === "WON" || bet.status === "CASHED_OUT" ? "Amount won" : "Potential return"}</span><b>{totalReturn.toFixed(2)}</b></div>
+	          <div><span>Total Odds</span><b>{bet.totalOdds.toFixed(2)}</b></div>
+	        </div>
+	        <div className="bh-card-foot">
           <small>{bet.settledAt ? `Settled ${new Date(bet.settledAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}` : "Awaiting settlement"}</small>
           <button type="button" className="bh-remix" onClick={() => onRemix(bet)}>Remix Bet</button>
         </div>
@@ -207,6 +207,21 @@ function BetHistoryStyles() {
 	        border-bottom:1px solid #edf2f8;
 	      }
 	      .bh-totals > div:last-child{border-bottom:0;}
+	      .bh-totals .bh-payout-row{
+	        margin:4px 0;
+	        padding:12px 14px;
+	        border:1px solid #d97706;
+	        border-radius:10px;
+	        background:linear-gradient(135deg,#f59e0b 0%,#ffb703 100%);
+	        box-shadow:0 4px 12px rgba(217,119,6,.2);
+	      }
+	      .bh-totals .bh-payout-row span,
+	      .bh-totals .bh-payout-row b{
+	        color:#2b1600;
+	        text-shadow:none;
+	      }
+	      .bh-totals .bh-payout-row span{font-weight:900;}
+	      .bh-totals .bh-payout-row b{font-size:1.08rem;font-weight:900;}
 	      .bh-totals span{
 	        min-width:0;
 	        overflow-wrap:anywhere;
