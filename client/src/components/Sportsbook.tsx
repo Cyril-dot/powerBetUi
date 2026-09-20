@@ -424,6 +424,7 @@ export default function Sportsbook({
   const [adminMatches, setAdminMatches] = useState<EnrichedMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [apiUnreachable, setApiUnreachable] = useState(false);
+  const [liveLeagueTab, setLiveLeagueTab] = useState<string | null>(null);
   const loaded = useRef<Set<SportKey>>(new Set());
 
   const load = async (s: SportKey) => {
@@ -445,6 +446,7 @@ export default function Sportsbook({
   };
 
   useEffect(() => { load(sport); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [sport]);
+  useEffect(() => { setLiveLeagueTab(null); }, [sport]);
 
   useEffect(() => {
     const interval = setInterval(() => { if (document.visibilityState === "visible") load(sport); }, 30_000);
@@ -500,6 +502,8 @@ export default function Sportsbook({
       return diffH >= 0 && diffH <= hoursFilter;
     });
   };
+  const filteredLive = applyFilter(grouped.live).filter((m) => !liveLeagueTab || m.league === liveLeagueTab);
+  const liveLeagueTabs = Array.from(new Set(applyFilter(grouped.live).map((m) => m.league).filter((l): l is string => !!l)));
 
   return (
     <div className="sb-wrap">
@@ -541,20 +545,18 @@ export default function Sportsbook({
 
       {!hideLive && <SectionShell id="sb-section-live" title="Live Now" icon={<i className="live-dot" />} count={applyFilter(grouped.live).length} live>
         {mode === "all" && (
-          <div className="live-subnav">
-            <div className="live-subnav-markets">
-              <button type="button" className="live-subnav-market active">1X2</button>
-              {["O/U", "Next Goal", "1st Half O/U", "Home O/U"].map((m) => (
-                <button key={m} type="button" className="live-subnav-market disabled" title="This market isn't available yet" disabled>{m}</button>
-              ))}
+          <div className="live-league-tabs" role="tablist" aria-label="Filter live matches by league">
+            <button type="button" className={!liveLeagueTab ? "active" : ""} onClick={() => setLiveLeagueTab(null)}>All live</button>
+            {liveLeagueTabs.map((league) => (
+              <button key={league} type="button" className={liveLeagueTab === league ? "active" : ""} onClick={() => setLiveLeagueTab(league)}>{league}</button>
+            ))}
             </div>
-          </div>
         )}
-        {loading && grouped.live.length === 0 ? (
+        {loading && filteredLive.length === 0 ? (
           <SkeletonRows />
         ) : (
           <PaginatedLeagueList
-            list={applyFilter(grouped.live)} hasDraw={hasDraw} picks={picks} onPick={onPick}
+            list={filteredLive} hasDraw={hasDraw} picks={picks} onPick={onPick}
             emptyLabel={`No live ${SPORT_TABS.find((t) => t.key === sport)?.label.toLowerCase()} matches right now.`}
           />
         )}

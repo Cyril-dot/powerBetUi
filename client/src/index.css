@@ -2179,3 +2179,24 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
   .sb-team-name{font-size:8px!important}
   .sb-fixture-vs{font-size:9px!important}
 }
+
+
+/* Live controls and hierarchy polish. */
+.sb-live-section{border:0!important;box-shadow:none!important;border-radius:0!important;background:#f5f9ff!important}
+.sb-live-section .sb-section-head{border-bottom:0!important;box-shadow:none!important}
+.sb-live-section .sb-section-body{border:0!important}
+.live-league-tabs{display:flex!important;gap:5px!important;overflow-x:auto!important;padding:5px 8px 7px!important;background:#edf5ff!important;border:0!important;scrollbar-width:none!important}
+.live-league-tabs::-webkit-scrollbar{display:none!important}
+.live-league-tabs button{flex:0 0 auto!important;border:1px solid #c7dbf4!important;border-radius:999px!important;background:#fff!important;color:#38618f!important;padding:5px 9px!important;font-size:8px!important;font-weight:850!important;line-height:1!important;white-space:nowrap!important;cursor:pointer!important}
+.live-league-tabs button.active{background:#1e6bff!important;border-color:#1e6bff!important;color:#fff!important;box-shadow:0 3px 8px rgba(30,107,255,.18)!important}
+.live-league-tabs button:hover{border-color:#6da0df!important;color:#1246a8!important}
+.sb-team-name{font-size:10.5px!important;font-weight:900!important}
+.sb-team-line em{font-size:14px!important;font-weight:950!important}
+.sb-live-section .sb-team-name{font-size:11px!important;color:#123b78!important}
+.sb-live-section .sb-team-line em{font-size:16px!important;color:#0759bd!important}
+.sb-live-section .sb-row{border-left:0!important;border-right:0!important}
+@media(max-width:560px){
+  .sb-team-name{font-size:9.5px!important}
+  .sb-live-section .sb-team-name{font-size:10px!important}
+  .sb-team-line em,.sb-live-section .sb-team-line em{font-size:14px!important}
+}
