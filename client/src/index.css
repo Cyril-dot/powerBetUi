@@ -2030,3 +2030,47 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
   .sb-team-name{font-size:10.5px!important}
   .sb-fixture-vs{font-size:15px!important}
 }
+
+
+/* Final density pass: smaller match cards for compact sportsbook scanning. */
+.sb-row{padding:10px!important;gap:8px!important}
+.sb-row-top{gap:8px!important}
+.sb-row-badges{gap:5px!important}
+.sb-team-line{gap:4px!important}
+.sb-team-line .sb-crest{width:38px!important;height:38px!important}
+.sb-team-line .sb-crest img{width:29px!important;height:29px!important}
+.sb-team-name{font-size:11px!important}
+.sb-fixture{gap:9px!important}
+.sb-fixture-vs{font-size:14px!important}
+.sb-row-badges small{font-size:9px!important}
+.sb-row-time{font-size:9px!important}
+.sb-row-time .sb-countdown{font-size:8px!important}
+.sb-odds-row{gap:6px!important}
+.sb-odds-row .sb-odd,.featured-card-odds .sb-odd,.admin-game-odd{min-height:50px!important}
+.sb-odds-row .sb-odd span,.featured-card-odds .sb-odd span,.admin-game-odd span{padding:6px 4px!important;font-size:9px!important}
+.sb-odds-row .sb-odd b{padding:7px 3px!important;font-size:14px!important}
+.sb-odds-row .sb-more{min-height:50px!important;width:28px!important;flex-basis:28px!important}
+.featured-card{padding:10px!important;gap:8px!important}
+.featured-card-fixture{gap:9px!important}
+.featured-card-side{gap:4px!important}
+.featured-card-side .sb-crest{width:40px!important;height:40px!important}
+.featured-card-side .sb-crest img{width:30px!important;height:30px!important}
+.featured-card-team-name{font-size:10px!important}
+.featured-card-mid,.featured-card-mid b{font-size:14px!important}
+.featured-card-mid small{font-size:8px!important}
+.admin-game-card{padding:10px!important}
+.admin-game-fixture{margin:10px 0 9px!important}
+.admin-game-team img{width:42px!important;height:42px!important}
+.admin-game-team b{font-size:10px!important}
+.admin-game-mid strong{font-size:14px!important}
+.admin-game-mid small{font-size:8px!important}
+@media(max-width:560px){
+  .sb-row{padding:9px!important}
+  .sb-team-line .sb-crest,.featured-card-side .sb-crest{width:34px!important;height:34px!important}
+  .sb-team-line .sb-crest img,.featured-card-side .sb-crest img{width:26px!important;height:26px!important}
+  .sb-team-name{font-size:10px!important}
+  .sb-fixture-vs{font-size:13px!important}
+  .sb-odds-row .sb-odd,.featured-card-odds .sb-odd{min-height:46px!important}
+  .sb-odds-row .sb-odd span{padding:5px 2px!important;font-size:8px!important}
+  .sb-odds-row .sb-odd b{padding:6px 2px!important;font-size:13px!important}
+}

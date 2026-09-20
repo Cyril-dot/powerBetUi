@@ -558,6 +558,14 @@ export default function Sportsbook({
 
       {mode === "all" && (
         <>
+          <SectionShell id="sb-section-today" title="Today" icon={<Trophy size={14} />} count={applyFilter(grouped.today).length}>
+            {loading && grouped.today.length === 0 ? (
+              <SkeletonRows />
+            ) : (
+              <PaginatedLeagueList list={applyFilter(grouped.today)} hasDraw={hasDraw} picks={picks} onPick={onPick} emptyLabel="No matches scheduled for today." />
+            )}
+          </SectionShell>
+
           <SectionShell id="sb-section-upcoming" title="Upcoming" icon={<Trophy size={14} />} count={applyFilter(grouped.upcoming).length}>
             {loading && grouped.upcoming.length === 0 ? (
               <SkeletonRows />
