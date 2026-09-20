@@ -199,7 +199,7 @@ export default function BetslipPage({
   picks, setPicks, onPlace,
 }: { picks: Pick[]; setPicks: (p: Pick[]) => void; onPlace: (stake: number) => Promise<void> }) {
   const [, setLocation] = useLocation();
-  const [stake, setStake] = useState(10);
+  const [stake, setStake] = useState(MIN_STAKE);
   const [placing, setPlacing] = useState(false);
   const [notice, setNotice] = useState<{ type: "error" | "success"; text: string } | null>(null);
   const [balance, setBalance] = useState<number | null>(null);

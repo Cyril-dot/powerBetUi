@@ -193,36 +193,11 @@ function extractTeamLogo(teamObj: Record<string, unknown> | null): string {
 // match always shows the same two badges across reloads.
 // ---------------------------------------------------------------------------
 
-const ADMIN_LOGO_TYPE_1: string[] = [
-  "https://cdn.mos.cms.futurecdn.net/FFwKPCmsFj9mm6XcxzoXu4.jpg", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9UN9qSuUMh8HTjJ70DiFM1C8KGJvg-uQSnNn4LFicVQ&s=10",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiyzXsvXygaQAeU3G9P40JQ45n0ol7ug9-gtAEl-OyBqRGgJ3gGdsIAEs&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ2o_OQB0tKBPmi_oEOutdHEx31x0GbQyJteCBeLI8Wdw&s",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcStmUPkC8Gi-fgvVaRz8-3ScfVx167CqKXwwRRbAnflUw&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZIuMtdqAOBlC6_51bNllVP76WbQ0_renquYj7Nnmguw&s=10",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuJqhmUhzKrs1qHs5L5CLA6hn9JNjhM6QU2cnhOpwWMg&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMG_qrcmUWavy4jvWZw5UFhXbIV2jq35gcY0zq1j1_Qw&s=10",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAbEMQIVJ3Mk91K3uqYRdIkPllqeWYApFVuHgVCARK8w&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtSh4XknlNuqvcZ0xhTwTUcGxpU1yJa0UBqx_6VNAHIQ&s=10",
-];
-const ADMIN_LOGO_TYPE_2: string[] = [
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvpN3rLpF4MqKc7elncd23jRlzGvXqUfDsVUMJmNQuDg&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbJlmSseJvla-BIwsaPGADeqF7zVmJ6Kd-JrZBeImuHg&s=10",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQnvpCuZU3-2pSFeiaVHnRWYNlqaLQvX2zJD_vyNvrig&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcRRQPHAIkB4jRoMcP66779jv-IuDlkF0aHO9RbGA4XA&s=10",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRr6Rpp5SfuCiuQi_NN_LcPtxHXc-FZUWAz3kkhXNLc2w&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQRGWuodGkOtoX-9vPkq8YtptduSvukbTVcWEEgQD7dg&s=10",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZM16CVsxs4LPM0bMFBvsvSCXNRtWRDw5EizK9jfXoYw&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfekZXKzVMnhDQxzMXKT_RFi6SQG5t4CVgYurvegDeyg&s=10",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPMQKGiqwa0O3yWdic6MD7y0XGgal3TBHD0W9-7eNWqQ&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKE7DL_HvsYolycHSBr_rQjym8XG_2w-ORsEhcEwrMEA&s=10",
-];
-const ADMIN_LOGO_TYPE_3: string[] = [
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRRybYLFTV2QijZn7gN9amG-aJtjC5qNFyw2zOB6LRQD2PushG7cCA-CQ&s=10", "https://www.shutterstock.com/image-vector/soccer-logo-football-club-sign-260nw-2419371391.jpg",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7p68jVKyuUhJGqjhnQSA6ycSEn9WOXe86gzOuns5Wog&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ458tCJwm-QHNdqIBMUofOO38ceV0BJuIFBihVB60ILA&s=10",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNz_AR18985G-QVYcK_dAvRqqcntDNr1lShZJxhgsclw&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbBvSeJ43fsUhUrvnLSBm0D1wjoqxsWvUt0F9ASmjdDg&s=10",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3qCZbfdgoNYIDbkW8pZkWF3Cfqujo6YU31C4UE4MCgQ&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTB0AFd8INz8ySYnmREsNxjue8u8_bKQjaMV30rUGBmrg&s=10",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgTVEHT-vHyAHqyMG2hDl5-wQTS-rOMSAHJtMIsv03ng&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRS1Qd-A1IMyk24YabRPCoUJxeg0IpO0eAYyp_mn2lKNQ&s=10",
-];
-const ADMIN_LOGO_TYPE_4: string[] = [
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrMMkbNKLzHoZunn95Br1naGE1FNwHeEy_wQYS5iRsjw&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9PhoNtb-4jCMNT9XASO3TiznX-eipoZMkHE8tOAjuRA&s=10",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRm0lYLtQ9X0Q-yb7ossuyQ8RM-8C3DhkxrxClHv6igQ&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSg0COq1RkwWSdLnxCOhd5lPLTtQ9bT90TptheKG3vpcA&s=10",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZ-Bz6CsaunojfhnsS_jATzliyq5_6JmPtvlU6Kj7xXw&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiSZQzVBHGQYXyzVNHZphNi9-0BxUXyAplMcV-JoOGqA&s=10",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvBYLDyU3N9K71lBWRTXguRzqBXAnr-e80uIj5WOZ-SQ&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRi9HT25amyYyCrCaHqsSize1Il1PG5200XwMrscajflQ&s=10",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_ptEF2OiYtUv0S4lj8FHefKLOjIgWG5D8zsHKj-L_Pg&s=10", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJWbjibjAYvYN3RiXcWuZOmAHiKKIcc_SBJVq8h4-Z9g&s=10",
-];
-const ADMIN_LOGO_CATEGORIES: string[][] = [ADMIN_LOGO_TYPE_1, ADMIN_LOGO_TYPE_2, ADMIN_LOGO_TYPE_3, ADMIN_LOGO_TYPE_4];
-
+const ADMIN_HOME_LOGOS: string[] = ["/admin-logos/home-01.svg", "/admin-logos/home-02.svg", "/admin-logos/home-03.svg", "/admin-logos/home-04.svg", "/admin-logos/home-05.svg", "/admin-logos/home-06.svg", "/admin-logos/home-07.svg", "/admin-logos/home-08.svg", "/admin-logos/home-09.svg", "/admin-logos/home-10.svg", "/admin-logos/home-11.svg", "/admin-logos/home-12.svg", "/admin-logos/home-13.svg", "/admin-logos/home-14.svg", "/admin-logos/home-15.svg", "/admin-logos/home-16.svg", "/admin-logos/home-17.svg", "/admin-logos/home-18.svg", "/admin-logos/home-19.svg", "/admin-logos/home-20.svg", "/admin-logos/home-21.svg", "/admin-logos/home-22.svg", "/admin-logos/home-23.svg", "/admin-logos/home-24.svg", "/admin-logos/home-25.svg", "/admin-logos/home-26.svg", "/admin-logos/home-27.svg", "/admin-logos/home-28.svg", "/admin-logos/home-29.svg", "/admin-logos/home-30.svg"];
+const ADMIN_AWAY_LOGOS: string[] = ["/admin-logos/away-01.svg", "/admin-logos/away-02.svg", "/admin-logos/away-03.svg", "/admin-logos/away-04.svg", "/admin-logos/away-05.svg", "/admin-logos/away-06.svg", "/admin-logos/away-07.svg", "/admin-logos/away-08.svg", "/admin-logos/away-09.svg", "/admin-logos/away-10.svg", "/admin-logos/away-11.svg", "/admin-logos/away-12.svg", "/admin-logos/away-13.svg", "/admin-logos/away-14.svg", "/admin-logos/away-15.svg", "/admin-logos/away-16.svg", "/admin-logos/away-17.svg", "/admin-logos/away-18.svg", "/admin-logos/away-19.svg", "/admin-logos/away-20.svg", "/admin-logos/away-21.svg", "/admin-logos/away-22.svg", "/admin-logos/away-23.svg", "/admin-logos/away-24.svg", "/admin-logos/away-25.svg", "/admin-logos/away-26.svg", "/admin-logos/away-27.svg", "/admin-logos/away-28.svg", "/admin-logos/away-29.svg", "/admin-logos/away-30.svg"];
+// Keep home and away pools separate so one admin fixture never receives the same
+// fallback crest on both sides. Selection is rotated and persisted per match.
+const ADMIN_LOGO_CATEGORIES: string[][] = [ADMIN_HOME_LOGOS, ADMIN_AWAY_LOGOS];
 const ADMIN_LOGO_USAGE_KEY = "admin_logo_usage_v1";
 const ADMIN_LOGO_ASSIGN_KEY = "admin_logo_assignments_v1";
 const ADMIN_LOGO_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000;
@@ -258,14 +233,15 @@ function saveLogoAssignments(assignments: Record<string, AdminLogoAssignment>): 
   try { window.localStorage.setItem(ADMIN_LOGO_ASSIGN_KEY, JSON.stringify(assignments)); } catch { /* ignore */ }
 }
 
-function pickRandomAdminLogo(usage: Record<string, number>, exclude: Set<string>): string {
+function pickRandomAdminLogo(usage: Record<string, number>, exclude: Set<string>, categoryIndex = 0): string {
   const now = Date.now();
   const nonEmptyCategories = ADMIN_LOGO_CATEGORIES
     .map((cat) => cat.map(sanitizeLogo).filter((url) => url && !exclude.has(url)))
     .filter((cat) => cat.length > 0);
   if (nonEmptyCategories.length === 0) return "";
-  const shuffledCategoryOrder = [...nonEmptyCategories].sort(() => Math.random() - 0.5);
-  for (const cat of shuffledCategoryOrder) {
+  const preferred = nonEmptyCategories[categoryIndex] ?? nonEmptyCategories[0];
+  const orderedCategories = [preferred, ...nonEmptyCategories.filter((cat) => cat !== preferred)];
+  for (const cat of orderedCategories) {
     const available = cat.filter((url) => !usage[url] || now - usage[url] > ADMIN_LOGO_COOLDOWN_MS);
     if (available.length > 0) return available[Math.floor(Math.random() * available.length)];
   }
@@ -305,14 +281,14 @@ function assignAdminLogos(adminMatches: EnrichedMatch[]): Map<string, AdminLogoA
     if (!homeUrl) {
       if (cached?.home) homeUrl = cached.home;
       else {
-        homeUrl = pickRandomAdminLogo(usage, new Set());
+        homeUrl = pickRandomAdminLogo(usage, new Set(), 0);
         if (homeUrl) { usage[homeUrl] = Date.now(); usageChanged = true; }
       }
     }
     if (!awayUrl) {
       if (cached?.away) awayUrl = cached.away;
       else {
-        awayUrl = pickRandomAdminLogo(usage, new Set(homeUrl ? [homeUrl] : []));
+        awayUrl = pickRandomAdminLogo(usage, new Set(homeUrl ? [homeUrl] : []), 1);
         if (awayUrl) { usage[awayUrl] = Date.now(); usageChanged = true; }
       }
     }

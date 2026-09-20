@@ -399,6 +399,37 @@ function BetsCenterStyles() {
       .bh-toggle-details{ color:var(--nature); font-size:.72rem; font-weight:800; cursor:pointer; }
       .bh-cashout-btn{ width:100%; padding:13px; border-radius:10px; background:rgba(30,107,255); color:rgba(30,107,255); font-size:.8rem; font-weight:800; cursor:not-allowed; }
 
+      /* History refresh: a richer visual treatment than the old flat white cards. */
+      .bc-page{ max-width:1120px; margin:0 auto; padding:22px 16px 54px; }
+      .bc-tabs{ background:linear-gradient(135deg,#10241e,#152c3a); border:1px solid rgba(104,221,151,.25); box-shadow:0 12px 28px rgba(10,31,28,.16); }
+      .bc-tabs button{ color:#9bb3ae; }
+      .bc-tabs button.active{ color:#fff; background:linear-gradient(135deg,#2d9c5a,#176e49); box-shadow:0 5px 14px rgba(45,156,90,.3); }
+      .bc-toolbar{ background:#f5f8f7; border:1px solid #dfe9e4; border-radius:14px; margin:14px 10px 4px; padding:10px; }
+      .bh-filter{ background:#fff; border-color:#d8e5df; color:#34564a; }
+      .bh-filter select{ color:#34564a; }
+      .bc-icon-btn{ background:#fff; border-color:#d8e5df; color:#356553; }
+      .bh-day-label{ color:#648177; }
+      .bh-day-label b{ color:#173a2b; }
+      .bh-card{ position:relative; background:linear-gradient(145deg,#ffffff,#f6fbf8); border:1px solid #d7e8df; box-shadow:0 8px 24px rgba(24,68,52,.08); }
+      .bh-card::before{ content:""; position:absolute; inset:0 auto 0 0; width:4px; background:linear-gradient(#28a95f,#b3e52e); }
+      .bh-card:hover{ border-color:#7ad2a0; box-shadow:0 14px 30px rgba(24,105,69,.16); }
+      .bh-card-top{ padding-left:20px; }
+      .bh-type{ color:#173b2b; letter-spacing:.01em; }
+      .bh-type em{ color:#668077; }
+      .bh-card-body{ padding-left:20px; }
+      .bh-totals{ border-bottom-color:#dceae3; }
+      .bh-totals span{ color:#6d8b80; }
+      .bh-totals b{ color:#173b2b; }
+      .bh-match{ color:#264d3d; }
+      .bh-more{ color:#6d8b80; }
+      .bh-card-foot{ border-top-color:#dceae3; }
+      .bh-day-cards .bh-card:nth-child(3n+2)::before{ background:linear-gradient(#e7a33d,#ef6e54); }
+      .bh-day-cards .bh-card:nth-child(3n)::before{ background:linear-gradient(#4c8ee8,#8258d6); }
+      .bh-pill.bh-lost{ background:#e85e64; color:#fff; }
+      .bh-pill.bh-void{ background:#879b93; color:#fff; }
+      .bh-pill.bh-won,.bh-pill.bh-cashed{ box-shadow:0 3px 10px rgba(13,166,83,.2); }
+      .bh-return-won{ color:#148448!important; }
+
       @media(max-width:560px){ .bh-card-head{ padding:10px 13px; } .bh-card-body{ padding:12px 13px 14px; } }
     `}</style>
   );
