@@ -504,8 +504,9 @@ export default function Sportsbook({
       return diffH >= 0 && diffH <= hoursFilter;
     });
   };
-  const filteredLive = applyFilter(grouped.live).filter((m) => !liveLeagueTab || m.league === liveLeagueTab);
-  const liveLeagueTabs = Array.from(new Set(applyFilter(grouped.live).map((m) => m.league).filter((l): l is string => !!l)));
+  // Public live fixtures are intentionally blocked. Only admin-created live
+  // fixtures are allowed into the visible Live Now section.
+  const adminLiveMatches = adminMatches.filter((m) => isMatchLive(m));
 
   return (
     <div className="sb-wrap">
@@ -545,23 +546,18 @@ export default function Sportsbook({
         </SectionShell>
       )}
 
-      {!UPCOMING_ONLY && !hideLive && <SectionShell id="sb-section-live" title="Live Now" icon={<i className="live-dot" />} count={applyFilter(grouped.live).length} live>
+      {!UPCOMING_ONLY && !hideLive && adminLiveMatches.length > 0 && <SectionShell id="sb-section-live" title="Live Now" icon={<i className="live-dot" />} count={adminLiveMatches.length} live>
         {mode === "all" && (
-          <div className="live-league-tabs" role="tablist" aria-label="Filter live matches by league">
+          <div className="live-league-tabs" role="tablist" aria-label="Filter admin live matches by league">
             <button type="button" className={!liveLeagueTab ? "active" : ""} onClick={() => setLiveLeagueTab(null)}>All live</button>
-            {liveLeagueTabs.map((league) => (
+            {Array.from(new Set(adminLiveMatches.map((m) => m.league).filter((l): l is string => !!l))).map((league) => (
               <button key={league} type="button" className={liveLeagueTab === league ? "active" : ""} onClick={() => setLiveLeagueTab(league)}>{league}</button>
             ))}
             </div>
         )}
-        {loading && filteredLive.length === 0 ? (
-          <SkeletonRows />
-        ) : (
-          <PaginatedLeagueList
-            list={filteredLive} hasDraw={hasDraw} picks={picks} onPick={onPick}
-            emptyLabel={`No live ${SPORT_TABS.find((t) => t.key === sport)?.label.toLowerCase()} matches right now.`}
-          />
-        )}
+        {adminLiveMatches.filter((m) => !liveLeagueTab || m.league === liveLeagueTab).map((m) => (
+          <MatchRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} isAdmin />
+        ))}
       </SectionShell>}
 
       {mode === "all" && (
