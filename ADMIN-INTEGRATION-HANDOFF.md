@@ -11,6 +11,8 @@ Both panels now include a clear **Back to user side** action. The regular Admin 
 
 The application also includes **How to use** guides in both operational surfaces. These guides explain what each icon opens, which actions are available in each tab, and the safe order for reviewing and changing financial or account records.
 
+The account-page links now open a role-specific pre-entry guide before the protected panel loads. The guide is implemented in `client/src/pages/AdminEntryGuidePage.tsx` and is reached through `/admin-guide?target=admin` or `/admin-guide?target=super`. It lists each icon, explains the destination, checks the current role, and provides a Continue button to `/admin` or `/super-admin`. Users can return to the account page or the public user side without entering the protected panel.
+
 ## Protected access model
 
 The application uses the session object and the shared role helpers in `client/src/lib/session.tsx`. The regular Admin Centre checks `isAdminUser`, which permits approved administrator roles. The Super Admin Centre checks `isSuperAdminUser`, which requires the `SUPER_ADMIN` role.

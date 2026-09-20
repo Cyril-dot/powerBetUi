@@ -134,8 +134,8 @@ export default function AccountCenter() {
     { icon: <Fingerprint size={ICON} />, label: "Security", href: "/security" },
     { icon: <Bell size={ICON} />, label: "Notifications", href: "/notifications" },
     { icon: <SlidersHorizontal size={ICON} />, label: "Settings", href: "/settings" },
-    ...(isAdmin ? [{ icon: <ShieldCheck size={ICON} />, label: "Admin Centre", href: "/admin", hint: "Restricted operations" }] : []),
-    ...(isSuperAdmin ? [{ icon: <ShieldCheck size={ICON} />, label: "Super Bet Super Admin", href: "/super-admin", hint: "SUPER_ADMIN only" }] : []),
+    ...(isAdmin ? [{ icon: <ShieldCheck size={ICON} />, label: "Admin Centre", href: "/admin-guide?target=admin", hint: "Restricted operations" }] : []),
+    ...(isSuperAdmin ? [{ icon: <ShieldCheck size={ICON} />, label: "Super Bet Super Admin", href: "/admin-guide?target=super", hint: "SUPER_ADMIN only" }] : []),
   ];
 
   const safetyMenu: MenuRow[] = [
