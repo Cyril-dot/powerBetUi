@@ -2298,3 +2298,14 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
   .admin-game-odd{font-size:11px!important;padding:2px!important}
   .sb-live-section .sb-odds-row .sb-odd b{font-size:12px!important}
 }
+
+
+/* Final odds-width reduction: keep the market row visually compact and centered. */
+.sb-odds-row,
+.featured-card-odds,
+.admin-game-odds{width:88%!important;max-width:340px!important;margin-left:auto!important;margin-right:auto!important}
+@media(max-width:560px){
+  .sb-odds-row,
+  .featured-card-odds,
+  .admin-game-odds{width:92%!important;max-width:300px!important}
+}
