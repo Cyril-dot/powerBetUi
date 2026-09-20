@@ -16,7 +16,7 @@ export default function MobileBottomNav() {
         const Icon = item.icon;
         const active = item.match(location);
         return (
-          <Link key={item.href} href={item.href} className={`mbn-item${active ? " active" : ""}`} aria-current={active ? "page" : undefined}>
+          <Link key={item.href} href={item.href} className={`mbn-item${item.href === "/booking-code" ? " mbn-booking" : ""}${active ? " active" : ""}`} aria-current={active ? "page" : undefined}>
             <span className="mbn-icon-wrap">
               <Icon size={20} />
             </span>
