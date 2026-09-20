@@ -2200,3 +2200,19 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
   .sb-live-section .sb-team-name{font-size:10px!important}
   .sb-team-line em,.sb-live-section .sb-team-line em{font-size:14px!important}
 }
+
+
+/* Mobile game-card polish: reclaim horizontal space and restore readable type. */
+@media(max-width:560px){
+  .admin-featured-grid{padding:4px!important;gap:5px!important}
+  .admin-game-card{padding:7px!important}
+  .admin-game-fixture{gap:4px!important;margin:7px 0 6px!important}
+  .admin-game-team img{width:30px!important;height:30px!important}
+  .admin-game-team b{font-size:9px!important}
+  .admin-game-mid strong{font-size:11px!important}
+  .admin-game-mid small{font-size:8px!important}
+  .admin-game-odds{gap:3px!important}
+  .admin-game-odd{font-size:10px!important;padding:5px 2px!important}
+  .sb-row{margin-left:0!important;margin-right:0!important}
+}
+.header-balance{font-variant-numeric:tabular-nums}
