@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
-  CalendarDays, ChevronDown, ChevronRight, Clock3, Info, RefreshCw, Share2, Trash2, Trophy, X,
+  CalendarDays, CheckCircle2, ChevronDown, ChevronRight, Clock3, Info, RefreshCw, Share2, Trash2, Trophy, X,
 } from "lucide-react";
 import api, { ApiError, type Bet, type Match } from "@/lib/api";
+import { BET_PLACED_NOTICE_KEY } from "./BetslipPage";
 
 const HIDDEN_TICKETS_KEY = "powerbet_hidden_tickets";
 
@@ -58,11 +59,12 @@ function HistoryCard({ bet, scores }: { bet: Bet; scores: Record<string, Match> 
   };
 
   return (
-    <div className="bh-card" onClick={() => setLocation(`/bets/${bet.id}`)} role="button" tabIndex={0}>
+    <div className={`bh-card ${STATUS_CLASS[bet.status]}`} onClick={() => setLocation(`/bets/${bet.id}`)} role="button" tabIndex={0}>
       <div className="bh-card-top">
         <span className="bh-type">{isMultiple ? "Multiple" : "Singles"} <em>· {bet.selections.length} pick{bet.selections.length !== 1 ? "s" : ""}</em></span>
         <span className={`bh-pill ${STATUS_CLASS[bet.status]}`}>{won && <Trophy size={12} />} {STATUS_LABEL[bet.status]}</span>
       </div>
+      {(bet.status === "WON" || bet.status === "LOST") && <div className="bh-outcome-ribbon">{bet.status === "WON" ? <><Trophy size={14} /> Winning ticket</> : <><X size={14} /> Ticket settled</>}</div>}
       <div className="bh-card-body">
         <div className="bh-totals">
           <div><span>Stake</span><b>GHS {bet.stake.toFixed(2)}</b></div>
@@ -137,6 +139,7 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
   const [resultFilter, setResultFilter] = useState("ALL");
   const [openSubFilter, setOpenSubFilter] = useState<"all" | "cashout" | "live">("all");
   const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [placedNotice, setPlacedNotice] = useState(false);
   const [matchScores, setMatchScores] = useState<Record<string, Match>>({});
   const hiddenTickets = useMemo(readHiddenTickets, []);
 
@@ -156,6 +159,16 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
   };
 
   useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    try {
+      const raw = window.sessionStorage.getItem(BET_PLACED_NOTICE_KEY);
+      if (!raw) return;
+      const payload = JSON.parse(raw) as { placedAt?: number };
+      if (!payload.placedAt || Date.now() - payload.placedAt < 120000) setPlacedNotice(true);
+      window.sessionStorage.removeItem(BET_PLACED_NOTICE_KEY);
+    } catch { /* storage may be unavailable */ }
+  }, []);
 
   const openBets = useMemo(() => bets.filter((b) => b.status === "PENDING"), [bets]);
   const settledBets = useMemo(() => bets.filter((b) => b.status !== "PENDING"), [bets]);
@@ -222,6 +235,8 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
           Bet History
         </button>
       </div>
+
+      {placedNotice && <div className="bc-placement-success" role="status"><span className="bc-success-icon"><CheckCircle2 size={19} /></span><div><strong>Bet placed successfully</strong><span>Your wager is now listed under Open Bets.</span></div><button type="button" onClick={() => setPlacedNotice(false)} aria-label="Dismiss success message"><X size={15} /></button></div>}
 
       {tab === "history" && (
         <div className="bc-toolbar">
@@ -398,6 +413,23 @@ function BetsCenterStyles() {
       .bh-leg-teams{ margin-top:1px; }
       .bh-toggle-details{ color:var(--nature); font-size:.72rem; font-weight:800; cursor:pointer; }
       .bh-cashout-btn{ width:100%; padding:13px; border-radius:10px; background:rgba(30,107,255); color:rgba(30,107,255); font-size:.8rem; font-weight:800; cursor:not-allowed; }
+
+      .bc-placement-success{ display:flex; align-items:center; gap:11px; margin:14px 10px 0; padding:13px 14px; border:1px solid #8ed9ad; border-radius:14px; background:linear-gradient(135deg,#eafff1,#f5fff8); color:#174b32; box-shadow:0 8px 22px rgba(26,130,75,.12); }
+      .bc-placement-success .bc-success-icon{ width:32px; height:32px; border-radius:50%; display:grid; place-items:center; flex-shrink:0; color:#fff; background:linear-gradient(135deg,#1eaf61,#087b43); }
+      .bc-placement-success div{ display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; }
+      .bc-placement-success strong{ font-size:.82rem; font-weight:900; }
+      .bc-placement-success div span{ color:#4f7763; font-size:.7rem; }
+      .bc-placement-success button{ color:#4f7763; cursor:pointer; padding:4px; }
+      .bh-outcome-ribbon{ display:flex; align-items:center; gap:6px; margin:0 16px 0 20px; padding:8px 10px; border-radius:9px; font-size:.68rem; font-weight:900; letter-spacing:.04em; text-transform:uppercase; }
+      .bh-card.bh-won{ background:linear-gradient(145deg,#f5fff8 0%,#e5faec 100%); border-color:#89d7a6; box-shadow:0 10px 28px rgba(20,137,75,.14); }
+      .bh-card.bh-won::before{ width:6px; background:linear-gradient(#0c9b51,#b8e638); }
+      .bh-card.bh-won .bh-outcome-ribbon{ color:#116438; background:rgba(68,193,111,.16); border:1px solid rgba(54,166,95,.25); }
+      .bh-card.bh-won .bh-dot{ background:#18a957; box-shadow:0 0 0 4px rgba(24,169,87,.12); }
+      .bh-card.bh-lost{ background:linear-gradient(145deg,#fffafa 0%,#fff0f0 100%); border-color:#efb0b4; box-shadow:0 10px 28px rgba(185,54,65,.10); }
+      .bh-card.bh-lost::before{ width:6px; background:linear-gradient(#d74757,#f1a04e); }
+      .bh-card.bh-lost .bh-outcome-ribbon{ color:#a52c38; background:rgba(226,86,98,.12); border:1px solid rgba(210,75,87,.22); }
+      .bh-card.bh-lost .bh-dot{ background:#db5360; box-shadow:0 0 0 4px rgba(219,83,96,.10); }
+      .bh-card.bh-lost .bh-return-won{ color:#a52c38!important; }
 
       /* History refresh: a richer visual treatment than the old flat white cards. */
       .bc-page{ max-width:1120px; margin:0 auto; padding:22px 16px 54px; }

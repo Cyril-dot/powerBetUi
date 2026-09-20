@@ -21,6 +21,7 @@ function formatCountdown(kickoffAt?: string): string {
 
 const MIN_STAKE = 150;
 const MAX_STAKE = 20000;
+export const BET_PLACED_NOTICE_KEY = "superbet_bet_placed_notice";
 
 function SelectionCard({ pick, onRemove }: { pick: Pick; onRemove: () => void }) {
   const [, force] = useState(0);
@@ -199,7 +200,7 @@ export default function BetslipPage({
   picks, setPicks, onPlace,
 }: { picks: Pick[]; setPicks: (p: Pick[]) => void; onPlace: (stake: number) => Promise<void> }) {
   const [, setLocation] = useLocation();
-  const [stake, setStake] = useState(MIN_STAKE);
+  const [stake, setStake] = useState("");
   const [placing, setPlacing] = useState(false);
   const [notice, setNotice] = useState<{ type: "error" | "success"; text: string } | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
@@ -215,8 +216,9 @@ export default function BetslipPage({
   }, []);
 
   const totalOdds = picks.reduce((a, p) => a * p.odd, 1);
-  const potentialReturn = stake * totalOdds;
-  const stakeInvalid = stake < MIN_STAKE || stake > MAX_STAKE || (balance !== null && stake > balance);
+  const stakeValue = stake === "" ? 0 : Number(stake);
+  const potentialReturn = stakeValue * totalOdds;
+  const stakeInvalid = stake === "" || !Number.isFinite(stakeValue) || stakeValue < MIN_STAKE || stakeValue > MAX_STAKE || (balance !== null && stakeValue > balance);
 
   const remove = (pick: Pick) => setPicks(picks.filter((p) => !(p.id === pick.id && p.selection === pick.selection && p.market === pick.market)));
 
@@ -228,10 +230,11 @@ export default function BetslipPage({
   const place = async () => {
     setNotice(null);
     if (picks.length === 0) return;
-    if (stakeInvalid) { setNotice({ type: "error", text: balance !== null && stake > balance ? "Stake exceeds your available balance." : `Stake must be between GHS ${MIN_STAKE} and GHS ${MAX_STAKE}.` }); return; }
+    if (stakeInvalid) { setNotice({ type: "error", text: stake === "" ? "Enter your stake amount to continue." : balance !== null && stakeValue > balance ? "Stake exceeds your available balance." : `Stake must be between GHS ${MIN_STAKE} and GHS ${MAX_STAKE}.` }); return; }
     setPlacing(true);
     try {
-      await onPlace(stake);
+      await onPlace(stakeValue);
+      try { window.sessionStorage.setItem(BET_PLACED_NOTICE_KEY, JSON.stringify({ placedAt: Date.now(), text: "Bet placed successfully" })); } catch { /* storage may be unavailable */ }
       setPicks([]);
       setLocation("/open-bets");
     } catch (e) {
@@ -274,7 +277,7 @@ export default function BetslipPage({
             <div className="bp-summary-row"><span>Total odds</span><b>{totalOdds.toFixed(2)}</b></div>
             <label className="bp-stake-field">
               <span>Stake (GHS)</span>
-              <input type="number" min={MIN_STAKE} max={MAX_STAKE} value={stake} onChange={(e) => setStake(Number(e.target.value) || 0)} />
+              <input type="number" min={MIN_STAKE} max={MAX_STAKE} value={stake} placeholder="Enter amount" onChange={(e) => setStake(e.target.value)} />
             </label>
             <div className="bp-stake-hint">Min GHS {MIN_STAKE} · Max GHS {MAX_STAKE}{balance !== null && ` · Balance GHS ${balance.toFixed(2)}`}</div>
             <div className="bp-summary-row highlight"><span>Potential return</span><b>GHS {potentialReturn.toFixed(2)}</b></div>
