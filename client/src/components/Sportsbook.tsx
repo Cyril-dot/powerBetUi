@@ -26,8 +26,8 @@ export const SPORT_TABS: { key: SportKey; label: string; icon: typeof Trophy; sw
 
 const PAGE_SIZE = 15;
 const ENDED_PAGE_SIZE = 5;
-// This sportsbook surface intentionally exposes upcoming fixtures only.
-const UPCOMING_ONLY = true;
+// Keep all active match categories visible: live first, then today, then upcoming.
+const UPCOMING_ONLY = false;
 const TOP_SIX_LEAGUE_KEYS = new Set(TOP_SIX_COMPETITIONS.filter((c) => c.tier === "league").map((c) => c.key));
 const topSixFirst = (a: EnrichedMatch, b: EnrichedMatch) => {
   const aTop = a.competitionKey && TOP_SIX_LEAGUE_KEYS.has(a.competitionKey) ? 0 : 1;
