@@ -269,7 +269,6 @@ export default function BetslipPage({
         <div className="bp-grid">
           <div className="bp-list">
             {picks.map((p) => <SelectionCard key={`${p.id}-${p.selection}-${p.market}`} pick={p} onRemove={() => remove(p)} />)}
-            <BookingCodePanel picks={picks} onAdd={addFromBookingCode} />
           </div>
 
           <aside className="panel bp-summary">
