@@ -2273,3 +2273,28 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
   .sb-live-section .sb-team-line em{font-size:16px!important}
   .sb-live-section .sb-odds-row .sb-odd b{font-size:14px!important}
 }
+
+
+/* Compact odds pass: narrower container, tighter tiles, slightly smaller scale. */
+.sb-odds-row,
+.featured-card-odds,
+.admin-game-odds{width:96%!important;margin-left:auto!important;margin-right:auto!important;gap:2px!important}
+.sb-odds-row .sb-odd,
+.featured-card-odds .sb-odd,
+.admin-game-odd{min-height:26px!important;padding:2px!important;border-radius:5px!important}
+.sb-odds-row .sb-odd b,
+.featured-card-odds .sb-odd b,
+.admin-game-odd{font-size:12px!important;padding:3px 2px!important}
+.sb-live-section .sb-odds-row .sb-odd b{font-size:13px!important}
+@media(max-width:560px){
+  .sb-odds-row,
+  .featured-card-odds,
+  .admin-game-odds{width:98%!important}
+  .sb-odds-row .sb-odd,
+  .featured-card-odds .sb-odd,
+  .admin-game-odd{min-height:24px!important;padding:1px!important}
+  .sb-odds-row .sb-odd b,
+  .featured-card-odds .sb-odd b,
+  .admin-game-odd{font-size:11px!important;padding:2px!important}
+  .sb-live-section .sb-odds-row .sb-odd b{font-size:12px!important}
+}
