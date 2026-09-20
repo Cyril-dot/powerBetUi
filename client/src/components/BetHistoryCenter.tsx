@@ -43,12 +43,12 @@ function BetCard({ bet, onRemix }: { bet: Bet; onRemix: (bet: Bet) => void }) {
         <span>{isMultiple ? "Multiple" : "Singles"}</span>
         <span className="bh-status-badge">{STATUS_LABEL[bet.status]}</span>
       </div>
-      <div className="bh-card-body">
-        <div className="bh-ticket-meta"><span>Ticket #{bet.id.slice(0, 10).toUpperCase()}</span><span>{new Date(bet.placedAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</span></div>
-        <div className="bh-totals">
-          <div><span>Total Stake (GHS)</span><b>{bet.stake.toFixed(2)}</b></div>
-          <div><span>{bet.status === "WON" || bet.status === "CASHED_OUT" ? "Winnings" : "Potential return"}</span><b>{totalReturn.toFixed(2)}</b></div>
-          <div><span>Total Odds</span><b>{bet.totalOdds.toFixed(2)}</b></div>
+	      <div className="bh-card-body">
+	        <div className="bh-ticket-meta"><span>Ticket #{bet.id.slice(0, 10).toUpperCase()}</span><span>{new Date(bet.placedAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</span></div>
+	        <div className="bh-totals">
+	          <div><span>Total Stake (GHS)</span><b>{bet.stake.toFixed(2)}</b></div>
+	          <div><span>{bet.status === "WON" || bet.status === "CASHED_OUT" ? "Amount won" : "Potential return"}</span><b>{totalReturn.toFixed(2)}</b></div>
+	          <div><span>Total Odds</span><b>{bet.totalOdds.toFixed(2)}</b></div>
         </div>
         <div className="bh-selections">
           {bet.selections.map((s, i) => {
@@ -182,18 +182,58 @@ function BetHistoryStyles() {
       .bh-card-head.bh-won,.bh-card-head.bh-cashed{ background:#e4f7ed; color:#16854b; }.bh-card-head.bh-lost,.bh-card-head.bh-void{ background:#eef2f7; color:#52647d; }.bh-card-head.bh-pending{ background:#fff8e6; color:#8a6100; }
       .bh-status-badge{ text-transform:uppercase; letter-spacing:.04em; }
 
-      .bh-card-body{ padding:12px 14px 14px; color:#20242d; }.bh-ticket-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:10px;color:#71809a;font-size:.68rem}.bh-totals{ display:flex; gap:22px; padding-bottom:10px; margin-bottom:10px; border-bottom:1px dashed #dfe7f3; }
-      .bh-totals div{ display:flex; flex-direction:column; gap:3px; }
-      .bh-totals span{ font-size:.64rem; color:#71809a; text-transform:uppercase; letter-spacing:.04em; }.bh-totals b{ font-size:.9rem; color:#20242d; }
+	      .bh-card-body{ padding:12px 14px 14px; color:#20242d; }.bh-ticket-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:10px;color:#71809a;font-size:.68rem}.bh-totals{ display:flex; gap:22px; padding-bottom:10px; margin-bottom:10px; border-bottom:1px dashed #dfe7f3; }
+	      .bh-totals div{ display:flex; flex-direction:column; gap:3px; }
+	      .bh-totals span{ font-size:.64rem; color:#71809a; text-transform:uppercase; letter-spacing:.04em; }.bh-totals b{ font-size:.9rem; color:#20242d; }
+
+	      /* Keep monetary values inside the card and place Amount won below the stake. */
+	      .bh-totals{
+	        display:grid;
+	        grid-template-columns:minmax(0,1fr);
+	        gap:0;
+	        width:100%;
+	        padding:0;
+	        margin:0 0 12px;
+	        border-bottom:1px dashed #dfe7f3;
+	      }
+	      .bh-totals > div{
+	        display:flex;
+	        flex-direction:row;
+	        align-items:center;
+	        justify-content:space-between;
+	        gap:16px;
+	        min-width:0;
+	        padding:10px 0;
+	        border-bottom:1px solid #edf2f8;
+	      }
+	      .bh-totals > div:last-child{border-bottom:0;}
+	      .bh-totals span{
+	        min-width:0;
+	        overflow-wrap:anywhere;
+	        line-height:1.3;
+	      }
+	      .bh-totals b{
+	        min-width:0;
+	        max-width:58%;
+	        overflow-wrap:anywhere;
+	        word-break:break-word;
+	        text-align:right;
+	        font-variant-numeric:tabular-nums;
+	      }
 
       .bh-selections{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}.bh-selection{display:flex;justify-content:space-between;gap:12px;padding:9px 10px;border:1px solid #dfe7f3;border-radius:9px;background:#f7faff}.bh-selection-main{display:flex;flex-direction:column;gap:3px;min-width:0}.bh-selection-main small{color:#71809a;font-size:.63rem}.bh-selection-main b{color:#20242d;font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bh-selection-main span{color:#52647d;font-size:.7rem}.bh-selection-side{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}.bh-selection-side>b{color:#1246a8;font-size:.76rem}.bh-result{font-size:.62rem;font-weight:800;text-transform:uppercase}.bh-result.bh-won,.bh-result.bh-cashed{color:#16854b}.bh-result.bh-lost,.bh-result.bh-void{color:#52647d}.bh-result.bh-pending{color:#8a6100}
 
       .bh-card-foot{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
       .bh-card-foot small{ color:#71809a; font-size:.68rem; }
-      .bh-remix{
-        display:inline-flex; align-items:center; padding:8px 14px; border-radius:8px; background:#1e6bff;
-        color:#fff; font-size:.72rem; font-weight:800; cursor:pointer;
-      }
+	      .bh-remix{
+	        display:inline-flex; align-items:center; padding:8px 14px; border-radius:8px; background:#1e6bff;
+	        color:#fff; font-size:.72rem; font-weight:800; cursor:pointer;
+	      }
+	      @media (max-width:560px){
+	        .bh-card-body{padding:11px 12px 13px;}
+	        .bh-totals > div{gap:10px;padding:9px 0;}
+	        .bh-totals b{max-width:52%;font-size:.86rem;}
+	      }
     `}</style>
   );
 }
