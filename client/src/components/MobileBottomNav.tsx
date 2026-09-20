@@ -15,9 +15,10 @@ export default function MobileBottomNav() {
       {items.map((item) => {
         const Icon = item.icon;
         const active = item.match(location);
+        const isLoadCode = item.label === "Load Code";
         return (
-          <Link key={item.href} href={item.href} className={`mbn-item${item.href === "/booking-code" ? " mbn-booking" : ""}${active ? " active" : ""}`} aria-current={active ? "page" : undefined}>
-            <span className="mbn-icon-wrap">
+          <Link key={item.href} href={item.href} className={`mbn-item${isLoadCode ? " mbn-load-code" : ""}${active ? " active" : ""}`} aria-current={active ? "page" : undefined}>
+            <span className={`mbn-icon-wrap${isLoadCode ? " mbn-load-code-icon" : ""}`}>
               <Icon size={20} />
             </span>
             <span className="mbn-label">{item.label}</span>
