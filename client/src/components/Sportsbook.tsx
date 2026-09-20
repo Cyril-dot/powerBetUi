@@ -391,10 +391,11 @@ function PaginatedLeagueList({
 
 export default function Sportsbook({
   picks, onPick, mode = "all", sport: sportProp, onSportChange, leagueFilter, hoursFilter,
-  onMeta,
+  onMeta, hideLive = false,
 }: {
   picks: Pick[]; onPick: (p: Pick) => void; mode?: "all" | "live-only";
   sport?: SportKey; onSportChange?: (s: SportKey) => void; leagueFilter?: string | null;
+  hideLive?: boolean;
   /** Only used for the "Today" section — caps it to matches kicking off
    * within this many hours from now (e.g. 3, for a "Football in next 3
    * hours" quick filter). Ignored for Live/Upcoming/Ended since "starting
@@ -519,7 +520,7 @@ export default function Sportsbook({
 
       {mode === "all" && (
         <FeaturedMatchCarousel
-          list={[...applyFilter(grouped.live), ...applyFilter(grouped.today)]}
+          list={hideLive ? applyFilter(grouped.today) : [...applyFilter(grouped.live), ...applyFilter(grouped.today)]}
           hasDraw={hasDraw} picks={picks} onPick={onPick}
         />
       )}
@@ -532,7 +533,7 @@ export default function Sportsbook({
         </SectionShell>
       )}
 
-      <SectionShell id="sb-section-live" title="Live Now" icon={<i className="live-dot" />} count={applyFilter(grouped.live).length} live>
+      {!hideLive && <SectionShell id="sb-section-live" title="Live Now" icon={<i className="live-dot" />} count={applyFilter(grouped.live).length} live>
         {mode === "all" && (
           <div className="live-subnav">
             <div className="live-subnav-markets">
@@ -551,7 +552,7 @@ export default function Sportsbook({
             emptyLabel={`No live ${SPORT_TABS.find((t) => t.key === sport)?.label.toLowerCase()} matches right now.`}
           />
         )}
-      </SectionShell>
+      </SectionShell>}
 
       {mode === "all" && (
         <>
