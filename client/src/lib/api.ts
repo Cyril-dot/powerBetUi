@@ -1262,11 +1262,11 @@ export const superAdminDeposits = {
 };
 
 export const superAdminWithdrawals = {
-  list: (page = 0, size = 50) => get<PageResponse<Record<string, unknown>>>(`/api/wallet/withdrawals/admin/all${qs({ page, size })}`),
-  approve: (id: string) => post<Record<string, unknown>>(`/api/wallet/withdrawals/admin/${encodeURIComponent(id)}/approve`),
-  reject: (id: string, body: { reason?: string }) => post<Record<string, unknown>>(`/api/wallet/withdrawals/admin/${encodeURIComponent(id)}/reject`, body),
-  settle: (id: string) => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/settle`),
-  markFailed: (id: string, body: { reason?: string }) => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/mark-failed`, body),
+  list: (page = 0, size = 50, status?: string) => get<PageResponse<Record<string, unknown>>>(`/api/wallet/withdrawals/admin/all${qs({ page, size, status })}`),
+  approve: (id: string, note = "") => post<Record<string, unknown>>(`/api/wallet/withdrawals/admin/${encodeURIComponent(id)}/approve`, { note }),
+  reject: (id: string, note: string) => post<Record<string, unknown>>(`/api/wallet/withdrawals/admin/${encodeURIComponent(id)}/reject`, { note }),
+  settle: (id: string, note = "") => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/settle`, { note }),
+  markFailed: (id: string, note: string) => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/mark-failed`, { note }),
 };
 
 // ---------------------------------------------------------------------------
