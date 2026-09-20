@@ -6,10 +6,15 @@ import { Link } from "wouter";
 import {
   ArrowDownRight,
   ArrowUpRight,
+  CalendarDays,
+  Check,
+  Clock3,
   CreditCard,
   Lock,
   Plus,
+  ReceiptText,
   RefreshCw,
+  Smartphone,
   Wifi,
 } from "lucide-react";
 import api, { ApiError, type Transaction } from "@/lib/api";
@@ -98,6 +103,12 @@ export default function WalletCenter() {
   });
   const [withdrawing,    setWithdrawing]    = useState(false);
   const [withdrawNotice, setWithdrawNotice] = useState("");
+  const [withdrawalSuccess, setWithdrawalSuccess] = useState<{
+    amount: number;
+    destination: string;
+    reference: string;
+    date: string;
+  } | null>(null);
 
   // ── Data loader ──────────────────────────────────────────────────────────
 
@@ -202,7 +213,7 @@ export default function WalletCenter() {
     }
     setWithdrawing(true);
     try {
-      await api.withdrawals.submit({
+      const request = await api.withdrawals.submit({
         amount,
         currency:      currencyCode,
         method:        withdrawForm.method,
@@ -211,11 +222,19 @@ export default function WalletCenter() {
         network:
           withdrawForm.method === "MOBILE_MONEY"
             ? withdrawForm.network
-            : undefined,
+          : undefined,
       });
-      setWithdrawNotice(
-        "Withdrawal request submitted. It will appear in your history once reviewed."
-      );
+      const requestDate = request.createdAt ? new Date(request.createdAt) : new Date();
+      setWithdrawalSuccess({
+        amount,
+        destination: withdrawForm.method === "MOBILE_MONEY"
+          ? `${withdrawForm.network === "AIRTELTIGO" ? "AirtelTigo" : withdrawForm.network === "TELECEL" ? "Telecel" : "MTN"} Mobile Money`
+          : "Bank transfer",
+        reference: request.id ? `WD-${String(request.id).slice(-8).toUpperCase()}` : "WD-PENDING",
+        date: requestDate.toLocaleDateString("en-GH", { day: "2-digit", month: "short", year: "numeric" }),
+      });
+      setShowWithdrawForm(false);
+      setWithdrawNotice("");
       setWithdrawForm({
         amount: "", method: "MOBILE_MONEY", accountNumber: "", accountName: "", network: "MTN",
       });
@@ -325,6 +344,41 @@ export default function WalletCenter() {
             }}
             onClose={() => setShowGate(false)}
           />
+        )}
+
+        {withdrawalSuccess && (
+          <section className="wal-withdraw-success" aria-live="polite">
+            <div className="wal-success-icon" aria-hidden><Check size={36} strokeWidth={3} /></div>
+            <h2>Withdrawal successful.</h2>
+            <p className="wal-success-lead">
+              We have received your request.<br />Your funds are pending processing.
+            </p>
+
+            <div className="wal-success-amount">
+              <span>Amount</span>
+              <strong>{currencyCode} {withdrawalSuccess.amount.toFixed(2)}</strong>
+            </div>
+
+            <div className="wal-success-details">
+              <div><Smartphone size={22} /><span><small>Destination</small><b>{withdrawalSuccess.destination}</b></span></div>
+              <div><CalendarDays size={22} /><span><small>Request date</small><b>{withdrawalSuccess.date}</b></span></div>
+              <div><ReceiptText size={22} /><span><small>Reference</small><b>{withdrawalSuccess.reference}</b></span></div>
+            </div>
+
+            <div className="wal-pending-card">
+              <div className="wal-pending-title"><Clock3 size={24} /> <strong>Pending processing</strong></div>
+              <div className="wal-pending-track" aria-label="Withdrawal progress">
+                <span className="done"><i><Check size={12} /></i><b>Request<br /><em>received</em></b></span>
+                <span className="current"><i /><b>Processing</b></span>
+                <span><i /><b>Sent to<br /><em>provider</em></b></span>
+                <span><i /><b>Completed</b></span>
+              </div>
+              <div className="wal-estimate"><Clock3 size={16} /> Estimated timing: 1–2 business days</div>
+            </div>
+
+            <button className="wal-success-done" type="button" onClick={() => setWithdrawalSuccess(null)}>Done</button>
+            <Link className="wal-success-wallet" href="/wallet">View wallet</Link>
+          </section>
         )}
 
         {showWithdrawForm && (isAdmin || gateUnlocked) && (
@@ -624,6 +678,37 @@ function WalStyles() {
       .wal-notice { color: #9a9a9a; font-size: .76rem; }
       .wal-muted  { color: #8b8b8b; font-size: .8rem; }
 
+      /* ── Withdrawal success / pending state ── */
+      .wal-withdraw-success { padding: 28px 4px 8px; text-align: center; color: #20242d; }
+      .wal-success-icon { display: grid; place-items: center; width: 76px; height: 76px; margin: 0 auto 20px; border-radius: 50%; background: #35a967; color: #fff; box-shadow: 0 0 0 12px rgba(53,169,103,.08); }
+      .wal-withdraw-success h2 { margin: 0; color: #123b75; font-size: clamp(1.65rem, 5vw, 2.25rem); letter-spacing: -.04em; }
+      .wal-success-lead { margin: 12px auto 26px; color: #52647d; font-size: .98rem; line-height: 1.55; }
+      .wal-success-amount { text-align: left; margin: 0 0 18px; }
+      .wal-success-amount span,.wal-success-details small { display: block; color: #71809a; font-size: .78rem; font-weight: 700; letter-spacing: .02em; }
+      .wal-success-amount strong { display: block; margin-top: 4px; color: #123b75; font-size: 2rem; letter-spacing: -.03em; }
+      .wal-success-details { display: grid; gap: 16px; text-align: left; margin: 0 0 22px; }
+      .wal-success-details>div { display: flex; align-items: center; gap: 14px; color: #6c829c; }
+      .wal-success-details svg { flex: 0 0 auto; stroke-width: 1.8; }
+      .wal-success-details span { min-width: 0; }
+      .wal-success-details b { display: block; margin-top: 3px; color: #123b75; font-size: .98rem; font-weight: 700; }
+      .wal-pending-card { padding: 20px 16px 15px; text-align: left; background: #f1fbf7; border: 1px solid #d9f0e6; border-radius: 14px; }
+      .wal-pending-title { display: flex; align-items: center; gap: 10px; color: #16854b; font-size: 1.1rem; }
+      .wal-pending-title svg { stroke-width: 2; }
+      .wal-pending-track { display: grid; grid-template-columns: repeat(4,1fr); gap: 0; margin: 22px 0 18px; }
+      .wal-pending-track>span { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; color: #8ba0b2; text-align: center; font-size: .68rem; }
+      .wal-pending-track>span:not(:last-child)::after { content: ""; position: absolute; top: 12px; left: 58%; width: 84%; height: 3px; background: #d6e6e3; }
+      .wal-pending-track>span.done:not(:last-child)::after { background: #b7decf; }
+      .wal-pending-track i { position: relative; z-index: 1; display: grid; place-items: center; width: 25px; height: 25px; border: 2px solid #d2e0e3; border-radius: 50%; background: #f1fbf7; font-style: normal; }
+      .wal-pending-track .done i { border-color: #18a05b; background: #18a05b; color: #fff; }
+      .wal-pending-track .current i { border: 3px solid #18a05b; box-shadow: 0 0 0 4px rgba(24,160,91,.12); }
+      .wal-pending-track b { color: #71809a; font-size: .68rem; font-weight: 600; line-height: 1.25; }
+      .wal-pending-track .current b,.wal-pending-track .done b { color: #16854b; }
+      .wal-pending-track em { font-style: normal; font-weight: 800; }
+      .wal-estimate { display: flex; align-items: center; gap: 10px; padding: 12px 13px; color: #52647d; background: #e7f7f0; border-radius: 10px; font-size: .78rem; }
+      .wal-estimate svg { flex: 0 0 auto; }
+      .wal-success-done { width: 100%; min-height: 48px; margin-top: 24px; border: 0; border-radius: 10px; background: #245eb4; color: #fff; font-size: .9rem; font-weight: 800; cursor: pointer; }
+      .wal-success-wallet { display: block; margin: 15px 0 2px; color: #245eb4; font-size: .9rem; font-weight: 800; }
+
       /* ── Activity list ── */
       .wal-activity-list { display: flex; flex-direction: column; }
       .wal-activity-row  {
@@ -696,6 +781,7 @@ function WalStyles() {
       .wal-hero svg,.wal-card svg{color:#fff}
       .wal-action svg,.wal-refresh svg{color:currentColor}
       @media(max-width:560px){.wal-body{padding-left:12px;padding-right:12px}.wal-card{padding:18px}}
+      @media(max-width:560px){.wal-withdraw-success{padding-top:20px}.wal-success-lead{font-size:.9rem}.wal-success-amount strong{font-size:1.85rem}.wal-pending-card{padding:17px 11px 13px}.wal-pending-track>span:not(:last-child)::after{width:78%}.wal-pending-track b{font-size:.62rem}.wal-estimate{font-size:.7rem}}
     `}</style>
   );
 }
