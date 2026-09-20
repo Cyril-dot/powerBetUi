@@ -6,6 +6,7 @@ import {
   isMatchLive, parseKickoff, TWO_WAY_SPORTS,
   type EnrichedMatch, type SportKey,
 } from "@/lib/sportsbook";
+import { TOP_SIX_COMPETITIONS } from "@/lib/competitionCatalog";
 import { useFavorites } from "@/lib/favorites";
 
 export type Pick = {
@@ -25,6 +26,15 @@ export const SPORT_TABS: { key: SportKey; label: string; icon: typeof Trophy; sw
 
 const PAGE_SIZE = 15;
 const ENDED_PAGE_SIZE = 5;
+const TOP_SIX_LEAGUE_KEYS = new Set(TOP_SIX_COMPETITIONS.filter((c) => c.tier === "league").map((c) => c.key));
+const topSixFirst = (a: EnrichedMatch, b: EnrichedMatch) => {
+  const aTop = a.competitionKey && TOP_SIX_LEAGUE_KEYS.has(a.competitionKey) ? 0 : 1;
+  const bTop = b.competitionKey && TOP_SIX_LEAGUE_KEYS.has(b.competitionKey) ? 0 : 1;
+  if (aTop !== bTop) return aTop - bTop;
+  const at = a.kickoffAt ? parseKickoff(a.kickoffAt).getTime() : Number.MAX_SAFE_INTEGER;
+  const bt = b.kickoffAt ? parseKickoff(b.kickoffAt).getTime() : Number.MAX_SAFE_INTEGER;
+  return at - bt;
+};
 
 function SkeletonRows() {
   return (
@@ -459,6 +469,9 @@ export default function Sportsbook({
       const bt = b.kickoffAt ? parseKickoff(b.kickoffAt).getTime() : 0;
       return bt - at;
     });
+    cats.live.sort(topSixFirst);
+    cats.today.sort(topSixFirst);
+    cats.upcoming.sort(topSixFirst);
     return cats;
   }, [current]);
 

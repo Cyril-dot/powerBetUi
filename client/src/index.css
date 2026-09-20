@@ -2074,3 +2074,65 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
   .sb-odds-row .sb-odd span{padding:5px 2px!important;font-size:8px!important}
   .sb-odds-row .sb-odd b{padding:6px 2px!important;font-size:13px!important}
 }
+
+
+/* Final compact presentation: cards carry the surface; section wrappers do not. */
+.sb-section,
+.sb-live-section,
+.sb-special-section{background:transparent!important;border:0!important;box-shadow:none!important}
+.sb-section-head,
+.sb-section-body{background:transparent!important;border-color:transparent!important}
+.sb-section-head{padding:7px 2px!important}
+.sb-section-body{padding:0!important}
+.sb-section-title{font-size:10px!important}
+.sb-live-section .sb-section-title{color:#1246a8!important}
+
+/* Keep the selection in aria-label/state, but remove visible 1/X/2 or
+   HOME/DRAW/AWAY identifiers from the compact odds tiles. */
+.sb-odds-row .sb-odd span,
+.featured-card-odds .sb-odd span,
+.admin-game-odd span{display:none!important}
+.sb-odds-row .sb-odd,
+.featured-card-odds .sb-odd,
+.admin-game-odd{min-height:32px!important;justify-content:center!important}
+.sb-odds-row .sb-odd b,
+.featured-card-odds .sb-odd b,
+.admin-game-odd{padding:5px 3px!important;font-size:12px!important;line-height:1!important}
+.sb-odds-row .sb-more{min-height:32px!important}
+
+/* Approx. 40% reduction from the prior compact pass. */
+.sb-row{padding:7px!important;gap:6px!important}
+.sb-row-top{gap:6px!important}
+.sb-team-line{gap:3px!important}
+.sb-team-line .sb-crest{width:30px!important;height:30px!important}
+.sb-team-line .sb-crest img{width:23px!important;height:23px!important}
+.sb-team-name{font-size:9px!important}
+.sb-fixture{gap:6px!important}
+.sb-fixture-vs{font-size:11px!important}
+.sb-row-badges small{font-size:8px!important}
+.sb-row-time{font-size:8px!important}
+.sb-row-time .sb-countdown{font-size:7px!important}
+.sb-odds-row{gap:4px!important}
+.featured-card{padding:7px!important;gap:6px!important}
+.featured-card-fixture{gap:6px!important}
+.featured-card-side{gap:3px!important}
+.featured-card-side .sb-crest{width:32px!important;height:32px!important}
+.featured-card-side .sb-crest img{width:24px!important;height:24px!important}
+.featured-card-team-name{font-size:8px!important}
+.featured-card-mid,.featured-card-mid b{font-size:11px!important}
+.featured-card-mid small{font-size:7px!important}
+.admin-game-card{padding:7px!important}
+.admin-game-fixture{margin:7px 0!important}
+.admin-game-team img{width:32px!important;height:32px!important}
+.admin-game-team b{font-size:8px!important}
+.admin-game-mid strong{font-size:11px!important}
+.admin-game-mid small{font-size:7px!important}
+@media(max-width:560px){
+  .sb-row{padding:6px!important}
+  .sb-team-line .sb-crest,.featured-card-side .sb-crest{width:27px!important;height:27px!important}
+  .sb-team-line .sb-crest img,.featured-card-side .sb-crest img{width:21px!important;height:21px!important}
+  .sb-team-name{font-size:8px!important}
+  .sb-fixture-vs{font-size:10px!important}
+  .sb-odds-row .sb-odd,.featured-card-odds .sb-odd{min-height:29px!important}
+  .sb-odds-row .sb-odd b{font-size:11px!important}
+}
