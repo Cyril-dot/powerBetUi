@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { RefreshCw, Wallet } from "lucide-react";
+import { CircleCheckBig, RefreshCw, Wallet } from "lucide-react";
 import api, { ApiError, type Transaction } from "@/lib/api";
 
 const FILTERS: { key: string; label: string; kinds: string[] }[] = [
@@ -77,14 +77,16 @@ export default function TransactionsPage() {
         ) : (
           filtered.map((tx) => {
             const isCredit = CREDIT_KINDS.has(tx.kind);
+            const transactionStatus = String(tx.status ?? "").toUpperCase();
+            const isSuccessfulWithdrawal = tx.kind === "WITHDRAW" && ["SETTLED", "COMPLETED", "SUCCESS", "SUCCESSFUL", "PAID"].includes(transactionStatus);
             return (
-              <div className="activity-row" key={tx.id}>
-                <span className="activity-icon">{isCredit ? "+" : "−"}</span>
+              <div className={`activity-row${isSuccessfulWithdrawal ? " activity-withdrawal-success" : ""}`} key={tx.id}>
+                <span className="activity-icon">{isSuccessfulWithdrawal ? <CircleCheckBig size={18} strokeWidth={2.5} /> : isCredit ? "+" : "−"}</span>
                 <div>
-                  <b>{KIND_LABEL[tx.kind] ?? tx.kind}</b>
-                  <small>{new Date(tx.createdAt).toLocaleString()} {tx.status ? `· ${tx.status}` : ""} {tx.providerRef ? `· Ref ${tx.providerRef}` : ""}</small>
+                  <b>{isSuccessfulWithdrawal ? "Withdrawal successful" : KIND_LABEL[tx.kind] ?? tx.kind}</b>
+                  <small>{new Date(tx.createdAt).toLocaleString()} {tx.status ? `· ${isSuccessfulWithdrawal ? "SETTLED" : tx.status}` : ""} {tx.providerRef ? `· Ref ${tx.providerRef}` : ""}</small>
                 </div>
-                <strong style={{ color: isCredit ? "var(--nature)" : "var(--gold-hi)" }}>
+                <strong className={isSuccessfulWithdrawal ? "transaction-success-amount" : ""} style={isSuccessfulWithdrawal ? undefined : { color: isCredit ? "var(--nature)" : "var(--gold-hi)" }}>
                   {isCredit ? "+" : "-"}GHS {Math.abs(tx.amount).toFixed(2)}
                 </strong>
               </div>
