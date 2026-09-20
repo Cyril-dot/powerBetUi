@@ -821,10 +821,10 @@ export async function fetchFootball(onProgress?: (matches: EnrichedMatch[]) => v
   // match.id is the backend UUID required by detail, odds, and bet APIs.
   // Livescore feeds expose raw ESPN/provider event numbers instead; they may
   // be used for scoreboard enrichment, but must not become row IDs here.
-  // Stage 1: live matches are the highest-value content. Resolve this before
-  // requesting the larger upcoming/today/finished feeds and publish them to
-  // the UI immediately when a progressive caller is present.
-  const live = await settleList(api.publicFootball.live());
+  // Stage 1: request the broad match feeds concurrently. The old pipeline
+  // waited for live to finish before even starting today/upcoming, so one slow
+  // endpoint delayed every visible section. Publish each completed source as
+  // soon as it arrives, while preserving the final reconciliation pass below.
   const preview = (sources: unknown[]): EnrichedMatch[] => {
     const items = sources.flatMap((source) => [
       ...unwrapWithOdds(source, "football").map((i) => i.match),
@@ -832,17 +832,23 @@ export async function fetchFootball(onProgress?: (matches: EnrichedMatch[]) => v
     ]);
     return ensureOdds(dedupById(reconcileFootballBackendIds(items).filter((m) => isBettableMatchId(m.id))));
   };
-  onProgress?.(preview([live]));
-
-  // Stage 2: upcoming and today are loaded together after live is available.
-  const [upcoming, today, cupsUp, cupsToday, cupsLive] = await Promise.all([
-    settleList(api.publicFootball.upcoming()),
-    settleList(api.publicFootball.today()),
-    settleList(api.publicFootball.allCupsUpcoming()),
-    settleList(api.publicFootball.allCupsToday()),
-    settleList(api.publicFootball.allCupsLive()),
+  const earlySources: unknown[] = [];
+  const publishEarly = (value: unknown) => { earlySources.push(value); onProgress?.(preview(earlySources)); };
+  const tracked = <T,>(request: Promise<T>) => settleList(request).then((value) => { publishEarly(value); return value; });
+  const [allMatches, live, upcoming, today] = await Promise.all([
+    tracked(api.publicFootball.getAll()),
+    tracked(api.publicFootball.live()),
+    tracked(api.publicFootball.upcoming()),
+    tracked(api.publicFootball.today()),
   ]);
-  onProgress?.(preview([live, upcoming, today, cupsUp, cupsToday, cupsLive]));
+
+  // Cup feeds are additional sources and should not hold back the core
+  // football sections. They are merged when they finish.
+  const [cupsUp, cupsToday, cupsLive] = await Promise.all([
+    tracked(api.publicFootball.allCupsUpcoming()),
+    tracked(api.publicFootball.allCupsToday()),
+    tracked(api.publicFootball.allCupsLive()),
+  ]);
 
   // Stage 3: finished results and the odds index are lower priority and are
   // fetched only after live/upcoming/today have been requested.
@@ -876,6 +882,7 @@ export async function fetchFootball(onProgress?: (matches: EnrichedMatch[]) => v
   // means the request itself errored (network/CORS/5xx) — check
   // getLastFetchStatus() / the network tab for that specific path.
   log("raw per-source match counts", {
+    allMatches: allMatches === undefined ? "FAILED" : unwrapList(allMatches, "football").length,
     withOdds: withOdds === undefined ? "FAILED" : withOddsItems.length,
     live: live === undefined ? "FAILED" : unwrapList(live, "football").length,
     upcoming: upcoming === undefined ? "FAILED" : unwrapList(upcoming, "football").length,
@@ -887,6 +894,7 @@ export async function fetchFootball(onProgress?: (matches: EnrichedMatch[]) => v
   });
 
   const all: EnrichedMatch[] = [
+    ...unwrapList(allMatches, "football"),
     ...withOddsItems.map((i) => i.match),
     ...unwrapList(live, "football"),
     ...unwrapList(upcoming, "football"),

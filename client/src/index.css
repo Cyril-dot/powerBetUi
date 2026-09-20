@@ -1995,3 +1995,38 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .sb-competition-mark{width:24px!important;height:24px!important;object-fit:contain!important;flex:0 0 24px!important;border-radius:50%!important;background:#f7faff!important;border:1px solid #d7e6fa!important;padding:3px!important}
 .featured-card-league{display:inline-flex!important;align-items:center!important;gap:8px!important}
 .featured-card-league .sb-competition-mark{width:26px!important;height:26px!important;flex-basis:26px!important}
+
+
+/* Compact sizing pass: keep the reference hierarchy without oversized cards. */
+.sb-row{padding:13px!important;gap:11px!important}
+.sb-team-line{gap:5px!important}
+.sb-team-line .sb-crest{width:48px!important;height:48px!important}
+.sb-team-line .sb-crest img{width:38px!important;height:38px!important}
+.sb-team-name{font-size:12px!important;line-height:1.08!important}
+.sb-fixture-vs{font-size:17px!important}
+.sb-row-badges small{font-size:10px!important}
+.sb-row-time{font-size:10px!important}
+.sb-row-time .sb-countdown{font-size:9px!important}
+.sb-odds-row .sb-odd,.featured-card-odds .sb-odd,.admin-game-odd{min-height:58px!important}
+.sb-odds-row .sb-odd span,.featured-card-odds .sb-odd span,.admin-game-odd span{padding:7px 6px!important;font-size:10px!important}
+.sb-odds-row .sb-odd b{padding:8px 4px!important;font-size:16px!important}
+.sb-odds-row .sb-more{min-height:58px!important}
+.featured-card{padding:13px!important;gap:11px!important}
+.featured-card-side{gap:5px!important}
+.featured-card-side .sb-crest{width:48px!important;height:48px!important}
+.featured-card-side .sb-crest img{width:38px!important;height:38px!important}
+.featured-card-team-name{font-size:11px!important}
+.featured-card-mid,.featured-card-mid b{font-size:16px!important}
+.featured-card-mid small{font-size:9px!important}
+.admin-game-card{padding:12px!important}
+.admin-game-team img{width:50px!important;height:50px!important}
+.admin-game-team b{font-size:11px!important}
+.admin-game-mid strong{font-size:16px!important}
+.admin-game-mid small{font-size:9px!important}
+@media(max-width:560px){
+  .sb-row{padding:11px!important}
+  .sb-team-line .sb-crest,.featured-card-side .sb-crest{width:42px!important;height:42px!important}
+  .sb-team-line .sb-crest img,.featured-card-side .sb-crest img{width:33px!important;height:33px!important}
+  .sb-team-name{font-size:10.5px!important}
+  .sb-fixture-vs{font-size:15px!important}
+}
