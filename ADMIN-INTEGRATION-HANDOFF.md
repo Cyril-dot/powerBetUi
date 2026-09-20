@@ -17,7 +17,7 @@ The account-page links now open a role-specific pre-entry guide before the prote
 
 The application uses the session object and the shared role helpers in `client/src/lib/session.tsx`. The regular Admin Centre checks `isAdminUser`, which permits approved administrator roles. The Super Admin Centre checks `isSuperAdminUser`, which requires the `SUPER_ADMIN` role.
 
-The `/admin` route has an additional routing boundary. When the current session is a `SUPER_ADMIN`, the route renders the dedicated Super Admin Centre rather than the regular Admin Centre. This prevents a Super Admin session from accidentally loading regular-admin endpoints that may be rejected by a backend configured for a narrower role policy.
+The `/admin` and `/super-admin` routes are now explicitly separated. `/admin` always renders the regular Admin Centre, including when the signed-in user is also a `SUPER_ADMIN`. `/super-admin` renders the dedicated Super Bet Super Admin Centre and remains protected by the exact `SUPER_ADMIN` guard. This prevents the Admin guide's Continue action from unexpectedly opening the Super Admin side.
 
 The account page exposes the normal **Admin Centre** link to administrator users and exposes **Super Bet Super Admin** to Super Admin users. Role extraction supports direct roles and common nested backend session shapes, including `user`, `data`, `profile`, `account`, `result`, `roles`, and `authorities`.
 
