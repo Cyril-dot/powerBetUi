@@ -130,12 +130,13 @@ function OpenBetCard({ bet, scores }: { bet: Bet; scores: Record<string, Match> 
         {expanded && (
           <div className="bh-legs">
             {bet.selections.map((s, i) => (
-              <div className="bh-leg" key={s.id ?? i}>
+              <div className="bh-leg bh-open-mapped-leg" key={s.id ?? i}>
                 <span className="bh-leg-check">✓</span>
                 <div className="bh-leg-info">
-                  <b>{s.selection} @ {s.oddsLocked?.toFixed(2)}</b>
+                  <div className="bh-open-leg-head"><b>{s.selection} @ {s.oddsLocked?.toFixed(2)}</b>{isOpenMatchLive(scores[s.matchId]) && <span className="bh-live-match"><i /><small>live</small><b>{openMatchClock(scores[s.matchId])}</b></span>}</div>
                   <small>{s.market}</small>
-                  <small className="bh-leg-teams">{s.homeTeam ?? "Home"} vs {s.awayTeam ?? "Away"}</small>{isOpenMatchLive(scores[s.matchId]) && <span className="bh-live-match"><i /> LIVE {scores[s.matchId].scoreHome ?? 0}–{scores[s.matchId].scoreAway ?? 0} · {openMatchClock(scores[s.matchId])}</span>}
+                  <div className="bh-open-team-row"><span>{s.homeTeam ?? "Home"}</span>{isOpenMatchLive(scores[s.matchId]) && scores[s.matchId]?.scoreHome != null && <strong>{scores[s.matchId].scoreHome}</strong>}</div>
+                  <div className="bh-open-team-row"><span>{s.awayTeam ?? "Away"}</span>{isOpenMatchLive(scores[s.matchId]) && scores[s.matchId]?.scoreAway != null && <strong>{scores[s.matchId].scoreAway}</strong>}</div>
                 </div>
               </div>
             ))}

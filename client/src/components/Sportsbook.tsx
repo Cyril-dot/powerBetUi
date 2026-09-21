@@ -311,7 +311,7 @@ function FeaturedMatchCard({ match, hasDraw, picks, onPick }: { match: EnrichedM
           <span className="featured-card-status-badge best">BEST ODDS</span>
         )}
       </div>
-      <Link href={matchHref} className={`featured-card-fixture${isLive ? " live-column-fixture" : ""}`}>
+      <Link href={matchHref} className="featured-card-fixture">
         <div className="featured-card-side">
           <TeamCrest url={match.displayHomeLogo} name={match.homeTeam ?? ""} />
           <span className="featured-card-side-label">HOME</span>
