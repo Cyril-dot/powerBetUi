@@ -42,6 +42,26 @@ function dayLabel(key: string): { day: string; mon: string } {
 }
 
 
+function isOpenMatchLive(match: Match | undefined): boolean {
+  if (!match) return false;
+  const status = String(match.status ?? "").trim().toUpperCase().replace(/[\s-]+/g, "_");
+  return ["LIVE", "IN_PLAY", "IN_PROGRESS", "FIRST_HALF", "SECOND_HALF", "HALFTIME", "HALF_TIME", "HT"].includes(status) || /^\d+(ST|ND|RD|TH)_HALF$/.test(status);
+}
+function openMatchClock(match: Match | undefined): string {
+  if (!match) return "";
+  const status = String(match.status ?? "").trim().toUpperCase().replace(/[\s-]+/g, "_");
+  if (["HALFTIME", "HALF_TIME", "HT"].includes(status)) return "HT";
+  if (match.minutePlayed != null) return `${match.minutePlayed}'`;
+  const kickoff = match.kickoffAt ? new Date(match.kickoffAt).getTime() : NaN;
+  if (Number.isNaN(kickoff)) return "LIVE";
+  const elapsed = (Date.now() - kickoff) / 60000;
+  if (elapsed < 0) return "LIVE";
+  if (elapsed <= 45) return `${Math.max(1, Math.floor(elapsed))}'`;
+  if (elapsed <= 60) return "HT";
+  if (elapsed <= 105) return `${45 + Math.floor(elapsed - 60)}'`;
+  return "90+'";
+}
+
 /* ── History card: full-width, rounded, colour-coded, clickable ── */
 function HistoryCard({ bet, scores }: { bet: Bet; scores: Record<string, Match> }) {
   const [, setLocation] = useLocation();
@@ -86,7 +106,7 @@ function HistoryCard({ bet, scores }: { bet: Bet; scores: Record<string, Match> 
 }
 
 /* ── Open-bet card: pending, cashout is UI-only (no backend cashout endpoint exists) ── */
-function OpenBetCard({ bet }: { bet: Bet }) {
+function OpenBetCard({ bet, scores }: { bet: Bet; scores: Record<string, Match> }) {
   const [expanded, setExpanded] = useState(true);
   const isMultiple = bet.selections.length > 1;
 
@@ -107,7 +127,7 @@ function OpenBetCard({ bet }: { bet: Bet }) {
                 <div className="bh-leg-info">
                   <b>{s.selection} @ {s.oddsLocked?.toFixed(2)}</b>
                   <small>{s.market}</small>
-                  <small className="bh-leg-teams">{s.homeTeam ?? "Home"} vs {s.awayTeam ?? "Away"}</small>
+                  <small className="bh-leg-teams">{s.homeTeam ?? "Home"} vs {s.awayTeam ?? "Away"}</small>{isOpenMatchLive(scores[s.matchId]) && <span className="bh-live-match"><i /> LIVE {scores[s.matchId].scoreHome ?? 0}–{scores[s.matchId].scoreAway ?? 0} · {openMatchClock(scores[s.matchId])}</span>}
                 </div>
               </div>
             ))}
@@ -173,26 +193,24 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
   const openBets = useMemo(() => bets.filter((b) => b.status === "PENDING"), [bets]);
   const settledBets = useMemo(() => bets.filter((b) => b.status !== "PENDING"), [bets]);
 
-  // Enrich settled tickets with real previous-match scores from the match
-  // list (api.matches.getById) — Bet.selections only carries the matchId,
-  // not the final score, so this is the "reference the match list" lookup
-  // the history cards need for their FT score.
+  // Load match status, live scores, and timers for both open and settled bets.
   useEffect(() => {
-    const ids = Array.from(new Set(settledBets.flatMap((b) => b.selections.map((s) => s.matchId)).filter(Boolean)));
-    const missing = ids.filter((mid) => !(mid in matchScores));
-    if (missing.length === 0) return;
+    const ids = Array.from(new Set([...openBets, ...settledBets].flatMap((b) => b.selections.map((s) => s.matchId)).filter(Boolean)));
+    if (ids.length === 0) return;
     let cancelled = false;
-    Promise.allSettled(missing.map((mid) => api.matches.getById(mid))).then((results) => {
+    const refresh = () => Promise.allSettled(ids.map((mid) => api.matches.getById(mid))).then((results) => {
       if (cancelled) return;
       setMatchScores((prev) => {
         const next = { ...prev };
-        results.forEach((r, i) => { if (r.status === "fulfilled") next[missing[i]] = r.value; });
+        results.forEach((r, i) => { if (r.status === "fulfilled") next[ids[i]] = r.value; });
         return next;
       });
     });
-    return () => { cancelled = true; };
+    refresh();
+    const timer = window.setInterval(refresh, 30_000);
+    return () => { cancelled = true; window.clearInterval(timer); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settledBets]);
+  }, [openBets, settledBets]);
 
   const filteredSettled = useMemo(() => {
     let list = settledBets;
@@ -202,13 +220,11 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
     return list;
   }, [settledBets, statusFilter, resultFilter]);
 
-  // "Cashout Available" / "Live Games" are UI-only groupings — there is no
-  // cashout or live-match feed wired into the Bet type yet, so both simply
-  // show nothing until that data exists rather than fake a number.
   const filteredOpen = useMemo(() => {
     if (openSubFilter === "all") return openBets;
+    if (openSubFilter === "live") return openBets.filter((bet) => bet.selections.some((selection) => isOpenMatchLive(matchScores[selection.matchId])));
     return [];
-  }, [openBets, openSubFilter]);
+  }, [openBets, openSubFilter, matchScores]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, Bet[]>();
@@ -291,7 +307,7 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
             </div>
           ) : (
             <div className="bc-flat-list">
-              {filteredOpen.map((bet) => <OpenBetCard key={bet.id} bet={bet} />)}
+              {filteredOpen.map((bet) => <OpenBetCard key={bet.id} bet={bet} scores={matchScores} />)}
             </div>
           )
         ) : filteredSettled.length === 0 ? (

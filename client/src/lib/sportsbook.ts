@@ -197,8 +197,8 @@ function extractTeamLogo(teamObj: Record<string, unknown> | null): string {
 // match always shows the same two badges across reloads.
 // ---------------------------------------------------------------------------
 
-const ADMIN_HOME_LOGOS: string[] = ["/admin-logos/home-01.svg", "/admin-logos/home-02.svg", "/admin-logos/home-03.svg", "/admin-logos/home-04.svg", "/admin-logos/home-05.svg", "/admin-logos/home-06.svg", "/admin-logos/home-07.svg", "/admin-logos/home-08.svg", "/admin-logos/home-09.svg", "/admin-logos/home-10.svg", "/admin-logos/home-11.svg", "/admin-logos/home-12.svg", "/admin-logos/home-13.svg", "/admin-logos/home-14.svg", "/admin-logos/home-15.svg", "/admin-logos/home-16.svg", "/admin-logos/home-17.svg", "/admin-logos/home-18.svg", "/admin-logos/home-19.svg", "/admin-logos/home-20.svg", "/admin-logos/home-21.svg", "/admin-logos/home-22.svg", "/admin-logos/home-23.svg", "/admin-logos/home-24.svg", "/admin-logos/home-25.svg", "/admin-logos/home-26.svg", "/admin-logos/home-27.svg", "/admin-logos/home-28.svg", "/admin-logos/home-29.svg", "/admin-logos/home-30.svg"];
-const ADMIN_AWAY_LOGOS: string[] = ["/admin-logos/away-01.svg", "/admin-logos/away-02.svg", "/admin-logos/away-03.svg", "/admin-logos/away-04.svg", "/admin-logos/away-05.svg", "/admin-logos/away-06.svg", "/admin-logos/away-07.svg", "/admin-logos/away-08.svg", "/admin-logos/away-09.svg", "/admin-logos/away-10.svg", "/admin-logos/away-11.svg", "/admin-logos/away-12.svg", "/admin-logos/away-13.svg", "/admin-logos/away-14.svg", "/admin-logos/away-15.svg", "/admin-logos/away-16.svg", "/admin-logos/away-17.svg", "/admin-logos/away-18.svg", "/admin-logos/away-19.svg", "/admin-logos/away-20.svg", "/admin-logos/away-21.svg", "/admin-logos/away-22.svg", "/admin-logos/away-23.svg", "/admin-logos/away-24.svg", "/admin-logos/away-25.svg", "/admin-logos/away-26.svg", "/admin-logos/away-27.svg", "/admin-logos/away-28.svg", "/admin-logos/away-29.svg", "/admin-logos/away-30.svg"];
+const ADMIN_HOME_LOGOS: string[] = ["/admin-logos/open-home-01.png", "/admin-logos/open-home-02.png", "/admin-logos/open-home-03.png", "/admin-logos/open-home-04.png", "/admin-logos/open-home-05.png", "/admin-logos/open-home-06.png", "/admin-logos/open-home-07.svg", "/admin-logos/open-home-08.png", "/admin-logos/open-home-09.png", "/admin-logos/open-home-10.png", "/admin-logos/open-home-11.png", "/admin-logos/open-home-12.png", "/admin-logos/open-home-13.png", "/admin-logos/open-home-14.png", "/admin-logos/open-home-15.png", "/admin-logos/open-home-16.png", "/admin-logos/open-home-17.png", "/admin-logos/open-home-18.png", "/admin-logos/open-home-19.png", "/admin-logos/open-home-20.png", "/admin-logos/open-home-21.png", "/admin-logos/open-home-22.png", "/admin-logos/open-home-23.png", "/admin-logos/open-home-24.png", "/admin-logos/open-home-25.png", "/admin-logos/open-home-26.png", "/admin-logos/open-home-27.png", "/admin-logos/open-home-28.png", "/admin-logos/open-home-29.svg", "/admin-logos/open-home-30.svg"];
+const ADMIN_AWAY_LOGOS: string[] = ["/admin-logos/open-away-01.png", "/admin-logos/open-away-02.png", "/admin-logos/open-away-03.png", "/admin-logos/open-away-04.png", "/admin-logos/open-away-05.svg", "/admin-logos/open-away-06.svg", "/admin-logos/open-away-07.png", "/admin-logos/open-away-08.svg", "/admin-logos/open-away-09.png", "/admin-logos/open-away-10.svg", "/admin-logos/open-away-11.svg", "/admin-logos/open-away-12.png", "/admin-logos/open-away-13.svg", "/admin-logos/open-away-14.png", "/admin-logos/open-away-15.png", "/admin-logos/open-away-16.png", "/admin-logos/open-away-17.svg", "/admin-logos/open-away-18.png", "/admin-logos/open-away-19.png", "/admin-logos/open-away-20.png", "/admin-logos/open-away-21.svg", "/admin-logos/open-away-22.svg", "/admin-logos/open-away-23.png", "/admin-logos/open-away-24.svg", "/admin-logos/open-away-25.png", "/admin-logos/open-away-26.svg", "/admin-logos/open-away-27.png", "/admin-logos/open-away-28.png", "/admin-logos/open-away-29.png", "/admin-logos/open-away-30.png"];
 // Keep home and away pools separate so one admin fixture never receives the same
 // fallback crest on both sides. Selection is rotated and persisted per match.
 const ADMIN_LOGO_CATEGORIES: string[][] = [ADMIN_HOME_LOGOS, ADMIN_AWAY_LOGOS];
@@ -276,12 +276,15 @@ function assignAdminLogos(adminMatches: EnrichedMatch[]): Map<string, AdminLogoA
   const result = new Map<string, AdminLogoAssignment>();
 
   for (const m of adminMatches) {
+    const usableBackendLogo = (value: unknown) => {
+      const logo = String(value ?? "").trim();
+      return logo && !logo.includes("placehold.co") && !logo.startsWith("data:image/") ? logo : "";
+    };
     const cached = assignments[m.id];
-    // Admin fixtures always use the bundled 60-logo pool. Ignore backend
-    // placeholders/data URLs and stale cached external URLs so the actual
-    // local home-01..30 and away-01..30 assets are always shown.
-    let homeUrl = cached?.home?.startsWith("/admin-logos/") ? cached.home : "";
-    let awayUrl = cached?.away?.startsWith("/admin-logos/") ? cached.away : "";
+    // Use a real backend crest when one exists; otherwise assign one of the
+    // 60 bundled club-style badges. Never keep stale placeholder/data URLs.
+    let homeUrl = usableBackendLogo(m.homeLogo) || (cached?.home?.startsWith("/admin-logos/") ? cached.home : "");
+    let awayUrl = usableBackendLogo(m.awayLogo) || (cached?.away?.startsWith("/admin-logos/") ? cached.away : "");
 
     if (!homeUrl) {
       homeUrl = pickRandomAdminLogo(usage, new Set(), 0);
@@ -1051,9 +1054,19 @@ export async function getSearchableMatches(): Promise<EnrichedMatch[]> {
 // identically for every user (not a per-browser dismiss).
 // ---------------------------------------------------------------------------
 
-/** Filters out special games that have finished playing. */
+/** Admin fixtures are shown only while active and only when both crests are
+ * actually assigned. Finished fixtures disappear permanently on the next poll. */
 function filterVisibleAdminMatches(matches: EnrichedMatch[]): EnrichedMatch[] {
-  return matches.filter((m) => !FINISHED_STATUSES.has(m.status ?? ""));
+  const hasLogo = (value: unknown) => {
+    const logo = String(value ?? "").trim();
+    return logo.startsWith("/admin-logos/") || logo.startsWith("http://") || logo.startsWith("https://") || logo.startsWith("data:image/");
+  };
+  return matches.filter((m) => {
+    const status = normalizeStatus(String(m.status ?? ""));
+    const finishAt = (m as EnrichedMatch & { finishAt?: string; finishedAt?: string }).finishAt ?? (m as EnrichedMatch & { finishedAt?: string }).finishedAt;
+    const finishedByTime = typeof finishAt === "string" && Boolean(finishAt) && !Number.isNaN(Date.parse(finishAt)) && Date.parse(finishAt) <= Date.now();
+    return !FINISHED_STATUSES.has(status) && !finishedByTime && hasLogo(m.displayHomeLogo ?? m.homeLogo) && hasLogo(m.displayAwayLogo ?? m.awayLogo);
+  });
 }
 
 /** Admin-created matches come straight from the raw backend Match object

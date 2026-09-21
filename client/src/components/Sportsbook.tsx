@@ -541,7 +541,7 @@ export default function Sportsbook({
         </div>
       )}
 
-      {mode === "all" && sport === "football" && !leagueFilter && adminMatches.length > 0 && (
+      {mode === "all" && sport === "football" && adminMatches.length > 0 && (
         <SectionShell title="Featured matches" icon={<Zap size={14} />} count={adminMatches.length} special badge="FEATURED">
           {adminMatches.map((m) => (
             <MatchRow key={m.id} match={m} hasDraw picks={picks} onPick={onPick} isAdmin />
