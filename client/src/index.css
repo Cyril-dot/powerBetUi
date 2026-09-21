@@ -2343,3 +2343,7 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
   .featured-card-mid{padding:4px 6px!important;min-width:54px!important}
   .admin-game-mid{padding:3px 5px!important;min-width:48px!important}
 }
+
+/* Featured admin fixtures: explicit, high-contrast label. */
+.sb-special-section .section-title,.sb-special-section .section-heading{font-weight:950!important;color:#073875!important}
+.sb-special-section .section-badge{background:#0d7d45!important;color:#fff!important;border-color:#0d7d45!important}

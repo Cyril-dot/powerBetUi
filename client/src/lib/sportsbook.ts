@@ -276,25 +276,20 @@ function assignAdminLogos(adminMatches: EnrichedMatch[]): Map<string, AdminLogoA
   const result = new Map<string, AdminLogoAssignment>();
 
   for (const m of adminMatches) {
-    const hardHome = sanitizeLogo(m.homeLogo);
-    const hardAway = sanitizeLogo(m.awayLogo);
     const cached = assignments[m.id];
-    let homeUrl = hardHome;
-    let awayUrl = hardAway;
+    // Admin fixtures always use the bundled 60-logo pool. Ignore backend
+    // placeholders/data URLs and stale cached external URLs so the actual
+    // local home-01..30 and away-01..30 assets are always shown.
+    let homeUrl = cached?.home?.startsWith("/admin-logos/") ? cached.home : "";
+    let awayUrl = cached?.away?.startsWith("/admin-logos/") ? cached.away : "";
 
     if (!homeUrl) {
-      if (cached?.home) homeUrl = cached.home;
-      else {
-        homeUrl = pickRandomAdminLogo(usage, new Set(), 0);
-        if (homeUrl) { usage[homeUrl] = Date.now(); usageChanged = true; }
-      }
+      homeUrl = pickRandomAdminLogo(usage, new Set(), 0);
+      if (homeUrl) { usage[homeUrl] = Date.now(); usageChanged = true; }
     }
     if (!awayUrl) {
-      if (cached?.away) awayUrl = cached.away;
-      else {
-        awayUrl = pickRandomAdminLogo(usage, new Set(homeUrl ? [homeUrl] : []), 1);
-        if (awayUrl) { usage[awayUrl] = Date.now(); usageChanged = true; }
-      }
+      awayUrl = pickRandomAdminLogo(usage, new Set(homeUrl ? [homeUrl] : []), 1);
+      if (awayUrl) { usage[awayUrl] = Date.now(); usageChanged = true; }
     }
 
     if (!cached || cached.home !== homeUrl || cached.away !== awayUrl) {
@@ -322,8 +317,8 @@ function resolveDisplayLogos(matches: EnrichedMatch[]): EnrichedMatch[] {
       const assigned = adminLogos.get(m.id);
       return {
         ...m,
-        displayHomeLogo: sanitizeLogo(m.homeLogo) || assigned?.home || generateCrest(m.homeTeam ?? ""),
-        displayAwayLogo: sanitizeLogo(m.awayLogo) || assigned?.away || generateCrest(m.awayTeam ?? ""),
+        displayHomeLogo: assigned?.home || generateCrest(m.homeTeam ?? ""),
+        displayAwayLogo: assigned?.away || generateCrest(m.awayTeam ?? ""),
       };
     }
     return {

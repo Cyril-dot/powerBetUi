@@ -542,26 +542,14 @@ export default function Sportsbook({
       )}
 
       {mode === "all" && sport === "football" && !leagueFilter && adminMatches.length > 0 && (
-        <SectionShell title="Featured" icon={<Zap size={14} />} count={adminMatches.length} special badge="CURATED">
+        <SectionShell title="Featured matches" icon={<Zap size={14} />} count={adminMatches.length} special badge="FEATURED">
           {adminMatches.map((m) => (
             <MatchRow key={m.id} match={m} hasDraw picks={picks} onPick={onPick} isAdmin />
           ))}
         </SectionShell>
       )}
 
-      {!UPCOMING_ONLY && !hideLive && adminLiveMatches.length > 0 && <SectionShell id="sb-section-live" title="Live Now" icon={<i className="live-dot" />} count={adminLiveMatches.length} live>
-        {mode === "all" && (
-          <div className="live-league-tabs" role="tablist" aria-label="Filter admin live matches by league">
-            <button type="button" className={!liveLeagueTab ? "active" : ""} onClick={() => setLiveLeagueTab(null)}>All live</button>
-            {Array.from(new Set(adminLiveMatches.map((m) => m.league).filter((l): l is string => !!l))).map((league) => (
-              <button key={league} type="button" className={liveLeagueTab === league ? "active" : ""} onClick={() => setLiveLeagueTab(league)}>{league}</button>
-            ))}
-            </div>
-        )}
-        {adminLiveMatches.filter((m) => !liveLeagueTab || m.league === liveLeagueTab).map((m) => (
-          <MatchRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} isAdmin />
-        ))}
-      </SectionShell>}
+
 
       {mode === "all" && (
         <>
