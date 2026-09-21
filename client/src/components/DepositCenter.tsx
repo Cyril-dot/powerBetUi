@@ -1375,6 +1375,68 @@ function DepStyles() {
         .dep-ng-tabs button{ padding:7px 10px; font-size:.7rem; }
         .dep-log-toolbar{ flex-direction:column; align-items:flex-start; }
       }
+
+      /* ── Current Super Bet deposit visual system ── */
+      .dep-page{ background:linear-gradient(180deg,#f5f8fc 0%,#eef3f9 100%); min-height:70vh; color:#10284d; }
+      .dep-hero{ position:relative; overflow:hidden; max-width:1120px; margin:0 auto; padding:34px 32px 38px;
+        background:linear-gradient(125deg,#0d55d9 0%,#1769ee 54%,#0d3f9f 100%); border-radius:0 0 24px 24px;
+        box-shadow:0 18px 40px rgba(18,76,161,.18); }
+      .dep-hero::after{ content:""; position:absolute; width:260px; height:260px; right:-80px; top:-120px; border:1px solid rgba(255,255,255,.18); border-radius:50%; box-shadow:0 0 0 24px rgba(255,255,255,.05),0 0 0 52px rgba(255,255,255,.04); }
+      .dep-hero-icon{ position:relative; z-index:1; width:48px; height:48px; border-radius:15px; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.3); }
+      .dep-hero h1,.dep-hero p{ position:relative; z-index:1; }
+      .dep-hero h1{ font-size:32px; letter-spacing:-.035em; }
+      .dep-hero p{ color:rgba(255,255,255,.86); font-size:.9rem; }
+      .dep-body{ max-width:720px; padding:24px 20px 56px; gap:16px; }
+      .dep-currency-tabs{ padding:5px; gap:5px; background:#e2eaf5; border-radius:13px; }
+      .dep-currency-tabs button{ padding:12px; background:transparent; border:0; border-radius:9px; color:#62738b; }
+      .dep-currency-tabs button.active{ background:#fff; color:#135bdc; box-shadow:0 4px 14px rgba(28,73,132,.12); border:0; }
+      .dep-ng-tabs{ padding:3px; gap:5px; background:#e2eaf5; border-radius:11px; }
+      .dep-ng-tabs button{ flex:1; justify-content:center; padding:9px 10px; background:transparent; border:0; color:#62738b; }
+      .dep-ng-tabs button.active{ background:#fff; color:#135bdc; border:0; box-shadow:0 3px 10px rgba(28,73,132,.1); }
+      .dep-method-summary{ padding:4px 3px; }
+      .dep-form-icon{ width:40px; height:40px; border-radius:12px; background:#dce9ff; color:#135bdc; }
+      .dep-form-icon.dep-accent-blue{ background:#dce9ff; color:#135bdc; }
+      .dep-form-icon.dep-accent-gold{ background:#fff1c9; color:#b57700; }
+      .dep-method-summary h3{ color:#10284d; font-size:17px; }
+      .dep-method-summary p{ color:#72839a; }
+      .dep-card{ background:#fff; border:1px solid #dce5f0; border-radius:16px; padding:22px; box-shadow:0 10px 26px rgba(19,53,96,.07); }
+      .dep-field{ color:#5c708a; }
+      .dep-field input,.dep-field select{ background:#f7faff; color:#10284d; border:1px solid #d5e0ec; border-radius:10px; padding:13px; }
+      .dep-field input:focus,.dep-field select:focus{ background:#fff; border-color:#1769ee; box-shadow:0 0 0 3px rgba(23,105,238,.12); }
+      .dep-quick-amounts button{ background:#f3f7fc; border-color:#d5e0ec; color:#526a86; padding:8px 14px; }
+      .dep-quick-amounts button.active{ background:#1769ee; border-color:#1769ee; color:#fff; box-shadow:0 5px 12px rgba(23,105,238,.2); }
+      .dep-submit{ background:linear-gradient(135deg,#1769ee,#0d4ebd); border-radius:11px; box-shadow:0 8px 18px rgba(23,105,238,.2); }
+      .dep-submit-gold{ background:linear-gradient(135deg,#1769ee,#0d4ebd); }
+      .dep-submit:hover{ box-shadow:0 10px 22px rgba(23,105,238,.28); }
+      .dep-ghost-btn{ color:#315579; border-color:#d5e0ec; background:#f7faff; }
+      .dep-inline-error{ background:#fff1f1; color:#c53b45; border:1px solid #f2c9cc; }
+      .dep-inline-note,.dep-note{ color:#72839a; }
+      .dep-info-card{ background:linear-gradient(135deg,#fff,#f7faff); }
+      .dep-info-icon{ background:#e4f7ed; color:#12945a; }
+      .dep-info-icon-gold{ background:#fff2cf; color:#ad7200; }
+      .dep-info-card h3{ color:#10284d; }
+      .dep-info-card p{ color:#667b95; }
+      .dep-info-card a{ color:#135bdc; }
+      .dep-log-panel{ background:#fff; border-color:#dce5f0; box-shadow:0 8px 22px rgba(19,53,96,.05); }
+      .dep-log-header{ color:#536b87; }
+      .dep-log-header:hover,.dep-log-toolbar{ background:#f5f8fc; }
+      .dep-log-body{ border-color:#e4ebf3; }
+      .dep-log-count,.dep-log-filter,.dep-log-action{ background:#edf3f9; border-color:#d8e3ef; color:#60758d; }
+      .dep-log-filter.active{ background:#e4edff; border-color:#1769ee; color:#135bdc; }
+      .dep-log-entry{ background:#f7faff; }
+      .dep-log-ctx{ color:#4f6680; }
+      .dep-log-msg{ color:#415b76; }
+      .dep-log-time,.dep-log-dur{ color:#8798ab; }
+      .dep-log-ref{ color:#73869b; background:#eaf0f6; }
+      .dep-log-details pre{ background:#eef3f8; color:#5f7590; }
+      .dep-log-empty{ color:#8a9bad; }
+      @media(max-width:560px){
+        .dep-hero{ margin:0; border-radius:0 0 20px 20px; padding:26px 18px 30px; }
+        .dep-hero h1{ font-size:28px; }
+        .dep-body{ padding:16px 12px 40px; }
+        .dep-card{ padding:17px; border-radius:14px; }
+        .dep-ng-tabs button{ flex:0 0 calc(50% - 3px); }
+      }
     `}</style>
   );
 }
