@@ -155,6 +155,24 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
   const headers: Record<string, string> = { Accept: "application/json", "Cache-Control": "no-cache", Pragma: "no-cache", ...authHeaders(path), ...extraHeaders };
   if (body !== undefined) headers["Content-Type"] = "application/json";
 
+  const debugScheduler = path.includes("/admin/matches/auto");
+  const debugBody = (value: unknown): unknown => {
+    if (!value || typeof value !== "object") return value;
+    if (Array.isArray(value)) return value.map(debugBody);
+    const source = value as Record<string, unknown>;
+    return Object.fromEntries(Object.entries(source).map(([key, item]) => {
+      if (typeof item === "string" && item.startsWith("data:image/")) return [key, `[redacted image data: ${item.length} chars]`];
+      if (key.toLowerCase().includes("token") || key.toLowerCase().includes("authorization")) return [key, "[redacted]"];
+      return [key, debugBody(item)];
+    }));
+  };
+  if (debugScheduler) {
+    console.groupCollapsed(`[Scheduler] ${method} ${BASE_URL}${path}`);
+    console.info("Request headers", { ...headers, Authorization: headers.Authorization ? "Bearer [redacted]" : undefined });
+    console.info("Request payload", debugBody(body));
+    console.groupEnd();
+  }
+
   let res: Response;
   try {
     res = await fetch(`${BASE_URL}${path}`, {
@@ -165,6 +183,8 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch (networkErr) {
+    if (debugScheduler) console.error("[Scheduler] Network error", networkErr);
+
     // Network failure (offline, DNS, CORS preflight) — wrap so callers
     // always get an ApiError and the DepositCenter logger sees httpStatus=0
     throw new ApiError(
@@ -176,8 +196,10 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
   const text = await res.text();
   let payload: unknown;
   try { payload = text ? JSON.parse(text) : undefined; } catch { payload = text; }
+  if (debugScheduler) console.info("[Scheduler] Response", { status: res.status, ok: res.ok, contentType: res.headers.get("content-type"), body: payload });
 
   if (!res.ok) {
+    if (debugScheduler) console.error("[Scheduler] HTTP failure", { status: res.status, url: `${BASE_URL}${path}`, body: payload });
     // Try to pull a human-readable message out of the response body.
     // Flutterwave v4 error shape: { "status": "failed", "error": { "message": "..." } }
     // Spring ApiException shape:  { "message": "..." }
