@@ -199,7 +199,7 @@ export default function WalletCenter() {
   const rawBalance = summary?.balance ?? summary?.availableBalance ?? summary?.currentBalance;
   const balance    = numeric(rawBalance);
   const money      = (v: number | null) =>
-    v === null ? "—" : showBalance ? v.toFixed(2) : "••••••";
+    v === null ? "—" : showBalance ? v.toLocaleString("en-GH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "••••••";
 
   const first      = pickUserField(user, "firstName",  "first_name",  "givenName");
   const last       = pickUserField(user, "lastName",   "last_name",   "familyName");
