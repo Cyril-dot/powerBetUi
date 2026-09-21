@@ -2347,3 +2347,9 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 /* Featured admin fixtures: explicit, high-contrast label. */
 .sb-special-section .section-title,.sb-special-section .section-heading{font-weight:950!important;color:#073875!important}
 .sb-special-section .section-badge{background:#0d7d45!important;color:#fff!important;border-color:#0d7d45!important}
+
+/* Club crest presentation: preserve badge shape and make Featured admin fixtures unmistakable. */
+.sb-crest{background:#fff!important;border:2px solid rgba(20,92,150,.22)!important;box-shadow:0 3px 10px rgba(9,37,64,.14)}
+.sb-crest img{object-fit:contain!important;padding:2px;box-sizing:border-box}
+.featured-chip{background:#0a7f4f!important;color:#fff!important;border:1px solid #49d991!important;font-weight:950!important}
+.sb-special-section .sb-section-head{background:linear-gradient(90deg,rgba(44,132,255,.16),rgba(73,217,145,.12));border-bottom:2px solid rgba(73,217,145,.55)}

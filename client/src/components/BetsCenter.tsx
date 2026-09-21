@@ -160,10 +160,11 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
   const [openSubFilter, setOpenSubFilter] = useState<"all" | "cashout" | "live">("all");
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [placedNotice, setPlacedNotice] = useState(false);
-  const [matchScores, setMatchScores] = useState<Record<string, Match>>({});
+  const [matchScores, setMatchScores] = useState<Record<string, Match>>({}); const [, repaint] = useState(0);
   const hiddenTickets = useMemo(readHiddenTickets, []);
 
   useEffect(() => { setTab(defaultTab); }, [defaultTab]);
+  useEffect(() => { const timer = window.setInterval(() => repaint((n) => n + 1), 1000); return () => window.clearInterval(timer); }, []);
 
   const load = async () => {
     setLoading(true);
@@ -198,7 +199,7 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
     const ids = Array.from(new Set([...openBets, ...settledBets].flatMap((b) => b.selections.map((s) => s.matchId)).filter(Boolean)));
     if (ids.length === 0) return;
     let cancelled = false;
-    const refresh = () => Promise.allSettled(ids.map((mid) => api.matches.getById(mid))).then((results) => {
+    const refresh = () => Promise.allSettled(ids.map(async (mid) => { try { return await api.matches.getById(mid); } catch { return api.adminMatches.getById(mid); } })).then((results) => {
       if (cancelled) return;
       setMatchScores((prev) => {
         const next = { ...prev };

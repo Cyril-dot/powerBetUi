@@ -156,7 +156,7 @@ function MatchRow({
           >
             <Star size={13} fill={favored ? "currentColor" : "none"} />
           </button>
-          {isAdmin && <span className="sb-badge special"><Zap size={9} /> POWER</span>}
+          {isAdmin && <span className="sb-badge special featured-chip"><Zap size={9} /> FEATURED</span>}
           {match.leagueLogo && <img className="sb-competition-mark" src={match.leagueLogo} alt="" loading="lazy" referrerPolicy="no-referrer" />}
           <small>{match.league || match.sport || "Match"}</small>
           {match.isSyntheticOdds && !isLive && !ended && <span className="sb-badge synth">EST. ODDS</span>}
