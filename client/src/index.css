@@ -2445,3 +2445,7 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .bh-open-team-row>span:not(.sb-crest){color:#111827!important;font-weight:800!important}
 .bh-open-team-row strong{background:transparent!important;border:0!important;box-shadow:none!important;color:#111827!important;padding:0!important}
 .bh-open-leg-head>b{color:#111827!important;font-size:12px!important;font-weight:850!important}
+
+/* Minimum stake validation: below GHS 100 is visible and unmistakably blocked. */
+.bp-stake-error,
+.stake-error{display:block;margin-top:6px;color:#b4232d!important;font-size:12px;font-weight:800;line-height:1.35}
