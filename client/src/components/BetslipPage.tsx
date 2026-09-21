@@ -201,6 +201,7 @@ export default function BetslipPage({
 }: { picks: Pick[]; setPicks: (p: Pick[]) => void; onPlace: (stake: number) => Promise<void> }) {
   const [, setLocation] = useLocation();
   const [stake, setStake] = useState("1");
+  const [stakeEdited, setStakeEdited] = useState(false);
   const [placing, setPlacing] = useState(false);
   const [notice, setNotice] = useState<{ type: "error" | "success"; text: string } | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
@@ -276,10 +277,10 @@ export default function BetslipPage({
             <div className="bp-summary-row"><span>Total odds</span><b>{totalOdds.toFixed(2)}</b></div>
             <label className="bp-stake-field">
               <span>Stake (GHS)</span>
-              <input type="number" min={MIN_STAKE} max={MAX_STAKE} value={stake} placeholder="Enter amount" onChange={(e) => setStake(e.target.value)} />
+              <input type="number" min={MIN_STAKE} max={MAX_STAKE} value={stake} placeholder="Enter amount" onChange={(e) => { setStakeEdited(true); setStake(e.target.value); }} />
             </label>
             <div className="bp-stake-hint">Min GHS {MIN_STAKE} · Max GHS {MAX_STAKE}{balance !== null && ` · Balance GHS ${balance.toFixed(2)}`}</div>
-            {stake !== "" && Number.isFinite(stakeValue) && stakeValue < MIN_STAKE && <small className="bp-stake-error" role="alert">You cannot stake below the minimum stake of GHS {MIN_STAKE}.</small>}
+            {stakeEdited && stake !== "" && Number.isFinite(stakeValue) && stakeValue < MIN_STAKE && <small className="bp-stake-error" role="alert">Deposit an additional GHS {Math.max(0, MIN_STAKE - stakeValue).toFixed(2)} to place this bet.</small>}
             <div className="bp-summary-row highlight"><span>Potential return</span><b>GHS {potentialReturn.toFixed(2)}</b></div>
             <button className="gold-button full" onClick={place} disabled={placing || stakeInvalid}>{placing ? "Placing…" : "Place Bet"}</button>
             {notice && <small className={notice.type === "error" ? "auth-notice" : "auth-notice bp-success"}>{notice.text}</small>}
