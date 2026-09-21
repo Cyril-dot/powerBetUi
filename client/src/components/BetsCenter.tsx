@@ -45,12 +45,20 @@ function dayLabel(key: string): { day: string; mon: string } {
 function isOpenMatchLive(match: Match | undefined): boolean {
   if (!match) return false;
   const status = String(match.status ?? "").trim().toUpperCase().replace(/[\s-]+/g, "_");
-  return ["LIVE", "IN_PLAY", "IN_PROGRESS", "FIRST_HALF", "SECOND_HALF", "HALFTIME", "HALF_TIME", "HT"].includes(status) || /^\d+(ST|ND|RD|TH)_HALF$/.test(status);
+  if (["FINISHED", "FT", "ENDED", "COMPLETED", "CANCELLED", "POSTPONED"].includes(status)) return false;
+  if (["LIVE", "IN_PLAY", "IN_PROGRESS", "FIRST_HALF", "SECOND_HALF", "HALFTIME", "HALF_TIME", "HT"].includes(status) || /^\d+(ST|ND|RD|TH)_HALF$/.test(status)) return true;
+  // Some admin-created fixtures have no live status. Infer the normal 90-minute
+  // window plus the half-time interval from kickoff so Open Bets still updates.
+  if (match.kickoffAt) {
+    const elapsed = (Date.now() - new Date(match.kickoffAt).getTime()) / 60000;
+    return Number.isFinite(elapsed) && elapsed >= 0 && elapsed < 105;
+  }
+  return false;
 }
 function openMatchClock(match: Match | undefined): string {
   if (!match) return "";
   const status = String(match.status ?? "").trim().toUpperCase().replace(/[\s-]+/g, "_");
-  if (["HALFTIME", "HALF_TIME", "HT"].includes(status)) return "HT";
+  if (["HALFTIME", "HALF_TIME", "HALF_TIME_BREAK", "HT"].includes(status)) return "HT";
   if (match.minutePlayed != null) return `${match.minutePlayed}'`;
   const kickoff = match.kickoffAt ? new Date(match.kickoffAt).getTime() : NaN;
   if (Number.isNaN(kickoff)) return "LIVE";

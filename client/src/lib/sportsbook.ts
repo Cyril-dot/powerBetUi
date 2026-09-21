@@ -609,13 +609,13 @@ export function isMatchLive(match: EnrichedMatch): boolean {
   const status = match.status ?? "";
   if (FINISHED_STATUSES.has(status)) return false;
   if (isLiveStatus(status)) return true;
-  if (status && match.kickoffAt) {
+  if (match.kickoffAt) {
     const kickoff = parseKickoff(match.kickoffAt);
     const now = new Date();
     if (!Number.isNaN(kickoff.getTime())) {
       const minutesSinceKickoff = (now.getTime() - kickoff.getTime()) / 60_000;
-      if (minutesSinceKickoff > 0 && minutesSinceKickoff < 180) {
-        logUnknownStatus(status, "isMatchLive (treated as live by kickoff time, status was non-empty but unrecognized)");
+      if (minutesSinceKickoff > 0 && minutesSinceKickoff < 105) {
+        if (status) logUnknownStatus(status, "isMatchLive (treated as live by kickoff time, status was non-empty but unrecognized)");
         return true;
       }
     }

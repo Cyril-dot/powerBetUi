@@ -167,7 +167,7 @@ function MatchRow({
           {match.isSyntheticOdds && !isLive && !ended && <span className="sb-badge synth">EST. ODDS</span>}
         </span>
         <span className={`sb-row-time${isLive ? " sb-live-corner" : ""}`}>
-          {ended ? <span className="sb-badge ft">FT</span> : isLive ? <><strong className="sb-live-label"><i className="live-dot" /> LIVE</strong><small className="sb-live-minute"><LiveClock match={match} /></small></> : (
+          {ended ? <span className="sb-badge ft">FT</span> : isLive ? <><span className="sb-live-label"><i className="live-dot" /><small>live</small></span><small className="sb-live-minute"><LiveClock match={match} /></small></> : (
             <>
               {formatKickoffDate(match.kickoffAt)} {formatKickoff(match.kickoffAt)}
               <Countdown kickoffAt={match.kickoffAt} />
@@ -311,7 +311,7 @@ function FeaturedMatchCard({ match, hasDraw, picks, onPick }: { match: EnrichedM
           <span className="featured-card-status-badge best">BEST ODDS</span>
         )}
       </div>
-      <Link href={matchHref} className="featured-card-fixture">
+      <Link href={matchHref} className={`featured-card-fixture${isLive ? " live-column-fixture" : ""}`}>
         <div className="featured-card-side">
           <TeamCrest url={match.displayHomeLogo} name={match.homeTeam ?? ""} />
           <span className="featured-card-side-label">HOME</span>
