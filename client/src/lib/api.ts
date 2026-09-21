@@ -1144,10 +1144,10 @@ export interface AutoMatchSchedule {
 }
 
 export const adminMatchSchedule = {
-  // Scheduler routes are protected API endpoints and require the /api prefix.
-  create: (body: AutoMatchScheduleRequest) => post<Match>("/api/admin/matches/auto", body),
-  getSchedule: (matchId: string) => get<AutoMatchSchedule>(`/api/admin/matches/auto/${matchId}`),
-  cancel: (matchId: string) => request<{ matchId: string; jobsCancelled: number }>("DELETE", `/api/admin/matches/auto/${matchId}`),
+  // Scheduler route follows the reference admin backend contract (no /api prefix).
+  create: (body: AutoMatchScheduleRequest) => post<Match>("/admin/matches/auto", body),
+  getSchedule: (matchId: string) => get<AutoMatchSchedule>(`/admin/matches/auto/${matchId}`),
+  cancel: (matchId: string) => request<{ matchId: string; jobsCancelled: number }>("DELETE", `/admin/matches/auto/${matchId}`),
 };
 
 export const adminPredictions = {
