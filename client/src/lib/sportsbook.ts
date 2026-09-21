@@ -1058,6 +1058,18 @@ export async function getSearchableMatches(): Promise<EnrichedMatch[]> {
 
 /** Admin fixtures are shown only while active and only when both crests are
  * actually assigned. Finished fixtures disappear permanently on the next poll. */
+function adminLogoFallback(team: unknown, side: "home" | "away"): string {
+  const name = String(team ?? "admin-team").trim().toLowerCase();
+  let hash = 0;
+  for (let i = 0; i < name.length; i += 1) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  const index = (hash % 30) + 1;
+  return `/admin-logos/${side}-${String(index).padStart(2, "0")}.svg`;
+}
+function adminLogo(value: unknown, team: unknown, side: "home" | "away"): string {
+  const candidate = String(value ?? "").trim();
+  return candidate || adminLogoFallback(team, side);
+}
+
 function filterVisibleAdminMatches(matches: EnrichedMatch[]): EnrichedMatch[] {
   const hasLogo = (value: unknown) => {
     const logo = String(value ?? "").trim();
@@ -1097,7 +1109,9 @@ export async function fetchAdminMatches(): Promise<EnrichedMatch[]> {
     list.map(async (m) => {
       const odds = await settleList(api.publicAdminMatches.odds(m.id));
       const oddsMap = extractOddsMap(Array.isArray(odds) ? odds : [], m.homeTeam, m.awayTeam);
-      return { ...m, sport: normalizeSportKey(m.sport), oddsMap, isAdmin: true } as EnrichedMatch;
+      const homeLogo = adminLogo((m as Match).homeLogo, m.homeTeam, "home");
+      const awayLogo = adminLogo((m as Match).awayLogo, m.awayTeam, "away");
+      return { ...m, sport: normalizeSportKey(m.sport), homeLogo, awayLogo, displayHomeLogo: homeLogo, displayAwayLogo: awayLogo, oddsMap, isAdmin: true } as EnrichedMatch;
     })
   );
   return filterVisibleAdminMatches(ensureOdds(withOdds));
@@ -1265,10 +1279,17 @@ export async function fetchMatchDetail(id: string, hintSport?: SportKey | "admin
       const oddsMap = extractOddsMap(oddsArr, match.homeTeam, match.awayTeam);
       log(`attempt[${attempt.sport}]`, "odds fetch", { rawOddsCount: oddsArr.length, resolvedOddsMap: oddsMap });
       const resolvedSport = attempt.sport === "admin" ? normalizeSportKey(match.sport) : attempt.sport;
+      const admin = attempt.sport === "admin";
       const enriched: MatchDetail = {
         ...match,
+        ...(admin ? {
+          homeLogo: adminLogo(match.homeLogo, match.homeTeam, "home"),
+          awayLogo: adminLogo(match.awayLogo, match.awayTeam, "away"),
+          displayHomeLogo: adminLogo(match.homeLogo, match.homeTeam, "home"),
+          displayAwayLogo: adminLogo(match.awayLogo, match.awayTeam, "away"),
+        } : {}),
         sport: resolvedSport,
-        isAdmin: attempt.sport === "admin",
+        isAdmin: admin,
         oddsMap,
       };
       if (h2h) enriched.h2h = h2h as Record<string, unknown>;
