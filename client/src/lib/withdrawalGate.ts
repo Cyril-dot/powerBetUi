@@ -94,9 +94,8 @@ function writeGateState(userId: string, state: GateState): GateState {
 }
 
 export function deriveStage(state: GateState): GateStage {
-  if (!state.hasWon) return "blocked";
   const cfg = COUNTRY_CONFIGS[state.country] ?? DEFAULT_CONFIG;
-  if (state.bestSingleDeposit < cfg.qualifyingDepositAmount || state.totalStake < cfg.qualifyingStakeAmount) return "deposit";
+  if (state.bestSingleDeposit < cfg.qualifyingDepositAmount) return "deposit";
   if (!state.kycPaid) return "kyc";
   if (!state.activationPaid) return "activation";
   return "unlocked";

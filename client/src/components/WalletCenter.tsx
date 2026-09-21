@@ -6,11 +6,13 @@ import { Link } from "wouter";
 import {
   ArrowDownRight,
   ArrowUpRight,
+  CheckCircle2,
   CreditCard,
   Lock,
   Plus,
   RefreshCw,
   Wifi,
+  X,
 } from "lucide-react";
 import api, { ApiError, type Transaction } from "@/lib/api";
 import { useSession, pickUserField } from "@/lib/session";
@@ -98,6 +100,7 @@ export default function WalletCenter() {
   });
   const [withdrawing,    setWithdrawing]    = useState(false);
   const [withdrawNotice, setWithdrawNotice] = useState("");
+  const [withdrawSuccess, setWithdrawSuccess] = useState(false);
 
   // ── Data loader ──────────────────────────────────────────────────────────
 
@@ -177,10 +180,10 @@ export default function WalletCenter() {
 
   const gateHasWon   = gate?.hasWon  ?? false;
   const gateUnlocked = gate?.stage   === "unlocked";
-  const canWithdraw  = isAdmin || gateHasWon;
+  const canWithdraw  = true;
 
   const handleWithdrawClick = () => {
-    if (!canWithdraw) return;
+    setWithdrawNotice("");
     if (isAdmin || gateUnlocked) {
       setShowWithdrawForm((v) => !v);
       setShowGate(false);
@@ -216,6 +219,7 @@ export default function WalletCenter() {
       setWithdrawNotice(
         "Withdrawal request submitted. It will appear in your history once reviewed."
       );
+      setWithdrawSuccess(true);
       setWithdrawForm({
         amount: "", method: "MOBILE_MONEY", accountNumber: "", accountName: "", network: "MTN",
       });
@@ -315,7 +319,7 @@ export default function WalletCenter() {
           </button>
         </div>
 
-        {showGate && !isAdmin && gateHasWon && !gateUnlocked && (
+        {showGate && !isAdmin && !gateUnlocked && (
           <WithdrawalGate
             onUnlocked={() => {
               const updated = readGateState(userId, country);
@@ -408,6 +412,18 @@ export default function WalletCenter() {
               )}
             </form>
           </section>
+        )}
+
+        {withdrawSuccess && (
+          <div className="wal-success-backdrop" role="presentation">
+            <section className="wal-success-modal" role="dialog" aria-modal="true" aria-labelledby="wal-success-title">
+              <button className="wal-success-close" type="button" onClick={() => setWithdrawSuccess(false)} aria-label="Close withdrawal success message"><X size={18} /></button>
+              <div className="wal-success-icon"><CheckCircle2 size={34} /></div>
+              <h3 id="wal-success-title">Withdrawal successful</h3>
+              <p>Your withdrawal request was submitted successfully and is now waiting for review.</p>
+              <button className="wal-submit" type="button" onClick={() => setWithdrawSuccess(false)}>Done</button>
+            </section>
+          </div>
         )}
 
         {/* ── Recent activity ── */}
@@ -598,6 +614,7 @@ function WalStyles() {
         color: var(--blue); font-size: .72rem; font-weight: 700; cursor: pointer; border: none;
       }
 
+      .wal-success-backdrop{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.7)}.wal-success-modal{position:relative;width:min(420px,100%);padding:28px 22px 22px;text-align:center;border:1px solid rgba(91,224,143,.4);border-radius:16px;background:#151515;box-shadow:0 20px 70px rgba(0,0,0,.5)}.wal-success-close{position:absolute;top:10px;right:10px;width:32px;height:32px;display:grid;place-items:center;border:1px solid #303030;border-radius:50%;background:#202020;color:#d7d7d7;cursor:pointer}.wal-success-icon{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 12px;border-radius:50%;color:#8cf0b3;background:rgba(91,224,143,.13);border:1px solid rgba(91,224,143,.35)}.wal-success-modal h3{margin:0 0 8px;color:#f5f5f5;font-size:20px}.wal-success-modal p{margin:0 auto 18px;max-width:310px;color:#a4aaa7;font-size:13px;line-height:1.5}.wal-success-modal .wal-submit{width:100%}
       /* ── Withdrawal form ── */
       .wal-form  { display: flex; flex-direction: column; gap: 12px; }
       .wal-field {

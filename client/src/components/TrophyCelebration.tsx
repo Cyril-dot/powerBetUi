@@ -35,7 +35,7 @@ export default function TrophyCelebration({ bet, onClose, showConfetti = true }:
   };
   const viewTicket = () => { handleClose(); setLocation(`/bets/${bet.id}`); };
   return <div className="wc-overlay" role="dialog" aria-modal="true" aria-label="Winning bet"><TrophyCelebrationStyles />{showConfetti && <Confetti />}
-    <button className="wc-close" type="button" onClick={handleClose} aria-label="Close"><X size={20} /></button>
+    <button className="wc-close" type="button" onPointerDown={(event) => { event.stopPropagation(); handleClose(); }} onClick={(event) => { event.stopPropagation(); handleClose(); }} aria-label="Close"><X size={20} /></button>
     <div className="wc-stage"><div className="wc-headline"><h1 className="wc-shimmer">YOU WON</h1></div>
       <div className="wc-amount"><span>AMOUNT WON</span><strong>GHS {bet.potentialReturn.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></div>
       <div className="wc-trophy-stage"><div className="wc-sparkles" aria-hidden="true"><i>✦</i><i>✧</i><i>✦</i><i>✧</i><i>✦</i></div><div className={trophyFailed ? "wc-trophy wc-trophy-fallback" : "wc-trophy"}>{trophyFailed ? <Trophy size={76} /> : <><span className="wc-shine" /><img src={TROPHY_SRC} alt="Super Bet S trophy" onError={() => setTrophyFailed(true)} /></>}</div></div>
