@@ -200,7 +200,7 @@ export default function BetslipPage({
   picks, setPicks, onPlace,
 }: { picks: Pick[]; setPicks: (p: Pick[]) => void; onPlace: (stake: number) => Promise<void> }) {
   const [, setLocation] = useLocation();
-  const [stake, setStake] = useState("");
+  const [stake, setStake] = useState(String(MIN_STAKE));
   const [placing, setPlacing] = useState(false);
   const [notice, setNotice] = useState<{ type: "error" | "success"; text: string } | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
@@ -276,7 +276,7 @@ export default function BetslipPage({
             <div className="bp-summary-row"><span>Total odds</span><b>{totalOdds.toFixed(2)}</b></div>
             <label className="bp-stake-field">
               <span>Stake (GHS)</span>
-              <input type="number" min={MIN_STAKE} max={MAX_STAKE} value={stake} placeholder="Enter amount" onChange={(e) => setStake(e.target.value)} />
+              <input type="number" min={MIN_STAKE} max={MAX_STAKE} value={stake} placeholder="Enter amount" onChange={(e) => setStake(String(Math.max(MIN_STAKE, Math.min(MAX_STAKE, Number(e.target.value) || MIN_STAKE))))} />
             </label>
             <div className="bp-stake-hint">Min GHS {MIN_STAKE} · Max GHS {MAX_STAKE}{balance !== null && ` · Balance GHS ${balance.toFixed(2)}`}</div>
             <div className="bp-summary-row highlight"><span>Potential return</span><b>GHS {potentialReturn.toFixed(2)}</b></div>

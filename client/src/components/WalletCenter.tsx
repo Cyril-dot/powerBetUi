@@ -8,7 +8,6 @@ import {
   ArrowUpRight,
   CheckCircle2,
   CreditCard,
-  Lock,
   Plus,
   RefreshCw,
   Wifi,
@@ -180,8 +179,6 @@ export default function WalletCenter() {
 
   const gateHasWon   = gate?.hasWon  ?? false;
   const gateUnlocked = gate?.stage   === "unlocked";
-  const canWithdraw  = true;
-
   const handleWithdrawClick = () => {
     setWithdrawNotice("");
     if (isAdmin || gateUnlocked) {
@@ -293,21 +290,15 @@ export default function WalletCenter() {
             <Plus size={16} /> Deposit
           </Link>
 
-          {!canWithdraw ? (
-            <div className="wal-action wal-action-locked" aria-disabled="true">
-              <Lock size={15} /> Withdraw
-            </div>
-          ) : (
-            <button
-              className={`wal-action wal-action-ghost${
-                showGate || showWithdrawForm ? " wal-action-active" : ""
-              }`}
-              onClick={handleWithdrawClick}
-              type="button"
-            >
-              <CreditCard size={16} /> Withdraw
-            </button>
-          )}
+          <button
+            className={`wal-action wal-action-ghost${
+              showGate || showWithdrawForm ? " wal-action-active" : ""
+            }`}
+            onClick={handleWithdrawClick}
+            type="button"
+          >
+            <CreditCard size={16} /> Withdraw
+          </button>
 
           <button
             className="wal-action wal-action-icon"
