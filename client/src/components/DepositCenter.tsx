@@ -368,7 +368,7 @@ async function probeNgVerify(
 // =============================================================================
 
 function MoMoForm() {
-  const [amount,   setAmount]   = useState("100");
+  const [amount,   setAmount]   = useState(() => new URLSearchParams(window.location.search).get("amount") || "100");
   const [phone,    setPhone]    = useState("");
   const [network,  setNetwork]  = useState<FlutterwaveGhNetwork>("MTN");
   const [status,   setStatus]   = useState<DepStatus>("idle");

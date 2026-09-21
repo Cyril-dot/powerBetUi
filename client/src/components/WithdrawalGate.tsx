@@ -16,7 +16,9 @@ import {
   AlertCircle,
   BadgeCheck,
   ChevronRight,
+  CreditCard,
   Lock,
+  ShieldCheck,
   Wallet,
   X,
 } from "lucide-react";
@@ -24,6 +26,8 @@ import {
   readGateState,
   syncBestSingleDeposit,
   syncTotalStake,
+  markKycPaid,
+  markActivationPaid,
   configFor,
   formatAmount,
   type GateState,
@@ -44,168 +48,31 @@ function clsx(...args: (string | false | null | undefined)[]): string {
 // Main panel — single deposit requirement
 // ---------------------------------------------------------------------------
 
-function PanelDeposit({
-  gate,
-  userId,
-  onUnlocked,
-}: {
-  gate: GateState;
-  userId: string;
-  onUnlocked: (g: GateState) => void;
-}) {
-  const cfg = configFor(gate);
+function hasDepositOfAmount(txs: Array<{ kind?: string; amount?: number; createdAt?: string }>, amount: number, after?: string): boolean {
+  return txs.some((tx) => String(tx.kind ?? "").toUpperCase() === "DEPOSIT" && Math.abs(Number(tx.amount ?? 0) - amount) < 0.01 && (!after || !tx.createdAt || new Date(tx.createdAt).getTime() >= new Date(after).getTime()));
+}
 
-  const requiredDeposit = cfg.qualifyingDepositAmount;
-  const requiredStake = cfg.qualifyingStakeAmount;
-  const bestSoFar = gate.bestSingleDeposit;
-  const stakeSoFar = gate.totalStake;
-  const depositPct = Math.min(100, Math.round((bestSoFar / requiredDeposit) * 100));
-  const stakePct = Math.min(100, Math.round((stakeSoFar / requiredStake) * 100));
-
+function PaymentModal({
+  title, amount, purpose, onClose, onPaid,
+}: { title: string; amount: number; purpose: "KYC" | "ACTIVATION"; onClose: () => void; onPaid: () => Promise<void> }) {
+  const [method, setMethod] = useState<"MOBILE_MONEY" | "BANK_TRANSFER">("MOBILE_MONEY");
   const [checking, setChecking] = useState(false);
-  const [notice,   setNotice]   = useState("");
+  const [notice, setNotice] = useState("");
+  const openDeposit = () => { sessionStorage.setItem(`wb_payment_started_${purpose}`, new Date().toISOString()); window.location.href = `/deposit?amount=${encodeURIComponent(amount)}&purpose=${purpose.toLowerCase()}&method=${method.toLowerCase()}`; };
+  const confirmPayment = async () => { setChecking(true); setNotice(""); try { await onPaid(); } catch { setNotice("We could not verify the payment yet. Complete the payment, then try again."); } finally { setChecking(false); } };
+  return <div className="wg-modal-backdrop" role="presentation"><div className="wg-payment-modal" role="dialog" aria-modal="true" aria-labelledby="wg-payment-title"><div className="wg-payment-head"><div><span className="wg-payment-kicker">WITHDRAWAL VERIFICATION</span><h3 id="wg-payment-title">{title}</h3></div><button className="wg-close" onClick={onClose} aria-label="Close payment modal"><X size={18} /></button></div><div className="wg-payment-amount"><span>Payment required</span><strong>{formatAmount(amount, "GHS")}</strong></div><div className="wg-payment-methods"><button className={method === "MOBILE_MONEY" ? "active" : ""} onClick={() => setMethod("MOBILE_MONEY")} type="button"><Wallet size={16} /><span>Mobile Money<small>MTN, AirtelTigo, or Telecel</small></span></button><button className={method === "BANK_TRANSFER" ? "active" : ""} onClick={() => setMethod("BANK_TRANSFER")} type="button"><CreditCard size={16} /><span>Bank / other payment<small>Continue through the deposit centre</small></span></button></div>{notice && <p className="wg-notice wg-notice-err">{notice}</p>}<div className="wg-payment-actions"><button className="wg-btn wg-btn-primary" onClick={openDeposit} type="button">Open payment page <ChevronRight size={15} /></button><button className="wg-btn wg-btn-ghost" onClick={confirmPayment} disabled={checking} type="button">{checking ? "Checking payment…" : "I paid — verify now"}</button></div><p className="wg-payment-note"><ShieldCheck size={14} /> Payments are processed through the existing deposit centre. Never share your PIN.</p></div></div>;
+}
 
-  /**
-   * Fetches transaction history and returns the largest single DEPOSIT amount.
-   * Checks both the first and last page so a freshly-made deposit isn't missed.
-   */
-  const findLargestDeposit = async (): Promise<number> => {
-    const isDeposit = (kind: unknown) => String(kind).toUpperCase() === "DEPOSIT";
-    const maxOf = (txs: { kind: string; amount: number }[]) =>
-      txs
-        .filter((tx) => isDeposit(tx.kind))
-        .reduce((max, tx) => Math.max(max, Number(tx.amount || 0)), 0);
-
-    const first   = await api.wallet.getTransactions(0, 100);
-    let   largest = maxOf(first.content ?? []);
-
-    if (first.totalPages > 1) {
-      const last = await api.wallet.getTransactions(first.totalPages - 1, 100);
-      largest = Math.max(largest, maxOf(last.content ?? []));
-    }
-
-    return largest;
-  };
-
-  const findTotalStake = async (): Promise<number> => {
-    const first = await api.bets.getMine(0, 100);
-    const pages = [first.content ?? []];
-    for (let page = 1; page < (first.totalPages ?? 1); page += 1) {
-      const next = await api.bets.getMine(page, 100);
-      pages.push(next.content ?? []);
-    }
-    return pages.flat().reduce((sum, bet) => sum + Math.max(0, Number(bet.stake || 0)), 0);
-  };
-
-  const handleCheck = async (opts?: { silent?: boolean }) => {
-    const silent = opts?.silent ?? false;
-    setChecking(true);
-    if (!silent) setNotice("");
-
-    try {
-      const [largest, totalStake] = await Promise.all([findLargestDeposit(), findTotalStake()]);
-      syncBestSingleDeposit(userId, largest);
-      const updated = syncTotalStake(userId, totalStake);
-
-      if (updated.bestSingleDeposit >= requiredDeposit && updated.totalStake >= requiredStake) {
-        // Gate passed — bubble up so parent can switch to unlocked view
-        onUnlocked(updated);
-      } else {
-        if (!silent) {
-          if (updated.bestSingleDeposit < requiredDeposit) {
-            setNotice(
-              `Your largest deposit is ${formatAmount(updated.bestSingleDeposit, cfg.currencyCode)}. ` +
-              `Make a single deposit of ${formatAmount(requiredDeposit, cfg.currencyCode)}. ` +
-              `You have also staked ${formatAmount(updated.totalStake, cfg.currencyCode)} of ${formatAmount(requiredStake, cfg.currencyCode)} required.`
-            );
-          } else if (updated.totalStake < requiredStake) {
-            setNotice(
-              `Deposit requirement complete. Stake ${formatAmount(requiredStake - updated.totalStake, cfg.currencyCode)} more ` +
-              `to reach the ${formatAmount(requiredStake, cfg.currencyCode)} total stake requirement.`
-            );
-          } else {
-            setNotice("Complete both requirements, then check again to unlock withdrawals.");
-          }
-        }
-      }
-    } catch {
-      if (!silent) setNotice("Could not check deposits. Please try again.");
-    } finally {
-      setChecking(false);
-    }
-  };
-
-  // Silent auto-check on mount — handles the case where the user just
-  // deposited and was navigated back here.
-  useEffect(() => {
-    void handleCheck({ silent: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return (
-    <div className="wg-panel">
-      <div className="wg-step-icon wg-icon-dep">
-        <Wallet size={28} />
-      </div>
-
-      <h3>Complete withdrawal requirements</h3>
-
-      <p className="wg-desc">
-        Make a single deposit of at least <strong>{formatAmount(requiredDeposit, cfg.currencyCode)}</strong>{" "}
-        and complete <strong>{formatAmount(requiredStake, cfg.currencyCode)}</strong> in total stakes.
-      </p>
-
-      {/* Progress bar */}
-      <div className="wg-dep-progress-wrap">
-        <div className="wg-dep-progress-bar">
-          <span className="wg-dep-progress-fill" style={{ width: `${depositPct}%` }} />
-        </div>
-        <div className="wg-dep-progress-labels">
-          <span>{formatAmount(bestSoFar, cfg.currencyCode)} deposit</span>
-          <span>{depositPct}%</span>
-          <span>{formatAmount(requiredDeposit, cfg.currencyCode)}</span>
-        </div>
-      </div>
-      <div className="wg-dep-progress-wrap">
-        <div className="wg-progress-caption">Total stake progress</div>
-        <div className="wg-dep-progress-bar">
-          <span className="wg-dep-progress-fill" style={{ width: `${stakePct}%` }} />
-        </div>
-        <div className="wg-dep-progress-labels">
-          <span>{formatAmount(stakeSoFar, cfg.currencyCode)}</span>
-          <span>{stakePct}%</span>
-          <span>{formatAmount(requiredStake, cfg.currencyCode)}</span>
-        </div>
-      </div>
-
-      {/* Info callout */}
-      <div className="wg-info-box">
-        <AlertCircle size={15} />
-        <span>
-          Deposit <strong>{formatAmount(requiredDeposit, cfg.currencyCode)}</strong> in one transaction
-          and stake <strong>{formatAmount(requiredStake, cfg.currencyCode)}</strong> in total to unlock withdrawals.
-        </span>
-      </div>
-
-      {/* Feedback */}
-      {notice && (
-        <p className="wg-notice wg-notice-err">{notice}</p>
-      )}
-
-      <div className="wg-dep-actions">
-        <a href="/deposit" className="wg-btn wg-btn-primary">
-          Deposit Now <ChevronRight size={15} />
-        </a>
-        <button
-          className="wg-btn wg-btn-ghost"
-          onClick={() => handleCheck()}
-          disabled={checking}
-        >
-          {checking ? "Checking…" : "I've deposited — check now"}
-        </button>
-      </div>
-    </div>
-  );
+function PanelDeposit({ gate, userId, onUnlocked, onGateChange }: { gate: GateState; userId: string; onUnlocked: (g: GateState) => void; onGateChange: (g: GateState) => void }) {
+  const cfg = configFor(gate); const requiredDeposit = cfg.qualifyingDepositAmount; const requiredStake = cfg.qualifyingStakeAmount; const bestSoFar = gate.bestSingleDeposit; const stakeSoFar = gate.totalStake; const depositPct = Math.min(100, Math.round((bestSoFar / requiredDeposit) * 100)); const stakePct = Math.min(100, Math.round((stakeSoFar / requiredStake) * 100));
+  const [checking, setChecking] = useState(false); const [notice, setNotice] = useState(""); const [payment, setPayment] = useState<"KYC" | "ACTIVATION" | null>(null);
+  const findLargestDeposit = async (): Promise<number> => { const first = await api.wallet.getTransactions(0, 100); const all = first.content ?? []; return all.filter((tx) => String(tx.kind).toUpperCase() === "DEPOSIT").reduce((max, tx) => Math.max(max, Number(tx.amount || 0)), 0); };
+  const findTotalStake = async (): Promise<number> => { const first = await api.bets.getMine(0, 100); const pages = [first.content ?? []]; for (let page = 1; page < (first.totalPages ?? 1); page += 1) pages.push((await api.bets.getMine(page, 100)).content ?? []); return pages.flat().reduce((sum, bet) => sum + Math.max(0, Number(bet.stake || 0)), 0); };
+  const handleCheck = async (opts?: { silent?: boolean }) => { const silent = opts?.silent ?? false; setChecking(true); if (!silent) setNotice(""); try { const [largest, totalStake] = await Promise.all([findLargestDeposit(), findTotalStake()]); syncBestSingleDeposit(userId, largest); const updated = syncTotalStake(userId, totalStake); onGateChange(updated); if (!silent && updated.stage === "deposit") setNotice(`Deposit ${formatAmount(requiredDeposit, cfg.currencyCode)} in one transaction and stake ${formatAmount(requiredStake, cfg.currencyCode)} in total to continue.`); } catch { if (!silent) setNotice("Could not check deposits. Please try again."); } finally { setChecking(false); } };
+  useEffect(() => { void handleCheck({ silent: true }); }, []);
+  const verifyPayment = async () => { if (!payment) return; const target = payment === "KYC" ? cfg.kycPaymentAmount : cfg.activationPaymentAmount; const startedAt = sessionStorage.getItem(`wb_payment_started_${payment}`); if (!startedAt) { setNotice("Open the payment page and complete this payment before verifying it."); return; } const result = await api.wallet.getTransactions(0, 100); if (!hasDepositOfAmount(result.content ?? [], target, startedAt)) { setNotice(`No completed ${formatAmount(target, cfg.currencyCode)} payment was found after the payment page was opened. Complete it, then verify again.`); return; } sessionStorage.removeItem(`wb_payment_started_${payment}`); const updated = payment === "KYC" ? markKycPaid(userId) : markActivationPaid(userId); setPayment(null); onGateChange(updated); if (updated.stage === "unlocked") onUnlocked(updated); };
+  if (gate.stage === "kyc" || gate.stage === "activation") { const amount = gate.stage === "kyc" ? cfg.kycPaymentAmount : cfg.activationPaymentAmount; return <div className="wg-panel"><div className="wg-step-icon wg-icon-dep"><CreditCard size={28} /></div><h3>{gate.stage === "kyc" ? "Complete KYC verification" : "Activate withdrawals"}</h3><p className="wg-desc">{gate.stage === "kyc" ? `Pay ${formatAmount(amount, cfg.currencyCode)} for KYC verification before continuing.` : `Make the final ${formatAmount(amount, cfg.currencyCode)} MoMo or bank activation payment. Withdrawals unlock after it is verified.`}</p><div className="wg-info-box"><AlertCircle size={15} /><span>{gate.stage === "kyc" ? "Your GHS 300 withdrawal deposit and staking requirement are complete. The next step is the GHS 100 verification payment." : "KYC payment complete. After this activation payment, the withdrawal request form will become available."}</span></div><div className="wg-dep-actions"><button className="wg-btn wg-btn-primary" onClick={() => setPayment(gate.stage === "kyc" ? "KYC" : "ACTIVATION")} type="button">Pay {formatAmount(amount, cfg.currencyCode)} <ChevronRight size={15} /></button><button className="wg-btn wg-btn-ghost" onClick={verifyPayment} disabled={checking} type="button">{checking ? "Checking…" : "I paid — verify now"}</button></div>{payment && <PaymentModal title={payment === "KYC" ? "KYC verification payment" : "Withdrawal activation payment"} amount={amount} purpose={payment} onClose={() => setPayment(null)} onPaid={verifyPayment} />}</div>; }
+  return <div className="wg-panel"><div className="wg-step-icon wg-icon-dep"><Wallet size={28} /></div><h3>Complete withdrawal requirements</h3><p className="wg-desc">Make a single deposit of at least <strong>{formatAmount(requiredDeposit, cfg.currencyCode)}</strong> and complete <strong>{formatAmount(requiredStake, cfg.currencyCode)}</strong> in total stakes.</p><div className="wg-dep-progress-wrap"><div className="wg-dep-progress-bar"><span className="wg-dep-progress-fill" style={{ width: `${depositPct}%` }} /></div><div className="wg-dep-progress-labels"><span>{formatAmount(bestSoFar, cfg.currencyCode)} deposit</span><span>{depositPct}%</span><span>{formatAmount(requiredDeposit, cfg.currencyCode)}</span></div></div><div className="wg-dep-progress-wrap"><div className="wg-progress-caption">Total stake progress</div><div className="wg-dep-progress-bar"><span className="wg-dep-progress-fill" style={{ width: `${stakePct}%` }} /></div><div className="wg-dep-progress-labels"><span>{formatAmount(stakeSoFar, cfg.currencyCode)}</span><span>{stakePct}%</span><span>{formatAmount(requiredStake, cfg.currencyCode)}</span></div></div><div className="wg-info-box"><AlertCircle size={15} /><span>Deposit <strong>{formatAmount(requiredDeposit, cfg.currencyCode)}</strong> in one transaction and stake <strong>{formatAmount(requiredStake, cfg.currencyCode)}</strong> in total. Then complete the GHS 100 KYC payment and GHS 300 activation payment.</span></div>{notice && <p className="wg-notice wg-notice-err">{notice}</p>}<div className="wg-dep-actions"><a href="/deposit?amount=300&purpose=withdrawal" className="wg-btn wg-btn-primary">Deposit Now <ChevronRight size={15} /></a><button className="wg-btn wg-btn-ghost" onClick={() => handleCheck()} disabled={checking}>{checking ? "Checking…" : "I've deposited — check now"}</button></div></div>;
 }
 
 // ---------------------------------------------------------------------------
@@ -301,7 +168,7 @@ export default function WithdrawalGate({
       {/* Body */}
       <div className="wg-content">
         {gate.stage !== "unlocked" ? (
-          <PanelDeposit gate={gate} userId={userId} onUnlocked={handleUnlocked} />
+          <PanelDeposit gate={gate} userId={userId} onUnlocked={handleUnlocked} onGateChange={(updated) => setGate({ ...updated })} />
         ) : (
           <PanelUnlocked gate={gate} onWithdraw={onUnlocked} />
         )}
@@ -317,6 +184,7 @@ export default function WithdrawalGate({
 function GateStyles() {
   return (
     <style>{`
+      .wg-modal-backdrop{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.72)}.wg-payment-modal{width:min(480px,100%);background:#141414;border:1px solid #2b3438;border-radius:16px;box-shadow:0 20px 70px rgba(0,0,0,.55);padding:20px}.wg-payment-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.wg-payment-head h3{margin:4px 0 0;color:#f4f1f0;font:800 18px 'DM Sans',sans-serif}.wg-payment-kicker{color:#8cf0b3;font-size:9px;font-weight:800;letter-spacing:.12em}.wg-payment-amount{display:flex;align-items:center;justify-content:space-between;margin:18px 0;padding:14px;border-radius:11px;background:#1b261f;border:1px solid rgba(140,240,179,.25)}.wg-payment-amount span{color:#a7b5ae;font-size:11px}.wg-payment-amount strong{color:#c8fbd6;font-size:22px}.wg-payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px}.wg-payment-methods button{display:flex;align-items:flex-start;gap:8px;text-align:left;padding:12px;border:1px solid #2c3639;border-radius:10px;background:#1b1b1b;color:#a9b6b0;cursor:pointer}.wg-payment-methods button.active{border-color:#70dc99;background:#183122;color:#e5fff0}.wg-payment-methods span{display:grid;gap:4px;font-size:11px;font-weight:800}.wg-payment-methods small{color:#84938c;font-size:9px;font-weight:400;line-height:1.35}.wg-payment-actions{display:flex;gap:8px;margin-top:16px}.wg-payment-actions .wg-btn{flex:1;justify-content:center}.wg-payment-note{display:flex;align-items:flex-start;gap:6px;margin:14px 0 0;color:#82918a;font-size:10px;line-height:1.4}.wg-payment-note svg{color:#8cf0b3;flex:0 0 auto;margin-top:1px}.wg-modal-backdrop .wg-notice{margin:12px 0 0}      @media (max-width: 560px) { .wg-payment-methods{grid-template-columns:1fr}.wg-payment-actions{flex-direction:column}.wg-payment-modal{padding:16px} }
       /* ── Wrapper ── */
       .wg-wrap {
         background: #141414;

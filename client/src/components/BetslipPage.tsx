@@ -19,7 +19,7 @@ function formatCountdown(kickoffAt?: string): string {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-const MIN_STAKE = 150;
+const MIN_STAKE = 100;
 const MAX_STAKE = 20000;
 export const BET_PLACED_NOTICE_KEY = "superbet_bet_placed_notice";
 
