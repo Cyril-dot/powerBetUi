@@ -28,7 +28,7 @@ import BookingCodePage from "./components/BookingCodePage";
 import AdminPanelPage from "./pages/AdminPanelPage";
 import AdminEntryGuidePage from "./pages/AdminEntryGuidePage";
 import SuperAdminPage from "./pages/SuperAdminPage";
-import { SessionProvider, useSession, pickUserField, isAdminUser, isSuperAdminUser } from "./lib/session";
+import { SessionProvider, useSession, pickUserField } from "./lib/session";
 import { flagForCountry, codeLabel, flagImageUrl, COUNTRY_OPTIONS } from "./lib/countries";
 import NotFound from "./pages/NotFound";
 import { Bell, ChevronDown, ChevronRight, CircleHelp, Clock3, Copy, CreditCard, Flame, Gamepad2, Gift, Headphones, Info, Layers3, LayoutGrid, Minus, MoreHorizontal, Play, Plus, Radio, ScanBarcode, Search, ShieldCheck, Sparkles, Ticket, Trophy, UserRound, WalletCards, X, Zap } from "lucide-react";
@@ -256,20 +256,16 @@ function Hero(){
 }
 function BetSlip({ picks, setPicks, onPlace }: { picks: Pick[]; setPicks: (p: Pick[])=>void; onPlace: (stake: number)=>Promise<void> }){ const [stake,setStake]=useState(10); const [placing,setPlacing]=useState(false); const [notice,setNotice]=useState(""); const total=picks.reduce((a,b)=>a*b.odd,1); const place=async()=>{ setNotice(""); setPlacing(true); try { await onPlace(stake); setPicks([]); setNotice("Bet placed successfully."); } catch (error) { setNotice(error instanceof ApiError ? error.message : "We could not place this bet. Please try again."); } finally { setPlacing(false); } }; return <aside className="betslip panel"><div className="betslip-tabs"><span className="active">Betslip</span><span>Cashout</span></div>{picks.length===0?<div className="empty-slip"><WalletCards size={34}/><h3>Your betslip is empty</h3><p>{notice || "Click on the odds to add selections and build your bet."}</p><Link href="/" className="ghost-button">Browse matches</Link></div>:<><div className="slip-header"><span>Singles</span><button onClick={()=>setPicks([])}>Clear all</button></div>{picks.map(p=><div className="slip-pick" key={`${p.id}-${p.selection}`}><div><b>{p.match}</b><small>{p.market} · {p.selection}</small></div><strong>{p.odd.toFixed(2)}</strong><button onClick={()=>setPicks(picks.filter(x=>x!==p))}><X size={14}/></button></div>)}<div className="slip-summary"><div><span>Potential return</span><b>GHS {(stake*total).toFixed(2)}</b></div><label>Stake<input value={stake} onChange={e=>setStake(Number(e.target.value)||0)} type="number" min="1"/></label><button className="gold-button full" onClick={place} disabled={placing}>{placing ? "Placing…" : "Place bet"} <Zap size={15}/></button>{notice&&<small className="auth-notice" role="alert">{notice}</small>}</div></>}</aside> }
 /**
- * Floating slip shortcut — always visible so customers can either load a
- * booking code or open the current slip. With no selections it opens the
- * booking-code page; once odds are selected it opens the staking slip.
+ * Floating betslip shortcut — hidden until there's at least one selection,
+ * then jumps straight to the betslip page. Kept deliberately simple: one
+ * icon, one count badge, no label clutter.
  */
 function BetslipFAB({ count }: { count: number }) {
-  const hasSelections = count > 0;
-  const destination = hasSelections ? "/betslip" : "/booking-code";
-  const label = hasSelections
-    ? `Open betslip, ${count} selection${count === 1 ? "" : "s"}`
-    : "Load a booking code";
+  if (count <= 0) return null;
   return (
     <Link
-      href={destination}
-      aria-label={label}
+      href="/betslip"
+      aria-label={`Open betslip, ${count} selection${count === 1 ? "" : "s"}`}
       style={{
         position: "fixed",
         bottom: "calc(64px + 16px)",
@@ -291,16 +287,16 @@ function BetslipFAB({ count }: { count: number }) {
       onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1.08)"; }}
       onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
     >
-      {hasSelections && <span
-          style={{
-            position: "absolute", top: -4, right: -4, minWidth: 20, height: 20, padding: "0 4px",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            background: "#141414", color: "#fff", fontSize: 10, fontWeight: 900,
-            border: "2px solid #fff", borderRadius: 999,
-          }}
-        >
-          {count > 99 ? "99+" : count}
-        </span>}
+      <span
+        style={{
+          position: "absolute", top: -4, right: -4, minWidth: 20, height: 20, padding: "0 4px",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: "#141414", color: "#fff", fontSize: 10, fontWeight: 900,
+          border: "2px solid #fff", borderRadius: 999,
+        }}
+      >
+        {count > 99 ? "99+" : count}
+      </span>
       <Ticket size={22} strokeWidth={2.2} />
     </Link>
   );
@@ -339,19 +335,7 @@ function DepositPage(){ return <><Header onMenu={()=>document.body.classList.tog
 function BetsRoute({ tab, hideHeader = false }: { tab: "open" | "history"; hideHeader?: boolean }){ return <>{!hideHeader && <Header onMenu={()=>document.body.classList.toggle("menu-open")}/>}<BetsCenter defaultTab={tab}/><Footer/></> }
 function TicketDetailsRoute({ id }: { id: string }){ return <TicketDetailsPage id={id}/> }
 
-function RoleDenied({ label }: { label: string }) {
-  return <main className="wrap simple-page"><div className="simple-hero"><span className="eyebrow">Restricted access</span><h1>{label}</h1><p>Your account does not have permission to view this control panel.</p><Link href="/account" className="gold-button">Return to account</Link></div></main>;
-}
-
-function ProtectedAdminRoute({ superOnly = false }: { superOnly?: boolean }) {
-  const { user, checked } = useSession();
-  if (!checked) return <main className="wrap simple-page"><div className="simple-hero"><span className="eyebrow">Checking access</span><h1>Loading secure panel…</h1></div></main>;
-  const allowed = superOnly ? isSuperAdminUser(user) : isAdminUser(user);
-  if (!allowed) return <RoleDenied label={superOnly ? "Super Admin only" : "Admin Centre only"} />;
-  return superOnly ? <SuperAdminPage /> : <AdminPanelPage />;
-}
-
-function AdminRoute(){ return <ProtectedAdminRoute/>; }
-function App(){ const [picks,setPicks]=useState<Pick[]>([]); const onPick=(p:Pick)=>setPicks(prev=>prev.some(x=>x.id===p.id&&x.selection===p.selection)?prev.filter(x=>!(x.id===p.id&&x.selection===p.selection)):[...prev,p]); const onPlace=async(stake:number)=>{ if(!window.localStorage.getItem("accessToken")){ window.location.href="/login"; return; } if(picks.some((pick)=>!isBettableMatchId(pick.id))){ throw new ApiError("One selection is no longer available for betting. Remove it and choose a match with current odds.",422); } await api.bets.place({stake,currency:"GHS",selections:picks.map((pick)=>({matchId:pick.id,market:pick.market,selection:pick.selection,submittedOdds:pick.odd}))}); }; return <><WinCelebrationModal/><Switch><Route path="/admin-guide"><AdminEntryGuidePage/></Route><Route path="/admin"><AdminRoute/></Route><Route path="/super-admin"><ProtectedAdminRoute superOnly/></Route><Route path="/casino"><Casino/></Route><Route path="/wallet"><WalletPage/></Route><Route path="/deposit"><DepositPage/></Route><Route path="/promos"><SimplePage title="Promotions" kicker="More value in every play"><section className="promo-card"><span className="eyebrow">Welcome offer</span><h2>Play the smart side of sport.</h2><p>Keep an eye on the latest boosts, free bets, and loyalty rewards.</p><Link href="/wallet" className="gold-button">View offers <ChevronRight size={15}/></Link></section></SimplePage></Route><Route path="/affiliate"><SimplePage title="Affiliate centre" kicker="Grow with Super Bet"><section className="panel simple-card"><Layers3 size={24}/><h2>Your referral toolkit</h2><p>Invite friends, track activity, and request affiliate payouts from one clear workspace.</p></section></SimplePage></Route><Route path="/login"><AccountAuth mode="login" /></Route><Route path="/register"><AccountAuth mode="register" /></Route><Route path="/support"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><main className="wrap support-page"><SupportCenter/></main><Footer/></></Route><Route path="/help"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><main className="wrap support-page"><SupportCenter/></main><Footer/></></Route><Route path="/bets"><BetsRoute tab="history" hideHeader/></Route><Route path="/betslip"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><BetslipPage picks={picks} setPicks={setPicks} onPlace={onPlace}/><Footer/></></Route><Route path="/account"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><AccountCenter/><Footer/></></Route><Route path="/profile"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><ProfileCenter/><Footer/></></Route><Route path="/sports"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><SportsPage picks={picks} onPick={onPick}/><Footer/></></Route><Route path="/match/:id">{(params)=><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><MatchDetailsRoute id={params.id ?? ""} picks={picks} onPick={onPick}/><Footer/></>}</Route><Route path="/transactions"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><TransactionsPage/><Footer/></></Route><Route path="/bets/:id">{(params)=><TicketDetailsRoute id={params.id ?? ""}/>}</Route><Route path="/open-bets"><BetsRoute tab="open"/></Route><Route path="/notifications"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><NotificationsPage/><Footer/></></Route><Route path="/favorites"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><FavoritesPage/><Footer/></></Route><Route path="/settings"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><SettingsPage/><Footer/></></Route><Route path="/security"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><SecurityPage/><Footer/></></Route><Route path="/responsible-gaming"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><ResponsibleGamingPage/><Footer/></></Route><Route path="/search"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><SearchPage/><Footer/></></Route><Route path="/booking-code"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><BookingCodePage picks={picks} setPicks={setPicks}/><Footer/></></Route><Route path="/live"><SimplePage title="Live betting" kicker="Follow the moment"><div className="main-column" style={{gridColumn:"1 / -1"}}><Sportsbook picks={picks} onPick={onPick} mode="live-only" /></div><div style={{gridColumn:"1 / -1"}}><BetSlip picks={picks} setPicks={setPicks} onPlace={onPlace}/></div></SimplePage></Route><Route path="/"><Home onPick={onPick} picks={picks} setPicks={setPicks} onPlace={onPlace}/></Route><Route><NotFound/></Route></Switch><MobileBottomNav/><BetslipFAB count={picks.length}/></> }
+function AdminRoute(){ return <AdminPanelPage/>; }
+function App(){ const [picks,setPicks]=useState<Pick[]>([]); const onPick=(p:Pick)=>setPicks(prev=>prev.some(x=>x.id===p.id&&x.selection===p.selection)?prev.filter(x=>!(x.id===p.id&&x.selection===p.selection)):[...prev,p]); const onPlace=async(stake:number)=>{ if(!window.localStorage.getItem("accessToken")){ window.location.href="/login"; return; } if(picks.some((pick)=>!isBettableMatchId(pick.id))){ throw new ApiError("One selection is no longer available for betting. Remove it and choose a match with current odds.",422); } await api.bets.place({stake,currency:"GHS",selections:picks.map((pick)=>({matchId:pick.id,market:pick.market,selection:pick.selection,submittedOdds:pick.odd}))}); }; return <><WinCelebrationModal/><Switch><Route path="/admin-guide"><AdminEntryGuidePage/></Route><Route path="/admin"><AdminRoute/></Route><Route path="/super-admin"><SuperAdminPage/></Route><Route path="/casino"><Casino/></Route><Route path="/wallet"><WalletPage/></Route><Route path="/deposit"><DepositPage/></Route><Route path="/promos"><SimplePage title="Promotions" kicker="More value in every play"><section className="promo-card"><span className="eyebrow">Welcome offer</span><h2>Play the smart side of sport.</h2><p>Keep an eye on the latest boosts, free bets, and loyalty rewards.</p><Link href="/wallet" className="gold-button">View offers <ChevronRight size={15}/></Link></section></SimplePage></Route><Route path="/affiliate"><SimplePage title="Affiliate centre" kicker="Grow with Super Bet"><section className="panel simple-card"><Layers3 size={24}/><h2>Your referral toolkit</h2><p>Invite friends, track activity, and request affiliate payouts from one clear workspace.</p></section></SimplePage></Route><Route path="/login"><AccountAuth mode="login" /></Route><Route path="/register"><AccountAuth mode="register" /></Route><Route path="/support"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><main className="wrap support-page"><SupportCenter/></main><Footer/></></Route><Route path="/help"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><main className="wrap support-page"><SupportCenter/></main><Footer/></></Route><Route path="/bets"><BetsRoute tab="history" hideHeader/></Route><Route path="/betslip"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><BetslipPage picks={picks} setPicks={setPicks} onPlace={onPlace}/><Footer/></></Route><Route path="/account"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><AccountCenter/><Footer/></></Route><Route path="/profile"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><ProfileCenter/><Footer/></></Route><Route path="/sports"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><SportsPage picks={picks} onPick={onPick}/><Footer/></></Route><Route path="/match/:id">{(params)=><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><MatchDetailsRoute id={params.id ?? ""} picks={picks} onPick={onPick}/><Footer/></>}</Route><Route path="/transactions"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><TransactionsPage/><Footer/></></Route><Route path="/bets/:id">{(params)=><TicketDetailsRoute id={params.id ?? ""}/>}</Route><Route path="/open-bets"><BetsRoute tab="open"/></Route><Route path="/notifications"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><NotificationsPage/><Footer/></></Route><Route path="/favorites"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><FavoritesPage/><Footer/></></Route><Route path="/settings"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><SettingsPage/><Footer/></></Route><Route path="/security"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><SecurityPage/><Footer/></></Route><Route path="/responsible-gaming"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><ResponsibleGamingPage/><Footer/></></Route><Route path="/search"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><SearchPage/><Footer/></></Route><Route path="/booking-code"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><BookingCodePage picks={picks} setPicks={setPicks}/><Footer/></></Route><Route path="/live"><SimplePage title="Live betting" kicker="Follow the moment"><div className="main-column" style={{gridColumn:"1 / -1"}}><Sportsbook picks={picks} onPick={onPick} mode="live-only" /></div><div style={{gridColumn:"1 / -1"}}><BetSlip picks={picks} setPicks={setPicks} onPlace={onPlace}/></div></SimplePage></Route><Route path="/"><Home onPick={onPick} picks={picks} setPicks={setPicks} onPlace={onPlace}/></Route><Route><NotFound/></Route></Switch><MobileBottomNav/><BetslipFAB count={picks.length}/></> }
 
 export default function Root(){ return <SessionProvider><App/></SessionProvider> }

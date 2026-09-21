@@ -108,11 +108,14 @@ export function LiveClock({ match }: { match: EnrichedMatch }) {
 
 export function TeamCrest({ url, name }: { url?: string; name: string }) {
   const fallback = generateCrest(name);
+  const initials = (name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("") || "?").toUpperCase();
   const [src, setSrc] = useState(url || fallback);
-  useEffect(() => { setSrc(url || fallback); }, [url, fallback]);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => { setSrc(url || fallback); setFailed(false); }, [url, fallback]);
   return (
     <span className="sb-crest" aria-hidden>
-      <img src={src} alt="" loading="lazy" decoding="async" draggable={false} referrerPolicy="no-referrer" onError={() => { if (src !== fallback) setSrc(fallback); }} />
+      {!failed && <img src={src} alt="" loading="lazy" decoding="async" draggable={false} referrerPolicy="no-referrer" onError={() => { setFailed(true); setSrc(fallback); }} />}
+      {failed && <span className="sb-crest-fallback" style={{ backgroundImage: `url(${fallback})` }}>{initials}</span>}
     </span>
   );
 }
@@ -539,7 +542,7 @@ export default function Sportsbook({
       )}
 
       {mode === "all" && sport === "football" && !leagueFilter && adminMatches.length > 0 && (
-        <SectionShell title="Power Specials" icon={<Zap size={14} />} count={adminMatches.length} special badge="CURATED">
+        <SectionShell title="Featured" icon={<Zap size={14} />} count={adminMatches.length} special badge="CURATED">
           {adminMatches.map((m) => (
             <MatchRow key={m.id} match={m} hasDraw picks={picks} onPick={onPick} isAdmin />
           ))}

@@ -6,22 +6,15 @@ import { Link } from "wouter";
 import {
   ArrowDownRight,
   ArrowUpRight,
-  CalendarDays,
-  Check,
-  CircleCheckBig,
-  Clock3,
   CreditCard,
   Lock,
   Plus,
-  ReceiptText,
   RefreshCw,
-  Smartphone,
-  WalletCards,
   Wifi,
 } from "lucide-react";
-import api, { ApiError, type Transaction, type WithdrawalRequest } from "@/lib/api";
+import api, { ApiError, type Transaction } from "@/lib/api";
 import { useSession, pickUserField } from "@/lib/session";
-import { readGateState, markBetWon, configFor, type GateState } from "@/lib/withdrawalGate";
+import { readGateState, markBetWon, type GateState } from "@/lib/withdrawalGate";
 import WithdrawalGate from "./WithdrawalGate";
 
 // ---------------------------------------------------------------------------
@@ -105,17 +98,6 @@ export default function WalletCenter() {
   });
   const [withdrawing,    setWithdrawing]    = useState(false);
   const [withdrawNotice, setWithdrawNotice] = useState("");
-  const [withdrawalSuccess, setWithdrawalSuccess] = useState<{
-    amount: number;
-    destination: string;
-    reference: string;
-    date: string;
-  } | null>(null);
-  const [withdrawalPaid, setWithdrawalPaid] = useState<{
-    amount: number;
-    destination: string;
-    reference: string;
-  } | null>(null);
 
   // ── Data loader ──────────────────────────────────────────────────────────
 
@@ -134,24 +116,6 @@ export default function WalletCenter() {
       ]);
       setSummary(wallet as Record<string, unknown>);
       setTransactions(txs.content ?? []);
-
-      // A settled withdrawal is the user-facing payment confirmation. Show it
-      // once when the wallet data reflects the Super Admin settlement.
-      const settledWithdrawal = (txs.content ?? []).find((tx) =>
-        tx.kind === "WITHDRAW" && ["SETTLED", "COMPLETED", "SUCCESS", "SUCCESSFUL", "PAID"].includes(String(tx.status ?? "").toUpperCase())
-      );
-      if (settledWithdrawal && typeof window !== "undefined") {
-        const paidKey = `powerbet:withdrawal-paid:${settledWithdrawal.id}`;
-        if (window.sessionStorage.getItem(paidKey) !== "1") {
-          window.sessionStorage.setItem(paidKey, "1");
-          setWithdrawalSuccess(null);
-          setWithdrawalPaid({
-            amount: Math.abs(Number(settledWithdrawal.amount) || 0),
-            destination: "Your wallet destination",
-            reference: settledWithdrawal.id ? `WD-${String(settledWithdrawal.id).slice(-8).toUpperCase()}` : "WD-PAID",
-          });
-        }
-      }
 
       if (userId && !isAdmin) {
         const allTxs   = txs.content ?? [];
@@ -199,7 +163,7 @@ export default function WalletCenter() {
   const rawBalance = summary?.balance ?? summary?.availableBalance ?? summary?.currentBalance;
   const balance    = numeric(rawBalance);
   const money      = (v: number | null) =>
-    v === null ? "—" : showBalance ? v.toLocaleString("en-GH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "••••••";
+    v === null ? "—" : showBalance ? v.toFixed(2) : "••••••";
 
   const first      = pickUserField(user, "firstName",  "first_name",  "givenName");
   const last       = pickUserField(user, "lastName",   "last_name",   "familyName");
@@ -211,8 +175,9 @@ export default function WalletCenter() {
 
   // ── Gate helpers ─────────────────────────────────────────────────────────
 
+  const gateHasWon   = gate?.hasWon  ?? false;
   const gateUnlocked = gate?.stage   === "unlocked";
-  const canWithdraw  = isAdmin || Boolean(gate);
+  const canWithdraw  = isAdmin || gateHasWon;
 
   const handleWithdrawClick = () => {
     if (!canWithdraw) return;
@@ -231,18 +196,13 @@ export default function WalletCenter() {
     e.preventDefault();
     setWithdrawNotice("");
     const amount = Number(withdrawForm.amount);
-    const minimumWithdrawal = configFor(gate ?? readGateState(userId || "guest", country)).minWithdrawal;
-    if (!amount || amount < minimumWithdrawal) {
-      setWithdrawNotice(`The minimum withdrawal is ${currencyCode} ${minimumWithdrawal.toFixed(2)}.`);
-      return;
-    }
-    if (!withdrawForm.accountNumber || !withdrawForm.accountName) {
+    if (!amount || amount <= 0 || !withdrawForm.accountNumber || !withdrawForm.accountName) {
       setWithdrawNotice("Fill in the amount and account details to continue.");
       return;
     }
     setWithdrawing(true);
     try {
-      const request = await api.withdrawals.submit({
+      await api.withdrawals.submit({
         amount,
         currency:      currencyCode,
         method:        withdrawForm.method,
@@ -251,29 +211,11 @@ export default function WalletCenter() {
         network:
           withdrawForm.method === "MOBILE_MONEY"
             ? withdrawForm.network
-          : undefined,
+            : undefined,
       });
-      // Some successful backend responses only return 201/204 or omit the
-      // request body. The modal must still appear after the request succeeds.
-      const requestData = request as Partial<WithdrawalRequest> | null | undefined;
-      const requestDate = requestData?.createdAt ? new Date(requestData.createdAt) : new Date();
-      const isAlreadyPaid = ["SETTLED", "COMPLETED", "SUCCESS", "SUCCESSFUL", "PAID"].includes(String(requestData?.status ?? "").toUpperCase());
-      const destination = withdrawForm.method === "MOBILE_MONEY"
-        ? `${withdrawForm.network === "AIRTELTIGO" ? "AirtelTigo" : withdrawForm.network === "TELECEL" ? "Telecel" : "MTN"} Mobile Money`
-        : "Bank transfer";
-      const reference = requestData?.id ? `WD-${String(requestData.id).slice(-8).toUpperCase()}` : "WD-PENDING";
-      if (isAlreadyPaid) {
-        setWithdrawalPaid({ amount, destination, reference });
-      } else {
-        setWithdrawalSuccess({
-        amount,
-        destination,
-        reference,
-        date: requestDate.toLocaleDateString("en-GH", { day: "2-digit", month: "short", year: "numeric" }),
-        });
-      }
-      setShowWithdrawForm(false);
-      setWithdrawNotice("");
+      setWithdrawNotice(
+        "Withdrawal request submitted. It will appear in your history once reviewed."
+      );
       setWithdrawForm({
         amount: "", method: "MOBILE_MONEY", accountNumber: "", accountName: "", network: "MTN",
       });
@@ -373,7 +315,7 @@ export default function WalletCenter() {
           </button>
         </div>
 
-        {showGate && !isAdmin && !gateUnlocked && (
+        {showGate && !isAdmin && gateHasWon && !gateUnlocked && (
           <WithdrawalGate
             onUnlocked={() => {
               const updated = readGateState(userId, country);
@@ -385,61 +327,6 @@ export default function WalletCenter() {
           />
         )}
 
-        {withdrawalSuccess && (
-          <div className="wal-success-modal" role="dialog" aria-modal="true" aria-labelledby="wal-success-title">
-            <button className="wal-success-backdrop" type="button" aria-label="Close withdrawal confirmation" onClick={() => setWithdrawalSuccess(null)} />
-          <section className="wal-withdraw-success" aria-live="polite">
-            <div className="wal-success-icon" aria-hidden><Check size={36} strokeWidth={3} /></div>
-            <h2 id="wal-success-title">Withdrawal successful.</h2>
-            <p className="wal-success-lead">
-              We have received your request.<br />Your funds are pending processing.
-            </p>
-
-            <div className="wal-success-amount">
-              <span>Amount</span>
-              <strong>{currencyCode} {withdrawalSuccess.amount.toFixed(2)}</strong>
-            </div>
-
-            <div className="wal-success-details">
-              <div><Smartphone size={22} /><span><small>Destination</small><b>{withdrawalSuccess.destination}</b></span></div>
-              <div><CalendarDays size={22} /><span><small>Request date</small><b>{withdrawalSuccess.date}</b></span></div>
-              <div><ReceiptText size={22} /><span><small>Reference</small><b>{withdrawalSuccess.reference}</b></span></div>
-            </div>
-
-            <div className="wal-pending-card">
-              <div className="wal-pending-title"><Clock3 size={24} /> <strong>Pending processing</strong></div>
-              <div className="wal-pending-track" aria-label="Withdrawal progress">
-                <span className="done"><i><Check size={12} /></i><b>Request<br /><em>received</em></b></span>
-                <span className="current"><i /><b>Processing</b></span>
-                <span><i /><b>Sent to<br /><em>provider</em></b></span>
-                <span><i /><b>Completed</b></span>
-              </div>
-              <div className="wal-estimate"><Clock3 size={16} /> Estimated timing: 1–2 business days</div>
-            </div>
-
-            <button className="wal-success-done" type="button" onClick={() => setWithdrawalSuccess(null)}>Done</button>
-            <Link className="wal-success-wallet" href="/wallet">View wallet</Link>
-          </section>
-          </div>
-        )}
-
-        {withdrawalPaid && (
-          <div className="wal-success-modal wal-paid-modal" role="dialog" aria-modal="true" aria-labelledby="wal-paid-title">
-            <button className="wal-success-backdrop" type="button" aria-label="Close withdrawal paid confirmation" onClick={() => setWithdrawalPaid(null)} />
-            <section className="wal-paid-card" aria-live="polite">
-              <div className="wal-paid-brand">super bet</div>
-              <div className="wal-paid-icon" aria-hidden><Check size={32} strokeWidth={3} /></div>
-              <h2 id="wal-paid-title">Withdrawal paid</h2>
-              <strong className="wal-paid-amount">{currencyCode} {withdrawalPaid.amount.toFixed(2)}</strong>
-              <div className="wal-paid-row"><Smartphone size={18} /><b>{withdrawalPaid.destination}</b></div>
-              <div className="wal-paid-row"><WalletCards size={18} /><span><b>Your wallet</b><small>{currencyCode} {withdrawalPaid.amount.toFixed(2)}</small></span></div>
-              <div className="wal-paid-row wal-paid-complete"><Check size={18} /><b>Settlement complete</b></div>
-              <button className="wal-success-done" type="button" onClick={() => setWithdrawalPaid(null)}>Done</button>
-              <button className="wal-paid-receipt" type="button" onClick={() => { setWithdrawalPaid(null); window.location.assign("/transactions"); }}>View receipt</button>
-            </section>
-          </div>
-        )}
-
         {showWithdrawForm && (isAdmin || gateUnlocked) && (
           <section className="wal-panel">
             <h3>Request a withdrawal</h3>
@@ -448,7 +335,7 @@ export default function WalletCenter() {
                 <span>Amount ({currencyCode})</span>
                 <input
                   type="number"
-                  min={configFor(gate ?? readGateState(userId || "guest", country)).minWithdrawal}
+                  min="1"
                   value={withdrawForm.amount}
                   onChange={(e) =>
                     setWithdrawForm((f) => ({ ...f, amount: e.target.value }))
@@ -545,29 +432,23 @@ export default function WalletCenter() {
                   "DEPOSIT", "BET_WIN", "REFERRAL_COMMISSION",
                   "WITHDRAWAL_REFUND", "VIP_CASHBACK", "WELCOME_BONUS",
                 ].includes(tx.kind);
-                const txStatus = String(tx.status ?? "").toUpperCase();
-                const isSuccessfulWithdrawal = tx.kind === "WITHDRAW" && [
-                  "SETTLED", "COMPLETED", "SUCCESS", "SUCCESSFUL", "PAID",
-                ].includes(txStatus);
 
                 return (
-                  <div className={`wal-activity-row${isSuccessfulWithdrawal ? " is-withdrawal-success" : ""}`} key={tx.id}>
-                    <span className={`wal-activity-icon${isCredit ? " is-credit" : ""}${isSuccessfulWithdrawal ? " is-withdrawal-success" : ""}`}>
-                      {isSuccessfulWithdrawal
-                        ? <CircleCheckBig size={18} strokeWidth={2.5} />
-                        : isCredit
+                  <div className="wal-activity-row" key={tx.id}>
+                    <span className={`wal-activity-icon${isCredit ? " is-credit" : ""}`}>
+                      {isCredit
                         ? <ArrowDownRight size={15} />
                         : <ArrowUpRight   size={15} />
                       }
                     </span>
                     <div className="wal-activity-text">
-                      <b>{isSuccessfulWithdrawal ? "Withdrawal successful" : KIND_LABEL[tx.kind] ?? tx.kind}</b>
+                      <b>{KIND_LABEL[tx.kind] ?? tx.kind}</b>
                       <small>
                         {new Date(tx.createdAt).toLocaleString()}
-                        {tx.status ? ` · ${isSuccessfulWithdrawal ? "SETTLED" : tx.status}` : ""}
+                        {tx.status ? ` · ${tx.status}` : ""}
                       </small>
                     </div>
-                    <strong className={`${isCredit ? "is-credit" : ""}${isSuccessfulWithdrawal ? " is-withdrawal-success" : ""}`}>
+                    <strong className={isCredit ? "is-credit" : ""}>
                       {isCredit ? "+" : "-"}
                       {currencyCode} {Math.abs(numeric(tx.amount) ?? 0).toFixed(2)}
                     </strong>
@@ -742,55 +623,6 @@ function WalStyles() {
       .wal-submit:disabled { opacity: .6; cursor: default; }
       .wal-notice { color: #9a9a9a; font-size: .76rem; }
       .wal-muted  { color: #8b8b8b; font-size: .8rem; }
-      .wal-activity-row.is-withdrawal-success { position: relative; margin: 5px -10px; padding: 13px 10px; border: 1px solid rgba(139,92,246,.28); border-radius: 14px; background: linear-gradient(100deg, rgba(139,92,246,.1), rgba(45,212,191,.08)); box-shadow: 0 6px 18px rgba(76,29,149,.1); }
-      .wal-activity-row.is-withdrawal-success::before { content: ""; position: absolute; left: -1px; top: 8px; bottom: 8px; width: 3px; border-radius: 3px; background: linear-gradient(180deg, #8b5cf6, #2dd4bf); }
-      .wal-activity-icon.is-withdrawal-success { display: grid; place-items: center; color: #7c3aed; background: linear-gradient(145deg, #ede9fe, #ccfbf1); border: 1px solid rgba(124,58,237,.25); box-shadow: 0 0 0 4px rgba(139,92,246,.08); }
-      .wal-activity-row.is-withdrawal-success .wal-activity-text b { color: #5b21b6; letter-spacing: .01em; }
-      .wal-activity-row.is-withdrawal-success .wal-activity-text small { color: #64748b; }
-      .wal-activity-row strong.is-withdrawal-success { color: #0f9f8a; font-weight: 900; }
-
-      /* ── Withdrawal success / pending state ── */
-      .wal-success-modal { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; padding: 20px; }
-      .wal-success-backdrop { position: absolute; inset: 0; width: 100%; border: 0; background: rgba(8,25,53,.58); backdrop-filter: blur(5px); cursor: pointer; }
-      .wal-withdraw-success { position: relative; z-index: 1; width: min(100%, 520px); max-height: min(92vh, 780px); overflow-y: auto; padding: 28px 28px 20px; text-align: center; color: #20242d; background: #fff; border: 1px solid #d9e4f2; border-radius: 20px; box-shadow: 0 24px 70px rgba(8,25,53,.3); }
-      .wal-success-icon { display: grid; place-items: center; width: 76px; height: 76px; margin: 0 auto 20px; border-radius: 50%; background: #35a967; color: #fff; box-shadow: 0 0 0 12px rgba(53,169,103,.08); }
-      .wal-withdraw-success h2 { margin: 0; color: #123b75; font-size: clamp(1.65rem, 5vw, 2.25rem); letter-spacing: -.04em; }
-      .wal-success-lead { margin: 12px auto 26px; color: #52647d; font-size: .98rem; line-height: 1.55; }
-      .wal-success-amount { text-align: left; margin: 0 0 18px; }
-      .wal-success-amount span,.wal-success-details small { display: block; color: #71809a; font-size: .78rem; font-weight: 700; letter-spacing: .02em; }
-      .wal-success-amount strong { display: block; margin-top: 4px; color: #123b75; font-size: 2rem; letter-spacing: -.03em; }
-      .wal-success-details { display: grid; gap: 16px; text-align: left; margin: 0 0 22px; }
-      .wal-success-details>div { display: flex; align-items: center; gap: 14px; color: #6c829c; }
-      .wal-success-details svg { flex: 0 0 auto; stroke-width: 1.8; }
-      .wal-success-details span { min-width: 0; }
-      .wal-success-details b { display: block; margin-top: 3px; color: #123b75; font-size: .98rem; font-weight: 700; }
-      .wal-pending-card { padding: 20px 16px 15px; text-align: left; background: #f1fbf7; border: 1px solid #d9f0e6; border-radius: 14px; }
-      .wal-pending-title { display: flex; align-items: center; gap: 10px; color: #16854b; font-size: 1.1rem; }
-      .wal-pending-title svg { stroke-width: 2; }
-      .wal-pending-track { display: grid; grid-template-columns: repeat(4,1fr); gap: 0; margin: 22px 0 18px; }
-      .wal-pending-track>span { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; color: #8ba0b2; text-align: center; font-size: .68rem; }
-      .wal-pending-track>span:not(:last-child)::after { content: ""; position: absolute; top: 12px; left: 58%; width: 84%; height: 3px; background: #d6e6e3; }
-      .wal-pending-track>span.done:not(:last-child)::after { background: #b7decf; }
-      .wal-pending-track i { position: relative; z-index: 1; display: grid; place-items: center; width: 25px; height: 25px; border: 2px solid #d2e0e3; border-radius: 50%; background: #f1fbf7; font-style: normal; }
-      .wal-pending-track .done i { border-color: #18a05b; background: #18a05b; color: #fff; }
-      .wal-pending-track .current i { border: 3px solid #18a05b; box-shadow: 0 0 0 4px rgba(24,160,91,.12); }
-      .wal-pending-track b { color: #71809a; font-size: .68rem; font-weight: 600; line-height: 1.25; }
-      .wal-pending-track .current b,.wal-pending-track .done b { color: #16854b; }
-      .wal-pending-track em { font-style: normal; font-weight: 800; }
-      .wal-estimate { display: flex; align-items: center; gap: 10px; padding: 12px 13px; color: #52647d; background: #e7f7f0; border-radius: 10px; font-size: .78rem; }
-      .wal-estimate svg { flex: 0 0 auto; }
-      .wal-success-done { width: 100%; min-height: 48px; margin-top: 24px; border: 0; border-radius: 10px; background: #245eb4; color: #fff; font-size: .9rem; font-weight: 800; cursor: pointer; }
-      .wal-success-wallet { display: block; margin: 15px 0 2px; color: #245eb4; font-size: .9rem; font-weight: 800; }
-      .wal-paid-card { position: relative; z-index: 1; width: min(100%, 520px); box-sizing: border-box; padding: 18px 24px 20px; text-align: center; color: #123b75; background: #fff; border-radius: 18px; box-shadow: 0 24px 70px rgba(8,25,53,.3); }
-      .wal-paid-brand { margin: -18px -24px 18px; padding: 18px 14px; border-radius: 18px 18px 0 0; background: linear-gradient(135deg,#1246a8,#1e6bff); color: #fff; font-size: 1.12rem; font-style: italic; font-weight: 900; letter-spacing: -.04em; }
-      .wal-paid-icon { display: grid; place-items: center; width: 64px; height: 64px; margin: 4px auto 13px; border-radius: 50%; background: #25b969; color: #fff; box-shadow: 0 0 0 9px #dff7e9; }
-      .wal-paid-card h2 { margin: 0 0 7px; font-size: clamp(1.45rem, 5vw, 2rem); letter-spacing: -.04em; }
-      .wal-paid-amount { display: block; margin-bottom: 16px; color: #1e6bff; font-size: 2rem; letter-spacing: -.04em; }
-      .wal-paid-row { display: flex; align-items: center; gap: 13px; padding: 13px 4px; border-bottom: 1px solid #e2eaf4; text-align: left; color: #1e6bff; }
-      .wal-paid-row b { color: #123b75; font-size: .92rem; }
-      .wal-paid-row span { display: grid; gap: 2px; }.wal-paid-row small { color: #71809a; font-size: .76rem; }
-      .wal-paid-complete { color: #18a05b; }.wal-paid-complete b { color: #18a05b; }
-      .wal-paid-card .wal-success-done { margin-top: 18px; }.wal-paid-receipt { width: 100%; min-height: 44px; margin-top: 10px; border: 1px solid #1e6bff; border-radius: 10px; background: #fff; color: #1e6bff; font-size: .86rem; font-weight: 800; cursor: pointer; }
 
       /* ── Activity list ── */
       .wal-activity-list { display: flex; flex-direction: column; }
@@ -864,9 +696,6 @@ function WalStyles() {
       .wal-hero svg,.wal-card svg{color:#fff}
       .wal-action svg,.wal-refresh svg{color:currentColor}
       @media(max-width:560px){.wal-body{padding-left:12px;padding-right:12px}.wal-card{padding:18px}}
-      @media(max-width:560px){.wal-success-modal{padding:8px}.wal-withdraw-success{box-sizing:border-box;max-height:none;overflow:hidden;padding:16px 13px 12px;border-radius:16px}.wal-success-icon{width:54px;height:54px;margin-bottom:10px}.wal-success-icon svg{width:28px;height:28px}.wal-withdraw-success h2{font-size:1.35rem}.wal-success-lead{margin:7px auto 12px;font-size:.78rem;line-height:1.35}.wal-success-amount{margin-bottom:10px}.wal-success-amount span,.wal-success-details small{font-size:.66rem}.wal-success-amount strong{margin-top:2px;font-size:1.45rem}.wal-success-details{gap:8px;margin-bottom:11px}.wal-success-details>div{gap:9px}.wal-success-details svg{width:17px;height:17px}.wal-success-details b{margin-top:1px;font-size:.78rem}.wal-pending-card{padding:10px 9px 9px;border-radius:10px}.wal-pending-title{gap:6px;font-size:.82rem}.wal-pending-title svg{width:18px;height:18px}.wal-pending-track{margin:11px 0 9px}.wal-pending-track>span{gap:4px;font-size:.55rem}.wal-pending-track i{width:19px;height:19px}.wal-pending-track>span:not(:last-child)::after{top:9px;width:78%;height:2px}.wal-pending-track b{font-size:.55rem}.wal-estimate{gap:6px;padding:7px 8px;font-size:.62rem}.wal-estimate svg{width:13px;height:13px}.wal-success-done{min-height:40px;margin-top:12px;font-size:.78rem}.wal-success-wallet{margin:8px 0 0;font-size:.75rem}}
-      @media(max-width:560px){.wal-paid-card{width:100%;padding:13px 14px 14px;border-radius:15px}.wal-paid-brand{margin:-13px -14px 14px;padding:14px;border-radius:15px 15px 0 0;font-size:1rem}.wal-paid-icon{width:50px;height:50px;margin-bottom:9px}.wal-paid-icon svg{width:25px;height:25px}.wal-paid-card h2{font-size:1.35rem}.wal-paid-amount{margin-bottom:9px;font-size:1.65rem}.wal-paid-row{gap:9px;padding:9px 2px}.wal-paid-row b{font-size:.78rem}.wal-paid-row small{font-size:.68rem}.wal-paid-card .wal-success-done{margin-top:12px}.wal-paid-receipt{min-height:39px;margin-top:7px;font-size:.76rem}}
-      @media(max-width:560px){.wal-activity-row.is-withdrawal-success{margin-left:-5px;margin-right:-5px;padding-left:8px;padding-right:8px}.wal-activity-icon.is-withdrawal-success{width:32px;height:32px}}
     `}</style>
   );
 }
