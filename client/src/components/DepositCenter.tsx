@@ -34,10 +34,10 @@ import api, {
 // CONFIGURATION
 // =============================================================================
 
-const GHS_QUICK_AMOUNTS = [50, 100, 250, 500, 1000];
+const GHS_QUICK_AMOUNTS = [1, 10, 50, 100, 500];
 const NGN_QUICK_AMOUNTS = [20_000, 50_000, 100_000, 200_000, 500_000];
 
-const MIN_GHS = 50;
+const MIN_GHS = 1;
 const MIN_NGN = 20_000;
 
 const GH_NETWORKS: { value: FlutterwaveGhNetwork; label: string }[] = [
