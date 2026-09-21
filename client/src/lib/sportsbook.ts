@@ -283,8 +283,10 @@ function assignAdminLogos(adminMatches: EnrichedMatch[]): Map<string, AdminLogoA
     const cached = assignments[m.id];
     // Use a real backend crest when one exists; otherwise assign one of the
     // 60 bundled club-style badges. Never keep stale placeholder/data URLs.
-    let homeUrl = usableBackendLogo(m.homeLogo) || (cached?.home?.startsWith("/admin-logos/") ? cached.home : "");
-    let awayUrl = usableBackendLogo(m.awayLogo) || (cached?.away?.startsWith("/admin-logos/") ? cached.away : "");
+    // Once a match has an assignment, the persisted pair is authoritative.
+    // This prevents a backend refresh from replacing the visible crests.
+    let homeUrl = (cached?.home?.startsWith("/admin-logos/") ? cached.home : "") || usableBackendLogo(m.homeLogo);
+    let awayUrl = (cached?.away?.startsWith("/admin-logos/") ? cached.away : "") || usableBackendLogo(m.awayLogo);
 
     if (!homeUrl) {
       homeUrl = pickRandomAdminLogo(usage, new Set(), 0);
