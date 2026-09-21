@@ -2428,3 +2428,13 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .bh-open-mapped-leg .bh-live-match{color:#ffb3b8!important;font-size:11px!important;font-weight:650!important}
 .bh-open-mapped-leg .bh-live-match small{color:#ffb3b8!important;font-size:10px!important;font-weight:650!important}
 .bh-open-mapped-leg .bh-live-match b{color:#ffffff!important;font-size:11px!important;font-weight:900!important}
+
+/* Open Bets light identity rows: logos remain visible, names and scores use black text. */
+.bh-open-mapped-leg .bh-leg-info{color:#111827!important}
+.bh-open-leg-head>b{color:#111827!important}
+.bh-open-mapped-leg .bh-leg-info>small{color:#4b5563!important}
+.bh-open-team-row{background:#ffffff!important;border:1px solid #cbd5e1!important;color:#111827!important;box-shadow:0 2px 5px rgba(15,23,42,.08)!important}
+.bh-open-team-row>span:not(.sb-crest){color:#111827!important;text-shadow:none!important;font-weight:800!important}
+.bh-open-team-row strong{background:transparent!important;border:0!important;color:#111827!important;padding:0!important;min-width:20px!important;font-size:17px!important;font-weight:950!important}
+.bh-open-mapped-leg .bh-live-match,.bh-open-mapped-leg .bh-live-match small{color:#b4232d!important}
+.bh-open-mapped-leg .bh-live-match b{color:#111827!important}
