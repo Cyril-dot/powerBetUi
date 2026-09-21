@@ -2411,3 +2411,20 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .bh-open-mapped-leg .bh-live-match{display:inline-flex;align-items:center;gap:4px;color:#ee6a73;font-size:10px;font-weight:500;text-transform:lowercase}
 .bh-open-mapped-leg .bh-live-match i{width:5px;height:5px;border-radius:50%;background:#ef4e5f;box-shadow:0 0 0 2px rgba(239,78,95,.12)}
 .bh-open-mapped-leg .bh-live-match b{font-weight:800;color:#ff858b}
+
+/* Open Bets team identity: crest and resolved match-team names stay visible. */
+.bh-open-team-row .sb-crest{width:24px!important;height:24px!important;flex:0 0 24px!important}
+.bh-open-team-row .sb-crest img{width:100%!important;height:100%!important}
+.bh-open-team-row>span:not(.sb-crest){flex:1!important;min-width:0!important;font-weight:750!important}
+.bh-open-team-row .sb-crest-fallback{font-size:8px!important}
+
+/* Open Bets high-contrast typography. */
+.bh-open-mapped-leg .bh-leg-info{color:#f5f8fb!important}
+.bh-open-leg-head>b{color:#ffffff!important;font-size:13px!important;font-weight:850!important;line-height:1.2!important}
+.bh-open-mapped-leg .bh-leg-info>small{color:#b9c7d2!important;font-size:11px!important;font-weight:650!important;line-height:1.25!important}
+.bh-open-team-row{background:#14202b!important;border-color:#385166!important;color:#ffffff!important;font-size:13px!important;font-weight:750!important;min-height:34px!important}
+.bh-open-team-row>span:not(.sb-crest){color:#ffffff!important;text-shadow:0 1px 1px rgba(0,0,0,.4)!important}
+.bh-open-team-row strong{background:#1f6ed1!important;border:1px solid #72b7ff!important;color:#ffffff!important;font-size:15px!important;font-weight:950!important}
+.bh-open-mapped-leg .bh-live-match{color:#ffb3b8!important;font-size:11px!important;font-weight:650!important}
+.bh-open-mapped-leg .bh-live-match small{color:#ffb3b8!important;font-size:10px!important;font-weight:650!important}
+.bh-open-mapped-leg .bh-live-match b{color:#ffffff!important;font-size:11px!important;font-weight:900!important}
