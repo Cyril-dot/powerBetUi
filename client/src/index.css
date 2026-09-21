@@ -2353,3 +2353,19 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .sb-crest img{object-fit:contain!important;padding:2px;box-sizing:border-box}
 .featured-chip{background:#0a7f4f!important;color:#fff!important;border:1px solid #49d991!important;font-weight:950!important}
 .sb-special-section .sb-section-head{background:linear-gradient(90deg,rgba(44,132,255,.16),rgba(73,217,145,.12));border-bottom:2px solid rgba(73,217,145,.55)}
+
+/* Compact live match treatment: LIVE and timer in the top-right corner, score beside each team. */
+.sb-live-corner{display:flex!important;flex-direction:column;align-items:flex-end;justify-content:center;gap:1px;min-width:48px;line-height:1.05}
+.sb-live-label{display:inline-flex;align-items:center;gap:4px;color:#ef4e5f;font-size:10px;font-weight:950;letter-spacing:.08em}
+.sb-live-label .live-dot{width:6px;height:6px;box-shadow:0 0 0 3px rgba(239,78,95,.14)}
+.sb-live-minute{color:#e84858;font-size:10px;font-weight:900;letter-spacing:.02em}
+.sb-team-score{display:inline-flex!important;align-items:center;justify-content:center;min-width:22px;margin-left:6px;padding:2px 6px;border-radius:6px;background:#0b376e;color:#fff!important;font-size:15px!important;font-style:normal;font-weight:950!important;line-height:1}
+.sb-row.is-live .sb-team-line{gap:4px}
+
+/* Featured carousel and compact league marker. */
+.featured-carousel{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;gap:10px;padding:0 0 8px}
+.featured-carousel::-webkit-scrollbar{display:none}
+.featured-carousel-slide{flex:0 0 100%;scroll-snap-align:start;min-width:0}
+.sb-league-icon{display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;border-radius:50%;background:linear-gradient(135deg,#fff1c7,#ff8a3d);box-shadow:0 2px 7px rgba(255,111,42,.25);font-size:12px;line-height:1}
+.mbn-booking .mbn-icon-wrap{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#1e6bff,#0d3b91);border:2px solid rgba(255,255,255,.9);box-shadow:0 5px 16px rgba(30,107,255,.35);color:#fff}
+.mbn-booking .mbn-label{display:none!important}

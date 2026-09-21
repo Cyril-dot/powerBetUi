@@ -20,7 +20,7 @@ export default function MobileBottomNav() {
             <span className="mbn-icon-wrap">
               <Icon size={20} />
             </span>
-            <span className="mbn-label">{item.label}</span>
+            <span className="mbn-label">{item.href === "/booking-code" ? "" : item.label}</span>
           </Link>
         );
       })}

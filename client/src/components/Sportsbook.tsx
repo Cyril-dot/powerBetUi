@@ -120,6 +120,12 @@ export function TeamCrest({ url, name }: { url?: string; name: string }) {
   );
 }
 
+const LEAGUE_ICONS = ["🔥", "⚡", "🏆", "🛡️", "⚽", "🌟"];
+function leagueIconFor(league?: string): string {
+  const value = league ?? "";
+  let hash = 0; for (let i = 0; i < value.length; i++) hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+  return LEAGUE_ICONS[hash % LEAGUE_ICONS.length];
+}
 function MatchRow({
   match, hasDraw, picks, onPick, isAdmin = false, ended = false,
 }: { match: EnrichedMatch; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void; isAdmin?: boolean; ended?: boolean }) {
@@ -157,12 +163,11 @@ function MatchRow({
             <Star size={13} fill={favored ? "currentColor" : "none"} />
           </button>
           {isAdmin && <span className="sb-badge special featured-chip"><Zap size={9} /> FEATURED</span>}
-          {match.leagueLogo && <img className="sb-competition-mark" src={match.leagueLogo} alt="" loading="lazy" referrerPolicy="no-referrer" />}
-          <small>{match.league || match.sport || "Match"}</small>
+          <span className="sb-league-icon" title={match.league || match.sport || "League"} aria-label={match.league || match.sport || "League"}>{leagueIconFor(match.league || match.sport)}</span>
           {match.isSyntheticOdds && !isLive && !ended && <span className="sb-badge synth">EST. ODDS</span>}
         </span>
-        <span className="sb-row-time">
-          {ended ? <span className="sb-badge ft">FT</span> : isLive ? <><i className="live-dot" /> <LiveClock match={match} /></> : (
+        <span className={`sb-row-time${isLive ? " sb-live-corner" : ""}`}>
+          {ended ? <span className="sb-badge ft">FT</span> : isLive ? <><strong className="sb-live-label"><i className="live-dot" /> LIVE</strong><small className="sb-live-minute"><LiveClock match={match} /></small></> : (
             <>
               {formatKickoffDate(match.kickoffAt)} {formatKickoff(match.kickoffAt)}
               <Countdown kickoffAt={match.kickoffAt} />
@@ -175,13 +180,13 @@ function MatchRow({
         <span className="sb-team-line">
           <TeamCrest url={match.displayHomeLogo} name={match.homeTeam ?? ""} />
           <span className="sb-team-name">{match.homeTeam}</span>
-          {showScore && match.scoreHome != null && <em>{match.scoreHome}</em>}
+          {showScore && match.scoreHome != null && <em className="sb-team-score">{match.scoreHome}</em>}
         </span>
         <span className="sb-fixture-vs" aria-hidden="true">VS</span>
         <span className="sb-team-line">
           <TeamCrest url={match.displayAwayLogo} name={match.awayTeam ?? ""} />
           <span className="sb-team-name">{match.awayTeam}</span>
-          {showScore && match.scoreAway != null && <em>{match.scoreAway}</em>}
+          {showScore && match.scoreAway != null && <em className="sb-team-score">{match.scoreAway}</em>}
         </span>
       </Link>
 
@@ -297,7 +302,7 @@ function FeaturedMatchCard({ match, hasDraw, picks, onPick }: { match: EnrichedM
   return (
     <div className={`featured-card${isLive ? " is-live" : ""}`}>
       <div className="featured-card-top">
-        <span className="featured-card-league">{match.leagueLogo && <img className="sb-competition-mark" src={match.leagueLogo} alt="" loading="lazy" referrerPolicy="no-referrer" />}{match.league || match.sport || "Match"}</span>
+        <span className="featured-card-league"><span className="sb-league-icon" title={match.league || match.sport || "League"} aria-label={match.league || match.sport || "League"}>{leagueIconFor(match.league || match.sport)}</span></span>
         {isLive ? (
           <span className="featured-card-status-badge live"><i className="live-dot" /> LIVE</span>
         ) : match.isSyntheticOdds ? (
@@ -438,9 +443,10 @@ export default function Sportsbook({
       const progress = s === "football"
         ? (batch: EnrichedMatch[]) => setMatches((prev) => ({ ...prev, football: batch }))
         : undefined;
-      const [sportData, admin] = await Promise.all([fetchSport(s, progress), s === "football" ? fetchAdminMatches() : Promise.resolve(adminMatches)]);
-      setMatches((prev) => ({ ...prev, [s]: sportData }));
-      if (s === "football") setAdminMatches(admin);
+      const adminPromise = s === "football" ? fetchAdminMatches().then((admin) => { setAdminMatches(admin); return admin; }) : Promise.resolve(adminMatches);
+      const sportPromise = fetchSport(s, progress);
+      const [sportResult] = await Promise.all([sportPromise, adminPromise]);
+      setMatches((prev) => ({ ...prev, [s]: sportResult }));
       loaded.current.add(s);
       setApiUnreachable(getLastFetchStatus().allFailed);
     } catch {
@@ -543,9 +549,11 @@ export default function Sportsbook({
 
       {mode === "all" && sport === "football" && adminMatches.length > 0 && (
         <SectionShell title="Featured matches" icon={<Zap size={14} />} count={adminMatches.length} special badge="FEATURED">
-          {adminMatches.map((m) => (
-            <MatchRow key={m.id} match={m} hasDraw picks={picks} onPick={onPick} isAdmin />
-          ))}
+          <FeaturedMatchCarousel list={[...adminMatches].sort((a, b) => {
+            const at = a.kickoffAt ? parseKickoff(a.kickoffAt).getTime() : Number.MAX_SAFE_INTEGER;
+            const bt = b.kickoffAt ? parseKickoff(b.kickoffAt).getTime() : Number.MAX_SAFE_INTEGER;
+            return at - bt;
+          })} hasDraw={hasDraw} picks={picks} onPick={onPick} />
         </SectionShell>
       )}
 
