@@ -186,11 +186,18 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
       const p = payload as Record<string, unknown>;
       if (typeof p.message === "string" && p.message) {
         message = p.message;
+      } else if (typeof p.error === "string" && p.error) {
+        message = p.error;
       } else if (p.error && typeof p.error === "object") {
         const e = p.error as Record<string, unknown>;
         if (typeof e.message === "string" && e.message) message = e.message;
+      } else if (typeof p.detail === "string" && p.detail) {
+        message = p.detail;
+      } else if (Array.isArray(p.errors) && p.errors.length) {
+        message = p.errors.map((item) => typeof item === "string" ? item : JSON.stringify(item)).join("; ");
       }
     }
+    if (message === `Request failed (${res.status})`) message = `Request failed (${res.status}) at ${path}`;
     throw new ApiError(message, res.status);
   }
 
