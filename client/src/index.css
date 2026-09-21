@@ -2438,3 +2438,10 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .bh-open-team-row strong{background:transparent!important;border:0!important;color:#111827!important;padding:0!important;min-width:20px!important;font-size:17px!important;font-weight:950!important}
 .bh-open-mapped-leg .bh-live-match,.bh-open-mapped-leg .bh-live-match small{color:#b4232d!important}
 .bh-open-mapped-leg .bh-live-match b{color:#111827!important}
+
+/* Plain Open Bets mapping: no crests, borders, or shadows. */
+.bh-open-mapped-leg .bh-leg-info{color:#111827!important}
+.bh-open-team-row{background:#ffffff!important;border:0!important;box-shadow:none!important;padding:5px 0!important;border-radius:0!important;color:#111827!important}
+.bh-open-team-row>span:not(.sb-crest){color:#111827!important;font-weight:800!important}
+.bh-open-team-row strong{background:transparent!important;border:0!important;box-shadow:none!important;color:#111827!important;padding:0!important}
+.bh-open-leg-head>b{color:#111827!important;font-size:12px!important;font-weight:850!important}

@@ -5,7 +5,6 @@ import {
 } from "lucide-react";
 import api, { ApiError, type Bet, type Match } from "@/lib/api";
 import { BET_PLACED_NOTICE_KEY } from "./BetslipPage";
-import { TeamCrest } from "./Sportsbook";
 
 const HIDDEN_TICKETS_KEY = "powerbet_hidden_tickets";
 
@@ -134,10 +133,10 @@ function OpenBetCard({ bet, scores }: { bet: Bet; scores: Record<string, Match> 
               <div className="bh-leg bh-open-mapped-leg" key={s.id ?? i}>
                 <span className="bh-leg-check">✓</span>
                 <div className="bh-leg-info">
-                  <div className="bh-open-leg-head"><b>{s.selection} @ {s.oddsLocked?.toFixed(2)}</b>{isOpenMatchLive(scores[s.matchId]) && <span className="bh-live-match"><i /><small>live</small><b>{openMatchClock(scores[s.matchId])}</b></span>}</div>
-                  <small>{s.market}{scores[s.matchId] ? ` · ${scores[s.matchId].homeTeam} vs ${scores[s.matchId].awayTeam}` : ""}</small>
-                  <div className="bh-open-team-row"><TeamCrest url={(scores[s.matchId] as (Match & { displayHomeLogo?: string }) | undefined)?.displayHomeLogo ?? scores[s.matchId]?.homeLogo} name={s.homeTeam ?? scores[s.matchId]?.homeTeam ?? "Home"} /><span>{s.homeTeam ?? scores[s.matchId]?.homeTeam ?? "Home"}</span>{isOpenMatchLive(scores[s.matchId]) && scores[s.matchId]?.scoreHome != null && <strong>{scores[s.matchId].scoreHome}</strong>}</div>
-                  <div className="bh-open-team-row"><TeamCrest url={(scores[s.matchId] as (Match & { displayAwayLogo?: string }) | undefined)?.displayAwayLogo ?? scores[s.matchId]?.awayLogo} name={s.awayTeam ?? scores[s.matchId]?.awayTeam ?? "Away"} /><span>{s.awayTeam ?? scores[s.matchId]?.awayTeam ?? "Away"}</span>{isOpenMatchLive(scores[s.matchId]) && scores[s.matchId]?.scoreAway != null && <strong>{scores[s.matchId].scoreAway}</strong>}</div>
+                  <div className="bh-open-leg-head"><b>{s.market || "1X2"} · {s.homeTeam ?? scores[s.matchId]?.homeTeam ?? "Home"} vs {s.awayTeam ?? scores[s.matchId]?.awayTeam ?? "Away"}</b>{isOpenMatchLive(scores[s.matchId]) && <span className="bh-live-match"><i /><small>live</small><b>{openMatchClock(scores[s.matchId])}</b></span>}</div>
+                  <small>{s.selection} @ {s.oddsLocked?.toFixed(2)}</small>
+                  <div className="bh-open-team-row"><span>{s.homeTeam ?? scores[s.matchId]?.homeTeam ?? "Home"}</span>{isOpenMatchLive(scores[s.matchId]) && scores[s.matchId]?.scoreHome != null && <strong>{scores[s.matchId].scoreHome}</strong>}</div>
+                  <div className="bh-open-team-row"><span>{s.awayTeam ?? scores[s.matchId]?.awayTeam ?? "Away"}</span>{isOpenMatchLive(scores[s.matchId]) && scores[s.matchId]?.scoreAway != null && <strong>{scores[s.matchId].scoreAway}</strong>}</div>
                 </div>
               </div>
             ))}
