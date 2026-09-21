@@ -146,7 +146,7 @@ export class ApiError extends Error {
 
 function authHeaders(path: string): Record<string, string> {
   if (typeof window === "undefined") return {};
-  const token = window.localStorage.getItem("accessToken");
+  const token = window.localStorage.getItem("accessToken") || window.localStorage.getItem("token") || window.localStorage.getItem("authToken") || window.sessionStorage.getItem("accessToken") || window.sessionStorage.getItem("token") || window.sessionStorage.getItem("authToken");
   const isPublic = path.startsWith("/api/auth/") || path.startsWith("/api/public/") || path.startsWith("/api/geo/");
   return token && !isPublic ? { Authorization: `Bearer ${token}` } : {};
 }
@@ -1144,11 +1144,10 @@ export interface AutoMatchSchedule {
 }
 
 export const adminMatchSchedule = {
-  // This scheduler is exposed by the backend at /admin/matches/auto (without
-  // the /api prefix); it is the endpoint used by the reference admin build.
-  create: (body: AutoMatchScheduleRequest) => post<Match>("/admin/matches/auto", body),
-  getSchedule: (matchId: string) => get<AutoMatchSchedule>(`/admin/matches/auto/${matchId}`),
-  cancel: (matchId: string) => request<{ matchId: string; jobsCancelled: number }>("DELETE", `/admin/matches/auto/${matchId}`),
+  // Scheduler routes are protected API endpoints and require the /api prefix.
+  create: (body: AutoMatchScheduleRequest) => post<Match>("/api/admin/matches/auto", body),
+  getSchedule: (matchId: string) => get<AutoMatchSchedule>(`/api/admin/matches/auto/${matchId}`),
+  cancel: (matchId: string) => request<{ matchId: string; jobsCancelled: number }>("DELETE", `/api/admin/matches/auto/${matchId}`),
 };
 
 export const adminPredictions = {
@@ -1262,11 +1261,11 @@ export const superAdminDeposits = {
 };
 
 export const superAdminWithdrawals = {
-  list: (page = 0, size = 50, status?: string) => get<PageResponse<Record<string, unknown>>>(`/api/wallet/withdrawals/admin/all${qs({ page, size, status })}`),
-  approve: (id: string, note = "") => post<Record<string, unknown>>(`/api/wallet/withdrawals/admin/${encodeURIComponent(id)}/approve`, { note }),
-  reject: (id: string, note: string) => post<Record<string, unknown>>(`/api/wallet/withdrawals/admin/${encodeURIComponent(id)}/reject`, { note }),
-  settle: (id: string, note = "") => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/settle`, { note }),
-  markFailed: (id: string, note: string) => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/mark-failed`, { note }),
+  list: (page = 0, size = 50) => get<PageResponse<Record<string, unknown>>>(`/api/wallet/withdrawals/admin/all${qs({ page, size })}`),
+  approve: (id: string) => post<Record<string, unknown>>(`/api/wallet/withdrawals/admin/${encodeURIComponent(id)}/approve`),
+  reject: (id: string, body: { reason?: string }) => post<Record<string, unknown>>(`/api/wallet/withdrawals/admin/${encodeURIComponent(id)}/reject`, body),
+  settle: (id: string) => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/settle`),
+  markFailed: (id: string, body: { reason?: string }) => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/mark-failed`, body),
 };
 
 // ---------------------------------------------------------------------------

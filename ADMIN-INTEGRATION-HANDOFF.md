@@ -30,7 +30,7 @@ The regular Admin Centre is implemented in `client/src/pages/AdminPanelPage.tsx`
 | Tab or icon | Purpose | Main operations |
 |---|---|---|
 | Overview | Operational summary | View platform health, reporting range, affiliate summary, and protected API status. |
-| Matches | Sportsbook operations | Create manual matches, schedule matches, upload team and league images, update scores, change status, inspect schedules, and cancel schedule automation. |
+| Matches | Sportsbook scheduler | Schedule automated matches, choose a top league, upload team and league images, update scores, change status, inspect schedules, and cancel schedule automation. |
 | Booking codes | Bet-slip code operations | Create and inspect booking codes used by customers. |
 | Affiliate | Affiliate operations | Review referral links, referred users, commission insights, country deposits, payout history, and affiliate balances. |
 | Withdrawals | Withdrawal operations | Review and process withdrawal requests exposed to the regular admin role. |
@@ -42,7 +42,7 @@ The regular Admin Centre is implemented in `client/src/pages/AdminPanelPage.tsx`
 
 ### Match administration
 
-The Matches tab supports both manual match creation and scheduled match creation. It validates team names, prevents identical home and away teams, validates scores as non-negative integers, requires a future kickoff for scheduled matches, and submits uploaded image files as data-URL payloads through the existing logo fields when the backend does not expose a separate media endpoint.
+The Matches tab supports automated scheduled match creation only. It validates team names, prevents identical home and away teams, validates scores as non-negative integers, requires a future kickoff for scheduled matches, and submits uploaded image files as data-URL payloads through the existing logo fields when the backend does not expose a separate media endpoint.
 
 The match form accepts PNG, JPEG, WEBP, and SVG files up to 2 MB per image. It previews the selected image and allows the operator to remove it before submission. This means administrators select real files rather than typing logo URLs.
 
