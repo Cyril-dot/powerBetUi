@@ -304,13 +304,6 @@ function FeaturedMatchCard({ match, hasDraw, picks, onPick }: { match: EnrichedM
     <div className={`featured-card${isLive ? " is-live" : ""}`}>
       <div className="featured-card-top">
         <span className="featured-card-league"><span className="sb-league-icon" title={match.league || match.sport || "League"} aria-label={match.league || match.sport || "League"}>{leagueIconFor(match.league || match.sport)}</span></span>
-        {isLive ? (
-          <span className="featured-card-status-badge live"><i className="live-dot" /> LIVE</span>
-        ) : match.isSyntheticOdds ? (
-          <span className="featured-card-status-badge synth">EST. ODDS</span>
-        ) : (
-          <span className="featured-card-status-badge best">BEST ODDS</span>
-        )}
       </div>
       <Link href={matchHref} className="featured-card-fixture">
         <div className="featured-card-side">
