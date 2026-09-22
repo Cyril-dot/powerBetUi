@@ -1,0 +1,362 @@
+[
+  {
+    "index": 1,
+    "sourcePath": "logos/Austria - Bundesliga/Austria Vienna.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Austria%20-%20Bundesliga/Austria%20Vienna.png",
+    "local": "/admin-logos/catalog/crest-01.png"
+  },
+  {
+    "index": 2,
+    "sourcePath": "logos/Austria - Bundesliga/Grazer AK 1902.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Austria%20-%20Bundesliga/Grazer%20AK%201902.png",
+    "local": "/admin-logos/catalog/crest-02.png"
+  },
+  {
+    "index": 3,
+    "sourcePath": "logos/Austria - Bundesliga/LASK.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Austria%20-%20Bundesliga/LASK.png",
+    "local": "/admin-logos/catalog/crest-03.png"
+  },
+  {
+    "index": 4,
+    "sourcePath": "logos/Austria - Bundesliga/Rapid Vienna.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Austria%20-%20Bundesliga/Rapid%20Vienna.png",
+    "local": "/admin-logos/catalog/crest-04.png"
+  },
+  {
+    "index": 5,
+    "sourcePath": "logos/Austria - Bundesliga/Red Bull Salzburg.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Austria%20-%20Bundesliga/Red%20Bull%20Salzburg.png",
+    "local": "/admin-logos/catalog/crest-05.png"
+  },
+  {
+    "index": 6,
+    "sourcePath": "logos/Austria - Bundesliga/SC Austria Lustenau.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Austria%20-%20Bundesliga/SC%20Austria%20Lustenau.png",
+    "local": "/admin-logos/catalog/crest-06.png"
+  },
+  {
+    "index": 7,
+    "sourcePath": "logos/Austria - Bundesliga/SCR Altach.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Austria%20-%20Bundesliga/SCR%20Altach.png",
+    "local": "/admin-logos/catalog/crest-07.png"
+  },
+  {
+    "index": 8,
+    "sourcePath": "logos/Austria - Bundesliga/SK Sturm Graz.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Austria%20-%20Bundesliga/SK%20Sturm%20Graz.png",
+    "local": "/admin-logos/catalog/crest-08.png"
+  },
+  {
+    "index": 9,
+    "sourcePath": "logos/Austria - Bundesliga/SV Ried.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Austria%20-%20Bundesliga/SV%20Ried.png",
+    "local": "/admin-logos/catalog/crest-09.png"
+  },
+  {
+    "index": 10,
+    "sourcePath": "logos/Austria - Bundesliga/TSV Hartberg.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Austria%20-%20Bundesliga/TSV%20Hartberg.png",
+    "local": "/admin-logos/catalog/crest-10.png"
+  },
+  {
+    "index": 11,
+    "sourcePath": "logos/Austria - Bundesliga/WSG Tirol.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Austria%20-%20Bundesliga/WSG%20Tirol.png",
+    "local": "/admin-logos/catalog/crest-11.png"
+  },
+  {
+    "index": 12,
+    "sourcePath": "logos/Austria - Bundesliga/Wolfsberger AC.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Austria%20-%20Bundesliga/Wolfsberger%20AC.png",
+    "local": "/admin-logos/catalog/crest-12.png"
+  },
+  {
+    "index": 13,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/Cercle Brugge.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/Cercle%20Brugge.png",
+    "local": "/admin-logos/catalog/crest-13.png"
+  },
+  {
+    "index": 14,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/Club Brugge KV.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/Club%20Brugge%20KV.png",
+    "local": "/admin-logos/catalog/crest-14.png"
+  },
+  {
+    "index": 15,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/KAA Gent.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/KAA%20Gent.png",
+    "local": "/admin-logos/catalog/crest-15.png"
+  },
+  {
+    "index": 16,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/KRC Genk.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/KRC%20Genk.png",
+    "local": "/admin-logos/catalog/crest-16.png"
+  },
+  {
+    "index": 17,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/KV Kortrijk.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/KV%20Kortrijk.png",
+    "local": "/admin-logos/catalog/crest-17.png"
+  },
+  {
+    "index": 18,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/KV Mechelen.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/KV%20Mechelen.png",
+    "local": "/admin-logos/catalog/crest-18.png"
+  },
+  {
+    "index": 19,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/KVC Westerlo.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/KVC%20Westerlo.png",
+    "local": "/admin-logos/catalog/crest-19.png"
+  },
+  {
+    "index": 20,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/Lommel SK.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/Lommel%20SK.png",
+    "local": "/admin-logos/catalog/crest-20.png"
+  },
+  {
+    "index": 21,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/Oud-Heverlee Leuven.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/Oud-Heverlee%20Leuven.png",
+    "local": "/admin-logos/catalog/crest-21.png"
+  },
+  {
+    "index": 22,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/RAAL La Louvi\u00e8re.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/RAAL%20La%20Louvi%C3%A8re.png",
+    "local": "/admin-logos/catalog/crest-22.png"
+  },
+  {
+    "index": 23,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/RSC Anderlecht.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/RSC%20Anderlecht.png",
+    "local": "/admin-logos/catalog/crest-23.png"
+  },
+  {
+    "index": 24,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/Royal Antwerp FC.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/Royal%20Antwerp%20FC.png",
+    "local": "/admin-logos/catalog/crest-24.png"
+  },
+  {
+    "index": 25,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/Royal Charleroi SC.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/Royal%20Charleroi%20SC.png",
+    "local": "/admin-logos/catalog/crest-25.png"
+  },
+  {
+    "index": 26,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/SK Beveren.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/SK%20Beveren.png",
+    "local": "/admin-logos/catalog/crest-26.png"
+  },
+  {
+    "index": 27,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/Sint-Truidense VV.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/Sint-Truidense%20VV.png",
+    "local": "/admin-logos/catalog/crest-27.png"
+  },
+  {
+    "index": 28,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/Standard Li\u00e8ge.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/Standard%20Li%C3%A8ge.png",
+    "local": "/admin-logos/catalog/crest-28.png"
+  },
+  {
+    "index": 29,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/Union Saint-Gilloise.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/Union%20Saint-Gilloise.png",
+    "local": "/admin-logos/catalog/crest-29.png"
+  },
+  {
+    "index": 30,
+    "sourcePath": "logos/Belgium - Jupiler Pro League/Zulte Waregem.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Belgium%20-%20Jupiler%20Pro%20League/Zulte%20Waregem.png",
+    "local": "/admin-logos/catalog/crest-30.png"
+  },
+  {
+    "index": 31,
+    "sourcePath": "logos/Bulgaria - efbet Liga/Arda Kardzhali.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Bulgaria%20-%20efbet%20Liga/Arda%20Kardzhali.png",
+    "local": "/admin-logos/catalog/crest-31.png"
+  },
+  {
+    "index": 32,
+    "sourcePath": "logos/Bulgaria - efbet Liga/Botev Plovdiv.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Bulgaria%20-%20efbet%20Liga/Botev%20Plovdiv.png",
+    "local": "/admin-logos/catalog/crest-32.png"
+  },
+  {
+    "index": 33,
+    "sourcePath": "logos/Bulgaria - efbet Liga/Botev Vratsa.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Bulgaria%20-%20efbet%20Liga/Botev%20Vratsa.png",
+    "local": "/admin-logos/catalog/crest-33.png"
+  },
+  {
+    "index": 34,
+    "sourcePath": "logos/Bulgaria - efbet Liga/CSKA 1948.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Bulgaria%20-%20efbet%20Liga/CSKA%201948.png",
+    "local": "/admin-logos/catalog/crest-34.png"
+  },
+  {
+    "index": 35,
+    "sourcePath": "logos/Bulgaria - efbet Liga/CSKA Sofia.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Bulgaria%20-%20efbet%20Liga/CSKA%20Sofia.png",
+    "local": "/admin-logos/catalog/crest-35.png"
+  },
+  {
+    "index": 36,
+    "sourcePath": "logos/Bulgaria - efbet Liga/Cherno More Varna.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Bulgaria%20-%20efbet%20Liga/Cherno%20More%20Varna.png",
+    "local": "/admin-logos/catalog/crest-36.png"
+  },
+  {
+    "index": 37,
+    "sourcePath": "logos/Bulgaria - efbet Liga/Dunav Ruse.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Bulgaria%20-%20efbet%20Liga/Dunav%20Ruse.png",
+    "local": "/admin-logos/catalog/crest-37.png"
+  },
+  {
+    "index": 38,
+    "sourcePath": "logos/Bulgaria - efbet Liga/Levski Sofia.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Bulgaria%20-%20efbet%20Liga/Levski%20Sofia.png",
+    "local": "/admin-logos/catalog/crest-38.png"
+  },
+  {
+    "index": 39,
+    "sourcePath": "logos/Bulgaria - efbet Liga/Lokomotiv Plovdiv.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Bulgaria%20-%20efbet%20Liga/Lokomotiv%20Plovdiv.png",
+    "local": "/admin-logos/catalog/crest-39.png"
+  },
+  {
+    "index": 40,
+    "sourcePath": "logos/Bulgaria - efbet Liga/Lokomotiv Sofia.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Bulgaria%20-%20efbet%20Liga/Lokomotiv%20Sofia.png",
+    "local": "/admin-logos/catalog/crest-40.png"
+  },
+  {
+    "index": 41,
+    "sourcePath": "logos/Bulgaria - efbet Liga/Ludogorets Razgrad.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Bulgaria%20-%20efbet%20Liga/Ludogorets%20Razgrad.png",
+    "local": "/admin-logos/catalog/crest-41.png"
+  },
+  {
+    "index": 42,
+    "sourcePath": "logos/Bulgaria - efbet Liga/Septemvri Sofia.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Bulgaria%20-%20efbet%20Liga/Septemvri%20Sofia.png",
+    "local": "/admin-logos/catalog/crest-42.png"
+  },
+  {
+    "index": 43,
+    "sourcePath": "logos/Bulgaria - efbet Liga/Slavia Sofia.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Bulgaria%20-%20efbet%20Liga/Slavia%20Sofia.png",
+    "local": "/admin-logos/catalog/crest-43.png"
+  },
+  {
+    "index": 44,
+    "sourcePath": "logos/Bulgaria - efbet Liga/Spartak Varna.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Bulgaria%20-%20efbet%20Liga/Spartak%20Varna.png",
+    "local": "/admin-logos/catalog/crest-44.png"
+  },
+  {
+    "index": 45,
+    "sourcePath": "logos/Croatia - SuperSport HNL/GNK Dinamo Zagreb.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Croatia%20-%20SuperSport%20HNL/GNK%20Dinamo%20Zagreb.png",
+    "local": "/admin-logos/catalog/crest-45.png"
+  },
+  {
+    "index": 46,
+    "sourcePath": "logos/Croatia - SuperSport HNL/HNK Gorica.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Croatia%20-%20SuperSport%20HNL/HNK%20Gorica.png",
+    "local": "/admin-logos/catalog/crest-46.png"
+  },
+  {
+    "index": 47,
+    "sourcePath": "logos/Croatia - SuperSport HNL/HNK Hajduk Split.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Croatia%20-%20SuperSport%20HNL/HNK%20Hajduk%20Split.png",
+    "local": "/admin-logos/catalog/crest-47.png"
+  },
+  {
+    "index": 48,
+    "sourcePath": "logos/Croatia - SuperSport HNL/HNK Rijeka.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Croatia%20-%20SuperSport%20HNL/HNK%20Rijeka.png",
+    "local": "/admin-logos/catalog/crest-48.png"
+  },
+  {
+    "index": 49,
+    "sourcePath": "logos/Croatia - SuperSport HNL/NK Istra 1961.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Croatia%20-%20SuperSport%20HNL/NK%20Istra%201961.png",
+    "local": "/admin-logos/catalog/crest-49.png"
+  },
+  {
+    "index": 50,
+    "sourcePath": "logos/Croatia - SuperSport HNL/NK Lokomotiva Zagreb.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Croatia%20-%20SuperSport%20HNL/NK%20Lokomotiva%20Zagreb.png",
+    "local": "/admin-logos/catalog/crest-50.png"
+  },
+  {
+    "index": 51,
+    "sourcePath": "logos/Croatia - SuperSport HNL/NK Osijek.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Croatia%20-%20SuperSport%20HNL/NK%20Osijek.png",
+    "local": "/admin-logos/catalog/crest-51.png"
+  },
+  {
+    "index": 52,
+    "sourcePath": "logos/Croatia - SuperSport HNL/NK Rudes.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Croatia%20-%20SuperSport%20HNL/NK%20Rudes.png",
+    "local": "/admin-logos/catalog/crest-52.png"
+  },
+  {
+    "index": 53,
+    "sourcePath": "logos/Croatia - SuperSport HNL/NK Varazdin.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Croatia%20-%20SuperSport%20HNL/NK%20Varazdin.png",
+    "local": "/admin-logos/catalog/crest-53.png"
+  },
+  {
+    "index": 54,
+    "sourcePath": "logos/Croatia - SuperSport HNL/Slaven Belupo Koprivnica.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Croatia%20-%20SuperSport%20HNL/Slaven%20Belupo%20Koprivnica.png",
+    "local": "/admin-logos/catalog/crest-54.png"
+  },
+  {
+    "index": 55,
+    "sourcePath": "logos/Czech Republic - Chance Liga/1.FC Slovacko.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Czech%20Republic%20-%20Chance%20Liga/1.FC%20Slovacko.png",
+    "local": "/admin-logos/catalog/crest-55.png"
+  },
+  {
+    "index": 56,
+    "sourcePath": "logos/Czech Republic - Chance Liga/AC Sparta Prague.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Czech%20Republic%20-%20Chance%20Liga/AC%20Sparta%20Prague.png",
+    "local": "/admin-logos/catalog/crest-56.png"
+  },
+  {
+    "index": 57,
+    "sourcePath": "logos/Czech Republic - Chance Liga/Bohemians Prague 1905.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Czech%20Republic%20-%20Chance%20Liga/Bohemians%20Prague%201905.png",
+    "local": "/admin-logos/catalog/crest-57.png"
+  },
+  {
+    "index": 58,
+    "sourcePath": "logos/Czech Republic - Chance Liga/FC Banik Ostrava.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Czech%20Republic%20-%20Chance%20Liga/FC%20Banik%20Ostrava.png",
+    "local": "/admin-logos/catalog/crest-58.png"
+  },
+  {
+    "index": 59,
+    "sourcePath": "logos/Czech Republic - Chance Liga/FC Hradec Kralove.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Czech%20Republic%20-%20Chance%20Liga/FC%20Hradec%20Kralove.png",
+    "local": "/admin-logos/catalog/crest-59.png"
+  },
+  {
+    "index": 60,
+    "sourcePath": "logos/Czech Republic - Chance Liga/FC Slovan Liberec.png",
+    "url": "https://raw.githubusercontent.com/luukhopman/football-logos/master/logos/Czech%20Republic%20-%20Chance%20Liga/FC%20Slovan%20Liberec.png",
+    "local": "/admin-logos/catalog/crest-60.png"
+  }
+]

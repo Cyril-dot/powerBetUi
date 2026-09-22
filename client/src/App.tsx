@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link, Route, Switch, useLocation, useSearch } from "wouter";
 import api, { ApiError } from "./lib/api";
 import { isBettableMatchId } from "./lib/sportsbook";
+import { adminCrestFor } from "./lib/logoCatalog";
 import Sportsbook, { type Pick } from "./components/Sportsbook";
 import { fetchAdminMatches, formatKickoff, isMatchLive, type EnrichedMatch } from "./lib/sportsbook";
 import WalletCenter from "./components/WalletCenter";
@@ -304,12 +305,7 @@ function BetslipFAB({ count }: { count: number }) {
 
 
 function adminFeaturedLogo(team: unknown, side: "home" | "away"): string {
-  const value = String(team ?? "admin-team").trim().toLowerCase();
-  let hash = 0;
-  for (let i = 0; i < value.length; i += 1) hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
-  const index = (hash % 4) + 1;
-  const extension = index === 1 || index === 2 ? "jpg" : index === 3 ? "webp" : "png";
-  return `/admin-logos/football-crest-${String(index).padStart(2, "0")}.${extension}`;
+  return adminCrestFor(team, side);
 }
 
 function AdminFeaturedGames({ picks, onPick }: { picks: Pick[]; onPick: (p: Pick) => void }) {

@@ -7,6 +7,7 @@
 
 import api, { type Match } from "./api";
 import { resolveCompetition } from "./competitionCatalog";
+import { adminCrestFor } from "./logoCatalog";
 
 export type SportKey = "football" | "basketball" | "tennis" | "baseball" | "nfl" | "mma";
 
@@ -1059,16 +1060,11 @@ export async function getSearchableMatches(): Promise<EnrichedMatch[]> {
 /** Admin fixtures are shown only while active and only when both crests are
  * actually assigned. Finished fixtures disappear permanently on the next poll. */
 function adminLogoFallback(team: unknown, side: "home" | "away"): string {
-  const name = String(team ?? "admin-team").trim().toLowerCase();
-  let hash = 0;
-  for (let i = 0; i < name.length; i += 1) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-  const index = (hash % 4) + 1;
-  const extension = index === 1 || index === 2 ? "jpg" : index === 3 ? "webp" : "png";
-  return `/admin-logos/football-crest-${String(index).padStart(2, "0")}.${extension}`;
+  return adminCrestFor(team, side);
 }
 function adminLogo(value: unknown, team: unknown, side: "home" | "away"): string {
   const candidate = String(value ?? "").trim();
-  return candidate || adminLogoFallback(team, side);
+  return !candidate || candidate.startsWith("/admin-logos/") ? adminLogoFallback(team, side) : candidate;
 }
 
 function movingAdminOdds(matchId: string, base: OddsMap): OddsMap {
