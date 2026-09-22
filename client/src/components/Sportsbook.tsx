@@ -477,10 +477,13 @@ export default function Sportsbook({
   }, [sport]);
 
   const hasDraw = !TWO_WAY_SPORTS.has(sport);
-  // Keep every fetched game visible. If a feed has not returned prices yet,
-  // ensureOdds supplies stable display odds; placement still validates the
-  // backend match ID before sending a bet.
-  const current = matches[sport];
+  // Hard gate: admin-created fixtures belong exclusively to the dedicated
+  // Featured matches section above. Some backend football feeds also return
+  // ADMIN_CREATED rows inside the normal list, so filter by both the enriched
+  // flag and the backend source before Today/Upcoming/Ended grouping.
+  const current = matches[sport].filter((match) => (
+    !match.isAdmin && String(match.source ?? "").trim().toUpperCase() !== "ADMIN_CREATED"
+  ));
 
   const grouped = useMemo(() => {
     const cats: Record<"live" | "today" | "upcoming" | "ended", EnrichedMatch[]> = { live: [], today: [], upcoming: [], ended: [] };
