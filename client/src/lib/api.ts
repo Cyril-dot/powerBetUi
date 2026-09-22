@@ -1297,9 +1297,9 @@ export const superAdminWithdrawals = {
   // Omitting it causes the approval controller to fail with HTTP 500.
   approve: (id: string, note = "") => post<Record<string, unknown>>(`/api/wallet/withdrawals/admin/${encodeURIComponent(id)}/approve`, { note }),
   approveAsSuperAdmin: (id: string, note = "") => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/approve`, { note }),
-  reject: (id: string, body: { reason?: string }) => post<Record<string, unknown>>(`/api/wallet/withdrawals/admin/${encodeURIComponent(id)}/reject`, body),
-  settle: (id: string) => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/settle`),
-  markFailed: (id: string, body: { reason?: string }) => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/mark-failed`, body),
+  reject: (id: string, note = "") => post<Record<string, unknown>>(`/api/wallet/withdrawals/admin/${encodeURIComponent(id)}/reject`, { note }),
+  settle: (id: string, note = "") => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/settle`, { note }),
+  markFailed: (id: string, note = "") => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/mark-failed`, { note }),
 };
 
 // ---------------------------------------------------------------------------

@@ -71,12 +71,97 @@ function UserDeposits() { const [userId, setUserId] = useState(""); const [rows,
 function AffiliateWithdrawals() { const [rows, setRows] = useState<Row[]>([]); const [error, setError] = useState(""); const load = async () => { try { setRows(pageRows(await api.superAdminAffiliateWithdrawals.list(0, 100))); } catch (e) { setError(e instanceof Error ? e.message : "Could not load affiliate withdrawals"); } }; useEffect(() => { load(); }, []); const act = async (row: Row, approve: boolean) => { try { if (approve) await api.superAdminAffiliateWithdrawals.process(idOf(row)); else await api.superAdminAffiliateWithdrawals.reject(idOf(row), { reason: window.prompt("Rejection reason") || "Rejected by Super Admin" }); await load(); } catch (e) { setError(e instanceof Error ? e.message : "Affiliate withdrawal operation failed"); } }; return <div className="sa-stack"><Intro title="Affiliate withdrawals" text="Process or reject affiliate withdrawal requests." onRefresh={load} /><Notice text={error} error /><Panel title="Affiliate withdrawal queue"><Table rows={rows} columns={["id", "userId", "amount", "currency", "status", "createdAt"]} onRow={row => <div className="sa-actions"><button onClick={() => act(row, true)}>Process</button><button onClick={() => act(row, false)}>Reject</button></div>} /></Panel></div>; }
 function PayoutRequests() { const [rows, setRows] = useState<Row[]>([]); const [error, setError] = useState(""); const load = async () => { try { setRows(list(await api.superAdminPayouts.getPending())); } catch (e) { setError(e instanceof Error ? e.message : "Could not load payout requests"); } }; useEffect(() => { load(); }, []); const act = async (row: Row, kind: "approve" | "reject" | "paid") => { try { if (kind === "approve") await api.superAdminPayouts.approve(idOf(row)); if (kind === "reject") await api.superAdminPayouts.reject(idOf(row), { reason: window.prompt("Rejection reason") || "Rejected by Super Admin" }); if (kind === "paid") await api.superAdminPayouts.markPaid(idOf(row)); await load(); } catch (e) { setError(e instanceof Error ? e.message : "Payout operation failed"); } }; return <div className="sa-stack"><Intro title="Payout requests" text="Approve, reject, and mark affiliate payout requests as paid." onRefresh={load} /><Notice text={error} error /><Panel title="Payout queue"><Table rows={rows} columns={["id", "adminId", "amount", "currency", "status", "createdAt"]} onRow={row => <div className="sa-actions"><button onClick={() => act(row, "approve")}>Approve</button><button onClick={() => act(row, "paid")}>Mark paid</button><button onClick={() => act(row, "reject")}>Reject</button></div>} /></Panel></div>; }
 function Withdrawals() {
-  const [rows, setRows] = useState<Row[]>([]); const [error, setError] = useState(""); const [message, setMessage] = useState("");
-  const load = async () => { try { setRows(pageRows(await api.superAdminWithdrawals.list())); } catch (e) { setError(e instanceof Error ? e.message : "Could not load withdrawals"); } };
-  useEffect(() => { load(); }, []);
+  type WithdrawalTab = "pending" | "settlement" | "history";
+  const [rows, setRows] = useState<Row[]>([]);
+  const [tab, setTab] = useState<WithdrawalTab>("pending");
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+  const pendingStatuses = ["PENDING", "REQUESTED", "PROCESSING", "PENDING_APPROVAL", "AWAITING_APPROVAL", "SUBMITTED"];
+  const approvedStatuses = ["APPROVED", "AWAITING_SETTLEMENT", "READY_TO_SETTLE"];
+  const terminalStatuses = ["SETTLED", "PAID", "REJECTED", "FAILED", "CANCELLED"];
   const statusOf = (row: Row) => String(row.status ?? row.state ?? "PENDING").toUpperCase();
-  const act = async (row: Row, kind: "approve" | "reject" | "settle" | "failed") => { const id = idOf(row); if (!id) return; const status = statusOf(row); const pendingStatuses = ["PENDING", "REQUESTED", "PROCESSING", "PENDING_APPROVAL", "AWAITING_APPROVAL", "SUBMITTED"]; const approvedStatuses = ["APPROVED", "AWAITING_SETTLEMENT", "READY_TO_SETTLE"]; if (kind === "settle" && !approvedStatuses.includes(status)) { setError("Approve the withdrawal first, then settle it."); return; } if (kind === "approve" && !pendingStatuses.includes(status)) { setError(`This withdrawal is already ${status.toLowerCase()}.`); return; } try { if (kind === "approve") { try { await api.superAdminWithdrawals.approve(id); } catch (adminApprovalError) { try { await api.superAdminWithdrawals.approveAsSuperAdmin(id); } catch { throw adminApprovalError; } } } if (kind === "reject") await api.superAdminWithdrawals.reject(id, { reason: window.prompt("Rejection reason") || "Rejected by Super Admin" }); if (kind === "settle") await api.superAdminWithdrawals.settle(id); if (kind === "failed") await api.superAdminWithdrawals.markFailed(id, { reason: window.prompt("Failure reason") || "Marked failed by Super Admin" }); setMessage(kind === "approve" ? "Withdrawal approved. It is now ready to settle." : kind === "settle" ? "Withdrawal settled successfully." : kind === "reject" ? "Withdrawal rejected." : "Withdrawal marked failed."); setError(""); await load(); } catch (e) { setError(e instanceof Error ? e.message : "Withdrawal operation failed"); } };
-  return <div className="sa-stack"><Intro title="Wallet withdrawals" text="Approve each withdrawal first. Once approved, settle it after the payment has been completed." onRefresh={load} /><Notice text={message} /><Notice text={error} error /><Panel title="Withdrawal queue"><Table rows={rows} columns={["id", "userId", "amount", "currency", "status", "method", "createdAt"]} onRow={row => { const status = statusOf(row); const pending = ["PENDING", "REQUESTED", "PROCESSING", "PENDING_APPROVAL", "AWAITING_APPROVAL", "SUBMITTED"].includes(status); const approved = ["APPROVED", "AWAITING_SETTLEMENT", "READY_TO_SETTLE"].includes(status); const terminal = ["SETTLED", "PAID", "REJECTED", "FAILED", "CANCELLED"].includes(status); return <div className="sa-actions">{pending && <><button onClick={() => act(row, "approve")}><Check size={12} /> Approve</button><button onClick={() => act(row, "reject")}><X size={12} /> Reject</button></>}{approved && <><button onClick={() => act(row, "settle")}><Check size={12} /> Settle</button><button onClick={() => act(row, "failed")}><X size={12} /> Failed</button></>}{terminal && <span className="sa-action-status">{status}</span>}</div>; }} /></Panel></div>;
+  const newestFirst = (left: Row, right: Row) => {
+    const leftTime = new Date(String(left.createdAt ?? left.submittedAt ?? left.requestedAt ?? "")).getTime();
+    const rightTime = new Date(String(right.createdAt ?? right.submittedAt ?? right.requestedAt ?? "")).getTime();
+    return (Number.isFinite(rightTime) ? rightTime : 0) - (Number.isFinite(leftTime) ? leftTime : 0);
+  };
+  const load = async () => {
+    setError("");
+    try {
+      const result = await api.superAdminWithdrawals.list(0, 100);
+      setRows(pageRows(result).sort(newestFirst));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not load withdrawals");
+    }
+  };
+  useEffect(() => { load(); }, []);
+
+  const visibleRows = useMemo(() => rows.filter((row) => {
+    const status = statusOf(row);
+    if (tab === "pending") return pendingStatuses.includes(status);
+    if (tab === "settlement") return approvedStatuses.includes(status);
+    return terminalStatuses.includes(status) || (!pendingStatuses.includes(status) && !approvedStatuses.includes(status));
+  }), [rows, tab]);
+
+  const approveOne = async (id: string) => {
+    try {
+      await api.superAdminWithdrawals.approve(id);
+    } catch (adminApprovalError) {
+      await api.superAdminWithdrawals.approveAsSuperAdmin(id);
+    }
+  };
+
+  const act = async (row: Row, kind: "approve" | "reject" | "settle" | "failed") => {
+    const id = idOf(row);
+    if (!id) return;
+    setBusy(true); setError(""); setMessage("");
+    try {
+      if (kind === "approve") await approveOne(id);
+      if (kind === "reject") await api.superAdminWithdrawals.reject(id, window.prompt("Rejection note") || "Rejected by Super Admin");
+      if (kind === "settle") await api.superAdminWithdrawals.settle(id);
+      if (kind === "failed") await api.superAdminWithdrawals.markFailed(id, window.prompt("Failure note") || "Marked failed by Super Admin");
+      setMessage(kind === "approve" ? "Withdrawal approved and moved to settlement." : kind === "settle" ? "Withdrawal settled successfully." : kind === "reject" ? "Withdrawal rejected." : "Withdrawal marked failed.");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Withdrawal operation failed");
+    } finally { setBusy(false); }
+  };
+
+  const bulkAction = async (kind: "approve" | "settle") => {
+    const eligible = visibleRows.filter((row) => kind === "approve" ? pendingStatuses.includes(statusOf(row)) : approvedStatuses.includes(statusOf(row)));
+    if (!eligible.length) return;
+    setBusy(true); setError(""); setMessage("");
+    const results = await Promise.allSettled(eligible.map((row) => kind === "approve" ? approveOne(idOf(row)) : api.superAdminWithdrawals.settle(idOf(row))));
+    const failed = results.filter((result) => result.status === "rejected").length;
+    const completed = results.length - failed;
+    setMessage(`${completed} withdrawal${completed === 1 ? "" : "s"} ${kind === "approve" ? "approved and moved to settlement" : "settled"}.${failed ? ` ${failed} failed; review the remaining records.` : ""}`);
+    if (failed) setError("Some bulk withdrawal actions failed. The successful actions were applied.");
+    await load();
+    setBusy(false);
+  };
+
+  const tabs: Array<{ id: WithdrawalTab; label: string; count: number }> = [
+    { id: "pending", label: "Pending approval", count: rows.filter((row) => pendingStatuses.includes(statusOf(row))).length },
+    { id: "settlement", label: "Awaiting settlement", count: rows.filter((row) => approvedStatuses.includes(statusOf(row))).length },
+    { id: "history", label: "History", count: rows.filter((row) => terminalStatuses.includes(statusOf(row))).length },
+  ];
+
+  return <div className="sa-stack">
+    <Intro title="Wallet withdrawals" text="New requests appear first. Approve pending requests, then settle approved requests from the settlement tab." onRefresh={load} />
+    <Notice text={message} /><Notice text={error} error />
+    <div className="sa-toggle">{tabs.map((item) => <button key={item.id} className={tab === item.id ? "active" : ""} onClick={() => setTab(item.id)}>{item.label} ({item.count})</button>)}</div>
+    {tab !== "history" && <div className="sa-actions"><button className="sa-primary" disabled={busy || visibleRows.length === 0} onClick={() => bulkAction(tab === "pending" ? "approve" : "settle")}>{busy ? "Processing…" : tab === "pending" ? `Approve all (${visibleRows.length})` : `Settle all (${visibleRows.length})`}</button></div>}
+    <Panel title={tab === "pending" ? "Pending approval queue" : tab === "settlement" ? "Awaiting settlement queue" : "Withdrawal history"}>
+      <Table rows={visibleRows} columns={["id", "userId", "amount", "currency", "status", "method", "createdAt"]} onRow={row => {
+        const status = statusOf(row);
+        const pending = pendingStatuses.includes(status);
+        const approved = approvedStatuses.includes(status);
+        const terminal = terminalStatuses.includes(status);
+        return <div className="sa-actions">{pending && <><button disabled={busy} onClick={() => act(row, "approve")}><Check size={12} /> Approve</button><button disabled={busy} onClick={() => act(row, "reject")}><X size={12} /> Reject</button></>}{approved && <><button disabled={busy} onClick={() => act(row, "settle")}><Check size={12} /> Settle</button><button disabled={busy} onClick={() => act(row, "failed")}><X size={12} /> Failed</button></>}{terminal && <span className="sa-action-status">{status}</span>}</div>;
+      }} />
+    </Panel>
+  </div>;
 }
 function CommissionAnalytics() { const [range, setRange] = useState<"daily" | "weekly">("daily"); const [rows, setRows] = useState<Row[]>([]); const [error, setError] = useState(""); const load = async () => { try { const raw = range === "daily" ? await api.superAdmin.commissionDaily(30) : await api.superAdmin.commissionWeekly(12); setRows(list(raw)); } catch (e) { setError(e instanceof Error ? e.message : "Could not load commission analytics"); } }; useEffect(() => { load(); }, [range]); return <div className="sa-stack"><Intro title="Commission analytics" text="Review Super Bet commission performance by country and period." onRefresh={load} /><Notice text={error} error /><div className="sa-toggle"><button className={range === "daily" ? "active" : ""} onClick={() => setRange("daily")}>Daily</button><button className={range === "weekly" ? "active" : ""} onClick={() => setRange("weekly")}>Weekly</button></div><Panel title="Country commission report"><Table rows={rows} columns={["periodLabel", "country", "amount", "currency", "adminCount", "depositCount"]} /></Panel></div>; }
 function UpgradeChats() { const [rows, setRows] = useState<Row[]>([]); const [selected, setSelected] = useState<Row | null>(null); const [messages, setMessages] = useState<Row[]>([]); const [content, setContent] = useState(""); const [error, setError] = useState(""); const load = async () => { try { setRows(list(await api.superAdminUpgradeChats.getAll())); } catch (e) { setError(e instanceof Error ? e.message : "Could not load upgrade chats"); } }; useEffect(() => { load(); }, []); const open = async (row: Row) => { try { setSelected(row); setMessages(list(await api.superAdminUpgradeChats.getMessages(idOf(row)))); } catch (e) { setError(e instanceof Error ? e.message : "Could not load chat messages"); } }; const send = async () => { if (!selected || !content.trim()) return; try { await api.superAdminUpgradeChats.sendMessage(idOf(selected), { content: content.trim() }); setContent(""); await open(selected); } catch (e) { setError(e instanceof Error ? e.message : "Could not send message"); } }; return <div className="sa-stack"><Intro title="Upgrade chats" text="Review administrator upgrade conversations and set commission rates." onRefresh={load} /><Notice text={error} error /><Panel title="Chat requests"><Table rows={rows} columns={["id", "adminId", "status", "subject", "createdAt"]} onRow={row => <button className="sa-link" onClick={() => open(row)}>Open chat</button>} /></Panel>{selected && <Panel title={`Conversation · ${idOf(selected)}`}><div className="sa-messages">{messages.map((m, i) => <div key={i}><b>{text(m.sender ?? m.senderRole, "Participant")}</b><p>{text(m.content)}</p></div>)}</div><div className="sa-form-grid"><input placeholder="Message" value={content} onChange={e => setContent(e.target.value)} /><button className="sa-primary" onClick={send}>Send message</button><button className="sa-secondary" onClick={async () => { const rate = window.prompt("Commission rate (%)"); if (rate !== null) await api.superAdminUpgradeChats.setCommission(idOf(selected), { commissionRate: Number(rate) }); }}>Set commission</button></div></Panel>}</div>; }
