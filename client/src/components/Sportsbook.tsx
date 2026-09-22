@@ -298,7 +298,7 @@ function FeaturedMatchCard({ match, hasDraw, picks, onPick }: { match: EnrichedM
   const slots = hasDraw
     ? [["1", odds?.home ?? 0], ["X", odds?.draw ?? 0], ["2", odds?.away ?? 0]]
     : [["1", odds?.home ?? 0], ["2", odds?.away ?? 0]];
-  const matchHref = `/match/${match.id}?sport=${encodeURIComponent(match.sport ?? "football")}`;
+  const matchHref = `/match/${match.id}?sport=${encodeURIComponent(match.sport ?? "football")}&admin=1`;
 
   return (
     <div className={`featured-card${isLive ? " is-live" : ""}`}>
