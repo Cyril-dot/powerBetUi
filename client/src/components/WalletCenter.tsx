@@ -196,6 +196,12 @@ export default function WalletCenter() {
       setWithdrawNotice("Fill in the amount and account details to continue.");
       return;
     }
+    if (balance === null || amount > balance) {
+      const available = balance ?? 0;
+      const shortfall = Math.max(0, amount - available);
+      setWithdrawNotice(`Insufficient balance. You can withdraw up to GHS ${available.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}. Reduce the amount by GHS ${shortfall.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} and try again.`);
+      return;
+    }
     setWithdrawing(true);
     try {
       if (!(await checkWithdrawalEligibility())) {
@@ -383,7 +389,10 @@ export default function WalletCenter() {
               </button>
 
               {withdrawNotice && (
-                <small className="wal-notice">{withdrawNotice}</small>
+                <div className={`wal-inline-notice${withdrawNotice.startsWith("Insufficient balance") ? " wal-inline-error" : ""}`} role="alert">
+                  <strong>{withdrawNotice.startsWith("Insufficient balance") ? "Insufficient balance" : "Withdrawal notice"}</strong>
+                  <span>{withdrawNotice}</span>
+                </div>
               )}
             </form>
             {withdrawGateMessage && (
@@ -640,6 +649,10 @@ function WalStyles() {
       .wal-inline-gate strong { color: #754819; font-size: .8rem; }
       .wal-inline-gate a { align-self: flex-start; color: #1e6bff; font-weight: 800; text-decoration: none; }
       .wal-inline-gate a:hover { text-decoration: underline; }
+      .wal-inline-notice { display: flex; flex-direction: column; gap: 5px; margin-top: 12px; padding: 12px 14px; border: 1px solid rgba(30,107,255,.35); border-radius: 10px; background: rgba(30,107,255,.08); color: #315b91; font-size: .78rem; line-height: 1.45; }
+      .wal-inline-notice strong { font-size: .8rem; color: #174b87; }
+      .wal-inline-error { border-color: rgba(190,82,55,.55); background: rgba(190,82,55,.11); color: #8a3f2f; }
+      .wal-inline-error strong { color: #7d3023; }
 
       /* ── Activity list ── */
       .wal-activity-list { display: flex; flex-direction: column; }
