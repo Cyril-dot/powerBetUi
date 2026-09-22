@@ -19,6 +19,79 @@ function verifyCode(bet: Bet): string {
   return `GH${raw.slice(0, 4)}${raw.slice(-6)}`;
 }
 
+type RawScoredMatch = Match & {
+  finalScoreHome?: number | string;
+  finalScoreAway?: number | string;
+  score_home?: number | string;
+  score_away?: number | string;
+  homeScore?: number | string;
+  awayScore?: number | string;
+  match?: Match;
+};
+
+function scoreNumber(value: unknown): number | undefined {
+  const n = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
+  return Number.isFinite(n) ? n : undefined;
+}
+
+/** Finished-result feeds carry the authoritative FT score, even when the
+ * individual ticket/slip response does not include it. */
+function normalizeFinishedScore(raw: unknown): Match | null {
+  if (!raw || typeof raw !== "object") return null;
+  const outer = raw as RawScoredMatch;
+  const source = outer.match && typeof outer.match === "object" ? outer.match as RawScoredMatch : outer;
+  const home = scoreNumber(source.scoreHome ?? source.score_home ?? source.homeScore ?? source.finalScoreHome);
+  const away = scoreNumber(source.scoreAway ?? source.score_away ?? source.awayScore ?? source.finalScoreAway);
+  if (home == null || away == null || !source.id) return null;
+  return { ...source, scoreHome: home, scoreAway: away } as Match;
+}
+
+async function loadTicketMatchScores(ids: string[]): Promise<Record<string, Match>> {
+  const byId: Record<string, Match> = {};
+  const direct = await Promise.allSettled(ids.map(async (matchId) => {
+    try { return await api.matches.getById(matchId); }
+    catch { return api.adminMatches.getById(matchId); }
+  }));
+  direct.forEach((result, index) => {
+    if (result.status === "fulfilled") {
+      const match = normalizeFinishedScore(result.value) ?? result.value;
+      byId[ids[index]] = match;
+    }
+  });
+
+  const missing = ids.filter((matchId) => {
+    const match = byId[matchId];
+    return !match || match.scoreHome == null || match.scoreAway == null;
+  });
+  if (!missing.length) return byId;
+
+  // Reuse the same finished/results feeds that populate Bet History. These
+  // feeds contain the final score after the match endpoint has stopped
+  // returning live fields or the slip response omits them entirely.
+  const feeds = await Promise.allSettled([
+    api.matches.results(100),
+    api.publicFootball.results(100),
+    api.publicBasketball.results(100),
+    api.publicTennis.results(100),
+    api.publicBaseball.results(100),
+    api.publicNfl.results(),
+    api.publicMma.results(100),
+  ]);
+  const finishedById = new Map<string, Match>();
+  feeds.forEach((feed) => {
+    if (feed.status !== "fulfilled" || !Array.isArray(feed.value)) return;
+    feed.value.forEach((raw) => {
+      const scored = normalizeFinishedScore(raw);
+      if (scored) finishedById.set(String(scored.id), scored);
+    });
+  });
+  missing.forEach((matchId) => {
+    const scored = finishedById.get(String(matchId));
+    if (scored) byId[matchId] = { ...(byId[matchId] ?? scored), scoreHome: scored.scoreHome, scoreAway: scored.scoreAway, status: scored.status ?? byId[matchId]?.status };
+  });
+  return byId;
+}
+
 const STATUS_TONE: Record<Bet["status"], string> = {
   PENDING: "td-pending", WON: "td-won", LOST: "td-lost", VOID: "td-void", CASHED_OUT: "td-cashed",
 };
@@ -43,13 +116,11 @@ export default function TicketDetailsPage({ id }: { id: string }) {
       .then(async (b) => {
         if (cancelled) return;
         setBet(b);
-        // Best-effort enrichment for FT score / outcome — the Bet.selections
-        // payload itself doesn't carry the final score, only the match id.
+        // The Bet.selections payload itself doesn't carry the final score.
         const ids = Array.from(new Set(b.selections.map((s) => s.matchId).filter(Boolean)));
-        const results = await Promise.allSettled(ids.map((mid) => api.matches.getById(mid)));
         if (cancelled) return;
-        const byId: Record<string, Match> = {};
-        results.forEach((r, i) => { if (r.status === "fulfilled") byId[ids[i]] = r.value; });
+        const byId = await loadTicketMatchScores(ids);
+        if (cancelled) return;
         setMatchesById(byId);
       })
       .catch((e) => { if (!cancelled) setError(e instanceof ApiError ? e.message : "This ticket could not be loaded."); })
@@ -115,7 +186,7 @@ export default function TicketDetailsPage({ id }: { id: string }) {
               const match = matches[s.matchId];
               const home = s.homeTeam ?? match?.homeTeam ?? "Home";
               const away = s.awayTeam ?? match?.awayTeam ?? "Away";
-              const ftScore = match && match.scoreHome != null && match.scoreAway != null ? `${match.scoreHome}:${match.scoreAway}` : "—";
+              const ftScore = match && match.scoreHome != null && match.scoreAway != null ? `FT ${match.scoreHome}-${match.scoreAway}` : "FT —";
               const won = s.result ? s.result.toLowerCase() === "won" || s.result.toLowerCase() === "win" : bet.status === "WON";
               return (
                 <div className="td-leg-card" key={s.id ?? i}>
@@ -130,7 +201,7 @@ export default function TicketDetailsPage({ id }: { id: string }) {
                     <div className="td-leg-row"><span>Pick</span><b>{s.selection} @ {s.oddsLocked?.toFixed(2)} {won && "✓"}</b></div>
                     <div className="td-leg-row"><span>Market</span><b>{s.market}</b></div>
                     <div className="td-leg-row"><span>FT Score</span><b>{ftScore}</b></div>
-                    <div className="td-leg-row"><span>Outcome</span><b>{s.result ?? (match ? ftScore : "—")}</b></div>
+                    <div className="td-leg-row"><span>Outcome</span><b>{s.result ?? (match && match.scoreHome != null && match.scoreAway != null ? ftScore : "—")}</b></div>
                   </div>
                 </div>
               );
