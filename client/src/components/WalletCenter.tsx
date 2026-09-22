@@ -167,7 +167,7 @@ export default function WalletCenter() {
         const bets = await api.bets.getMine(0, 100);
         const hasWonBet = (bets.content ?? []).some((bet: { status?: string }) => String(bet.status ?? "").toUpperCase() === "WON");
         if (!hasWonBet) {
-          setWithdrawGateMessage("Place a bet and win it before requesting a withdrawal. Your withdrawal request will be available after a settled winning bet.");
+          setWithdrawGateMessage("Stake and win one bet first. Then you can withdraw your winnings.");
           setWithdrawing(false);
           return;
         }
@@ -375,7 +375,7 @@ export default function WalletCenter() {
             <section className="wal-gate-modal" role="dialog" aria-modal="true" aria-labelledby="wal-gate-title">
               <button className="wal-modal-close" type="button" onClick={() => setWithdrawGateMessage("")} aria-label="Close withdrawal requirement"><X size={18} /></button>
               <div className="wal-gate-icon"><CreditCard size={28} /></div>
-              <h3 id="wal-gate-title">Win a bet before withdrawing</h3>
+              <h3 id="wal-gate-title">One quick step first</h3>
               <p>{withdrawGateMessage}</p>
               <Link className="wal-submit" href="/" onClick={() => setWithdrawGateMessage("")}>Go to sportsbook</Link>
             </section>
@@ -583,11 +583,11 @@ function WalStyles() {
       }
 
       .wal-success-backdrop,.wal-payment-backdrop,.wal-gate-backdrop{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.72)}
-      .wal-success-modal,.wal-gate-modal{position:relative;width:min(420px,100%);padding:28px 22px 22px;text-align:center;border:1px solid rgba(91,224,143,.4);border-radius:16px;background:#151515;box-shadow:none}
+      .wal-success-modal{position:relative;width:min(420px,100%);padding:28px 22px 22px;text-align:center;border:1px solid rgba(91,224,143,.4);border-radius:16px;background:#151515;box-shadow:none}.wal-gate-modal{position:relative;width:min(360px,100%);padding:28px 24px 22px;text-align:center;border:1px solid #d9e4f0;border-radius:18px;background:#fff;box-shadow:none}
       .wal-payment-modal{position:relative;width:min(760px,100%);max-height:90vh;overflow:auto;border:1px solid #d7e3f2;border-radius:16px;background:#fff;box-shadow:none}
       .wal-payment-modal .dep-page{min-height:0;background:#fff}.wal-payment-modal .dep-hero{border-radius:16px 16px 0 0;padding:22px 24px}.wal-payment-modal .dep-body{padding:18px 20px 24px}.wal-payment-modal .dep-info-card,.wal-payment-modal .dep-log-panel{display:none}
       .wal-modal-close{position:absolute;top:10px;right:10px;z-index:3;width:32px;height:32px;display:grid;place-items:center;border:1px solid #d3dce8;border-radius:50%;background:#fff;color:#4e6076;cursor:pointer}
-      .wal-success-close{position:absolute;top:10px;right:10px;width:32px;height:32px;display:grid;place-items:center;border:1px solid #303030;border-radius:50%;background:#202020;color:#d7d7d7;cursor:pointer}.wal-success-icon,.wal-gate-icon{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 12px;border-radius:50%;color:#8cf0b3;background:rgba(91,224,143,.13);border:1px solid rgba(91,224,143,.35)}.wal-gate-icon{width:58px;height:58px;color:#1e6bff;background:#eaf2ff;border-color:#b7d0f2}.wal-success-modal h3,.wal-gate-modal h3{margin:0 0 8px;color:#f5f5f5;font-size:20px}.wal-success-modal p,.wal-gate-modal p{margin:0 auto 18px;max-width:310px;color:#a4aaa7;font-size:13px;line-height:1.5}.wal-success-modal .wal-submit,.wal-gate-modal .wal-submit{width:100%;text-decoration:none}.wal-gate-modal .wal-submit{display:flex;align-items:center;justify-content:center;padding:13px;border-radius:10px}
+      .wal-success-close{position:absolute;top:10px;right:10px;width:32px;height:32px;display:grid;place-items:center;border:1px solid #303030;border-radius:50%;background:#202020;color:#d7d7d7;cursor:pointer}.wal-success-icon,.wal-gate-icon{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 12px;border-radius:50%;color:#8cf0b3;background:rgba(91,224,143,.13);border:1px solid rgba(91,224,143,.35)}.wal-gate-icon{width:54px;height:54px;color:#1e6bff;background:#eaf2ff;border-color:#b7d0f2}.wal-success-modal h3{margin:0 0 8px;color:#f5f5f5;font-size:20px}.wal-gate-modal h3{margin:0 0 8px;color:#173a68;font-size:20px}.wal-success-modal p{margin:0 auto 18px;max-width:310px;color:#a4aaa7;font-size:13px;line-height:1.5}.wal-gate-modal p{margin:0 auto 18px;max-width:280px;color:#5f7489;font-size:13px;line-height:1.45}.wal-success-modal .wal-submit,.wal-gate-modal .wal-submit{width:100%;text-decoration:none}.wal-gate-modal .wal-submit{display:flex;align-items:center;justify-content:center;padding:13px;border-radius:10px;background:#1e6bff;color:#fff}
       /* ── Withdrawal form ── */
       .wal-form  { display: flex; flex-direction: column; gap: 12px; }
       .wal-field {
