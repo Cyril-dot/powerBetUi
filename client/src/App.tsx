@@ -315,12 +315,14 @@ function AdminFeaturedGames({ picks, onPick }: { picks: Pick[]; onPick: (p: Pick
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     let active = true;
-    fetchAdminMatches().then((rows) => {
+    const load = () => fetchAdminMatches().then((rows) => {
       if (!active) return;
       const visible = rows.filter((m) => !isMatchLive(m) && !["FINISHED", "ENDED", "COMPLETED", "CANCELLED", "POSTPONED"].includes(String(m.status ?? "").toUpperCase()));
       setMatches(visible);
     }).catch(() => { if (active) setMatches([]); }).finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+    load();
+    const refresh = window.setInterval(load, 30_000);
+    return () => { active = false; window.clearInterval(refresh); };
   }, []);
   if (loading || matches.length === 0) return null;
   const hasDraw = (m: EnrichedMatch) => !["basketball", "nfl", "baseball", "mma"].includes(String(m.sport ?? "").toLowerCase());

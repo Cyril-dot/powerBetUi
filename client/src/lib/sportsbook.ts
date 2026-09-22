@@ -1070,6 +1070,15 @@ function adminLogo(value: unknown, team: unknown, side: "home" | "away"): string
   return candidate || adminLogoFallback(team, side);
 }
 
+function movingAdminOdds(matchId: string, base: OddsMap): OddsMap {
+  const tick = Math.floor(Date.now() / 30_000);
+  let hash = 2166136261;
+  for (const char of `${matchId}:${tick}`) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
+  const wave = ((hash >>> 0) % 21 - 10) / 100;
+  const next = (value: number, multiplier: number) => Math.max(1.1, Number((value * (1 + wave * multiplier)).toFixed(2)));
+  return { home: next(base.home, 0.75), draw: next(base.draw, 0.45), away: next(base.away, 0.75) };
+}
+
 function filterVisibleAdminMatches(matches: EnrichedMatch[]): EnrichedMatch[] {
   const hasLogo = (value: unknown) => {
     const logo = String(value ?? "").trim();
@@ -1114,7 +1123,11 @@ export async function fetchAdminMatches(): Promise<EnrichedMatch[]> {
       return { ...m, sport: normalizeSportKey(m.sport), homeLogo, awayLogo, displayHomeLogo: homeLogo, displayAwayLogo: awayLogo, oddsMap, isAdmin: true } as EnrichedMatch;
     })
   );
-  return filterVisibleAdminMatches(ensureOdds(withOdds));
+  const complete = ensureOdds(withOdds);
+  return filterVisibleAdminMatches(complete.map((match) => ({
+    ...match,
+    oddsMap: movingAdminOdds(match.id, match.oddsMap ?? { home: 1.8, draw: 3.2, away: 3.6 }),
+  })));
 }
 
 // ---------------------------------------------------------------------------
