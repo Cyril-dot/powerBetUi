@@ -2449,3 +2449,5 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 /* Minimum stake validation: below GHS 100 is visible and unmistakably blocked. */
 .bp-stake-error,
 .stake-error{display:block;margin-top:6px;color:#b4232d!important;font-size:12px;font-weight:800;line-height:1.35}
+.stake-button-disabled,
+.stake-button-disabled:disabled{opacity:.48!important;cursor:not-allowed!important;filter:grayscale(.25)!important;transform:none!important;box-shadow:none!important}
