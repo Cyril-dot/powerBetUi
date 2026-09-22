@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PowerBet Admin Logo Gallery</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    body { margin: 0; padding: 28px; background: #071119; color: #eef8f1; }
+    h1 { margin: 0 0 6px; font-size: 24px; }
+    p { margin: 0 0 22px; color: #9bb2aa; }
+    h2 { margin: 28px 0 12px; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: #8de6a9; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    figure { margin: 0; padding: 12px; border: 1px solid #29423b; border-radius: 14px; background: linear-gradient(145deg, #142620, #0c171c); }
+    img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; }
+    figcaption { margin-top: 8px; text-align: center; color: #b8d6c4; font-size: 11px; font-weight: 800; }
+  </style>
+</head>
+<body>
+  <h1>PowerBet admin match logos</h1>
+  <p>20 home crests and 20 away crests. These are the same files used by the admin-created match cards.</p>
+  <h2>Home crests</h2>
+  <div class="grid" id="home"></div>
+  <h2>Away crests</h2>
+  <div class="grid" id="away"></div>
+  <script>
+    for (const side of ['home', 'away']) {
+      const root = document.getElementById(side);
+      for (let i = 1; i <= 20; i++) {
+        const filename = `team-${side}-${String(i).padStart(2, '0')}.png`;
+        const figure = document.createElement('figure');
+        figure.innerHTML = `<img src="/admin-logos/${filename}" alt="${side} crest ${i}" /><figcaption>${filename}</figcaption>`;
+        root.appendChild(figure);
+      }
+    }
+  </script>
+</body>
+</html>

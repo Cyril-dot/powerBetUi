@@ -1,0 +1,252 @@
+{
+  "description": "PowerBet admin match crest catalog. Legacy admin logo assets removed.",
+  "counts": {
+    "home": 20,
+    "away": 20,
+    "total": 40
+  },
+  "assignment": "adminCrestFor(team, side) uses a stable hash of the team name to select a crest.",
+  "previewBaseUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer",
+  "logos": [
+    {
+      "side": "home",
+      "slot": 1,
+      "path": "/admin-logos/team-home-01.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-01.png"
+    },
+    {
+      "side": "home",
+      "slot": 2,
+      "path": "/admin-logos/team-home-02.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-02.png"
+    },
+    {
+      "side": "home",
+      "slot": 3,
+      "path": "/admin-logos/team-home-03.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-03.png"
+    },
+    {
+      "side": "home",
+      "slot": 4,
+      "path": "/admin-logos/team-home-04.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-04.png"
+    },
+    {
+      "side": "home",
+      "slot": 5,
+      "path": "/admin-logos/team-home-05.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-05.png"
+    },
+    {
+      "side": "home",
+      "slot": 6,
+      "path": "/admin-logos/team-home-06.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-06.png"
+    },
+    {
+      "side": "home",
+      "slot": 7,
+      "path": "/admin-logos/team-home-07.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-07.png"
+    },
+    {
+      "side": "home",
+      "slot": 8,
+      "path": "/admin-logos/team-home-08.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-08.png"
+    },
+    {
+      "side": "home",
+      "slot": 9,
+      "path": "/admin-logos/team-home-09.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-09.png"
+    },
+    {
+      "side": "home",
+      "slot": 10,
+      "path": "/admin-logos/team-home-10.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-10.png"
+    },
+    {
+      "side": "home",
+      "slot": 11,
+      "path": "/admin-logos/team-home-11.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-11.png"
+    },
+    {
+      "side": "home",
+      "slot": 12,
+      "path": "/admin-logos/team-home-12.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-12.png"
+    },
+    {
+      "side": "home",
+      "slot": 13,
+      "path": "/admin-logos/team-home-13.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-13.png"
+    },
+    {
+      "side": "home",
+      "slot": 14,
+      "path": "/admin-logos/team-home-14.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-14.png"
+    },
+    {
+      "side": "home",
+      "slot": 15,
+      "path": "/admin-logos/team-home-15.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-15.png"
+    },
+    {
+      "side": "home",
+      "slot": 16,
+      "path": "/admin-logos/team-home-16.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-16.png"
+    },
+    {
+      "side": "home",
+      "slot": 17,
+      "path": "/admin-logos/team-home-17.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-17.png"
+    },
+    {
+      "side": "home",
+      "slot": 18,
+      "path": "/admin-logos/team-home-18.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-18.png"
+    },
+    {
+      "side": "home",
+      "slot": 19,
+      "path": "/admin-logos/team-home-19.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-19.png"
+    },
+    {
+      "side": "home",
+      "slot": 20,
+      "path": "/admin-logos/team-home-20.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-home-20.png"
+    },
+    {
+      "side": "away",
+      "slot": 1,
+      "path": "/admin-logos/team-away-01.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-01.png"
+    },
+    {
+      "side": "away",
+      "slot": 2,
+      "path": "/admin-logos/team-away-02.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-02.png"
+    },
+    {
+      "side": "away",
+      "slot": 3,
+      "path": "/admin-logos/team-away-03.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-03.png"
+    },
+    {
+      "side": "away",
+      "slot": 4,
+      "path": "/admin-logos/team-away-04.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-04.png"
+    },
+    {
+      "side": "away",
+      "slot": 5,
+      "path": "/admin-logos/team-away-05.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-05.png"
+    },
+    {
+      "side": "away",
+      "slot": 6,
+      "path": "/admin-logos/team-away-06.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-06.png"
+    },
+    {
+      "side": "away",
+      "slot": 7,
+      "path": "/admin-logos/team-away-07.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-07.png"
+    },
+    {
+      "side": "away",
+      "slot": 8,
+      "path": "/admin-logos/team-away-08.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-08.png"
+    },
+    {
+      "side": "away",
+      "slot": 9,
+      "path": "/admin-logos/team-away-09.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-09.png"
+    },
+    {
+      "side": "away",
+      "slot": 10,
+      "path": "/admin-logos/team-away-10.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-10.png"
+    },
+    {
+      "side": "away",
+      "slot": 11,
+      "path": "/admin-logos/team-away-11.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-11.png"
+    },
+    {
+      "side": "away",
+      "slot": 12,
+      "path": "/admin-logos/team-away-12.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-12.png"
+    },
+    {
+      "side": "away",
+      "slot": 13,
+      "path": "/admin-logos/team-away-13.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-13.png"
+    },
+    {
+      "side": "away",
+      "slot": 14,
+      "path": "/admin-logos/team-away-14.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-14.png"
+    },
+    {
+      "side": "away",
+      "slot": 15,
+      "path": "/admin-logos/team-away-15.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-15.png"
+    },
+    {
+      "side": "away",
+      "slot": 16,
+      "path": "/admin-logos/team-away-16.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-16.png"
+    },
+    {
+      "side": "away",
+      "slot": 17,
+      "path": "/admin-logos/team-away-17.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-17.png"
+    },
+    {
+      "side": "away",
+      "slot": 18,
+      "path": "/admin-logos/team-away-18.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-18.png"
+    },
+    {
+      "side": "away",
+      "slot": 19,
+      "path": "/admin-logos/team-away-19.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-19.png"
+    },
+    {
+      "side": "away",
+      "slot": 20,
+      "path": "/admin-logos/team-away-20.png",
+      "globalUrl": "https://4173-ixv67lwm4rtscbcjke1gx-c06198e1.us1.manus.computer/admin-logos/team-away-20.png"
+    }
+  ]
+}
