@@ -219,7 +219,7 @@ export default function WalletCenter() {
             ? withdrawForm.network
             : undefined,
       });
-      setWithdrawNotice("Withdrawal pending. Your request is waiting for review.");
+      setWithdrawNotice(isAdmin ? "Withdrawal successful and complete." : "Withdrawal pending. Your request is waiting for review.");
       setWithdrawSuccess(true);
       setWithdrawForm({
         amount: "", method: "MOBILE_MONEY", accountNumber: "", accountName: "", network: "MTN",
@@ -416,11 +416,11 @@ export default function WalletCenter() {
 
         {withdrawSuccess && (
           <div className="wal-success-backdrop" role="presentation">
-            <section className="wal-success-modal wal-pending-modal" role="dialog" aria-modal="true" aria-labelledby="wal-success-title">
+            <section className={`wal-success-modal${isAdmin ? " wal-complete-modal" : " wal-pending-modal"}`} role="dialog" aria-modal="true" aria-labelledby="wal-success-title">
               <button className="wal-success-close" type="button" onClick={() => setWithdrawSuccess(false)} aria-label="Close withdrawal success message"><X size={18} /></button>
               <div className="wal-success-icon"><CheckCircle2 size={34} /></div>
-              <h3 id="wal-success-title">Withdrawal pending</h3>
-              <p>Your withdrawal request is pending review. We will update your wallet when it is approved and settled.</p>
+              <h3 id="wal-success-title">{isAdmin ? "Withdrawal successful" : "Withdrawal pending"}</h3>
+              <p>{isAdmin ? "Your withdrawal was submitted successfully and is complete." : "Your withdrawal request is pending review. We will update your wallet when it is approved and settled."}</p>
               <button className="wal-submit" type="button" onClick={() => setWithdrawSuccess(false)}>Done</button>
             </section>
           </div>
