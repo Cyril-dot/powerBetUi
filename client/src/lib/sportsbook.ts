@@ -1059,11 +1059,11 @@ export async function getSearchableMatches(): Promise<EnrichedMatch[]> {
 
 /** Admin fixtures are shown only while active. Logo selection is client-owned
  * so stale backend URLs can never blank the homepage card. */
-function adminLogoFallback(team: unknown, side: "home" | "away"): string {
-  return adminCrestFor(team, side);
+function adminLogoFallback(team: unknown, side: "home" | "away", salt = ""): string {
+  return adminCrestFor(team, side, salt);
 }
-function adminLogo(_value: unknown, team: unknown, side: "home" | "away"): string {
-  return adminLogoFallback(team, side);
+function adminLogo(_value: unknown, team: unknown, side: "home" | "away", salt = ""): string {
+  return adminLogoFallback(team, side, salt);
 }
 
 function movingAdminOdds(matchId: string, base: OddsMap): OddsMap {
@@ -1106,12 +1106,13 @@ export async function fetchAdminMatches(): Promise<EnrichedMatch[]> {
   const raw = await settleList(api.publicAdminMatches.getAll());
   const list = Array.isArray(raw) ? raw : [];
   if (!list.length) return [];
+  const assignmentSalt = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const withOdds = await Promise.all(
     list.map(async (m) => {
       const odds = await settleList(api.publicAdminMatches.odds(m.id));
       const oddsMap = extractOddsMap(Array.isArray(odds) ? odds : [], m.homeTeam, m.awayTeam);
-      const homeLogo = adminLogo((m as Match).homeLogo, m.homeTeam, "home");
-      const awayLogo = adminLogo((m as Match).awayLogo, m.awayTeam, "away");
+      const homeLogo = adminLogo((m as Match).homeLogo, m.homeTeam, "home", assignmentSalt);
+      const awayLogo = adminLogo((m as Match).awayLogo, m.awayTeam, "away", assignmentSalt);
       return { ...m, sport: normalizeSportKey(m.sport), homeLogo, awayLogo, displayHomeLogo: homeLogo, displayAwayLogo: awayLogo, oddsMap, isAdmin: true } as EnrichedMatch;
     })
   );
