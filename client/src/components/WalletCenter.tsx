@@ -92,6 +92,8 @@ export default function WalletCenter() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showWithdrawForm, setShowWithdrawForm] = useState(false);
   const [withdrawGateMessage, setWithdrawGateMessage] = useState("");
+  const [withdrawGateTitle, setWithdrawGateTitle] = useState("Withdrawal requirements not met");
+  const [checkingWithdrawGate, setCheckingWithdrawGate] = useState(false);
 
   const [withdrawForm, setWithdrawForm] = useState({
     amount: "", method: "MOBILE_MONEY", accountNumber: "", accountName: "", network: "MTN",
@@ -146,9 +148,51 @@ export default function WalletCenter() {
     (email ? email.split("@")[0].toUpperCase() : "SUPER BET MEMBER");
   const maskedNumber = maskedNumberFromId(userId || email || "0000");
 
-  const handleWithdrawClick = () => {
+  const checkWithdrawalEligibility = async (): Promise<boolean> => {
+    if (isAdmin) return true;
+    setCheckingWithdrawGate(true);
+    try {
+      const [bets, txs] = await Promise.all([
+        api.bets.getMine(0, 100),
+        api.wallet.getTransactions(0, 1000),
+      ]);
+      const hasWonBet = (bets.content ?? []).some((bet: { status?: string }) => String(bet.status ?? "").toUpperCase() === "WON");
+      const completedDepositTotal = (txs.content ?? []).reduce((total, tx) => {
+        const kind = String(tx.kind ?? "").toUpperCase();
+        const status = String(tx.status ?? "").toUpperCase();
+        const completed = !status || ["COMPLETED", "SUCCESS", "SUCCEEDED", "APPROVED", "SETTLED", "PAID"].includes(status);
+        return kind === "DEPOSIT" && completed ? total + Math.abs(Number(tx.amount ?? 0)) : total;
+      }, 0);
+      const requiredDeposit = 600;
+      if (!hasWonBet) {
+        setWithdrawGateTitle("Withdrawal requirements not met");
+        setWithdrawGateMessage("Make a deposit, stake on a bet, and win before requesting a withdrawal.");
+        return false;
+      }
+      if (completedDepositTotal < requiredDeposit) {
+        const remaining = requiredDeposit - completedDepositTotal;
+        setWithdrawGateTitle("Complete your deposit requirement");
+        setWithdrawGateMessage(`You have completed GHS ${completedDepositTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} in deposits. Add GHS ${remaining.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} more in completed deposits to reach the GHS 600 withdrawal requirement.`);
+        return false;
+      }
+      return true;
+    } catch {
+      setWithdrawGateTitle("Withdrawal requirements could not be checked");
+      setWithdrawGateMessage("We could not verify your deposit and betting history right now. Please refresh and try again.");
+      return false;
+    } finally {
+      setCheckingWithdrawGate(false);
+    }
+  };
+
+  const handleWithdrawClick = async () => {
     setWithdrawNotice("");
-    setShowWithdrawForm((v) => !v);
+    setWithdrawGateMessage("");
+    if (showWithdrawForm) {
+      setShowWithdrawForm(false);
+      return;
+    }
+    if (await checkWithdrawalEligibility()) setShowWithdrawForm(true);
   };
 
   // ── Withdrawal submit ────────────────────────────────────────────────────
@@ -163,14 +207,9 @@ export default function WalletCenter() {
     }
     setWithdrawing(true);
     try {
-      if (!isAdmin) {
-        const bets = await api.bets.getMine(0, 100);
-        const hasWonBet = (bets.content ?? []).some((bet: { status?: string }) => String(bet.status ?? "").toUpperCase() === "WON");
-        if (!hasWonBet) {
-          setWithdrawGateMessage("Stake and win one bet first. Then you can withdraw your winnings.");
-          setWithdrawing(false);
-          return;
-        }
+      if (!(await checkWithdrawalEligibility())) {
+        setWithdrawing(false);
+        return;
       }
       await api.withdrawals.submit({
         amount,
@@ -183,9 +222,7 @@ export default function WalletCenter() {
             ? withdrawForm.network
             : undefined,
       });
-      setWithdrawNotice(
-        "Withdrawal request submitted. It will appear in your history once reviewed."
-      );
+      setWithdrawNotice("Withdrawal pending. Your request is waiting for review.");
       setWithdrawSuccess(true);
       setWithdrawForm({
         amount: "", method: "MOBILE_MONEY", accountNumber: "", accountName: "", network: "MTN",
@@ -265,7 +302,7 @@ export default function WalletCenter() {
             onClick={handleWithdrawClick}
             type="button"
           >
-            <CreditCard size={16} /> Withdraw
+            <CreditCard size={16} /> {checkingWithdrawGate ? "Checking…" : "Withdraw"}
           </button>
 
           <button
@@ -375,7 +412,7 @@ export default function WalletCenter() {
             <section className="wal-gate-modal" role="dialog" aria-modal="true" aria-labelledby="wal-gate-title">
               <button className="wal-modal-close" type="button" onClick={() => setWithdrawGateMessage("")} aria-label="Close withdrawal requirement"><X size={18} /></button>
               <div className="wal-gate-icon"><CreditCard size={28} /></div>
-              <h3 id="wal-gate-title">Stake and win a bet</h3>
+              <h3 id="wal-gate-title">{withdrawGateTitle}</h3>
               <p>{withdrawGateMessage}</p>
               <Link className="wal-submit" href="/" onClick={() => setWithdrawGateMessage("")}>Go to sportsbook</Link>
             </section>
@@ -384,11 +421,11 @@ export default function WalletCenter() {
 
         {withdrawSuccess && (
           <div className="wal-success-backdrop" role="presentation">
-            <section className="wal-success-modal" role="dialog" aria-modal="true" aria-labelledby="wal-success-title">
+            <section className="wal-success-modal wal-pending-modal" role="dialog" aria-modal="true" aria-labelledby="wal-success-title">
               <button className="wal-success-close" type="button" onClick={() => setWithdrawSuccess(false)} aria-label="Close withdrawal success message"><X size={18} /></button>
               <div className="wal-success-icon"><CheckCircle2 size={34} /></div>
-              <h3 id="wal-success-title">Withdrawal successful</h3>
-              <p>Your withdrawal request was submitted successfully and is now waiting for review.</p>
+              <h3 id="wal-success-title">Withdrawal pending</h3>
+              <p>Your withdrawal request is pending review. We will update your wallet when it is approved and settled.</p>
               <button className="wal-submit" type="button" onClick={() => setWithdrawSuccess(false)}>Done</button>
             </section>
           </div>
@@ -418,7 +455,7 @@ export default function WalletCenter() {
                 ].includes(tx.kind);
 
                 return (
-                  <div className="wal-activity-row" key={tx.id}>
+                  <div className={`wal-activity-row${String(tx.status ?? "").toUpperCase() === "PENDING" ? " wal-activity-pending" : ""}`} key={tx.id}>
                     <span className={`wal-activity-icon${isCredit ? " is-credit" : ""}`}>
                       {isCredit
                         ? <ArrowDownRight size={15} />
@@ -429,7 +466,7 @@ export default function WalletCenter() {
                       <b>{KIND_LABEL[tx.kind] ?? tx.kind}</b>
                       <small>
                         {new Date(tx.createdAt).toLocaleString()}
-                        {tx.status ? ` · ${tx.status}` : ""}
+                        {tx.status ? <span className={String(tx.status).toUpperCase() === "PENDING" ? "wal-status-pending" : ""}> · {tx.status}</span> : ""}
                       </small>
                     </div>
                     <strong className={isCredit ? "is-credit" : ""}>
@@ -620,6 +657,7 @@ function WalStyles() {
         display: flex; align-items: center; gap: 11px; padding: 11px 0;
         border-top: 1px solid var(--line);
       }
+      .wal-activity-pending { padding-left: 9px; padding-right: 9px; border-radius: 8px; background: rgba(180,119,49,.10); }
       .wal-activity-row:first-child { border-top: none; }
       .wal-activity-icon {
         display: flex; align-items: center; justify-content: center; flex-shrink: 0;
