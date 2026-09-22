@@ -9,10 +9,10 @@ import api, { type Match } from "./api";
 import { resolveCompetition } from "./competitionCatalog";
 import { adminCrestFor } from "./logoCatalog";
 
-// One seed per loaded app session keeps a match's crest identical between the
-// Featured card and Match Details. A new browser page load creates a new seed,
-// so the catalog can still rotate on a fresh session.
-const ADMIN_LOGO_ASSIGNMENT_SALT = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+// Fixed catalog version: the same team always receives the same home/away crest
+// across every browser, device, page load, and user. Change the version only
+// when intentionally rotating the entire assignment catalog in a future release.
+const ADMIN_LOGO_ASSIGNMENT_SALT = "admin-logo-catalog-v1";
 
 export type SportKey = "football" | "basketball" | "tennis" | "baseball" | "nfl" | "mma";
 
