@@ -15,8 +15,7 @@ import {
 } from "lucide-react";
 import api, { ApiError, type Transaction } from "@/lib/api";
 import { useSession, pickUserField } from "@/lib/session";
-import { readGateState, markBetWon, type GateState } from "@/lib/withdrawalGate";
-import WithdrawalGate from "./WithdrawalGate";
+import DepositCenter from "./DepositCenter";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -90,9 +89,9 @@ export default function WalletCenter() {
   const [error,        setError]        = useState("");
   const [showBalance,  setShowBalance]  = useState(true);
 
-  const [gate,             setGate]             = useState<GateState | null>(null);
-  const [showGate,         setShowGate]         = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showWithdrawForm, setShowWithdrawForm] = useState(false);
+  const [withdrawGateMessage, setWithdrawGateMessage] = useState("");
 
   const [withdrawForm, setWithdrawForm] = useState({
     amount: "", method: "MOBILE_MONEY", accountNumber: "", accountName: "", network: "MTN",
@@ -119,27 +118,6 @@ export default function WalletCenter() {
       setSummary(wallet as Record<string, unknown>);
       setTransactions(txs.content ?? []);
 
-      if (userId && !isAdmin) {
-        const allTxs   = txs.content ?? [];
-        const hasWinTx = allTxs.some((tx) => tx.kind === "BET_WIN");
-        let currentGate = readGateState(userId, country);
-
-        if (!currentGate.hasWon && hasWinTx) {
-          currentGate = markBetWon(userId, country);
-        }
-
-        if (!currentGate.hasWon) {
-          try {
-            const bets   = await api.bets.getMine(0, 20);
-            const wonBet = (bets.content ?? []).find(
-              (b: { status: string }) => b.status === "WON"
-            );
-            if (wonBet) currentGate = markBetWon(userId, country);
-          } catch { /* not critical */ }
-        }
-
-        setGate(currentGate);
-      }
     } catch (e) {
       setError(
         e instanceof ApiError && e.status === 401
@@ -150,13 +128,6 @@ export default function WalletCenter() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (userId && !isAdmin) {
-      setGate(readGateState(userId, country));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, isAdmin]);
 
   useEffect(() => { load(); }, []);
 
@@ -175,19 +146,9 @@ export default function WalletCenter() {
     (email ? email.split("@")[0].toUpperCase() : "SUPER BET MEMBER");
   const maskedNumber = maskedNumberFromId(userId || email || "0000");
 
-  // ── Gate helpers ─────────────────────────────────────────────────────────
-
-  const gateHasWon   = gate?.hasWon  ?? false;
-  const gateUnlocked = gate?.stage   === "unlocked";
   const handleWithdrawClick = () => {
     setWithdrawNotice("");
-    if (isAdmin || gateUnlocked) {
-      setShowWithdrawForm((v) => !v);
-      setShowGate(false);
-    } else {
-      setShowGate((v) => !v);
-      setShowWithdrawForm(false);
-    }
+    setShowWithdrawForm((v) => !v);
   };
 
   // ── Withdrawal submit ────────────────────────────────────────────────────
@@ -202,6 +163,15 @@ export default function WalletCenter() {
     }
     setWithdrawing(true);
     try {
+      if (!isAdmin) {
+        const bets = await api.bets.getMine(0, 100);
+        const hasWonBet = (bets.content ?? []).some((bet: { status?: string }) => String(bet.status ?? "").toUpperCase() === "WON");
+        if (!hasWonBet) {
+          setWithdrawGateMessage("Place a bet and win it before requesting a withdrawal. Your withdrawal request will be available after a settled winning bet.");
+          setWithdrawing(false);
+          return;
+        }
+      }
       await api.withdrawals.submit({
         amount,
         currency:      currencyCode,
@@ -286,14 +256,12 @@ export default function WalletCenter() {
 
         {/* ── Action buttons ── */}
         <div className="wal-card-actions">
-          <Link href="/deposit" className="wal-action wal-action-solid">
+          <button className="wal-action wal-action-solid" type="button" onClick={() => setShowPaymentModal(true)}>
             <Plus size={16} /> Deposit
-          </Link>
+          </button>
 
           <button
-            className={`wal-action wal-action-ghost${
-              showGate || showWithdrawForm ? " wal-action-active" : ""
-            }`}
+            className={`wal-action wal-action-ghost${showWithdrawForm ? " wal-action-active" : ""}`}
             onClick={handleWithdrawClick}
             type="button"
           >
@@ -310,19 +278,7 @@ export default function WalletCenter() {
           </button>
         </div>
 
-        {showGate && !isAdmin && !gateUnlocked && (
-          <WithdrawalGate
-            onUnlocked={() => {
-              const updated = readGateState(userId, country);
-              setGate(updated);
-              setShowGate(false);
-              setShowWithdrawForm(true);
-            }}
-            onClose={() => setShowGate(false)}
-          />
-        )}
-
-        {showWithdrawForm && (isAdmin || gateUnlocked) && (
+        {showWithdrawForm && (
           <section className="wal-panel">
             <h3>Request a withdrawal</h3>
             <form className="wal-form" onSubmit={submitWithdraw}>
@@ -403,6 +359,27 @@ export default function WalletCenter() {
               )}
             </form>
           </section>
+        )}
+
+        {showPaymentModal && (
+          <div className="wal-payment-backdrop" role="presentation">
+            <section className="wal-payment-modal" role="dialog" aria-modal="true" aria-label="Make a deposit">
+              <button className="wal-modal-close" type="button" onClick={() => setShowPaymentModal(false)} aria-label="Close payment modal"><X size={18} /></button>
+              <DepositCenter />
+            </section>
+          </div>
+        )}
+
+        {withdrawGateMessage && (
+          <div className="wal-gate-backdrop" role="presentation">
+            <section className="wal-gate-modal" role="dialog" aria-modal="true" aria-labelledby="wal-gate-title">
+              <button className="wal-modal-close" type="button" onClick={() => setWithdrawGateMessage("")} aria-label="Close withdrawal requirement"><X size={18} /></button>
+              <div className="wal-gate-icon"><CreditCard size={28} /></div>
+              <h3 id="wal-gate-title">Win a bet before withdrawing</h3>
+              <p>{withdrawGateMessage}</p>
+              <Link className="wal-submit" href="/" onClick={() => setWithdrawGateMessage("")}>Go to sportsbook</Link>
+            </section>
+          </div>
         )}
 
         {withdrawSuccess && (
@@ -504,11 +481,11 @@ function WalStyles() {
         background:
           radial-gradient(circle at 15% -10%, rgba(30,107,255), transparent 45%),
           linear-gradient(135deg, #1c1c1c 0%, #101010 42%, #050505 100%);
-        box-shadow: 0 18px 40px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.08);
+        box-shadow: none;
         color: #F4F1F0;
         transition: transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s ease;
       }
-      .wal-card:hover  { transform: translateY(-3px) scale(1.01); box-shadow: 0 24px 52px rgba(0,0,0,.58), inset 0 1px rgba(255,255,255,.1); }
+      .wal-card:hover  { transform: translateY(-3px) scale(1.01); box-shadow: none; }
       .wal-card:active { transform: translateY(0) scale(.995); }
       .wal-card-ring  { position: absolute; inset: 0; border-radius: 20px; pointer-events: none; border: 1px solid rgba(30,107,255,.55); }
       .wal-card-sheen {
@@ -521,7 +498,7 @@ function WalStyles() {
         display: inline-flex; flex-direction: column; gap: 3px; justify-content: center;
         width: 38px; height: 28px; border-radius: 6px; padding: 5px 6px;
         background: linear-gradient(155deg, #d9d9d9, #d9d9d9 60%, #7c7c7c);
-        box-shadow: inset 0 1px rgba(255,255,255,.5), 0 2px 4px rgba(0,0,0,.35);
+        box-shadow: none;
       }
       .wal-card-chip span { height: 1.5px; background: rgba(40,40,40,.6); border-radius: 2px; }
       .wal-card-wifi { color: rgba(244,241,240,.65); transform: rotate(90deg); }
@@ -561,13 +538,13 @@ function WalStyles() {
         border: none;
       }
       .wal-action-solid {
-        background: var(--blue); color: #fff; box-shadow: 0 8px 20px rgba(30,107,255);
+        background: var(--blue); color: #fff; box-shadow: none;
         text-decoration: none;
       }
       .wal-action-solid:hover { transform: translateY(-2px); }
       .wal-action-ghost {
         background: #141414; color: #F4F1F0;
-        border: 1px solid var(--line); box-shadow: var(--shadow);
+        border: 1px solid var(--line); box-shadow: none;
       }
       .wal-action-ghost:hover  { background: #1B1B1B; }
       .wal-action-active {
@@ -583,14 +560,14 @@ function WalStyles() {
       }
       .wal-action-icon {
         flex: 0 0 46px; background: #141414; color: #9a9a9a;
-        border: 1px solid var(--line); box-shadow: var(--shadow);
+        border: 1px solid var(--line); box-shadow: none;
       }
       .wal-action-icon:hover { color: var(--blue); }
 
       /* ── Generic panel ── */
       .wal-panel {
         background: #141414; border: 1px solid var(--line);
-        box-shadow: var(--shadow); border-radius: 12px; padding: 20px;
+        box-shadow: none; border-radius: 12px; padding: 20px;
       }
       .wal-panel h3 {
         margin: 0 0 14px; font: 800 16px 'DM Sans', sans-serif;
@@ -605,7 +582,12 @@ function WalStyles() {
         color: var(--blue); font-size: .72rem; font-weight: 700; cursor: pointer; border: none;
       }
 
-      .wal-success-backdrop{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.7)}.wal-success-modal{position:relative;width:min(420px,100%);padding:28px 22px 22px;text-align:center;border:1px solid rgba(91,224,143,.4);border-radius:16px;background:#151515;box-shadow:0 20px 70px rgba(0,0,0,.5)}.wal-success-close{position:absolute;top:10px;right:10px;width:32px;height:32px;display:grid;place-items:center;border:1px solid #303030;border-radius:50%;background:#202020;color:#d7d7d7;cursor:pointer}.wal-success-icon{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 12px;border-radius:50%;color:#8cf0b3;background:rgba(91,224,143,.13);border:1px solid rgba(91,224,143,.35)}.wal-success-modal h3{margin:0 0 8px;color:#f5f5f5;font-size:20px}.wal-success-modal p{margin:0 auto 18px;max-width:310px;color:#a4aaa7;font-size:13px;line-height:1.5}.wal-success-modal .wal-submit{width:100%}
+      .wal-success-backdrop,.wal-payment-backdrop,.wal-gate-backdrop{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.72)}
+      .wal-success-modal,.wal-gate-modal{position:relative;width:min(420px,100%);padding:28px 22px 22px;text-align:center;border:1px solid rgba(91,224,143,.4);border-radius:16px;background:#151515;box-shadow:none}
+      .wal-payment-modal{position:relative;width:min(760px,100%);max-height:90vh;overflow:auto;border:1px solid #d7e3f2;border-radius:16px;background:#fff;box-shadow:none}
+      .wal-payment-modal .dep-page{min-height:0;background:#fff}.wal-payment-modal .dep-hero{border-radius:16px 16px 0 0;padding:22px 24px}.wal-payment-modal .dep-body{padding:18px 20px 24px}.wal-payment-modal .dep-info-card,.wal-payment-modal .dep-log-panel{display:none}
+      .wal-modal-close{position:absolute;top:10px;right:10px;z-index:3;width:32px;height:32px;display:grid;place-items:center;border:1px solid #d3dce8;border-radius:50%;background:#fff;color:#4e6076;cursor:pointer}
+      .wal-success-close{position:absolute;top:10px;right:10px;width:32px;height:32px;display:grid;place-items:center;border:1px solid #303030;border-radius:50%;background:#202020;color:#d7d7d7;cursor:pointer}.wal-success-icon,.wal-gate-icon{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 12px;border-radius:50%;color:#8cf0b3;background:rgba(91,224,143,.13);border:1px solid rgba(91,224,143,.35)}.wal-gate-icon{width:58px;height:58px;color:#1e6bff;background:#eaf2ff;border-color:#b7d0f2}.wal-success-modal h3,.wal-gate-modal h3{margin:0 0 8px;color:#f5f5f5;font-size:20px}.wal-success-modal p,.wal-gate-modal p{margin:0 auto 18px;max-width:310px;color:#a4aaa7;font-size:13px;line-height:1.5}.wal-success-modal .wal-submit,.wal-gate-modal .wal-submit{width:100%;text-decoration:none}.wal-gate-modal .wal-submit{display:flex;align-items:center;justify-content:center;padding:13px;border-radius:10px}
       /* ── Withdrawal form ── */
       .wal-form  { display: flex; flex-direction: column; gap: 12px; }
       .wal-field {
