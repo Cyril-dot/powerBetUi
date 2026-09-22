@@ -151,8 +151,8 @@ function OpenBetCard({ bet, scores, isAdmin, onCashout }: { bet: Bet; scores: Re
           <div><span>Stake</span><b>{bet.stake.toFixed(2)}</b></div>
           <div><span>Pot. Win</span><b>{bet.potentialReturn.toFixed(2)}</b></div>
         </div>
-        <button type="button" className="bh-cashout-btn" disabled={!isAdmin} onClick={() => { if (isAdmin) void onCashout(bet); }} title={isAdmin ? "Cash out this open bet" : "Cashout is available to administrators only"}>
-          {isAdmin ? "Cashout" : "Cashout Unavailable"}
+        <button type="button" className="bh-cashout-btn" onClick={() => undefined} title="Cashout">
+          Cashout
         </button>
       </div>
     </div>
