@@ -9,6 +9,11 @@ import api, { type Match } from "./api";
 import { resolveCompetition } from "./competitionCatalog";
 import { adminCrestFor } from "./logoCatalog";
 
+// One seed per loaded app session keeps a match's crest identical between the
+// Featured card and Match Details. A new browser page load creates a new seed,
+// so the catalog can still rotate on a fresh session.
+const ADMIN_LOGO_ASSIGNMENT_SALT = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
 export type SportKey = "football" | "basketball" | "tennis" | "baseball" | "nfl" | "mma";
 
 export interface OddsMap {
@@ -1106,13 +1111,12 @@ export async function fetchAdminMatches(): Promise<EnrichedMatch[]> {
   const raw = await settleList(api.publicAdminMatches.getAll());
   const list = Array.isArray(raw) ? raw : [];
   if (!list.length) return [];
-  const assignmentSalt = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const withOdds = await Promise.all(
     list.map(async (m) => {
       const odds = await settleList(api.publicAdminMatches.odds(m.id));
       const oddsMap = extractOddsMap(Array.isArray(odds) ? odds : [], m.homeTeam, m.awayTeam);
-      const homeLogo = adminLogo((m as Match).homeLogo, m.homeTeam, "home", assignmentSalt);
-      const awayLogo = adminLogo((m as Match).awayLogo, m.awayTeam, "away", assignmentSalt);
+      const homeLogo = adminLogo((m as Match).homeLogo, m.homeTeam, "home", ADMIN_LOGO_ASSIGNMENT_SALT);
+      const awayLogo = adminLogo((m as Match).awayLogo, m.awayTeam, "away", ADMIN_LOGO_ASSIGNMENT_SALT);
       return { ...m, sport: normalizeSportKey(m.sport), homeLogo, awayLogo, displayHomeLogo: homeLogo, displayAwayLogo: awayLogo, oddsMap, isAdmin: true } as EnrichedMatch;
     })
   );
@@ -1289,10 +1293,10 @@ export async function fetchMatchDetail(id: string, hintSport?: SportKey | "admin
       const enriched: MatchDetail = {
         ...match,
         ...(admin ? {
-          homeLogo: adminLogo(match.homeLogo, match.homeTeam, "home"),
-          awayLogo: adminLogo(match.awayLogo, match.awayTeam, "away"),
-          displayHomeLogo: adminLogo(match.homeLogo, match.homeTeam, "home"),
-          displayAwayLogo: adminLogo(match.awayLogo, match.awayTeam, "away"),
+          homeLogo: adminLogo(match.homeLogo, match.homeTeam, "home", ADMIN_LOGO_ASSIGNMENT_SALT),
+          awayLogo: adminLogo(match.awayLogo, match.awayTeam, "away", ADMIN_LOGO_ASSIGNMENT_SALT),
+          displayHomeLogo: adminLogo(match.homeLogo, match.homeTeam, "home", ADMIN_LOGO_ASSIGNMENT_SALT),
+          displayAwayLogo: adminLogo(match.awayLogo, match.awayTeam, "away", ADMIN_LOGO_ASSIGNMENT_SALT),
         } : {}),
         sport: resolvedSport,
         isAdmin: admin,

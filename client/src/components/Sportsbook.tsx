@@ -164,7 +164,6 @@ function MatchRow({
           >
             <Star size={13} fill={favored ? "currentColor" : "none"} />
           </button>
-          {isAdmin && <span className="sb-badge special featured-chip"><Zap size={9} /> FEATURED</span>}
           <span className="sb-league-icon" title={match.league || match.sport || "League"} aria-label={match.league || match.sport || "League"}>{leagueIconFor(match.league || match.sport)}</span>
           {match.isSyntheticOdds && !isLive && !ended && <span className="sb-badge synth">EST. ODDS</span>}
         </span>
