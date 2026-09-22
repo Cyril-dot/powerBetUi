@@ -1062,8 +1062,9 @@ function adminLogoFallback(team: unknown, side: "home" | "away"): string {
   const name = String(team ?? "admin-team").trim().toLowerCase();
   let hash = 0;
   for (let i = 0; i < name.length; i += 1) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-  const index = (hash % 30) + 1;
-  return `/admin-logos/${side}-${String(index).padStart(2, "0")}.svg`;
+  const index = (hash % 4) + 1;
+  const extension = index === 1 || index === 2 ? "jpg" : index === 3 ? "webp" : "png";
+  return `/admin-logos/football-crest-${String(index).padStart(2, "0")}.${extension}`;
 }
 function adminLogo(value: unknown, team: unknown, side: "home" | "away"): string {
   const candidate = String(value ?? "").trim();
@@ -1071,7 +1072,7 @@ function adminLogo(value: unknown, team: unknown, side: "home" | "away"): string
 }
 
 function movingAdminOdds(matchId: string, base: OddsMap): OddsMap {
-  const tick = Math.floor(Date.now() / 30_000);
+  const tick = Math.floor(Date.now() / 5_000);
   let hash = 2166136261;
   for (const char of `${matchId}:${tick}`) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
   const wave = ((hash >>> 0) % 21 - 10) / 100;

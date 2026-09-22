@@ -307,7 +307,9 @@ function adminFeaturedLogo(team: unknown, side: "home" | "away"): string {
   const value = String(team ?? "admin-team").trim().toLowerCase();
   let hash = 0;
   for (let i = 0; i < value.length; i += 1) hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
-  return `/admin-logos/${side}-${String((hash % 30) + 1).padStart(2, "0")}.svg`;
+  const index = (hash % 4) + 1;
+  const extension = index === 1 || index === 2 ? "jpg" : index === 3 ? "webp" : "png";
+  return `/admin-logos/football-crest-${String(index).padStart(2, "0")}.${extension}`;
 }
 
 function AdminFeaturedGames({ picks, onPick }: { picks: Pick[]; onPick: (p: Pick) => void }) {
@@ -321,7 +323,7 @@ function AdminFeaturedGames({ picks, onPick }: { picks: Pick[]; onPick: (p: Pick
       setMatches(visible);
     }).catch(() => { if (active) setMatches([]); }).finally(() => { if (active) setLoading(false); });
     load();
-    const refresh = window.setInterval(load, 30_000);
+    const refresh = window.setInterval(load, 5_000);
     return () => { active = false; window.clearInterval(refresh); };
   }, []);
   if (loading || matches.length === 0) return null;

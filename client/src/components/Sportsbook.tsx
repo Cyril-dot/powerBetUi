@@ -465,6 +465,15 @@ export default function Sportsbook({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sport]);
 
+  useEffect(() => {
+    if (sport !== "football") return;
+    const interval = setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      fetchAdminMatches().then(setAdminMatches).catch(() => undefined);
+    }, 5_000);
+    return () => clearInterval(interval);
+  }, [sport]);
+
   const hasDraw = !TWO_WAY_SPORTS.has(sport);
   // Keep every fetched game visible. If a feed has not returned prices yet,
   // ensureOdds supplies stable display odds; placement still validates the
