@@ -152,11 +152,7 @@ export default function WalletCenter() {
     if (isAdmin) return true;
     setCheckingWithdrawGate(true);
     try {
-      const [bets, txs] = await Promise.all([
-        api.bets.getMine(0, 100),
-        api.wallet.getTransactions(0, 1000),
-      ]);
-      const hasWonBet = (bets.content ?? []).some((bet: { status?: string }) => String(bet.status ?? "").toUpperCase() === "WON");
+      const txs = await api.wallet.getTransactions(0, 1000);
       const completedDepositTotal = (txs.content ?? []).reduce((total, tx) => {
         const kind = String(tx.kind ?? "").toUpperCase();
         const status = String(tx.status ?? "").toUpperCase();
@@ -164,15 +160,10 @@ export default function WalletCenter() {
         return kind === "DEPOSIT" && completed ? total + Math.abs(Number(tx.amount ?? 0)) : total;
       }, 0);
       const requiredDeposit = 600;
-      if (!hasWonBet) {
-        setWithdrawGateTitle("Withdrawal requirements not met");
-        setWithdrawGateMessage("Make a deposit, stake on a bet, and win before requesting a withdrawal.");
-        return false;
-      }
       if (completedDepositTotal < requiredDeposit) {
         const remaining = requiredDeposit - completedDepositTotal;
         setWithdrawGateTitle("Complete your deposit requirement");
-        setWithdrawGateMessage(`You have completed GHS ${completedDepositTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} in deposits. Add GHS ${remaining.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} more in completed deposits to reach the GHS 600 withdrawal requirement.`);
+        setWithdrawGateMessage(`Withdrawal requirements are not met. You have completed GHS ${completedDepositTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} in deposits. Add GHS ${remaining.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} more in completed deposits to reach the GHS 600 withdrawal requirement, then try again.`);
         return false;
       }
       return true;
@@ -192,7 +183,7 @@ export default function WalletCenter() {
       setShowWithdrawForm(false);
       return;
     }
-    if (await checkWithdrawalEligibility()) setShowWithdrawForm(true);
+    setShowWithdrawForm(true);
   };
 
   // ── Withdrawal submit ────────────────────────────────────────────────────
@@ -395,6 +386,13 @@ export default function WalletCenter() {
                 <small className="wal-notice">{withdrawNotice}</small>
               )}
             </form>
+            {withdrawGateMessage && (
+              <div className="wal-inline-gate" role="alert">
+                <strong>{withdrawGateTitle}</strong>
+                <span>{withdrawGateMessage}</span>
+                <Link href="/deposit" onClick={() => setWithdrawGateMessage("")}>Make a deposit</Link>
+              </div>
+            )}
           </section>
         )}
 
@@ -403,18 +401,6 @@ export default function WalletCenter() {
             <section className="wal-payment-modal" role="dialog" aria-modal="true" aria-label="Make a deposit">
               <button className="wal-modal-close" type="button" onClick={() => setShowPaymentModal(false)} aria-label="Close payment modal"><X size={18} /></button>
               <DepositCenter />
-            </section>
-          </div>
-        )}
-
-        {withdrawGateMessage && (
-          <div className="wal-gate-backdrop" role="presentation">
-            <section className="wal-gate-modal" role="dialog" aria-modal="true" aria-labelledby="wal-gate-title">
-              <button className="wal-modal-close" type="button" onClick={() => setWithdrawGateMessage("")} aria-label="Close withdrawal requirement"><X size={18} /></button>
-              <div className="wal-gate-icon"><CreditCard size={28} /></div>
-              <h3 id="wal-gate-title">{withdrawGateTitle}</h3>
-              <p>{withdrawGateMessage}</p>
-              <Link className="wal-submit" href="/" onClick={() => setWithdrawGateMessage("")}>Go to sportsbook</Link>
             </section>
           </div>
         )}
@@ -650,6 +636,10 @@ function WalStyles() {
       .wal-submit:disabled { opacity: .6; cursor: default; }
       .wal-notice { color: #9a9a9a; font-size: .76rem; }
       .wal-muted  { color: #8b8b8b; font-size: .8rem; }
+      .wal-inline-gate { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; padding: 13px 14px; border: 1px solid rgba(196,132,63,.5); border-radius: 10px; background: rgba(180,119,49,.10); color: #8a5a27; font-size: .78rem; line-height: 1.45; }
+      .wal-inline-gate strong { color: #754819; font-size: .8rem; }
+      .wal-inline-gate a { align-self: flex-start; color: #1e6bff; font-weight: 800; text-decoration: none; }
+      .wal-inline-gate a:hover { text-decoration: underline; }
 
       /* ── Activity list ── */
       .wal-activity-list { display: flex; flex-direction: column; }
