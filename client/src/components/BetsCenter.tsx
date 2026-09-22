@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
-  CalendarDays, CheckCircle2, ChevronDown, ChevronRight, Clock3, Info, RefreshCw, Share2, Trash2, Trophy, X,
+  CalendarDays, CheckCircle2, ChevronDown, ChevronRight, Clock3, Info, RefreshCw, Trash2, Trophy, X,
 } from "lucide-react";
 import api, { ApiError, type Bet, type Match } from "@/lib/api";
 import { resolveIsAdmin } from "./WalletCenter";
@@ -124,9 +124,6 @@ function OpenBetCard({ bet, scores, isAdmin, onCashout }: { bet: Bet; scores: Re
     <div className="bh-card">
       <div className="bh-card-head bh-open-head">
         <span>{isMultiple ? "Multiple" : "Singles"}</span>
-        <button type="button" className="bh-share" onClick={() => navigator.clipboard?.writeText(`${bet.id}`).catch(() => undefined)} aria-label="Share">
-          <Share2 size={14} />
-        </button>
       </div>
       <div className="bh-card-body">
         {expanded && (
