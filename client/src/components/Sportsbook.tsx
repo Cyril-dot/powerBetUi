@@ -108,9 +108,7 @@ export function LiveClock({ match }: { match: EnrichedMatch }) {
 
 export function TeamCrest({ url, name }: { url?: string; name: string }) {
   const fallback = generateCrest(name);
-  const safeUrl = url && /^https?:\/\//i.test(url)
-    ? `/api/logo-proxy?url=${encodeURIComponent(url)}`
-    : url;
+  const safeUrl = url;
   const initials = (name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("") || "?").toUpperCase();
   const [src, setSrc] = useState(safeUrl || fallback);
   const [failed, setFailed] = useState(false);
