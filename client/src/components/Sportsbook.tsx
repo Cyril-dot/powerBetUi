@@ -2,10 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
 import { Bike, ChevronRight, CircleDot, Dumbbell, Flame, RefreshCw, Sparkles, Star, Trophy, TriangleAlert, Zap } from "lucide-react";
 import {
-  categorise, fetchAdminMatches, fetchSport, formatKickoff, formatKickoffDate, generateCrest, getLastFetchStatus, liveClock,
+  categorise, fetchAdminMatches, fetchSport, formatKickoff, formatKickoffDate, getLastFetchStatus, liveClock,
   isMatchLive, parseKickoff, TWO_WAY_SPORTS,
   type EnrichedMatch, type SportKey,
 } from "@/lib/sportsbook";
+import { DEFAULT_ADMIN_CREST } from "@/lib/logoCatalog";
 import { TOP_SIX_COMPETITIONS } from "@/lib/competitionCatalog";
 import { useFavorites } from "@/lib/favorites";
 
@@ -107,7 +108,7 @@ export function LiveClock({ match }: { match: EnrichedMatch }) {
 }
 
 export function TeamCrest({ url, name }: { url?: string; name: string }) {
-  const fallback = generateCrest(name);
+  const fallback = DEFAULT_ADMIN_CREST;
   const safeUrl = url;
   const initials = (name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("") || "?").toUpperCase();
   const [src, setSrc] = useState(safeUrl || fallback);

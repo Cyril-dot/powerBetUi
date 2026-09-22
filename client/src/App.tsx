@@ -347,7 +347,8 @@ function AdminFeaturedGames({ picks, onPick }: { picks: Pick[]; onPick: (p: Pick
     const refresh = window.setInterval(load, 5_000);
     return () => { active = false; window.clearInterval(refresh); };
   }, []);
-  if (loading || matches.length === 0) return null;
+  if (loading) return null;
+  if (matches.length === 0) return <section className="admin-featured-games admin-featured-empty"><div className="admin-featured-head"><div><div className="admin-featured-kicker"><Sparkles size={11}/> Featured matches</div><h2>Admin-created fixtures</h2><p>No active admin fixtures are available from the matches endpoint yet.</p></div></div></section>;
   const hasDraw = (m: EnrichedMatch) => !["basketball", "nfl", "baseball", "mma"].includes(String(m.sport ?? "").toLowerCase());
   const choose = (m: EnrichedMatch, selection: "1" | "X" | "2", odd: number) => {
     if (!odd || odd <= 0) return;

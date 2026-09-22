@@ -1057,14 +1057,13 @@ export async function getSearchableMatches(): Promise<EnrichedMatch[]> {
 // identically for every user (not a per-browser dismiss).
 // ---------------------------------------------------------------------------
 
-/** Admin fixtures are shown only while active and only when both crests are
- * actually assigned. Finished fixtures disappear permanently on the next poll. */
+/** Admin fixtures are shown only while active. Logo selection is client-owned
+ * so stale backend URLs can never blank the homepage card. */
 function adminLogoFallback(team: unknown, side: "home" | "away"): string {
   return adminCrestFor(team, side);
 }
-function adminLogo(value: unknown, team: unknown, side: "home" | "away"): string {
-  const candidate = String(value ?? "").trim();
-  return !candidate || candidate.startsWith("/admin-logos/") ? adminLogoFallback(team, side) : candidate;
+function adminLogo(_value: unknown, team: unknown, side: "home" | "away"): string {
+  return adminLogoFallback(team, side);
 }
 
 function movingAdminOdds(matchId: string, base: OddsMap): OddsMap {
@@ -1077,15 +1076,11 @@ function movingAdminOdds(matchId: string, base: OddsMap): OddsMap {
 }
 
 function filterVisibleAdminMatches(matches: EnrichedMatch[]): EnrichedMatch[] {
-  const hasLogo = (value: unknown) => {
-    const logo = String(value ?? "").trim();
-    return logo.startsWith("/admin-logos/") || logo.startsWith("http://") || logo.startsWith("https://") || logo.startsWith("data:image/");
-  };
   return matches.filter((m) => {
     const status = normalizeStatus(String(m.status ?? ""));
     const finishAt = (m as EnrichedMatch & { finishAt?: string; finishedAt?: string }).finishAt ?? (m as EnrichedMatch & { finishedAt?: string }).finishedAt;
     const finishedByTime = typeof finishAt === "string" && Boolean(finishAt) && !Number.isNaN(Date.parse(finishAt)) && Date.parse(finishAt) <= Date.now();
-    return !FINISHED_STATUSES.has(status) && !finishedByTime && hasLogo(m.displayHomeLogo ?? m.homeLogo) && hasLogo(m.displayAwayLogo ?? m.awayLogo);
+    return !FINISHED_STATUSES.has(status) && !finishedByTime;
   });
 }
 
