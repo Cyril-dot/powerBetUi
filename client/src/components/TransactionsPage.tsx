@@ -85,7 +85,7 @@ export default function TransactionsPage() {
                   <small>{new Date(tx.createdAt).toLocaleString()} {tx.status ? `· ${tx.status}` : ""} {tx.providerRef ? `· Ref ${tx.providerRef}` : ""}</small>
                 </div>
                 <strong style={{ color: isCredit ? "var(--nature)" : "var(--gold-hi)" }}>
-                  {isCredit ? "+" : "-"}GHS {Math.abs(tx.amount).toFixed(2)}
+                  {isCredit ? "+" : "-"}GHS {Math.abs(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </strong>
               </div>
             );

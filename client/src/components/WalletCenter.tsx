@@ -136,7 +136,7 @@ export default function WalletCenter() {
   const rawBalance = summary?.balance ?? summary?.availableBalance ?? summary?.currentBalance;
   const balance    = numeric(rawBalance);
   const money      = (v: number | null) =>
-    v === null ? "—" : showBalance ? v.toFixed(2) : "••••••";
+    v === null ? "—" : showBalance ? v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "••••••";
 
   const first      = pickUserField(user, "firstName",  "first_name",  "givenName");
   const last       = pickUserField(user, "lastName",   "last_name",   "familyName");
@@ -434,7 +434,7 @@ export default function WalletCenter() {
                     </div>
                     <strong className={isCredit ? "is-credit" : ""}>
                       {isCredit ? "+" : "-"}
-                      {currencyCode} {Math.abs(numeric(tx.amount) ?? 0).toFixed(2)}
+                      {currencyCode} {Math.abs(numeric(tx.amount) ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </strong>
                   </div>
                 );

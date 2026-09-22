@@ -19,7 +19,7 @@ function formatCountdown(kickoffAt?: string): string {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-const MIN_STAKE = 100;
+const MIN_STAKE = 200;
 const MAX_STAKE = 20000;
 export const BET_PLACED_NOTICE_KEY = "superbet_bet_placed_notice";
 
@@ -200,7 +200,7 @@ export default function BetslipPage({
   picks, setPicks, onPlace,
 }: { picks: Pick[]; setPicks: (p: Pick[]) => void; onPlace: (stake: number) => Promise<void> }) {
   const [, setLocation] = useLocation();
-  const [stake, setStake] = useState("1");
+  const [stake, setStake] = useState(String(MIN_STAKE));
   const [stakeEdited, setStakeEdited] = useState(false);
   const [placing, setPlacing] = useState(false);
   const [notice, setNotice] = useState<{ type: "error" | "success"; text: string } | null>(null);

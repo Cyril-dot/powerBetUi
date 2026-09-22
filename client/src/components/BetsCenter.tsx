@@ -4,7 +4,9 @@ import {
   CalendarDays, CheckCircle2, ChevronDown, ChevronRight, Clock3, Info, RefreshCw, Share2, Trash2, Trophy, X,
 } from "lucide-react";
 import api, { ApiError, type Bet, type Match } from "@/lib/api";
+import { resolveIsAdmin } from "./WalletCenter";
 import { BET_PLACED_NOTICE_KEY } from "./BetslipPage";
+import { useSession } from "../lib/session";
 
 const HIDDEN_TICKETS_KEY = "powerbet_hidden_tickets";
 
@@ -113,8 +115,8 @@ function HistoryCard({ bet, scores }: { bet: Bet; scores: Record<string, Match> 
   );
 }
 
-/* ── Open-bet card: pending, cashout is UI-only (no backend cashout endpoint exists) ── */
-function OpenBetCard({ bet, scores }: { bet: Bet; scores: Record<string, Match> }) {
+/* ── Open-bet card: admins can trigger the backend cashout action. ── */
+function OpenBetCard({ bet, scores, isAdmin, onCashout }: { bet: Bet; scores: Record<string, Match>; isAdmin: boolean; onCashout: (bet: Bet) => Promise<void> }) {
   const [expanded, setExpanded] = useState(true);
   const isMultiple = bet.selections.length > 1;
 
@@ -149,8 +151,8 @@ function OpenBetCard({ bet, scores }: { bet: Bet; scores: Record<string, Match> 
           <div><span>Stake</span><b>{bet.stake.toFixed(2)}</b></div>
           <div><span>Pot. Win</span><b>{bet.potentialReturn.toFixed(2)}</b></div>
         </div>
-        <button type="button" className="bh-cashout-btn" disabled title="Cashout isn't available yet">
-          Cashout Unavailable
+        <button type="button" className="bh-cashout-btn" disabled={!isAdmin} onClick={() => { if (isAdmin) void onCashout(bet); }} title={isAdmin ? "Cash out this open bet" : "Cashout is available to administrators only"}>
+          {isAdmin ? "Cashout" : "Cashout Unavailable"}
         </button>
       </div>
     </div>
@@ -169,6 +171,8 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
   const [openSubFilter, setOpenSubFilter] = useState<"all" | "cashout" | "live">("all");
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [placedNotice, setPlacedNotice] = useState(false);
+  const { user } = useSession();
+  const isAdmin = resolveIsAdmin(user);
   const [matchScores, setMatchScores] = useState<Record<string, Match>>({}); const [, repaint] = useState(0);
   const hiddenTickets = useMemo(readHiddenTickets, []);
 
@@ -248,6 +252,14 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
   }, [filteredSettled]);
 
   const clearFilters = () => { setStatusFilter("ALL"); setResultFilter("ALL"); };
+  const cashout = async (bet: Bet) => {
+    try {
+      await api.bets.cashout(bet.id);
+      await load();
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Cashout could not be completed.");
+    }
+  };
 
   return (
     <div className="bc-page">
@@ -317,7 +329,7 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
             </div>
           ) : (
             <div className="bc-flat-list">
-              {filteredOpen.map((bet) => <OpenBetCard key={bet.id} bet={bet} scores={matchScores} />)}
+              {filteredOpen.map((bet) => <OpenBetCard key={bet.id} bet={bet} scores={matchScores} isAdmin={isAdmin} onCashout={cashout} />)}
             </div>
           )
         ) : filteredSettled.length === 0 ? (

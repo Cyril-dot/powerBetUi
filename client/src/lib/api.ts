@@ -528,6 +528,7 @@ export const bets = {
   place: (body: { stake: number; currency?: string; selections: Array<{ matchId: string; market: string; selection: string; submittedOdds: number }>; bookingCodeUsedId?: string }) =>
     post<Bet>("/api/bets", body),
   getOne: (id: string) => get<Bet>(`/api/bets/${id}`),
+  cashout: (id: string) => post<Bet>(`/api/bets/${encodeURIComponent(id)}/cashout`),
   getUnseenWins: () => get<Bet[]>("/api/bets/unseen-wins"),
   dismissWin: (id: string) => post<void>(`/api/bets/${id}/dismiss-win`),
 };
@@ -1292,8 +1293,10 @@ export const superAdminDeposits = {
 
 export const superAdminWithdrawals = {
   list: (page = 0, size = 50) => get<PageResponse<Record<string, unknown>>>(`/api/wallet/withdrawals/admin/all${qs({ page, size })}`),
-  approve: (id: string) => post<Record<string, unknown>>(`/api/wallet/withdrawals/admin/${encodeURIComponent(id)}/approve`),
-  approveAsSuperAdmin: (id: string) => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/approve`),
+  // The backend expects a JSON command body even when no note is supplied.
+  // Omitting it causes the approval controller to fail with HTTP 500.
+  approve: (id: string, note = "") => post<Record<string, unknown>>(`/api/wallet/withdrawals/admin/${encodeURIComponent(id)}/approve`, { note }),
+  approveAsSuperAdmin: (id: string, note = "") => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/approve`, { note }),
   reject: (id: string, body: { reason?: string }) => post<Record<string, unknown>>(`/api/wallet/withdrawals/admin/${encodeURIComponent(id)}/reject`, body),
   settle: (id: string) => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/settle`),
   markFailed: (id: string, body: { reason?: string }) => post<Record<string, unknown>>(`/api/wallet/withdrawals/super-admin/${encodeURIComponent(id)}/mark-failed`, body),
