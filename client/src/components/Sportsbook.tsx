@@ -108,10 +108,13 @@ export function LiveClock({ match }: { match: EnrichedMatch }) {
 
 export function TeamCrest({ url, name }: { url?: string; name: string }) {
   const fallback = generateCrest(name);
+  const safeUrl = url && /^https?:\/\//i.test(url)
+    ? `/api/logo-proxy?url=${encodeURIComponent(url)}`
+    : url;
   const initials = (name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("") || "?").toUpperCase();
-  const [src, setSrc] = useState(url || fallback);
+  const [src, setSrc] = useState(safeUrl || fallback);
   const [failed, setFailed] = useState(false);
-  useEffect(() => { setSrc(url || fallback); setFailed(false); }, [url, fallback]);
+  useEffect(() => { setSrc(safeUrl || fallback); setFailed(false); }, [safeUrl, fallback]);
   return (
     <span className="sb-crest" aria-hidden>
       {!failed && <img src={src} alt="" loading="lazy" decoding="async" draggable={false} referrerPolicy="no-referrer" onError={() => { setFailed(true); setSrc(fallback); }} />}
