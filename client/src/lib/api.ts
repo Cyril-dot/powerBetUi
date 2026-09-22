@@ -1263,6 +1263,7 @@ export const superAdmin = {
     }
   },
   createAdmin: (body: Record<string, string>) => post<Record<string, unknown>>("/api/super-admin/admins", body),
+  createAdminWithCommission: (body: { email: string; password: string; firstName: string; lastName?: string; commissionRate: string }) => post<Record<string, unknown>>("/api/super-admin/admins/with-commission", body),
   getAdminDetail: (adminId: string) => get<Record<string, unknown>>(`/api/super-admin/admins/${adminId}`),
   setAdminCommissionRate: (adminId: string, body: { commissionRate: number }) => patch<Record<string, unknown>>(`/api/super-admin/admins/${adminId}/commission-rate`, body),
   addFundsToAdmin: (adminId: string, body: { amount: number; currency?: string; reason?: string }) => post<Record<string, unknown>>(`/api/super-admin/admins/${adminId}/add-funds`, body),
