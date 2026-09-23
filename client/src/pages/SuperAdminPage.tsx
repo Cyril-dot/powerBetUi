@@ -31,12 +31,22 @@ const money = (value: unknown) => `₵${numberValue(value).toLocaleString(undefi
 const idOf = (row: Row) => text(row.id ?? row.userId ?? row.adminId, "");
 const adminEmail = (row: Row) => text(row.email ?? row.adminEmail ?? row.admin_email, "Email unavailable");
 const commissionValue = (row: Row): string => {
-  const raw = row.commissionRate ?? row.commissionPercentage ?? row.commissionPercent ?? row.commission_rate ?? row.commission_percentage ?? (row.commission as Row | undefined)?.rate;
+  const commission = row.commission as Row | undefined;
+  const settings = row.settings as Row | undefined;
+  const raw = row.commissionRate ?? row.commissionPercentage ?? row.commissionPercent ?? row.commission_rate ?? row.commission_percentage ?? row.adminCommissionRate ?? row.effectiveCommissionRate ?? commission?.rate ?? commission?.commissionRate ?? commission?.percentage ?? settings?.commissionRate;
   if (raw === null || raw === undefined || raw === "") return "—";
   const n = Number(raw);
   if (!Number.isFinite(n)) return String(raw);
   return `${(n >= 0 && n <= 1 ? n * 100 : n).toFixed(2).replace(/\.00$/, "")}%`;
 };
+const rateFromRow = (row: Row): number | null => {
+  const commission = row.commission as Row | undefined;
+  const settings = row.settings as Row | undefined;
+  const raw = row.commissionRate ?? row.commissionPercentage ?? row.commissionPercent ?? row.commission_rate ?? row.commission_percentage ?? row.adminCommissionRate ?? row.effectiveCommissionRate ?? commission?.rate ?? commission?.commissionRate ?? commission?.percentage ?? settings?.commissionRate;
+  const n = Number(raw);
+  return Number.isFinite(n) ? (n >= 0 && n <= 1 ? n * 100 : n) : null;
+};
+const rateDisplay = (rate: number | null) => rate === null ? "—" : `${rate.toFixed(2).replace(/\.00$/, "")}%`;
 
 function Table({ rows, columns, onRow }: { rows: Row[]; columns: string[]; onRow?: (row: Row) => React.ReactNode }) {
   return <div className="sa-table-wrap"><table className="sa-table"><thead><tr>{columns.map((c) => <th key={c}>{c.replace(/([A-Z])/g, " $1")}</th>)}{onRow && <th>Actions</th>}</tr></thead><tbody>{rows.length === 0 ? <tr><td colSpan={columns.length + (onRow ? 1 : 0)} className="sa-empty">No records found.</td></tr> : rows.map((row, i) => <tr key={idOf(row) || String(i)}>{columns.map((c) => <td key={c}>{c === "id" ? <code>{text(row[c])}</code> : text(row[c])}</td>)}{onRow && <td>{onRow(row)}</td>}</tr>)}</tbody></table></div>;
@@ -254,12 +264,13 @@ function CommissionAnalytics() {
   const depositPeriodRows = reportRows(report, "depositsByPeriod");
   const summaries = reportRows(report, "summaries");
   const adminMap = new Map(admins.map((admin) => [idOf(admin), admin]));
-  const grouped = new Map<string, { admin: Row; commission: number; deposits: number; entries: number; countries: Set<string> }>();
-  admins.forEach((admin) => grouped.set(idOf(admin), { admin, commission: 0, deposits: 0, entries: 0, countries: new Set() }));
+  const grouped = new Map<string, { admin: Row; rate: number | null; commission: number; deposits: number; entries: number; countries: Set<string> }>();
+  admins.forEach((admin) => grouped.set(idOf(admin), { admin, rate: rateFromRow(admin), commission: 0, deposits: 0, entries: 0, countries: new Set() }));
   commissionRows.forEach((row) => {
     const id = adminIdOf(row);
     if (!id) return;
-    const current = grouped.get(id) ?? { admin: adminMap.get(id) ?? { id, email: row.adminEmail }, commission: 0, deposits: 0, entries: 0, countries: new Set<string>() };
+    const current = grouped.get(id) ?? { admin: adminMap.get(id) ?? { id, email: row.adminEmail }, rate: rateFromRow(row), commission: 0, deposits: 0, entries: 0, countries: new Set<string>() };
+    current.rate = current.rate ?? rateFromRow(row);
     current.commission += amountNumber(row); current.entries += countNumber(row);
     current.deposits += depositAmountNumber(row) !== amountNumber(row) ? depositAmountNumber(row) : 0;
     if (row.country) current.countries.add(String(row.country));
@@ -268,9 +279,13 @@ function CommissionAnalytics() {
   depositAdminRows.forEach((row) => {
     const id = adminIdOf(row);
     if (!id) return;
-    const current = grouped.get(id) ?? { admin: adminMap.get(id) ?? { id, email: row.adminEmail }, commission: 0, deposits: 0, entries: 0, countries: new Set<string>() };
+    const current = grouped.get(id) ?? { admin: adminMap.get(id) ?? { id, email: row.adminEmail }, rate: rateFromRow(row), commission: 0, deposits: 0, entries: 0, countries: new Set<string>() };
+    current.rate = current.rate ?? rateFromRow(row);
     current.deposits += depositAmountNumber(row);
     grouped.set(id, current);
+  });
+  grouped.forEach((item) => {
+    if (item.rate === null && item.deposits > 0 && item.commission >= 0) item.rate = (item.commission / item.deposits) * 100;
   });
   const adminCards = [...grouped.values()].sort((a, b) => b.commission - a.commission);
   const normalizedSearch = adminSearch.trim().toLowerCase();
@@ -301,8 +316,8 @@ function CommissionAnalytics() {
     </div>
     {loading ? <Panel title="Loading analytics"><div className="sa-analytics-loading">Loading the official commission report…</div></Panel> : <>
       <Panel title={selected ? `Administrator · ${adminEmail(selected.admin)}` : "Administrators by commission"}>
-        {selected ? <div className="sa-admin-detail-head"><div><strong>{adminEmail(selected.admin)}</strong><span>{commissionValue(selected.admin)} commission rate</span></div><button className="sa-secondary" onClick={() => setSelectedAdmin("")}>Back to all admins</button></div> : null}
-        <div className="sa-admin-analytics-grid">{(selected ? [selected] : visibleAdminCards).map((item) => <button type="button" className="sa-admin-analytics-card" key={idOf(item.admin)} onClick={() => setSelectedAdmin(idOf(item.admin))}><div className="sa-admin-analytics-name"><span>{adminEmail(item.admin)}</span></div><div className="sa-admin-analytics-values"><div><small>Commission rate</small><b>{commissionValue(item.admin)}</b></div><div><small>Commission earned</small><b>{money(item.commission)}</b></div><div><small>Total deposits</small><b>{money(item.deposits)}</b></div></div><div className="sa-admin-analytics-foot"><span>{item.countries.size ? [...item.countries].join(" · ") : "No activity in this range"}</span><span>{item.entries.toLocaleString()} entries <ChevronRight size={14} /></span></div></button>)}</div>
+        {selected ? <div className="sa-admin-detail-head"><div><strong>{adminEmail(selected.admin)}</strong><span>{rateDisplay(selected.rate)} commission rate</span></div><button className="sa-secondary" onClick={() => setSelectedAdmin("")}>Back to all admins</button></div> : null}
+        <div className="sa-admin-analytics-grid">{(selected ? [selected] : visibleAdminCards).map((item) => <button type="button" className="sa-admin-analytics-card" key={idOf(item.admin)} onClick={() => setSelectedAdmin(idOf(item.admin))}><div className="sa-admin-analytics-name"><span>{adminEmail(item.admin)}</span></div><div className="sa-admin-analytics-values"><div><small>Commission rate</small><b>{rateDisplay(item.rate)}</b></div><div><small>Commission earned</small><b>{money(item.commission)}</b></div><div><small>Total deposits</small><b>{money(item.deposits)}</b></div></div><div className="sa-admin-analytics-foot"><span>{item.countries.size ? [...item.countries].join(" · ") : "No activity in this range"}</span><span>{item.entries.toLocaleString()} entries <ChevronRight size={14} /></span></div></button>)}</div>
       </Panel>
       <Panel title="Commission by period"><Table rows={selected ? visibleRows : periodRows} columns={selected ? ["periodLabel", "country", "amount", "currency", "count"] : ["periodLabel", "country", "amount", "currency", "commissionCount"]} /></Panel>
       <Panel title="Deposit performance by period"><Table rows={depositPeriodRows} columns={["periodLabel", "country", "amount", "currency", "depositCount"]} /></Panel>
