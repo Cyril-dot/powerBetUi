@@ -2545,3 +2545,26 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .header-wallet-group .header-deposit svg{width:13px!important;height:13px!important}
 .header-wallet-group .header-deposit:hover{background:transparent!important;color:#ffe783!important;transform:none!important;box-shadow:none!important}
  @media(max-width:820px){.header-wallet-group{height:30px!important;gap:5px!important}.header-wallet-group .header-balance{height:28px!important}.header-wallet-group .header-balance .balance-label{font-size:6px!important}.header-wallet-group .header-balance strong{font-size:10px!important}.header-wallet-group .header-deposit{height:28px!important;padding-left:6px!important;font-size:9px!important}.header-wallet-group .header-deposit span{font-size:9px!important}.header-wallet-group .header-deposit svg{width:12px!important;height:12px!important}}
+
+/* Narrow authenticated header: keep wallet balance visible without horizontal overflow. */
+@media(max-width:560px){
+  .header-inner{min-width:0!important;padding-left:8px!important;padding-right:8px!important;gap:6px!important}
+  .header .brand-logo{min-width:0!important;width:140px!important;flex:1 1 auto!important;flex-basis:140px!important;height:34px!important}
+  .header .brand-logo img{max-width:100%!important;width:100%!important;height:100%!important}
+  .header-actions{min-width:0!important;flex:0 1 auto!important;gap:4px!important;margin-left:auto!important}
+  .header-wallet-group{min-width:0!important;max-width:154px!important;flex:0 1 auto!important;gap:4px!important}
+  .header-wallet-group .header-balance{min-width:0!important;max-width:84px!important}
+  .header-wallet-group .header-balance strong{display:block!important;max-width:84px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;font-size:10px!important}
+  .header-wallet-group .header-deposit{flex:0 0 auto!important;padding-left:5px!important}
+}
+@media(max-width:380px){
+  .header-inner{padding-left:6px!important;padding-right:6px!important;gap:4px!important}
+  .header .brand-logo{width:108px!important;flex-basis:108px!important}
+  .header-wallet-group{max-width:146px!important;gap:3px!important}
+  .header-wallet-group .header-balance{max-width:70px!important}
+  .header-wallet-group .header-balance .balance-label{display:none!important}
+  .header-wallet-group .header-balance strong{max-width:70px!important;font-size:9px!important}
+  .header-wallet-group .header-deposit{padding-left:4px!important;font-size:8px!important}
+  .header-wallet-group .header-deposit span{font-size:8px!important}
+  .header-wallet-group .header-deposit svg{width:10px!important;height:10px!important}
+}
