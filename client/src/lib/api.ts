@@ -1285,8 +1285,8 @@ export const superAdmin = {
   commissionWeekly: (weeks = 12) => get<unknown>(`/api/super-admin/commission/country-report/weekly${qs({ weeks })}`),
   commissionDailyByAdmin: (date?: string, adminId?: string) => get<Record<string, unknown>[]>(`/api/super-admin/commission/daily${qs({ date, adminId })}`),
   commissionDailyForAdmin: (adminId: string, date?: string) => get<Record<string, unknown>[]>(`/api/super-admin/commission/daily/${encodeURIComponent(adminId)}${qs({ date })}`),
-  payAdminCommission: (adminId: string) => post<Record<string, unknown>>(`/api/super-admin/commission/admins/${encodeURIComponent(adminId)}/pay`),
-  clearAllAdminCommissions: () => post<Record<string, unknown>>('/api/super-admin/commission/clear'),
+  payAdminCommission: (adminId: string, date?: string) => post<Record<string, unknown>>(`/api/super-admin/commission/admins/${encodeURIComponent(adminId)}/pay${qs({ date })}`),
+  clearAllAdminCommissions: (date?: string) => post<Record<string, unknown>>(`/api/super-admin/commission/clear${qs({ date })}`),
 };
 
 export const superAdminDeposits = {
