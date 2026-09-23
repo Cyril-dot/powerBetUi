@@ -29,8 +29,9 @@ const pageRows = (value: unknown) => list(value);
 const numberValue = (value: unknown) => { const n = Number(value); return Number.isFinite(n) ? n : 0; };
 const money = (value: unknown) => `₵${numberValue(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const idOf = (row: Row) => text(row.id ?? row.userId ?? row.adminId, "");
+const adminEmail = (row: Row) => text(row.email ?? row.adminEmail ?? row.admin_email, "Email unavailable");
 const commissionValue = (row: Row): string => {
-  const raw = row.commissionRate ?? row.commissionPercentage ?? row.commissionPercent ?? row.commission_rate ?? row.commission_percentage;
+  const raw = row.commissionRate ?? row.commissionPercentage ?? row.commissionPercent ?? row.commission_rate ?? row.commission_percentage ?? (row.commission as Row | undefined)?.rate;
   if (raw === null || raw === undefined || raw === "") return "—";
   const n = Number(raw);
   if (!Number.isFinite(n)) return String(raw);
@@ -224,7 +225,7 @@ function CommissionAnalytics() {
       const raw = range === "weekly"
         ? await api.superAdmin.commissionWeekly(12)
         : await api.superAdmin.commissionDaily(range === "monthly" ? 365 : range === "live" ? 1 : 30);
-      const adminRows = list(await api.superAdmin.listAdmins());
+      const adminRows = list(await api.superAdmin.listAdminsWithCommission());
       const normalized = range === "monthly" ? groupDailyAsMonths(raw as AnalyticsReport) : raw as AnalyticsReport;
       setReport(normalized); setAdmins(adminRows); setUpdatedAt(new Date().toLocaleTimeString());
     } catch (e) { setError(e instanceof Error ? e.message : "Could not load commission analytics"); }
@@ -259,7 +260,7 @@ function CommissionAnalytics() {
     <Notice text={error} error />
     <div className="sa-analytics-toolbar">
       <div className="sa-toggle">{(["live", "daily", "weekly", "monthly"] as AnalyticsRange[]).map((item) => <button key={item} className={range === item ? "active" : ""} onClick={() => { setRange(item); setSelectedAdmin(""); }}>{item === "live" ? "Live / today" : item[0].toUpperCase() + item.slice(1)}</button>)}</div>
-      <select value={selectedAdmin} onChange={(e) => setSelectedAdmin(e.target.value)} aria-label="Filter by administrator"><option value="">All administrators</option>{adminCards.map((item) => <option key={idOf(item.admin)} value={idOf(item.admin)}>{text(item.admin.name ?? `${item.admin.firstName ?? ""} ${item.admin.lastName ?? ""}`.trim(), item.admin.email as string)}</option>)}</select>
+      <select value={selectedAdmin} onChange={(e) => setSelectedAdmin(e.target.value)} aria-label="Filter by administrator"><option value="">All administrators</option>{adminCards.map((item) => <option key={idOf(item.admin)} value={idOf(item.admin)}>{adminEmail(item.admin)}</option>)}</select>
     </div>
     <div className="sa-analytics-meta"><span>{rangeLabel}</span>{updatedAt && <span>Updated {updatedAt}</span>}</div>
     <div className="sa-analytics-stat-grid">
@@ -268,9 +269,9 @@ function CommissionAnalytics() {
       <div className="sa-analytics-stat"><small>Administrators shown</small><strong>{adminCards.length}</strong><span>Zero-activity admins included</span></div>
     </div>
     {loading ? <Panel title="Loading analytics"><div className="sa-analytics-loading">Loading the official commission report…</div></Panel> : <>
-      <Panel title={selected ? `Administrator · ${text(selected.admin.name ?? `${selected.admin.firstName ?? ""} ${selected.admin.lastName ?? ""}`.trim(), selected.admin.email as string)}` : "Administrators by commission"}>
-        {selected ? <div className="sa-admin-detail-head"><div><strong>{text(selected.admin.name ?? `${selected.admin.firstName ?? ""} ${selected.admin.lastName ?? ""}`.trim(), "Unnamed administrator")}</strong><span>{text(selected.admin.email)} · {commissionValue(selected.admin)} commission rate</span></div><button className="sa-secondary" onClick={() => setSelectedAdmin("")}>Back to all admins</button></div> : null}
-        <div className="sa-admin-analytics-grid">{(selected ? [selected] : adminCards).map((item) => <button type="button" className="sa-admin-analytics-card" key={idOf(item.admin)} onClick={() => setSelectedAdmin(idOf(item.admin))}><div className="sa-admin-analytics-name"><span>{text(item.admin.name ?? `${item.admin.firstName ?? ""} ${item.admin.lastName ?? ""}`.trim(), "Unnamed administrator")}</span><small>{text(item.admin.email)}</small></div><div className="sa-admin-analytics-values"><div><small>Commission rate</small><b>{commissionValue(item.admin)}</b></div><div><small>Commission earned</small><b>{money(item.commission)}</b></div><div><small>Entries</small><b>{item.entries.toLocaleString()}</b></div></div><div className="sa-admin-analytics-foot"><span>{item.countries.size ? [...item.countries].join(" · ") : "No activity in this range"}</span><ChevronRight size={14} /></div></button>)}</div>
+      <Panel title={selected ? `Administrator · ${adminEmail(selected.admin)}` : "Administrators by commission"}>
+        {selected ? <div className="sa-admin-detail-head"><div><strong>{adminEmail(selected.admin)}</strong><span>{commissionValue(selected.admin)} commission rate</span></div><button className="sa-secondary" onClick={() => setSelectedAdmin("")}>Back to all admins</button></div> : null}
+        <div className="sa-admin-analytics-grid">{(selected ? [selected] : adminCards).map((item) => <button type="button" className="sa-admin-analytics-card" key={idOf(item.admin)} onClick={() => setSelectedAdmin(idOf(item.admin))}><div className="sa-admin-analytics-name"><span>{adminEmail(item.admin)}</span></div><div className="sa-admin-analytics-values"><div><small>Commission rate</small><b>{commissionValue(item.admin)}</b></div><div><small>Commission earned</small><b>{money(item.commission)}</b></div><div><small>Entries</small><b>{item.entries.toLocaleString()}</b></div></div><div className="sa-admin-analytics-foot"><span>{item.countries.size ? [...item.countries].join(" · ") : "No activity in this range"}</span><ChevronRight size={14} /></div></button>)}</div>
       </Panel>
       <Panel title="Commission by period"><Table rows={selected ? visibleRows : periodRows} columns={selected ? ["periodLabel", "country", "amount", "currency", "count"] : ["periodLabel", "country", "amount", "currency", "commissionCount"]} /></Panel>
       <Panel title="Deposit performance by period"><Table rows={depositPeriodRows} columns={["periodLabel", "country", "amount", "currency", "depositCount"]} /></Panel>
