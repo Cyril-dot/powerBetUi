@@ -169,6 +169,7 @@ type AnalyticsRange = "daily" | "weekly" | "monthly" | "live";
 type AnalyticsReport = Row & {
   summaries?: Row[];
   commissionByAdmin?: Row[];
+  depositsByAdmin?: Row[];
   commissionByPeriod?: Row[];
   depositsByPeriod?: Row[];
 };
@@ -186,6 +187,8 @@ const rateNumber = (row: Row): number => {
 const periodLabel = (row: Row) => text(row.periodLabel ?? row.label ?? row.periodStart ?? row.period, "—");
 const amountNumber = (row: Row) => numberValue(row.amount ?? row.total ?? row.value ?? row.commissionTotal);
 const countNumber = (row: Row) => numberValue(row.count ?? row.depositCount ?? row.commissionCount ?? row.entries);
+const depositAmountNumber = (row: Row) => numberValue(row.depositTotal ?? row.depositAmount ?? row.totalDeposits ?? row.deposits ?? row.amount ?? row.total ?? row.value);
+const adminIdOf = (row: Row) => text(row.adminId ?? row.admin_id ?? row.administratorId ?? row.userId, "");
 
 function groupDailyAsMonths(report: AnalyticsReport): AnalyticsReport {
   const group = (rows: Row[]) => {
@@ -214,6 +217,7 @@ function CommissionAnalytics() {
   const [report, setReport] = useState<AnalyticsReport | null>(null);
   const [admins, setAdmins] = useState<Row[]>([]);
   const [selectedAdmin, setSelectedAdmin] = useState("");
+  const [adminSearch, setAdminSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatedAt, setUpdatedAt] = useState("");
@@ -234,21 +238,36 @@ function CommissionAnalytics() {
   useEffect(() => { load(); }, [range]);
 
   const commissionRows = reportRows(report, "commissionByAdmin");
+  const depositAdminRows = reportRows(report, "depositsByAdmin").length > 0
+    ? reportRows(report, "depositsByAdmin")
+    : reportRows(report, "depositByAdmin");
   const periodRows = reportRows(report, "commissionByPeriod");
   const depositPeriodRows = reportRows(report, "depositsByPeriod");
   const summaries = reportRows(report, "summaries");
   const adminMap = new Map(admins.map((admin) => [idOf(admin), admin]));
-  const grouped = new Map<string, { admin: Row; commission: number; entries: number; countries: Set<string> }>();
-  admins.forEach((admin) => grouped.set(idOf(admin), { admin, commission: 0, entries: 0, countries: new Set() }));
+  const grouped = new Map<string, { admin: Row; commission: number; deposits: number; entries: number; countries: Set<string> }>();
+  admins.forEach((admin) => grouped.set(idOf(admin), { admin, commission: 0, deposits: 0, entries: 0, countries: new Set() }));
   commissionRows.forEach((row) => {
-    const id = text(row.adminId ?? row.admin_id, "");
+    const id = adminIdOf(row);
     if (!id) return;
-    const current = grouped.get(id) ?? { admin: adminMap.get(id) ?? { id, email: row.adminEmail }, commission: 0, entries: 0, countries: new Set<string>() };
+    const current = grouped.get(id) ?? { admin: adminMap.get(id) ?? { id, email: row.adminEmail }, commission: 0, deposits: 0, entries: 0, countries: new Set<string>() };
     current.commission += amountNumber(row); current.entries += countNumber(row);
+    current.deposits += depositAmountNumber(row) !== amountNumber(row) ? depositAmountNumber(row) : 0;
     if (row.country) current.countries.add(String(row.country));
     grouped.set(id, current);
   });
+  depositAdminRows.forEach((row) => {
+    const id = adminIdOf(row);
+    if (!id) return;
+    const current = grouped.get(id) ?? { admin: adminMap.get(id) ?? { id, email: row.adminEmail }, commission: 0, deposits: 0, entries: 0, countries: new Set<string>() };
+    current.deposits += depositAmountNumber(row);
+    grouped.set(id, current);
+  });
   const adminCards = [...grouped.values()].sort((a, b) => b.commission - a.commission);
+  const normalizedSearch = adminSearch.trim().toLowerCase();
+  const visibleAdminCards = normalizedSearch
+    ? adminCards.filter((item) => adminEmail(item.admin).toLowerCase().includes(normalizedSearch))
+    : adminCards;
   const selected = selectedAdmin ? adminCards.find((item) => idOf(item.admin) === selectedAdmin) : null;
   const visibleRows = selected ? commissionRows.filter((row) => text(row.adminId ?? row.admin_id, "") === selectedAdmin) : commissionRows;
   const totalCommission = summaries.reduce((sum, row) => sum + numberValue(row.commissionTotal ?? row.commissionAmount), 0);
@@ -260,18 +279,19 @@ function CommissionAnalytics() {
     <Notice text={error} error />
     <div className="sa-analytics-toolbar">
       <div className="sa-toggle">{(["live", "daily", "weekly", "monthly"] as AnalyticsRange[]).map((item) => <button key={item} className={range === item ? "active" : ""} onClick={() => { setRange(item); setSelectedAdmin(""); }}>{item === "live" ? "Live / today" : item[0].toUpperCase() + item.slice(1)}</button>)}</div>
-      <select value={selectedAdmin} onChange={(e) => setSelectedAdmin(e.target.value)} aria-label="Filter by administrator"><option value="">All administrators</option>{adminCards.map((item) => <option key={idOf(item.admin)} value={idOf(item.admin)}>{adminEmail(item.admin)}</option>)}</select>
+      <div className="sa-admin-search"><Search size={14} /><input value={adminSearch} onChange={(e) => setAdminSearch(e.target.value)} placeholder="Search admin email" aria-label="Search administrators by email" />{adminSearch && <button type="button" onClick={() => setAdminSearch("")} aria-label="Clear administrator search">×</button>}</div>
+      <select value={selectedAdmin} onChange={(e) => setSelectedAdmin(e.target.value)} aria-label="Filter by administrator"><option value="">All administrators</option>{visibleAdminCards.map((item) => <option key={idOf(item.admin)} value={idOf(item.admin)}>{adminEmail(item.admin)}</option>)}</select>
     </div>
     <div className="sa-analytics-meta"><span>{rangeLabel}</span>{updatedAt && <span>Updated {updatedAt}</span>}</div>
     <div className="sa-analytics-stat-grid">
       <div className="sa-analytics-stat"><small>Platform deposits in report</small><strong>{money(totalDeposits)}</strong><span>{summaries.length} country summaries</span></div>
       <div className="sa-analytics-stat"><small>Platform commission</small><strong>{money(totalCommission)}</strong><span>Authoritative backend total</span></div>
-      <div className="sa-analytics-stat"><small>Administrators shown</small><strong>{adminCards.length}</strong><span>Zero-activity admins included</span></div>
+      <div className="sa-analytics-stat"><small>Administrators shown</small><strong>{visibleAdminCards.length}</strong><span>{normalizedSearch ? `Matching “${adminSearch.trim()}”` : "Zero-activity admins included"}</span></div>
     </div>
     {loading ? <Panel title="Loading analytics"><div className="sa-analytics-loading">Loading the official commission report…</div></Panel> : <>
       <Panel title={selected ? `Administrator · ${adminEmail(selected.admin)}` : "Administrators by commission"}>
         {selected ? <div className="sa-admin-detail-head"><div><strong>{adminEmail(selected.admin)}</strong><span>{commissionValue(selected.admin)} commission rate</span></div><button className="sa-secondary" onClick={() => setSelectedAdmin("")}>Back to all admins</button></div> : null}
-        <div className="sa-admin-analytics-grid">{(selected ? [selected] : adminCards).map((item) => <button type="button" className="sa-admin-analytics-card" key={idOf(item.admin)} onClick={() => setSelectedAdmin(idOf(item.admin))}><div className="sa-admin-analytics-name"><span>{adminEmail(item.admin)}</span></div><div className="sa-admin-analytics-values"><div><small>Commission rate</small><b>{commissionValue(item.admin)}</b></div><div><small>Commission earned</small><b>{money(item.commission)}</b></div><div><small>Entries</small><b>{item.entries.toLocaleString()}</b></div></div><div className="sa-admin-analytics-foot"><span>{item.countries.size ? [...item.countries].join(" · ") : "No activity in this range"}</span><ChevronRight size={14} /></div></button>)}</div>
+        <div className="sa-admin-analytics-grid">{(selected ? [selected] : visibleAdminCards).map((item) => <button type="button" className="sa-admin-analytics-card" key={idOf(item.admin)} onClick={() => setSelectedAdmin(idOf(item.admin))}><div className="sa-admin-analytics-name"><span>{adminEmail(item.admin)}</span></div><div className="sa-admin-analytics-values"><div><small>Commission rate</small><b>{commissionValue(item.admin)}</b></div><div><small>Commission earned</small><b>{money(item.commission)}</b></div><div><small>Total deposits</small><b>{money(item.deposits)}</b></div></div><div className="sa-admin-analytics-foot"><span>{item.countries.size ? [...item.countries].join(" · ") : "No activity in this range"}</span><span>{item.entries.toLocaleString()} entries <ChevronRight size={14} /></span></div></button>)}</div>
       </Panel>
       <Panel title="Commission by period"><Table rows={selected ? visibleRows : periodRows} columns={selected ? ["periodLabel", "country", "amount", "currency", "count"] : ["periodLabel", "country", "amount", "currency", "commissionCount"]} /></Panel>
       <Panel title="Deposit performance by period"><Table rows={depositPeriodRows} columns={["periodLabel", "country", "amount", "currency", "depositCount"]} /></Panel>
