@@ -258,7 +258,7 @@ function CommissionAnalytics() {
   const [updatedAt, setUpdatedAt] = useState("");
   const [dailyAdminRows, setDailyAdminRows] = useState<Row[]>([]);
   const [actingAdmin, setActingAdmin] = useState("");
-  const [settlementDate, setSettlementDate] = useState(() => { const date = new Date(); date.setUTCDate(date.getUTCDate() - 1); return date.toISOString().slice(0, 10); });
+  const [settlementDate, setSettlementDate] = useState(() => new Date().toISOString().slice(0, 10));
   const todayDate = new Date().toISOString().slice(0, 10);
   const yesterdayDate = (() => { const date = new Date(); date.setUTCDate(date.getUTCDate() - 1); return date.toISOString().slice(0, 10); })();
   const settlementDateOptions = Array.from({ length: 31 }, (_, index) => { const date = new Date(); date.setUTCHours(0, 0, 0, 0); date.setUTCDate(date.getUTCDate() - index); return date.toISOString().slice(0, 10); });
