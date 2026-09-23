@@ -255,11 +255,16 @@ function CommissionAnalytics() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatedAt, setUpdatedAt] = useState("");
+  const [dailyAdminRows, setDailyAdminRows] = useState<Row[]>([]);
+  const [actingAdmin, setActingAdmin] = useState("");
 
   const load = async () => {
     setLoading(true); setError("");
     try {
       // These are the exact report routes used by the connected OmegaBet repo.
+      const today = new Date().toISOString().slice(0, 10);
+      const dailyRows = await api.superAdmin.commissionDailyByAdmin(today);
+      setDailyAdminRows(dailyRows);
       const raw = range === "weekly"
         ? await api.superAdmin.commissionWeekly(12)
         : await api.superAdmin.commissionDaily(range === "monthly" ? 365 : 1);
@@ -278,6 +283,8 @@ function CommissionAnalytics() {
     finally { setLoading(false); }
   };
   useEffect(() => { load(); }, [range]);
+  const payAdmin = async (adminId: string) => { setActingAdmin(adminId); setError(""); try { await api.superAdmin.payAdminCommission(adminId); await load(); } catch (e) { setError(e instanceof Error ? e.message : "Could not mark commission as paid"); } finally { setActingAdmin(""); } };
+  const clearAll = async () => { if (!window.confirm("Mark all current admin commissions as paid and clear their balances?")) return; setActingAdmin("all"); setError(""); try { await api.superAdmin.clearAllAdminCommissions(); await load(); } catch (e) { setError(e instanceof Error ? e.message : "Could not clear admin commissions"); } finally { setActingAdmin(""); } };
 
   const commissionRows = reportRows(report, "commissionByAdmin");
   const depositAdminRows = reportRows(report, "depositsByAdmin").length > 0
@@ -344,6 +351,7 @@ function CommissionAnalytics() {
         {selected ? <div className="sa-admin-detail-head"><div><strong>{adminEmail(selected.admin)}</strong><span>{rateDisplay(selected.rate)} commission rate</span></div><button className="sa-secondary" onClick={() => setSelectedAdmin("")}>Back to all admins</button></div> : null}
         <div className="sa-admin-analytics-grid">{(selected ? [selected] : visibleAdminCards).map((item) => <button type="button" className="sa-admin-analytics-card" key={idOf(item.admin)} onClick={() => setSelectedAdmin(idOf(item.admin))}><div className="sa-admin-analytics-name"><span>{adminEmail(item.admin)}</span></div><div className="sa-admin-analytics-values"><div><small>Commission rate</small><b>{rateDisplay(item.rate)}</b></div><div><small>{range === "daily" || range === "live" ? "Owed today" : "Commission owed"}</small><b>{money(item.commission)}</b></div><div><small>Total deposits</small><b>{money(item.deposits)}</b></div></div><div className="sa-admin-analytics-foot"><span>{item.countries.size ? [...item.countries].join(" · ") : "No activity in this range"}</span><span>{item.entries.toLocaleString()} entries <ChevronRight size={14} /></span></div></button>)}</div>
       </Panel>
+      <Panel title="Today’s admin commissions" action={<button className="sa-primary" onClick={clearAll} disabled={actingAdmin !== ""}>{actingAdmin === "all" ? "Clearing…" : "Pay & clear all"}</button>}><div className="sa-table-wrap"><table className="sa-table"><thead><tr><th>Admin</th><th>Rate</th><th>Commission</th><th>Deposits</th><th>Deposit count</th><th>Balance</th><th /></tr></thead><tbody>{dailyAdminRows.length === 0 ? <tr><td colSpan={7} className="sa-empty">No admin commission or deposit activity today.</td></tr> : dailyAdminRows.map((row) => <tr key={text(row.adminId)}><td>{text(row.adminEmail)}</td><td>{text(row.commissionPercent)}%</td><td>{money(row.commissionEarned)}</td><td>{money(row.totalDeposits)}</td><td>{text(row.depositCount, "0")}</td><td>{money(row.commissionBalance)}</td><td><button className="sa-link" onClick={() => payAdmin(text(row.adminId))} disabled={actingAdmin !== "" || numberValue(row.commissionBalance) <= 0}>{actingAdmin === text(row.adminId) ? "Paying…" : "Mark paid"}</button></td></tr>)}</tbody></table></div></Panel>
       <Panel title="Commission by period"><Table rows={selected ? visibleRows : periodRows} columns={selected ? ["periodLabel", "country", "amount", "currency", "count"] : ["periodLabel", "country", "amount", "currency", "commissionCount"]} /></Panel>
       <Panel title="Deposit performance by period"><Table rows={depositPeriodRows} columns={["periodLabel", "country", "amount", "currency", "depositCount"]} /></Panel>
     </>}

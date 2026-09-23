@@ -1202,6 +1202,8 @@ export const adminAffiliate = {
   getPayoutWindow: () => get<Record<string, boolean>>("/api/admin/affiliate/payout-window"),
   requestPayout: () => post<Record<string, unknown>>("/api/admin/affiliate/payout-request"),
   getPayoutHistory: (page = 0, size = 20) => get<PageResponse<Record<string, unknown>>>(`/api/admin/affiliate/payout-requests${qs({ page, size })}`),
+  dailySummary: (date?: string) => get<Record<string, unknown>>(`/api/admin/affiliate/commission/daily-summary${qs({ date })}`),
+  payoutNotification: () => get<Record<string, unknown> | null>('/api/admin/affiliate/commission/payout-notification'),
 };
 
 export const adminAffiliateInsights = {
@@ -1281,6 +1283,10 @@ export const superAdmin = {
   predictions: (page = 0, size = 50) => get<PageResponse<Record<string, unknown>>>(`/api/super-admin/predictions${qs({ page, size })}`),
   commissionDaily: (days = 30) => get<unknown>(`/api/super-admin/commission/country-report/daily${qs({ days })}`),
   commissionWeekly: (weeks = 12) => get<unknown>(`/api/super-admin/commission/country-report/weekly${qs({ weeks })}`),
+  commissionDailyByAdmin: (date?: string, adminId?: string) => get<Record<string, unknown>[]>(`/api/super-admin/commission/daily${qs({ date, adminId })}`),
+  commissionDailyForAdmin: (adminId: string, date?: string) => get<Record<string, unknown>[]>(`/api/super-admin/commission/daily/${encodeURIComponent(adminId)}${qs({ date })}`),
+  payAdminCommission: (adminId: string) => post<Record<string, unknown>>(`/api/super-admin/commission/admins/${encodeURIComponent(adminId)}/pay`),
+  clearAllAdminCommissions: () => post<Record<string, unknown>>('/api/super-admin/commission/clear'),
 };
 
 export const superAdminDeposits = {
