@@ -217,7 +217,7 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
     const ids = Array.from(new Set([...openBets, ...settledBets].flatMap((b) => b.selections.map((s) => s.matchId)).filter(Boolean)));
     if (ids.length === 0) return;
     let cancelled = false;
-    const refresh = () => Promise.allSettled(ids.map(async (mid) => { try { return await api.matches.getById(mid); } catch { return api.adminMatches.getById(mid); } })).then((results) => {
+    const refresh = () => Promise.allSettled(ids.map(async (mid) => { try { return await api.matches.getById(mid); } catch { return api.publicAdminMatches.getById(mid); } })).then((results) => {
       if (cancelled) return;
       setMatchScores((prev) => {
         const next = { ...prev };
