@@ -34,6 +34,13 @@ function scoreNumber(value: unknown): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
+function formatTicketKickoff(kickoffAt?: string): string {
+  if (!kickoffAt) return "";
+  const kickoff = new Date(kickoffAt);
+  if (Number.isNaN(kickoff.getTime())) return "";
+  return `Starts ${kickoff.toLocaleDateString(undefined, { day: "2-digit", month: "short" })}, ${kickoff.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}`;
+}
+
 /** Finished-result feeds carry the authoritative FT score, even when the
  * individual ticket/slip response does not include it. */
 function normalizeFinishedScore(raw: unknown): Match | null {
@@ -196,6 +203,7 @@ export default function TicketDetailsPage({ id }: { id: string }) {
                     <div>
                       <div className="td-leg-teams">{home} <span>v</span> {away}</div>
                       <div className="td-leg-game-id">Game ID: {s.matchId?.slice(0, 8) ?? "—"}</div>
+                      {formatTicketKickoff(match?.kickoffAt) && <div className="td-leg-kickoff">{formatTicketKickoff(match?.kickoffAt)}</div>}
                     </div>
                   </div>
                   <div className={`td-leg-pick ${won ? "td-pick-won" : ""}`}>
@@ -257,7 +265,7 @@ function TicketDetailsStyles() {
       .td-leg-top{ display:flex; align-items:flex-start; gap:8px; margin-bottom:10px; }
       .td-leg-check{ color:var(--td-blue); flex-shrink:0; margin-top:2px; }
       .td-leg-teams{ font:700 14px 'DM Sans',sans-serif; margin-bottom:2px; }
-      .td-leg-teams span{ color:var(--td-muted); font-weight:500; margin:0 4px; }.td-leg-game-id{ font-size:.68rem; color:var(--td-muted); }.td-leg-pick{ background:#f7faff; border:1px solid var(--td-line); border-radius:10px; padding:10px 12px; }.td-leg-pick.td-pick-won{ background:#eaf2ff; }.td-leg-row{ display:flex; align-items:center; justify-content:space-between; padding:4px 0; font-size:.76rem; color:var(--td-muted); }.td-leg-row b{ color:#20242d; font-weight:700; }.td-pick-won .td-leg-row:first-child b{ color:var(--td-blue-deep); }
+      .td-leg-teams span{ color:var(--td-muted); font-weight:500; margin:0 4px; }.td-leg-game-id{ font-size:.68rem; color:var(--td-muted); }.td-leg-kickoff{ margin-top:4px; color:#c9962c; font-size:.7rem; font-weight:800; }.td-leg-pick{ background:#f7faff; border:1px solid var(--td-line); border-radius:10px; padding:10px 12px; }.td-leg-pick.td-pick-won{ background:#eaf2ff; }.td-leg-row{ display:flex; align-items:center; justify-content:space-between; padding:4px 0; font-size:.76rem; color:var(--td-muted); }.td-leg-row b{ color:#20242d; font-weight:700; }.td-pick-won .td-leg-row:first-child b{ color:var(--td-blue-deep); }
 
       /* Reference-matched winning ticket treatment: blue summary, dark celebration strip, gold action. */
       .td-summary{ margin:0 0 14px; border:0; border-radius:0; background:linear-gradient(160deg,#273ee4 0%,#2236d5 72%,#1829ae 100%); color:#fff; box-shadow:0 8px 18px rgba(20,45,150,.16); }
