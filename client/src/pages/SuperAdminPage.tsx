@@ -36,6 +36,20 @@ const unwrapAdmin = (row: Row): Row => {
   }
   return row;
 };
+const findRateValue = (value: unknown, depth = 0): number | null => {
+  if (depth > 5 || !value || typeof value !== "object") return null;
+  if (Array.isArray(value)) { for (const item of value) { const found = findRateValue(item, depth + 1); if (found !== null) return found; } return null; }
+  for (const [key, child] of Object.entries(value as Row)) {
+    const normalized = key.toLowerCase().replace(/[_-]/g, "");
+    if ((normalized.includes("commission") && (normalized.includes("rate") || normalized.includes("percent"))) || normalized === "effectiverate") {
+      const n = Number(child);
+      if (Number.isFinite(n)) return n >= 0 && n <= 1 ? n * 100 : n;
+    }
+    if (key === "rate" && depth > 0) { const n = Number(child); if (Number.isFinite(n)) return n >= 0 && n <= 1 ? n * 100 : n; }
+  }
+  for (const child of Object.values(value as Row)) { const found = findRateValue(child, depth + 1); if (found !== null) return found; }
+  return null;
+};
 const commissionValue = (row: Row): string => {
   const commission = row.commission as Row | undefined;
   const settings = row.settings as Row | undefined;
@@ -52,7 +66,8 @@ const rateFromRow = (row: Row): number | null => {
   const commissionSettings = row.commissionSettings as Row | undefined;
   const raw = row.commissionRate ?? row.commissionPercentage ?? row.commissionPercent ?? row.commission_rate ?? row.commission_percentage ?? row.adminCommissionRate ?? row.effectiveCommissionRate ?? commission?.rate ?? commission?.commissionRate ?? commission?.percentage ?? settings?.commissionRate ?? commissionSettings?.rate ?? commissionSettings?.commissionRate ?? commissionSettings?.percentage;
   const n = Number(raw);
-  return Number.isFinite(n) ? (n >= 0 && n <= 1 ? n * 100 : n) : null;
+  if (Number.isFinite(n)) return n >= 0 && n <= 1 ? n * 100 : n;
+  return findRateValue(row);
 };
 const rateDisplay = (rate: number | null) => rate === null ? "—" : `${rate.toFixed(2).replace(/\.00$/, "")}%`;
 
@@ -271,6 +286,7 @@ function CommissionAnalytics() {
   const periodRows = reportRows(report, "commissionByPeriod");
   const depositPeriodRows = reportRows(report, "depositsByPeriod");
   const summaries = reportRows(report, "summaries");
+  const reportRate = summaries.map(rateFromRow).find((rate): rate is number => rate !== null) ?? null;
   const adminMap = new Map(admins.map((admin) => [idOf(admin), admin]));
   const grouped = new Map<string, { admin: Row; rate: number | null; commission: number; deposits: number; entries: number; countries: Set<string> }>();
   admins.forEach((admin) => grouped.set(idOf(admin), { admin, rate: rateFromRow(admin), commission: 0, deposits: 0, entries: 0, countries: new Set() }));
@@ -293,6 +309,7 @@ function CommissionAnalytics() {
     grouped.set(id, current);
   });
   grouped.forEach((item) => {
+    if (item.rate === null) item.rate = reportRate;
     if (item.rate === null && item.deposits > 0 && item.commission >= 0) item.rate = (item.commission / item.deposits) * 100;
   });
   const adminCards = [...grouped.values()].sort((a, b) => b.commission - a.commission);
