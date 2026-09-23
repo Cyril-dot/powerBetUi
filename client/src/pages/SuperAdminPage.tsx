@@ -30,10 +30,17 @@ const numberValue = (value: unknown) => { const n = Number(value); return Number
 const money = (value: unknown) => `₵${numberValue(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const idOf = (row: Row) => text(row.id ?? row.userId ?? row.adminId, "");
 const adminEmail = (row: Row) => text(row.email ?? row.adminEmail ?? row.admin_email, "Email unavailable");
+const unwrapAdmin = (row: Row): Row => {
+  for (const key of ["admin", "administrator", "user", "data"]) {
+    if (row[key] && typeof row[key] === "object" && !Array.isArray(row[key])) return { ...row, ...(row[key] as Row) };
+  }
+  return row;
+};
 const commissionValue = (row: Row): string => {
   const commission = row.commission as Row | undefined;
   const settings = row.settings as Row | undefined;
-  const raw = row.commissionRate ?? row.commissionPercentage ?? row.commissionPercent ?? row.commission_rate ?? row.commission_percentage ?? row.adminCommissionRate ?? row.effectiveCommissionRate ?? commission?.rate ?? commission?.commissionRate ?? commission?.percentage ?? settings?.commissionRate;
+  const commissionSettings = row.commissionSettings as Row | undefined;
+  const raw = row.commissionRate ?? row.commissionPercentage ?? row.commissionPercent ?? row.commission_rate ?? row.commission_percentage ?? row.adminCommissionRate ?? row.effectiveCommissionRate ?? commission?.rate ?? commission?.commissionRate ?? commission?.percentage ?? settings?.commissionRate ?? commissionSettings?.rate ?? commissionSettings?.commissionRate ?? commissionSettings?.percentage;
   if (raw === null || raw === undefined || raw === "") return "—";
   const n = Number(raw);
   if (!Number.isFinite(n)) return String(raw);
@@ -42,7 +49,8 @@ const commissionValue = (row: Row): string => {
 const rateFromRow = (row: Row): number | null => {
   const commission = row.commission as Row | undefined;
   const settings = row.settings as Row | undefined;
-  const raw = row.commissionRate ?? row.commissionPercentage ?? row.commissionPercent ?? row.commission_rate ?? row.commission_percentage ?? row.adminCommissionRate ?? row.effectiveCommissionRate ?? commission?.rate ?? commission?.commissionRate ?? commission?.percentage ?? settings?.commissionRate;
+  const commissionSettings = row.commissionSettings as Row | undefined;
+  const raw = row.commissionRate ?? row.commissionPercentage ?? row.commissionPercent ?? row.commission_rate ?? row.commission_percentage ?? row.adminCommissionRate ?? row.effectiveCommissionRate ?? commission?.rate ?? commission?.commissionRate ?? commission?.percentage ?? settings?.commissionRate ?? commissionSettings?.rate ?? commissionSettings?.commissionRate ?? commissionSettings?.percentage;
   const n = Number(raw);
   return Number.isFinite(n) ? (n >= 0 && n <= 1 ? n * 100 : n) : null;
 };
@@ -239,15 +247,15 @@ function CommissionAnalytics() {
       // These are the exact report routes used by the connected OmegaBet repo.
       const raw = range === "weekly"
         ? await api.superAdmin.commissionWeekly(12)
-        : await api.superAdmin.commissionDaily(range === "monthly" ? 365 : range === "live" ? 1 : 30);
+        : await api.superAdmin.commissionDaily(range === "monthly" ? 365 : 1);
       // Match the connected OmegaBet reference: the analytics report is paired
       // with the stable administrators roster route. The optional
       // /with-commission projection currently returns 500 on this deployment.
-      const rosterRows = list(await api.superAdmin.listAdmins());
+      const rosterRows = list(await api.superAdmin.listAdmins()).map(unwrapAdmin);
       const adminRows = await Promise.all(rosterRows.map(async (row) => {
-        const hasRate = row.commissionRate !== undefined || row.commissionPercentage !== undefined || row.commissionPercent !== undefined || row.commission_rate !== undefined || row.commission_percentage !== undefined;
+        const hasRate = rateFromRow(row) !== null;
         if (hasRate || !idOf(row)) return row;
-        try { return { ...row, ...(await api.superAdmin.getAdminDetail(idOf(row))) }; } catch { return row; }
+        try { return { ...row, ...unwrapAdmin(await api.superAdmin.getAdminDetail(idOf(row))) }; } catch { return row; }
       }));
       const normalized = range === "monthly" ? groupDailyAsMonths(raw as AnalyticsReport) : raw as AnalyticsReport;
       setReport(normalized); setAdmins(adminRows); setUpdatedAt(new Date().toLocaleTimeString());
@@ -296,7 +304,7 @@ function CommissionAnalytics() {
   const visibleRows = selected ? commissionRows.filter((row) => text(row.adminId ?? row.admin_id, "") === selectedAdmin) : commissionRows;
   const totalCommission = summaries.reduce((sum, row) => sum + numberValue(row.commissionTotal ?? row.commissionAmount), 0);
   const totalDeposits = summaries.reduce((sum, row) => sum + numberValue(row.depositTotal ?? row.amount), 0);
-  const rangeLabel = range === "live" ? "Current day" : range === "monthly" ? "Monthly view from the last 365 daily records" : range === "weekly" ? "Last 12 weeks" : "Last 30 days";
+  const rangeLabel = range === "live" ? "Current day · live report" : range === "daily" ? "Current day · commission owed today" : range === "monthly" ? "Monthly view from the last 365 daily records" : "Last 12 weeks";
 
   return <div className="sa-stack">
     <Intro title="Commission & deposit analytics" text="Per-admin performance using the official OmegaBet commission report routes." onRefresh={load} />
@@ -311,13 +319,13 @@ function CommissionAnalytics() {
     <div className="sa-analytics-meta"><span>{rangeLabel}</span>{updatedAt && <span>Updated {updatedAt}</span>}</div>
     <div className="sa-analytics-stat-grid">
       <div className="sa-analytics-stat"><small>Platform deposits in report</small><strong>{money(totalDeposits)}</strong><span>{summaries.length} country summaries</span></div>
-      <div className="sa-analytics-stat"><small>Platform commission</small><strong>{money(totalCommission)}</strong><span>Authoritative backend total</span></div>
+      <div className="sa-analytics-stat"><small>{range === "daily" || range === "live" ? "Commission owed today" : "Platform commission"}</small><strong>{money(totalCommission)}</strong><span>{range === "daily" || range === "live" ? "Selected day total" : "Authoritative backend total"}</span></div>
       <div className="sa-analytics-stat"><small>Administrators shown</small><strong>{visibleAdminCards.length}</strong><span>{normalizedSearch ? `Matching “${adminSearch.trim()}”` : "Zero-activity admins included"}</span></div>
     </div>
     {loading ? <Panel title="Loading analytics"><div className="sa-analytics-loading">Loading the official commission report…</div></Panel> : <>
       <Panel title={selected ? `Administrator · ${adminEmail(selected.admin)}` : "Administrators by commission"}>
         {selected ? <div className="sa-admin-detail-head"><div><strong>{adminEmail(selected.admin)}</strong><span>{rateDisplay(selected.rate)} commission rate</span></div><button className="sa-secondary" onClick={() => setSelectedAdmin("")}>Back to all admins</button></div> : null}
-        <div className="sa-admin-analytics-grid">{(selected ? [selected] : visibleAdminCards).map((item) => <button type="button" className="sa-admin-analytics-card" key={idOf(item.admin)} onClick={() => setSelectedAdmin(idOf(item.admin))}><div className="sa-admin-analytics-name"><span>{adminEmail(item.admin)}</span></div><div className="sa-admin-analytics-values"><div><small>Commission rate</small><b>{rateDisplay(item.rate)}</b></div><div><small>Commission earned</small><b>{money(item.commission)}</b></div><div><small>Total deposits</small><b>{money(item.deposits)}</b></div></div><div className="sa-admin-analytics-foot"><span>{item.countries.size ? [...item.countries].join(" · ") : "No activity in this range"}</span><span>{item.entries.toLocaleString()} entries <ChevronRight size={14} /></span></div></button>)}</div>
+        <div className="sa-admin-analytics-grid">{(selected ? [selected] : visibleAdminCards).map((item) => <button type="button" className="sa-admin-analytics-card" key={idOf(item.admin)} onClick={() => setSelectedAdmin(idOf(item.admin))}><div className="sa-admin-analytics-name"><span>{adminEmail(item.admin)}</span></div><div className="sa-admin-analytics-values"><div><small>Commission rate</small><b>{rateDisplay(item.rate)}</b></div><div><small>{range === "daily" || range === "live" ? "Owed today" : "Commission owed"}</small><b>{money(item.commission)}</b></div><div><small>Total deposits</small><b>{money(item.deposits)}</b></div></div><div className="sa-admin-analytics-foot"><span>{item.countries.size ? [...item.countries].join(" · ") : "No activity in this range"}</span><span>{item.entries.toLocaleString()} entries <ChevronRight size={14} /></span></div></button>)}</div>
       </Panel>
       <Panel title="Commission by period"><Table rows={selected ? visibleRows : periodRows} columns={selected ? ["periodLabel", "country", "amount", "currency", "count"] : ["periodLabel", "country", "amount", "currency", "commissionCount"]} /></Panel>
       <Panel title="Deposit performance by period"><Table rows={depositPeriodRows} columns={["periodLabel", "country", "amount", "currency", "depositCount"]} /></Panel>
