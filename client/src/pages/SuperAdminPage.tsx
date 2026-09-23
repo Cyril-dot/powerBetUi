@@ -254,6 +254,7 @@ function CommissionAnalytics() {
   const [showGuide, setShowGuide] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [updatedAt, setUpdatedAt] = useState("");
   const [dailyAdminRows, setDailyAdminRows] = useState<Row[]>([]);
   const [actingAdmin, setActingAdmin] = useState("");
@@ -294,8 +295,8 @@ function CommissionAnalytics() {
   };
   useEffect(() => { load(); }, [range]);
   useEffect(() => { loadSelectedDay(); }, [settlementDate]);
-  const payAdmin = async (adminId: string) => { setActingAdmin(adminId); setError(""); console.info("[commission] mark paid", { adminId, date: settlementDate }); try { await api.superAdmin.payAdminCommission(adminId, settlementDate); await load(); } catch (e) { console.error("[commission] mark paid failed", { adminId, date: settlementDate, error: e }); setError(e instanceof Error ? e.message : "Could not mark commission as paid"); } finally { setActingAdmin(""); } };
-  const clearAll = async () => { if (!window.confirm(`Mark all unpaid commission for ${settlementDate} as paid and clear only that day?`)) return; setActingAdmin("all"); setError(""); console.info("[commission] clear start", { date: settlementDate }); try { await api.superAdmin.clearAllAdminCommissions(settlementDate); console.info("[commission] clear success", { date: settlementDate }); await load(); } catch (e) { console.error("[commission] clear failed", { date: settlementDate, endpoint: `/api/super-admin/commission/clear?date=${settlementDate}`, error: e }); setError(e instanceof Error ? e.message : "Could not clear admin commissions"); } finally { setActingAdmin(""); } };
+  const payAdmin = async (adminId: string) => { setActingAdmin(adminId); setError(""); setSuccess(""); console.info("[commission] mark paid", { adminId, date: settlementDate }); try { await api.superAdmin.payAdminCommission(adminId, settlementDate); await loadSelectedDay(); setSuccess(`Commission marked as paid for ${settlementDate}.`); } catch (e) { console.error("[commission] mark paid failed", { adminId, date: settlementDate, error: e }); setError(e instanceof Error ? e.message : "Could not mark commission as paid"); } finally { setActingAdmin(""); } };
+  const clearAll = async () => { if (!window.confirm(`Mark all unpaid commission for ${settlementDate} as paid and clear only that day?`)) return; setActingAdmin("all"); setError(""); setSuccess(""); console.info("[commission] clear start", { date: settlementDate }); try { await api.superAdmin.clearAllAdminCommissions(settlementDate); console.info("[commission] clear success", { date: settlementDate }); await loadSelectedDay(); setSuccess(`Commission cleared and marked as paid for ${settlementDate}.`); } catch (e) { console.error("[commission] clear failed", { date: settlementDate, endpoint: `/api/super-admin/commission/clear?date=${settlementDate}`, error: e }); setError(e instanceof Error ? e.message : "Could not clear admin commissions"); } finally { setActingAdmin(""); } };
 
   const commissionRows = reportRows(report, "commissionByAdmin");
   const depositAdminRows = reportRows(report, "depositsByAdmin").length > 0
@@ -330,7 +331,16 @@ function CommissionAnalytics() {
     if (item.rate === null) item.rate = reportRate;
     if (item.rate === null && item.deposits > 0 && item.commission >= 0) item.rate = (item.commission / item.deposits) * 100;
   });
-  const adminCards = [...grouped.values()].sort((a, b) => b.commission - a.commission);
+  const reportAdminCards = [...grouped.values()].sort((a, b) => b.commission - a.commission);
+  const selectedDayAdminCards = dailyAdminRows.map((row) => ({
+    admin: { id: text(row.adminId), email: text(row.adminEmail) },
+    rate: numberValue(row.commissionPercent),
+    commission: numberValue(row.commissionEarned),
+    deposits: numberValue(row.totalDeposits),
+    entries: numberValue(row.depositCount),
+    countries: new Set([text(row.commissionCurrency, "")].filter(Boolean)),
+  }));
+  const adminCards = range === "daily" ? selectedDayAdminCards : reportAdminCards;
   const normalizedSearch = adminSearch.trim().toLowerCase();
   const visibleAdminCards = normalizedSearch
     ? adminCards.filter((item) => adminEmail(item.admin).toLowerCase().includes(normalizedSearch))
@@ -338,13 +348,15 @@ function CommissionAnalytics() {
   const selected = selectedAdmin ? adminCards.find((item) => idOf(item.admin) === selectedAdmin) : null;
   const visibleRows = selected ? commissionRows.filter((row) => text(row.adminId ?? row.admin_id, "") === selectedAdmin) : commissionRows;
   const visibleDailyAdminRows = selected ? dailyAdminRows.filter((row) => text(row.adminId) === selectedAdmin) : dailyAdminRows;
-  const totalCommission = summaries.reduce((sum, row) => sum + numberValue(row.commissionTotal ?? row.commissionAmount), 0);
-  const totalDeposits = summaries.reduce((sum, row) => sum + numberValue(row.depositTotal ?? row.amount), 0);
-  const rangeLabel = range === "live" ? "Current day · live report" : range === "daily" ? "Current day · commission owed today" : range === "monthly" ? "Monthly view from the last 365 daily records" : "Last 12 weeks";
+  const selectedDayCommissionDetailRows = (selected ? visibleDailyAdminRows : dailyAdminRows).map((row) => ({ periodLabel: settlementDate, country: text(row.commissionCurrency, ""), amount: numberValue(row.commissionEarned), currency: text(row.commissionCurrency, ""), count: numberValue(row.depositCount) }));
+  const selectedDayDepositDetailRows = (selected ? visibleDailyAdminRows : dailyAdminRows).map((row) => ({ periodLabel: settlementDate, country: text(row.commissionCurrency, ""), amount: numberValue(row.totalDeposits), currency: text(row.commissionCurrency, ""), depositCount: numberValue(row.depositCount) }));
+  const totalCommission = range === "daily" ? selectedDayAdminCards.reduce((sum, row) => sum + row.commission, 0) : summaries.reduce((sum, row) => sum + numberValue(row.commissionTotal ?? row.commissionAmount), 0);
+  const totalDeposits = range === "daily" ? selectedDayAdminCards.reduce((sum, row) => sum + row.deposits, 0) : summaries.reduce((sum, row) => sum + numberValue(row.depositTotal ?? row.amount), 0);
+  const rangeLabel = range === "live" ? "Current day · live report" : range === "daily" ? `Selected day · ${settlementDate}` : range === "monthly" ? "Monthly view from the last 365 daily records" : "Last 12 weeks";
 
   return <div className="sa-stack">
     <Intro title="Commission & deposit analytics" text="Per-admin performance using the official OmegaBet commission report routes." onRefresh={load} />
-    <Notice text={error} error />
+    <Notice text={error} error /><Notice text={success} />
     {showGuide && <div className="sa-analytics-guide"><strong>How to read this report</strong><button type="button" onClick={() => setShowGuide(false)} aria-label="Close analytics explanation"><X size={14} /></button><p><b>Commission rate</b> is the percentage assigned to the administrator. <b>Commission earned</b> is the commission amount owed to that administrator for the selected period; it is not the deposit amount. <b>Total deposits</b> is the deposit value attributed to that administrator in the report.</p><small>Values are reported by the backend and can change when you switch Live, Daily, Weekly, or Monthly.</small></div>}
     <div className="sa-analytics-toolbar">
       <div className="sa-toggle">{(["live", "daily", "weekly", "monthly"] as AnalyticsRange[]).map((item) => <button key={item} className={range === item ? "active" : ""} onClick={() => { setRange(item); setSelectedAdmin(""); }}>{item === "live" ? "Live / today" : item[0].toUpperCase() + item.slice(1)}</button>)}</div>
@@ -364,8 +376,8 @@ function CommissionAnalytics() {
         <div className="sa-admin-analytics-grid">{(selected ? [selected] : visibleAdminCards).map((item) => <button type="button" className="sa-admin-analytics-card" key={idOf(item.admin)} onClick={() => setSelectedAdmin(idOf(item.admin))}><div className="sa-admin-analytics-name"><span>{adminEmail(item.admin)}</span></div><div className="sa-admin-analytics-values"><div><small>Commission rate</small><b>{rateDisplay(item.rate)}</b></div><div><small>{range === "daily" || range === "live" ? "Owed today" : "Commission owed"}</small><b>{money(item.commission)}</b></div><div><small>Total deposits</small><b>{money(item.deposits)}</b></div></div><div className="sa-admin-analytics-foot"><span>{item.countries.size ? [...item.countries].join(" · ") : "No activity in this range"}</span><span>{item.entries.toLocaleString()} entries <ChevronRight size={14} /></span></div></button>)}</div>
       </Panel>
       <Panel title={`${selected ? `Admin · ${adminEmail(selected.admin)} · ` : "Admin commissions · "}${settlementDate}`} action={<div className="sa-actions"><button className={settlementDate === todayDate ? "sa-primary" : "sa-secondary"} onClick={() => setSettlementDate(todayDate)} disabled={actingAdmin !== ""}>Today</button><button className={settlementDate === yesterdayDate ? "sa-primary" : "sa-secondary"} onClick={() => setSettlementDate(yesterdayDate)} disabled={actingAdmin !== ""}>Yesterday</button><select value={settlementDate} onChange={(e) => setSettlementDate(e.target.value)} aria-label="Select commission day">{settlementDateOptions.map((date) => <option key={date} value={date}>{date}</option>)}</select><button className="sa-primary" onClick={clearAll} disabled={actingAdmin !== ""}>{actingAdmin === "all" ? "Clearing…" : `Pay & clear ${settlementDate}`}</button></div>}><div className="sa-table-wrap"><table className="sa-table"><thead><tr><th>Admin</th><th>Rate</th><th>Unpaid commission</th><th>Deposits</th><th>Deposit count</th><th>Current balance</th><th /></tr></thead><tbody>{visibleDailyAdminRows.length === 0 ? <tr><td colSpan={7} className="sa-empty">No unpaid admin commission or deposit activity for this day.</td></tr> : visibleDailyAdminRows.map((row) => <tr key={text(row.adminId)}><td>{text(row.adminEmail)}</td><td>{text(row.commissionPercent)}%</td><td>{money(row.commissionEarned)}</td><td>{money(row.totalDeposits)}</td><td>{text(row.depositCount, "0")}</td><td>{money(row.commissionBalance)}</td><td><button className="sa-link" onClick={() => payAdmin(text(row.adminId))} disabled={actingAdmin !== "" || numberValue(row.commissionEarned) <= 0}>{actingAdmin === text(row.adminId) ? "Paying…" : "Mark paid"}</button></td></tr>)}</tbody></table></div></Panel>
-      <Panel title="Commission by period"><Table rows={selected ? visibleRows : periodRows} columns={selected ? ["periodLabel", "country", "amount", "currency", "count"] : ["periodLabel", "country", "amount", "currency", "commissionCount"]} /></Panel>
-      <Panel title="Deposit performance by period"><Table rows={depositPeriodRows} columns={["periodLabel", "country", "amount", "currency", "depositCount"]} /></Panel>
+      <Panel title="Commission by period"><Table rows={range === "daily" ? selectedDayCommissionDetailRows : selected ? visibleRows : periodRows} columns={range === "daily" || selected ? ["periodLabel", "country", "amount", "currency", "count"] : ["periodLabel", "country", "amount", "currency", "commissionCount"]} /></Panel>
+      <Panel title="Deposit performance by period"><Table rows={range === "daily" ? selectedDayDepositDetailRows : depositPeriodRows} columns={["periodLabel", "country", "amount", "currency", "depositCount"]} /></Panel>
     </>}
   </div>;
 }
