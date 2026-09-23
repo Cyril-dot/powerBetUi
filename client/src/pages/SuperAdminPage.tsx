@@ -260,6 +260,7 @@ function CommissionAnalytics() {
   const [settlementDate, setSettlementDate] = useState(() => { const date = new Date(); date.setUTCDate(date.getUTCDate() - 1); return date.toISOString().slice(0, 10); });
 
   const load = async () => {
+    console.info("[commission] load", { range, settlementDate, selectedAdmin });
     setLoading(true); setError("");
     try {
       // These are the exact report routes used by the connected OmegaBet repo.
@@ -283,8 +284,8 @@ function CommissionAnalytics() {
     finally { setLoading(false); }
   };
   useEffect(() => { load(); }, [range, settlementDate]);
-  const payAdmin = async (adminId: string) => { setActingAdmin(adminId); setError(""); try { await api.superAdmin.payAdminCommission(adminId, settlementDate); await load(); } catch (e) { setError(e instanceof Error ? e.message : "Could not mark commission as paid"); } finally { setActingAdmin(""); } };
-  const clearAll = async () => { if (!window.confirm(`Mark all unpaid commission for ${settlementDate} as paid and clear only that day?`)) return; setActingAdmin("all"); setError(""); try { await api.superAdmin.clearAllAdminCommissions(settlementDate); await load(); } catch (e) { setError(e instanceof Error ? e.message : "Could not clear admin commissions"); } finally { setActingAdmin(""); } };
+  const payAdmin = async (adminId: string) => { setActingAdmin(adminId); setError(""); console.info("[commission] mark paid", { adminId, date: settlementDate }); try { await api.superAdmin.payAdminCommission(adminId, settlementDate); await load(); } catch (e) { console.error("[commission] mark paid failed", { adminId, date: settlementDate, error: e }); setError(e instanceof Error ? e.message : "Could not mark commission as paid"); } finally { setActingAdmin(""); } };
+  const clearAll = async () => { if (!window.confirm(`Mark all unpaid commission for ${settlementDate} as paid and clear only that day?`)) return; setActingAdmin("all"); setError(""); console.info("[commission] clear start", { date: settlementDate }); try { await api.superAdmin.clearAllAdminCommissions(settlementDate); console.info("[commission] clear success", { date: settlementDate }); await load(); } catch (e) { console.error("[commission] clear failed", { date: settlementDate, endpoint: `/api/super-admin/commission/clear?date=${settlementDate}`, error: e }); setError(e instanceof Error ? e.message : "Could not clear admin commissions"); } finally { setActingAdmin(""); } };
 
   const commissionRows = reportRows(report, "commissionByAdmin");
   const depositAdminRows = reportRows(report, "depositsByAdmin").length > 0
