@@ -2641,3 +2641,30 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
   .sa-admin-analytics-values{gap:4px}
   .sa-admin-analytics-values b{font-size:11px}
 }
+
+/* Super Admin main dashboard: compact mobile treatment */
+@media(max-width:650px){
+  .sa-page-intro h1{font-size:19px!important;line-height:1.15!important}
+  .sa-page-intro p{font-size:10px!important}
+  .sa-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  .sa-stat{padding:10px!important;border-radius:8px!important;gap:4px 6px!important}
+  .sa-stat svg{width:15px;height:15px}
+  .sa-stat small{font-size:9px!important;line-height:1.2!important}
+  .sa-stat strong{font-size:16px!important;line-height:1.1!important}
+  .sa-stat>svg:last-child{width:12px;height:12px}
+  .sa-quick-links{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;padding:10px!important}
+  .sa-quick-links button{min-width:0;padding:8px 7px!important;font-size:9px!important;line-height:1.2!important;justify-content:flex-start}
+  .sa-quick-links button svg{width:13px;height:13px;flex:0 0 auto}
+  .sa-summary-list{padding:0 12px 10px!important}
+  .sa-summary-list div{padding:10px 0!important}
+  .sa-summary-list span{font-size:10px!important}
+  .sa-summary-list b{font-size:12px!important}
+  .sa-platform-badge{margin:0 12px 12px!important;font-size:9px!important}
+}
+@media(max-width:360px){
+  .sa-stat-grid{gap:6px!important}
+  .sa-stat{padding:8px!important}
+  .sa-stat small{font-size:8px!important}
+  .sa-stat strong{font-size:14px!important}
+  .sa-quick-links button{font-size:8px!important;padding:7px 5px!important}
+}
