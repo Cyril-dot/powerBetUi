@@ -1071,13 +1071,24 @@ function adminLogo(_value: unknown, team: unknown, side: "home" | "away", salt =
   return adminLogoFallback(team, side, salt);
 }
 
-function movingAdminOdds(matchId: string, base: OddsMap): OddsMap {
+function movingAdminOdds(match: EnrichedMatch, base: OddsMap): OddsMap {
   const tick = Math.floor(Date.now() / 5_000);
   let hash = 2166136261;
-  for (const char of `${matchId}:${tick}`) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
+  for (const char of `${match.id}:${tick}`) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
   const wave = ((hash >>> 0) % 21 - 10) / 100;
-  const next = (value: number, multiplier: number) => Math.max(1.1, Number((value * (1 + wave * multiplier)).toFixed(2)));
-  return { home: next(base.home, 0.75), draw: next(base.draw, 0.45), away: next(base.away, 0.75) };
+  const live = isMatchLive(match);
+  const homeScore = Number(match.scoreHome);
+  const awayScore = Number(match.scoreAway);
+  const scoreDelta = live && Number.isFinite(homeScore) && Number.isFinite(awayScore)
+    ? Math.max(-4, Math.min(4, homeScore - awayScore))
+    : 0;
+  // A live score must affect the market: the leading side shortens, the trailing
+  // side lengthens, and the draw price rises with the size of the lead.
+  const homeTilt = 1 - scoreDelta * 0.07;
+  const awayTilt = 1 + scoreDelta * 0.07;
+  const drawTilt = 1 + Math.abs(scoreDelta) * 0.045;
+  const next = (value: number, multiplier: number, scoreTilt: number) => Math.max(1.1, Number((value * scoreTilt * (1 + wave * multiplier)).toFixed(2)));
+  return { home: next(base.home, 0.75, homeTilt), draw: next(base.draw, 0.45, drawTilt), away: next(base.away, 0.75, awayTilt) };
 }
 
 function filterVisibleAdminMatches(matches: EnrichedMatch[]): EnrichedMatch[] {
@@ -1123,7 +1134,7 @@ export async function fetchAdminMatches(): Promise<EnrichedMatch[]> {
   const complete = ensureOdds(withOdds);
   return filterVisibleAdminMatches(complete.map((match) => ({
     ...match,
-    oddsMap: movingAdminOdds(match.id, match.oddsMap ?? { home: 1.8, draw: 3.2, away: 3.6 }),
+    oddsMap: movingAdminOdds(match, match.oddsMap ?? { home: 1.8, draw: 3.2, away: 3.6 }),
   })));
 }
 

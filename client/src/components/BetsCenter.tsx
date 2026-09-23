@@ -72,6 +72,13 @@ function openMatchClock(match: Match | undefined): string {
   return "90+'";
 }
 
+function openMatchStartTime(match: Match | undefined): string {
+  if (!match?.kickoffAt) return "";
+  const kickoff = new Date(match.kickoffAt);
+  if (Number.isNaN(kickoff.getTime())) return "";
+  return `${isOpenMatchLive(match) ? "Started" : "Starts"} ${kickoff.toLocaleDateString(undefined, { day: "2-digit", month: "short" })}, ${kickoff.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}`;
+}
+
 /* ── History card: full-width, rounded, colour-coded, clickable ── */
 function HistoryCard({ bet, scores }: { bet: Bet; scores: Record<string, Match> }) {
   const [, setLocation] = useLocation();
@@ -133,6 +140,7 @@ function OpenBetCard({ bet, scores, isAdmin, onCashout }: { bet: Bet; scores: Re
                 <span className="bh-leg-check">✓</span>
                 <div className="bh-leg-info">
                   <div className="bh-open-leg-head"><b>{s.market || "1X2"} · {s.homeTeam ?? scores[s.matchId]?.homeTeam ?? "Home"} vs {s.awayTeam ?? scores[s.matchId]?.awayTeam ?? "Away"}</b>{isOpenMatchLive(scores[s.matchId]) && <span className="bh-live-match"><i /><small>live</small><b>{openMatchClock(scores[s.matchId])}</b></span>}</div>
+                  {openMatchStartTime(scores[s.matchId]) && <small className="bh-open-kickoff">{openMatchStartTime(scores[s.matchId])}</small>}
                   <small>{s.selection} @ {s.oddsLocked?.toFixed(2)}</small>
                   <div className="bh-open-team-row"><span>{s.homeTeam ?? scores[s.matchId]?.homeTeam ?? "Home"}</span>{isOpenMatchLive(scores[s.matchId]) && scores[s.matchId]?.scoreHome != null && <strong>{scores[s.matchId].scoreHome}</strong>}</div>
                   <div className="bh-open-team-row"><span>{s.awayTeam ?? scores[s.matchId]?.awayTeam ?? "Away"}</span>{isOpenMatchLive(scores[s.matchId]) && scores[s.matchId]?.scoreAway != null && <strong>{scores[s.matchId].scoreAway}</strong>}</div>
@@ -470,6 +478,7 @@ function BetsCenterStyles() {
       .bh-leg-check{ width:18px; height:18px; border-radius:50%; background:var(--nature); color:#fff; font-size:.62rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
       .bh-leg-info b{ display:block; font-size:.82rem; color:#F4F1F0; }
       .bh-leg-info small{ display:block; color:#8b8b8b; font-size:.7rem; }
+      .bh-leg-info .bh-open-kickoff{ margin-top:4px; color:#c9962c; font-size:.68rem; font-weight:800; letter-spacing:.01em; }
       .bh-leg-teams{ margin-top:1px; }
       .bh-toggle-details{ color:var(--nature); font-size:.72rem; font-weight:800; cursor:pointer; }
       .bh-cashout-btn{ width:100%; padding:13px; border-radius:10px; background:rgba(30,107,255); color:rgba(30,107,255); font-size:.8rem; font-weight:800; cursor:not-allowed; }
