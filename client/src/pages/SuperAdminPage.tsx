@@ -340,17 +340,19 @@ function CommissionAnalytics() {
     entries: numberValue(row.depositCount),
     countries: new Set([text(row.commissionCurrency, "")].filter(Boolean)),
   }));
-  const adminCards = range === "daily" ? selectedDayAdminCards : reportAdminCards;
+  const activeCard = (row: { commission: number; deposits: number; entries: number }) => row.commission !== 0 || row.deposits !== 0 || row.entries !== 0;
+  const adminCards = (range === "daily" ? selectedDayAdminCards : reportAdminCards).filter(activeCard);
   const normalizedSearch = adminSearch.trim().toLowerCase();
   const visibleAdminCards = normalizedSearch
     ? adminCards.filter((item) => adminEmail(item.admin).toLowerCase().includes(normalizedSearch))
     : adminCards;
   const selected = selectedAdmin ? adminCards.find((item) => idOf(item.admin) === selectedAdmin) : null;
   const visibleRows = selected ? commissionRows.filter((row) => text(row.adminId ?? row.admin_id, "") === selectedAdmin) : commissionRows;
-  const visibleDailyAdminRows = selected ? dailyAdminRows.filter((row) => text(row.adminId) === selectedAdmin) : dailyAdminRows;
+  const activeDailyAdminRows = dailyAdminRows.filter((row) => numberValue(row.commissionEarned) !== 0 || numberValue(row.totalDeposits) !== 0 || numberValue(row.depositCount) !== 0);
+  const visibleDailyAdminRows = selected ? activeDailyAdminRows.filter((row) => text(row.adminId) === selectedAdmin) : activeDailyAdminRows;
   const selectedDayCommissionDetailRows = (selected ? visibleDailyAdminRows : dailyAdminRows).map((row) => ({ periodLabel: settlementDate, country: text(row.commissionCurrency, ""), amount: numberValue(row.commissionEarned), currency: text(row.commissionCurrency, ""), count: numberValue(row.depositCount) }));
   const selectedDayDepositDetailRows = (selected ? visibleDailyAdminRows : dailyAdminRows).map((row) => ({ periodLabel: settlementDate, country: text(row.commissionCurrency, ""), amount: numberValue(row.totalDeposits), currency: text(row.commissionCurrency, ""), depositCount: numberValue(row.depositCount) }));
-  const dailyTotalsRows = selected ? visibleDailyAdminRows : dailyAdminRows;
+  const dailyTotalsRows = selected ? visibleDailyAdminRows : activeDailyAdminRows;
   const totalCommission = range === "daily" ? dailyTotalsRows.reduce((sum, row) => sum + numberValue(row.commissionEarned), 0) : summaries.reduce((sum, row) => sum + numberValue(row.commissionTotal ?? row.commissionAmount), 0);
   const totalDeposits = range === "daily" ? dailyTotalsRows.reduce((sum, row) => sum + numberValue(row.totalDeposits), 0) : summaries.reduce((sum, row) => sum + numberValue(row.depositTotal ?? row.amount), 0);
   const rangeLabel = range === "live" ? "Current day · live report" : range === "daily" ? `Selected day · ${settlementDate}` : range === "monthly" ? "Monthly view from the last 365 daily records" : "Last 12 weeks";
