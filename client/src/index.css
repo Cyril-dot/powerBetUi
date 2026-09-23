@@ -2581,3 +2581,10 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .sa-admin-search button{border:0;background:transparent;color:#83a1ac;padding:2px;cursor:pointer;font-size:16px;line-height:1}
 .sa-admin-analytics-foot span:last-child{display:flex;align-items:center;gap:4px;white-space:nowrap}
 @media(max-width:650px){.sa-admin-search{width:100%;max-width:none;order:3}.sa-analytics-toolbar select{order:4}.sa-admin-analytics-values{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.sa-admin-analytics-values small{font-size:8px}.sa-admin-analytics-values b{font-size:10px}}
+
+/* Super Admin analytics definitions and mobile readability */
+.sa-analytics-help{display:inline-flex;align-items:center;justify-content:center;gap:6px;color:#b9f2c8;background:rgba(104,228,154,.08);border:1px solid #2b6a4a;border-radius:7px;padding:8px 10px;font-size:10px;font-weight:700;cursor:pointer}
+.sa-analytics-help:hover{background:rgba(104,228,154,.16)}
+.sa-analytics-guide{position:relative;border:1px solid #376b50;background:linear-gradient(145deg,#102920,#0c1c21);border-radius:10px;padding:14px 42px 14px 15px;color:#cfe5da;font-size:11px;line-height:1.55;box-shadow:0 12px 28px rgba(0,0,0,.18)}
+.sa-analytics-guide strong{display:block;color:#baf3c9;font-size:13px;margin-bottom:5px}.sa-analytics-guide p{margin:0}.sa-analytics-guide small{display:block;color:#829b91;margin-top:7px}.sa-analytics-guide button{position:absolute;right:10px;top:10px;display:grid;place-items:center;background:transparent;color:#8eafa0;cursor:pointer}
+@media(max-width:650px){.sa-analytics-help{width:100%;padding:10px 8px;font-size:11px}.sa-analytics-guide{font-size:12px;line-height:1.6}.sa-analytics-stat small{font-size:11px}.sa-analytics-stat strong{font-size:25px}.sa-analytics-stat span{font-size:11px}.sa-admin-analytics-name span{font-size:14px}.sa-admin-analytics-values small{font-size:9px}.sa-admin-analytics-values b{font-size:12px}.sa-admin-analytics-foot{font-size:11px}.sa-table th{font-size:10px}.sa-table td{font-size:12px}}

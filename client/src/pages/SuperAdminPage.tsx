@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
-import { Activity, ArrowLeft, BarChart3, Building2, Check, ChevronRight, CircleDollarSign, ClipboardList, Coins, CreditCard, Database, FileText, LayoutDashboard, Loader2, LogOut, MessageSquare, RefreshCw, Search, ShieldAlert, ShieldCheck, UserPlus, Users, WalletCards, X } from "lucide-react";
+import { Activity, ArrowLeft, BarChart3, Building2, Check, ChevronRight, CircleDollarSign, ClipboardList, Coins, CreditCard, Database, FileText, Info, LayoutDashboard, Loader2, LogOut, MessageSquare, RefreshCw, Search, ShieldAlert, ShieldCheck, UserPlus, Users, WalletCards, X } from "lucide-react";
 import api, { type PageResponse } from "@/lib/api";
 import { isSuperAdminUser, useSession } from "@/lib/session";
 
@@ -218,6 +218,7 @@ function CommissionAnalytics() {
   const [admins, setAdmins] = useState<Row[]>([]);
   const [selectedAdmin, setSelectedAdmin] = useState("");
   const [adminSearch, setAdminSearch] = useState("");
+  const [showGuide, setShowGuide] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatedAt, setUpdatedAt] = useState("");
@@ -229,7 +230,15 @@ function CommissionAnalytics() {
       const raw = range === "weekly"
         ? await api.superAdmin.commissionWeekly(12)
         : await api.superAdmin.commissionDaily(range === "monthly" ? 365 : range === "live" ? 1 : 30);
-      const adminRows = list(await api.superAdmin.listAdminsWithCommission());
+      // Match the connected OmegaBet reference: the analytics report is paired
+      // with the stable administrators roster route. The optional
+      // /with-commission projection currently returns 500 on this deployment.
+      const rosterRows = list(await api.superAdmin.listAdmins());
+      const adminRows = await Promise.all(rosterRows.map(async (row) => {
+        const hasRate = row.commissionRate !== undefined || row.commissionPercentage !== undefined || row.commissionPercent !== undefined || row.commission_rate !== undefined || row.commission_percentage !== undefined;
+        if (hasRate || !idOf(row)) return row;
+        try { return { ...row, ...(await api.superAdmin.getAdminDetail(idOf(row))) }; } catch { return row; }
+      }));
       const normalized = range === "monthly" ? groupDailyAsMonths(raw as AnalyticsReport) : raw as AnalyticsReport;
       setReport(normalized); setAdmins(adminRows); setUpdatedAt(new Date().toLocaleTimeString());
     } catch (e) { setError(e instanceof Error ? e.message : "Could not load commission analytics"); }
@@ -277,8 +286,10 @@ function CommissionAnalytics() {
   return <div className="sa-stack">
     <Intro title="Commission & deposit analytics" text="Per-admin performance using the official OmegaBet commission report routes." onRefresh={load} />
     <Notice text={error} error />
+    {showGuide && <div className="sa-analytics-guide"><strong>How to read this report</strong><button type="button" onClick={() => setShowGuide(false)} aria-label="Close analytics explanation"><X size={14} /></button><p><b>Commission rate</b> is the percentage assigned to the administrator. <b>Commission earned</b> is the commission amount owed to that administrator for the selected period; it is not the deposit amount. <b>Total deposits</b> is the deposit value attributed to that administrator in the report.</p><small>Values are reported by the backend and can change when you switch Live, Daily, Weekly, or Monthly.</small></div>}
     <div className="sa-analytics-toolbar">
       <div className="sa-toggle">{(["live", "daily", "weekly", "monthly"] as AnalyticsRange[]).map((item) => <button key={item} className={range === item ? "active" : ""} onClick={() => { setRange(item); setSelectedAdmin(""); }}>{item === "live" ? "Live / today" : item[0].toUpperCase() + item.slice(1)}</button>)}</div>
+      <button type="button" className="sa-analytics-help" onClick={() => setShowGuide((current) => !current)}><Info size={14} /> What do these amounts mean?</button>
       <div className="sa-admin-search"><Search size={14} /><input value={adminSearch} onChange={(e) => setAdminSearch(e.target.value)} placeholder="Search admin email" aria-label="Search administrators by email" />{adminSearch && <button type="button" onClick={() => setAdminSearch("")} aria-label="Clear administrator search">×</button>}</div>
       <select value={selectedAdmin} onChange={(e) => setSelectedAdmin(e.target.value)} aria-label="Filter by administrator"><option value="">All administrators</option>{visibleAdminCards.map((item) => <option key={idOf(item.admin)} value={idOf(item.admin)}>{adminEmail(item.admin)}</option>)}</select>
     </div>
