@@ -212,16 +212,32 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
   const openBets = useMemo(() => bets.filter((b) => b.status === "PENDING"), [bets]);
   const settledBets = useMemo(() => bets.filter((b) => b.status !== "PENDING"), [bets]);
 
-  // Load match status, live scores, and timers for both open and settled bets.
+  // Load match status, live scores, kickoff times, and timers for both open and settled bets.
   useEffect(() => {
     const ids = Array.from(new Set([...openBets, ...settledBets].flatMap((b) => b.selections.map((s) => s.matchId)).filter(Boolean)));
     if (ids.length === 0) return;
     let cancelled = false;
-    const refresh = () => Promise.allSettled(ids.map(async (mid) => { try { return await api.matches.getById(mid); } catch { return api.publicAdminMatches.getById(mid); } })).then((results) => {
+    const normalizeMatchTiming = (match: Match): Match => {
+      const raw = match as Match & Record<string, unknown>;
+      const kickoffAt = match.kickoffAt ?? raw.startTime ?? raw.scheduledAt ?? raw.commenceTime ?? raw.eventStartTime;
+      return kickoffAt && !match.kickoffAt ? { ...match, kickoffAt: String(kickoffAt) } : match;
+    };
+    const refresh = () => Promise.all([
+      Promise.allSettled(ids.map(async (mid) => { try { return await api.matches.getById(mid); } catch { try { return await api.publicAdminMatches.getById(mid); } catch { return null; } } })),
+      Promise.allSettled([api.matches.today(), api.matches.upcoming(), api.matches.live(), api.publicAdminMatches.getAll()]),
+    ]).then(([directResults, catalogResults]) => {
       if (cancelled) return;
+      const catalog = catalogResults.flatMap((result) => result.status === "fulfilled" ? result.value : []).map(normalizeMatchTiming);
       setMatchScores((prev) => {
         const next = { ...prev };
-        results.forEach((r, i) => { if (r.status === "fulfilled") next[ids[i]] = r.value; });
+        directResults.forEach((result, i) => {
+          const direct = result.status === "fulfilled" ? result.value : null;
+          const listed = catalog.find((match) => match.id === ids[i] || match.externalId === ids[i]);
+          if (direct || listed) {
+            const merged = { ...(listed ?? {}), ...(direct ?? {}) } as Match;
+            next[ids[i]] = normalizeMatchTiming(merged);
+          }
+        });
         return next;
       });
     });
