@@ -163,7 +163,120 @@ function Withdrawals() {
     </Panel>
   </div>;
 }
-function CommissionAnalytics() { const [range, setRange] = useState<"daily" | "weekly">("daily"); const [rows, setRows] = useState<Row[]>([]); const [error, setError] = useState(""); const load = async () => { try { const raw = range === "daily" ? await api.superAdmin.commissionDaily(30) : await api.superAdmin.commissionWeekly(12); setRows(list(raw)); } catch (e) { setError(e instanceof Error ? e.message : "Could not load commission analytics"); } }; useEffect(() => { load(); }, [range]); return <div className="sa-stack"><Intro title="Commission analytics" text="Review Super Bet commission performance by country and period." onRefresh={load} /><Notice text={error} error /><div className="sa-toggle"><button className={range === "daily" ? "active" : ""} onClick={() => setRange("daily")}>Daily</button><button className={range === "weekly" ? "active" : ""} onClick={() => setRange("weekly")}>Weekly</button></div><Panel title="Country commission report"><Table rows={rows} columns={["periodLabel", "country", "amount", "currency", "adminCount", "depositCount"]} /></Panel></div>; }
+type AnalyticsRange = "daily" | "weekly" | "monthly" | "live";
+
+type AnalyticsReport = Row & {
+  summaries?: Row[];
+  commissionByAdmin?: Row[];
+  commissionByPeriod?: Row[];
+  depositsByPeriod?: Row[];
+};
+
+const reportRows = (report: unknown, key: string): Row[] => {
+  if (!report || typeof report !== "object") return [];
+  const value = (report as Row)[key];
+  return Array.isArray(value) ? value as Row[] : [];
+};
+const rateNumber = (row: Row): number => {
+  const raw = row.commissionRate ?? row.commissionPercentage ?? row.commissionPercent ?? row.commission_rate ?? row.commission_percentage;
+  const n = Number(raw);
+  return Number.isFinite(n) ? (n >= 0 && n <= 1 ? n * 100 : n) : 0;
+};
+const periodLabel = (row: Row) => text(row.periodLabel ?? row.label ?? row.periodStart ?? row.period, "—");
+const amountNumber = (row: Row) => numberValue(row.amount ?? row.total ?? row.value ?? row.commissionTotal);
+const countNumber = (row: Row) => numberValue(row.count ?? row.depositCount ?? row.commissionCount ?? row.entries);
+
+function groupDailyAsMonths(report: AnalyticsReport): AnalyticsReport {
+  const group = (rows: Row[]) => {
+    const map = new Map<string, Row>();
+    rows.forEach((row) => {
+      const raw = String(row.periodStart ?? row.periodLabel ?? row.label ?? "");
+      const date = new Date(raw);
+      const month = Number.isNaN(date.getTime()) ? raw.slice(0, 7) : date.toISOString().slice(0, 7);
+      const country = String(row.country ?? "UNKNOWN");
+      const currency = String(row.currency ?? "");
+      const key = `${month}|${country}|${currency}`;
+      const current = map.get(key) ?? { periodLabel: month, country: row.country, currency: row.currency, amount: 0, count: 0 };
+      current.amount = numberValue(current.amount) + amountNumber(row);
+      current.count = numberValue(current.count) + countNumber(row);
+      current.currency = row.currency ?? current.currency;
+      current.country = row.country ?? current.country;
+      map.set(key, current);
+    });
+    return [...map.values()].sort((a, b) => periodLabel(b).localeCompare(periodLabel(a)));
+  };
+  return { ...report, commissionByPeriod: group(reportRows(report, "commissionByPeriod")), depositsByPeriod: group(reportRows(report, "depositsByPeriod")) };
+}
+
+function CommissionAnalytics() {
+  const [range, setRange] = useState<AnalyticsRange>("daily");
+  const [report, setReport] = useState<AnalyticsReport | null>(null);
+  const [admins, setAdmins] = useState<Row[]>([]);
+  const [selectedAdmin, setSelectedAdmin] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [updatedAt, setUpdatedAt] = useState("");
+
+  const load = async () => {
+    setLoading(true); setError("");
+    try {
+      // These are the exact report routes used by the connected OmegaBet repo.
+      const raw = range === "weekly"
+        ? await api.superAdmin.commissionWeekly(12)
+        : await api.superAdmin.commissionDaily(range === "monthly" ? 365 : range === "live" ? 1 : 30);
+      const adminRows = list(await api.superAdmin.listAdmins());
+      const normalized = range === "monthly" ? groupDailyAsMonths(raw as AnalyticsReport) : raw as AnalyticsReport;
+      setReport(normalized); setAdmins(adminRows); setUpdatedAt(new Date().toLocaleTimeString());
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not load commission analytics"); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { load(); }, [range]);
+
+  const commissionRows = reportRows(report, "commissionByAdmin");
+  const periodRows = reportRows(report, "commissionByPeriod");
+  const depositPeriodRows = reportRows(report, "depositsByPeriod");
+  const summaries = reportRows(report, "summaries");
+  const adminMap = new Map(admins.map((admin) => [idOf(admin), admin]));
+  const grouped = new Map<string, { admin: Row; commission: number; entries: number; countries: Set<string> }>();
+  admins.forEach((admin) => grouped.set(idOf(admin), { admin, commission: 0, entries: 0, countries: new Set() }));
+  commissionRows.forEach((row) => {
+    const id = text(row.adminId ?? row.admin_id, "");
+    if (!id) return;
+    const current = grouped.get(id) ?? { admin: adminMap.get(id) ?? { id, email: row.adminEmail }, commission: 0, entries: 0, countries: new Set<string>() };
+    current.commission += amountNumber(row); current.entries += countNumber(row);
+    if (row.country) current.countries.add(String(row.country));
+    grouped.set(id, current);
+  });
+  const adminCards = [...grouped.values()].sort((a, b) => b.commission - a.commission);
+  const selected = selectedAdmin ? adminCards.find((item) => idOf(item.admin) === selectedAdmin) : null;
+  const visibleRows = selected ? commissionRows.filter((row) => text(row.adminId ?? row.admin_id, "") === selectedAdmin) : commissionRows;
+  const totalCommission = summaries.reduce((sum, row) => sum + numberValue(row.commissionTotal ?? row.commissionAmount), 0);
+  const totalDeposits = summaries.reduce((sum, row) => sum + numberValue(row.depositTotal ?? row.amount), 0);
+  const rangeLabel = range === "live" ? "Current day" : range === "monthly" ? "Monthly view from the last 365 daily records" : range === "weekly" ? "Last 12 weeks" : "Last 30 days";
+
+  return <div className="sa-stack">
+    <Intro title="Commission & deposit analytics" text="Per-admin performance using the official OmegaBet commission report routes." onRefresh={load} />
+    <Notice text={error} error />
+    <div className="sa-analytics-toolbar">
+      <div className="sa-toggle">{(["live", "daily", "weekly", "monthly"] as AnalyticsRange[]).map((item) => <button key={item} className={range === item ? "active" : ""} onClick={() => { setRange(item); setSelectedAdmin(""); }}>{item === "live" ? "Live / today" : item[0].toUpperCase() + item.slice(1)}</button>)}</div>
+      <select value={selectedAdmin} onChange={(e) => setSelectedAdmin(e.target.value)} aria-label="Filter by administrator"><option value="">All administrators</option>{adminCards.map((item) => <option key={idOf(item.admin)} value={idOf(item.admin)}>{text(item.admin.name ?? `${item.admin.firstName ?? ""} ${item.admin.lastName ?? ""}`.trim(), item.admin.email as string)}</option>)}</select>
+    </div>
+    <div className="sa-analytics-meta"><span>{rangeLabel}</span>{updatedAt && <span>Updated {updatedAt}</span>}</div>
+    <div className="sa-analytics-stat-grid">
+      <div className="sa-analytics-stat"><small>Platform deposits in report</small><strong>{money(totalDeposits)}</strong><span>{summaries.length} country summaries</span></div>
+      <div className="sa-analytics-stat"><small>Platform commission</small><strong>{money(totalCommission)}</strong><span>Authoritative backend total</span></div>
+      <div className="sa-analytics-stat"><small>Administrators shown</small><strong>{adminCards.length}</strong><span>Zero-activity admins included</span></div>
+    </div>
+    {loading ? <Panel title="Loading analytics"><div className="sa-analytics-loading">Loading the official commission report…</div></Panel> : <>
+      <Panel title={selected ? `Administrator · ${text(selected.admin.name ?? `${selected.admin.firstName ?? ""} ${selected.admin.lastName ?? ""}`.trim(), selected.admin.email as string)}` : "Administrators by commission"}>
+        {selected ? <div className="sa-admin-detail-head"><div><strong>{text(selected.admin.name ?? `${selected.admin.firstName ?? ""} ${selected.admin.lastName ?? ""}`.trim(), "Unnamed administrator")}</strong><span>{text(selected.admin.email)} · {commissionValue(selected.admin)} commission rate</span></div><button className="sa-secondary" onClick={() => setSelectedAdmin("")}>Back to all admins</button></div> : null}
+        <div className="sa-admin-analytics-grid">{(selected ? [selected] : adminCards).map((item) => <button type="button" className="sa-admin-analytics-card" key={idOf(item.admin)} onClick={() => setSelectedAdmin(idOf(item.admin))}><div className="sa-admin-analytics-name"><span>{text(item.admin.name ?? `${item.admin.firstName ?? ""} ${item.admin.lastName ?? ""}`.trim(), "Unnamed administrator")}</span><small>{text(item.admin.email)}</small></div><div className="sa-admin-analytics-values"><div><small>Commission rate</small><b>{commissionValue(item.admin)}</b></div><div><small>Commission earned</small><b>{money(item.commission)}</b></div><div><small>Entries</small><b>{item.entries.toLocaleString()}</b></div></div><div className="sa-admin-analytics-foot"><span>{item.countries.size ? [...item.countries].join(" · ") : "No activity in this range"}</span><ChevronRight size={14} /></div></button>)}</div>
+      </Panel>
+      <Panel title="Commission by period"><Table rows={selected ? visibleRows : periodRows} columns={selected ? ["periodLabel", "country", "amount", "currency", "count"] : ["periodLabel", "country", "amount", "currency", "commissionCount"]} /></Panel>
+      <Panel title="Deposit performance by period"><Table rows={depositPeriodRows} columns={["periodLabel", "country", "amount", "currency", "depositCount"]} /></Panel>
+    </>}
+  </div>;
+}
 function UpgradeChats() { const [rows, setRows] = useState<Row[]>([]); const [selected, setSelected] = useState<Row | null>(null); const [messages, setMessages] = useState<Row[]>([]); const [content, setContent] = useState(""); const [error, setError] = useState(""); const load = async () => { try { setRows(list(await api.superAdminUpgradeChats.getAll())); } catch (e) { setError(e instanceof Error ? e.message : "Could not load upgrade chats"); } }; useEffect(() => { load(); }, []); const open = async (row: Row) => { try { setSelected(row); setMessages(list(await api.superAdminUpgradeChats.getMessages(idOf(row)))); } catch (e) { setError(e instanceof Error ? e.message : "Could not load chat messages"); } }; const send = async () => { if (!selected || !content.trim()) return; try { await api.superAdminUpgradeChats.sendMessage(idOf(selected), { content: content.trim() }); setContent(""); await open(selected); } catch (e) { setError(e instanceof Error ? e.message : "Could not send message"); } }; return <div className="sa-stack"><Intro title="Upgrade chats" text="Review administrator upgrade conversations and set commission rates." onRefresh={load} /><Notice text={error} error /><Panel title="Chat requests"><Table rows={rows} columns={["id", "adminId", "status", "subject", "createdAt"]} onRow={row => <button className="sa-link" onClick={() => open(row)}>Open chat</button>} /></Panel>{selected && <Panel title={`Conversation · ${idOf(selected)}`}><div className="sa-messages">{messages.map((m, i) => <div key={i}><b>{text(m.sender ?? m.senderRole, "Participant")}</b><p>{text(m.content)}</p></div>)}</div><div className="sa-form-grid"><input placeholder="Message" value={content} onChange={e => setContent(e.target.value)} /><button className="sa-primary" onClick={send}>Send message</button><button className="sa-secondary" onClick={async () => { const rate = window.prompt("Commission rate (%)"); if (rate !== null) await api.superAdminUpgradeChats.setCommission(idOf(selected), { commissionRate: Number(rate) }); }}>Set commission</button></div></Panel>}</div>; }
 function AuditLog() { const [rows, setRows] = useState<Row[]>([]); const [error, setError] = useState(""); const load = async () => { try { setRows(pageRows(await api.superAdmin.auditLog(0, 100))); } catch (e) { setError(e instanceof Error ? e.message : "Could not load audit log"); } }; useEffect(() => { load(); }, []); return <div className="sa-stack"><Intro title="Audit log" text="Trace sensitive Super Bet administrative actions." onRefresh={load} /><Notice text={error} error /><Panel title="Audit events"><Table rows={rows} columns={["id", "actor", "action", "resource", "ipAddress", "createdAt"]} /></Panel></div>; }
 function Guide() { const rows = pages.filter(item => item.id !== "guide"); return <div className="sa-stack"><Intro title="How to use this panel" text="Every icon opens a focused operational workspace. Read this before changing financial or account data." /><Panel title="Navigation guide"><div className="sa-guide-grid">{rows.map(item => { const Icon = item.icon; const explanation: Record<string, string> = { dashboard: "Platform totals and quick links to the main finance queues.", admins: "Create administrators, set commission rates, and add administrator funds.", users: "Search users, inspect profiles/deposits, change status, and adjust balances.", transactions: "Review the platform-wide transaction ledger.", binance: "Review crypto deposit requests and approve or reject them.", "bank-deposits": "Review bank-transfer deposit requests and approve or reject them.", "simple-deposits": "Review mobile-money/simple deposit requests and approve or reject them.", "user-deposits": "Load deposit history for one specific user ID.", "affiliate-withdrawals": "Process or reject affiliate withdrawal requests.", "payout-requests": "Approve, reject, and mark affiliate payouts as paid.", withdrawals: "Approve, reject, settle, or mark wallet withdrawals as failed.", "commission-analytics": "Compare daily or weekly commission and deposit performance by country.", "upgrade-chats": "Read and reply to upgrade conversations and set commission rates.", "audit-log": "Review sensitive administrative actions for accountability." }; return <div className="sa-guide-row" key={item.id}><Icon size={17} /><div><b>{item.label}</b><p>{explanation[item.id]}</p></div><span>{item.group}</span></div>; })}</div></Panel><Panel title="Safe operating order"><ol className="sa-guide-steps"><li>Start with <b>Dashboard</b> to confirm current totals.</li><li>Use the relevant queue to inspect a record before acting.</li><li>Use rejection reasons for every rejected deposit, payout, or withdrawal.</li><li>Refresh the queue after an action and confirm the status changed.</li><li>Use <b>Audit log</b> to verify sensitive actions.</li></ol></Panel></div>; }
