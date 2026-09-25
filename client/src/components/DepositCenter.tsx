@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertCircle, Check, CheckCircle2, ChevronRight, Clock3, Copy, Loader2, ShieldCheck, Smartphone, WalletCards, XCircle, Zap } from "lucide-react";
 import api, { ApiError, type WebRabbitNetwork, type WebRabbitTransaction } from "@/lib/api";
 
-const MIN_GHS = 10;
-const QUICK_AMOUNTS = [10, 25, 50, 100, 250];
+const MIN_GHS = 50;
+const QUICK_AMOUNTS = [50, 100, 250, 500, 1000];
 const NETWORKS: Array<{ value: WebRabbitNetwork; label: string; hint: string }> = [
   { value: "MTN", label: "MTN Mobile Money", hint: "024, 025, 053, 054, 055, 059" },
   { value: "TELECEL", label: "Telecel Cash", hint: "020, 050" },
