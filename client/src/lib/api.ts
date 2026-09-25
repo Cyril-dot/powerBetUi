@@ -201,8 +201,7 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
   if (!res.ok) {
     if (debugScheduler) console.error("[Scheduler] HTTP failure", { status: res.status, url: `${BASE_URL}${path}`, body: payload });
     // Try to pull a human-readable message out of the response body.
-    // Flutterwave v4 error shape: { "status": "failed", "error": { "message": "..." } }
-    // Spring ApiException shape:  { "message": "..." }
+    // Spring ApiException shape: { "message": "..." }
     let message = `Request failed (${res.status})`;
     if (payload && typeof payload === "object") {
       const p = payload as Record<string, unknown>;
@@ -314,209 +313,25 @@ export const withdrawals = {
 };
 
 // ---------------------------------------------------------------------------
-// DEPOSITS — Flutterwave v4
-//
-// Five payment rails across two currencies. All share the same idempotent
-// backend credit path. Webhooks use HMAC-SHA256(secretHash, rawBody)→base64
-// compared against the "flutterwave-signature" header (official v4 algorithm
-// per developer.flutterwave.com/docs/webhooks). A background reconciler also
-// polls pending charges so a closed tab or missed webhook still credits.
-//
-// ── Ghana (GHS) ──────────────────────────────────────────────────────────────
-//   Mobile Money — push-notification flow (MTN / AirtelTigo / Vodafone).
-//   Controller: FlutterwaveGhV4DepositController.java
-//   Webhook URL: /api/webhooks/flutterwave/v4/gh
-//
-//   POST /api/wallet/deposit/flutterwave/gh/v4/init
-//     body:    { amount: number, phoneNumber?: string, network: FlutterwaveGhNetwork }
-//     returns: FlutterwaveGhInitResponse  { txRef, message }
-//
-//   POST /api/wallet/deposit/flutterwave/gh/v4/verify
-//     body:    { txRef: string }
-//     returns: FlutterwaveVerifyResponse  { credited, status, message }
-//
-// ── Nigeria (NGN) ─────────────────────────────────────────────────────────────
-//   Controller: FlutterwaveNgBankV4DepositController.java
-//   Webhook URL: /api/webhooks/flutterwave/v4/ng  (all four NGN methods)
-//
-//   1. Pay with Bank Account (Mono redirect)
-//      POST /api/wallet/deposit/flutterwave/v4/ng-bank/init
-//        body:    { amount: number }
-//        returns: FlutterwaveNgBankInitResponse
-//        Flow: frontend sends browser to redirectUrl → bank auth page → backend
-//              /redirect → 302 to /deposit?method=ngbank-v4&reference=... →
-//              DepositCenter resumes polling /verify
-//
-//   2. Pay with Bank Transfer — PWBT (dynamic virtual account)
-//      POST /api/wallet/deposit/flutterwave/v4/ng-bank/init/bank-transfer
-//        body:    { amount: number }
-//        returns: FlutterwavePwbtInitResponse
-//        Flow: show account number to customer → customer transfers → webhook credits
-//        Note: no polling endpoint; credit is webhook-only for PWBT
-//
-//   3. USSD
-//      GET  /api/wallet/deposit/flutterwave/v4/ng-ussd/banks
-//        returns: bank list  { data: FlutterwaveUssdBank[] }
-//      POST /api/wallet/deposit/flutterwave/v4/ng-ussd/init
-//        body:    { amount: number, bankCode: string }
-//        returns: FlutterwaveUssdInitResponse  { reference, chargeId, note }
-//        Flow: show USSD dial string to customer → customer dials → webhook credits
-//
-//   4. OPay
-//      POST /api/wallet/deposit/flutterwave/v4/ng-opay/init
-//        body:    { amount: number }
-//        returns: FlutterwaveOpayInitResponse
-//        Flow: frontend sends browser to redirectUrl → OPay auth → backend
-//              /redirect → 302 to /deposit?method=ngopay-v4&reference=... →
-//              DepositCenter resumes polling /verify
-//
-//   Shared NGN verify (bank_account + ussd + opay — NOT pwbt):
-//      GET /api/wallet/deposit/flutterwave/v4/ng/verify?ref={reference}
-//        returns: FlutterwaveVerifyResponse  { credited, status, message }
+// DEPOSITS — Web Rabbit Ghana Mobile Money
 // ---------------------------------------------------------------------------
-
-export type FlutterwaveGhNetwork = "MTN" | "AIRTELTIGO" | "VODAFONE";
-
-// ── Ghana ────────────────────────────────────────────────────────────────────
-
-export interface FlutterwaveGhInitResponse {
-  txRef: string;
-  message: string;
-}
-
-// ── Shared verify response (all methods that support polling) ────────────────
-
-/** Returned by all /verify endpoints. `credited` is false when idempotently
- *  already processed; `status` mirrors AbstractFlutterwaveV4DepositController
- *  SUCCESS_STATUSES / TERMINAL_FAILURE_STATUSES / "pending". */
-export interface FlutterwaveVerifyResponse {
-  credited: boolean;
-  status: string;
-  message: string;
-}
-
-/** @deprecated alias — kept so existing imports don't break. */
-export type FlutterwaveGhVerifyResponse = FlutterwaveVerifyResponse;
-
-// ── Nigeria: Pay with Bank Account ──────────────────────────────────────────
-
-export interface FlutterwaveNgBankInitResponse {
-  reference: string;
-  chargeId: string;
-  /**
-   * URL to send the customer to (Mono's bank-selection page).
-   * Confirmed v4 path: data.next_action.redirect_url.url
-   * Can be null if the backend couldn't extract it — callers MUST handle this.
-   */
-  redirectUrl: string | null;
-  /** next_action.type from the charge response, e.g. "redirect_url". */
-  nextActionType?: string;
-}
-
-// ── Nigeria: Pay with Bank Transfer (PWBT virtual account) ──────────────────
-
-export interface FlutterwavePwbtInitResponse {
-  reference: string;
-  /** Virtual account number the customer must transfer to. */
-  accountNumber: string;
-  /** Bank name, e.g. "Flutterwave MFB". */
-  bankName: string;
-  /** ISO-8601 expiry datetime of the dynamic virtual account. */
-  expiresAt: string;
-  /** Human-readable transfer instruction to show the customer. */
-  note: string;
-  /** The exact NGN amount the customer must transfer. */
-  amount: number;
-}
-
-// ── Nigeria: USSD ────────────────────────────────────────────────────────────
-
-export interface FlutterwaveUssdBank {
-  /** Bank code to pass as bankCode in the USSD init request. e.g. "044" */
-  code: string;
-  /** Display name, e.g. "Access Bank" */
-  name: string;
+export type WebRabbitNetwork = "MTN" | "TELECEL" | "AT" | "GMONEY";
+export interface WebRabbitTransaction {
+  transaction_id?: string;
+  transactionId?: string;
   id?: string;
+  status?: string;
+  reason_code?: string;
+  reasonCode?: string;
+  message?: string;
+  settled_at?: string;
+  [key: string]: unknown;
 }
-
-export interface FlutterwaveUssdInitResponse {
-  reference: string;
-  chargeId: string;
-  /**
-   * The USSD instruction string to display to the customer.
-   * e.g. "Please dial *1414# to complete this transaction"
-   * Confirmed v4 path: data.next_action.payment_instruction.note
-   */
-  note: string;
-}
-
-// ── Nigeria: OPay ────────────────────────────────────────────────────────────
-
-export interface FlutterwaveOpayInitResponse {
-  reference: string;
-  chargeId: string;
-  /**
-   * URL to send the customer to (OPay's authorization interface).
-   * Confirmed v4 path: data.next_action.redirect_url.url
-   * Can be null — callers must handle this.
-   */
-  redirectUrl: string | null;
-}
-
-// ── deposits object ──────────────────────────────────────────────────────────
-
 export const deposits = {
-  stripeIntent: (body: Record<string, unknown>) =>
-    post<Record<string, unknown>>("/api/wallet/deposit/stripe/intent", body),
-
-  paystackInit: (body: { amount: number; currency?: string }) =>
-    post<{ authorizationUrl?: string; reference?: string }>("/api/wallet/deposit/paystack/init", body),
-
-  // ── Ghana GHS: Mobile Money ─────────────────────────────────────────────
-
-  flutterwaveGhInit: (body: { amount: number; phoneNumber?: string; network: FlutterwaveGhNetwork }) =>
-    post<FlutterwaveGhInitResponse>("/api/wallet/deposit/flutterwave/gh/v4/init", body),
-
-  flutterwaveGhVerify: (body: { txRef: string }) =>
-    post<FlutterwaveVerifyResponse>("/api/wallet/deposit/flutterwave/gh/v4/verify", body),
-
-  // ── Nigeria NGN: Pay with Bank Account (Mono redirect) ──────────────────
-
-  flutterwaveNgBankInit: (body: { amount: number }) =>
-    post<FlutterwaveNgBankInitResponse>("/api/wallet/deposit/flutterwave/v4/ng-bank/init", body),
-
-  // ── Nigeria NGN: Pay with Bank Transfer (PWBT virtual account) ──────────
-
-  flutterwaveNgPwbtInit: (body: { amount: number }) =>
-    post<FlutterwavePwbtInitResponse>("/api/wallet/deposit/flutterwave/v4/ng-bank/init/bank-transfer", body),
-
-  // ── Nigeria NGN: USSD ────────────────────────────────────────────────────
-
-  /** Fetch the list of supported banks for USSD in Nigeria. */
-  flutterwaveNgUssdBanks: () =>
-    get<{ data: FlutterwaveUssdBank[] }>("/api/wallet/deposit/flutterwave/v4/ng-ussd/banks"),
-
-  flutterwaveNgUssdInit: (body: { amount: number; bankCode: string }) =>
-    post<FlutterwaveUssdInitResponse>("/api/wallet/deposit/flutterwave/v4/ng-ussd/init", body),
-
-  // ── Nigeria NGN: OPay ────────────────────────────────────────────────────
-
-  flutterwaveNgOpayInit: (body: { amount: number }) =>
-    post<FlutterwaveOpayInitResponse>("/api/wallet/deposit/flutterwave/v4/ng-opay/init", body),
-
-  // ── Shared NGN verify (bank_account, ussd, opay — NOT pwbt) ─────────────
-  //
-  // GET with query param ?ref=  (differs from GH which is POST with body)
-
-  flutterwaveNgVerify: (reference: string) =>
-    get<FlutterwaveVerifyResponse>(`/api/wallet/deposit/flutterwave/v4/ng/verify${qs({ ref: reference })}`),
-
-  /**
-   * @deprecated use flutterwaveNgVerify() — kept as an alias so existing
-   * call sites compile without changes.
-   */
-  flutterwaveNgBankVerify: (reference: string) =>
-    get<FlutterwaveVerifyResponse>(`/api/wallet/deposit/flutterwave/v4/ng/verify${qs({ ref: reference })}`),
+  webRabbitMomoInit: (body: { amount: number; phone: string; network: WebRabbitNetwork }) =>
+    post<WebRabbitTransaction>("/api/wallet/deposit/webrabbit-momo/init", body),
+  webRabbitMomoVerify: (transactionId: string) =>
+    get<WebRabbitTransaction>(`/api/wallet/deposit/webrabbit-momo/verify/${encodeURIComponent(transactionId)}`),
 };
 
 // ---------------------------------------------------------------------------
