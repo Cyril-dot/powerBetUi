@@ -19,6 +19,25 @@ function transactionId(tx: WebRabbitTransaction) { return String(tx.transaction_
 function statusOf(tx: WebRabbitTransaction) { return String(tx.reason_code ?? tx.reasonCode ?? tx.status ?? "pending").toLowerCase(); }
 function maskPhone(value: string) { const digits = value.replace(/\D/g, ""); return digits.length < 5 ? "••••" : `${digits.slice(0, 3)}••••${digits.slice(-2)}`; }
 function normalizePhone(value: string) { const compact = value.replace(/[\s-]/g, ""); if (compact.startsWith("+233")) return `0${compact.slice(4)}`; if (compact.startsWith("233") && compact.length === 12) return `0${compact.slice(3)}`; return compact; }
+function safeLogValue(value: unknown, key = ""): unknown {
+  if (typeof value === "string") {
+    const lowerKey = key.toLowerCase();
+    if (lowerKey.includes("phone") || lowerKey.includes("subscriber") || lowerKey.includes("msisdn")) return maskPhone(value);
+    if (lowerKey.includes("email")) return value.replace(/^(.{1,2}).*(@.*)$/, "$1•••$2");
+    return value;
+  }
+  if (Array.isArray(value)) return value.map((item) => safeLogValue(item, key));
+  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([entryKey, entryValue]) => [entryKey, safeLogValue(entryValue, entryKey)]));
+  return value;
+}
+function depositLog(level: "info" | "warn" | "error", event: string, details: Record<string, unknown> = {}) {
+  const sanitizedDetails = safeLogValue(details) as Record<string, unknown>;
+  const payload = { timestamp: new Date().toISOString(), provider: "WebRabbit", channel: "ghana_momo", event, ...sanitizedDetails };
+  const prefix = `[Deposit/WebRabbit/${event}]`;
+  if (level === "error") console.error(prefix, payload);
+  else if (level === "warn") console.warn(prefix, payload);
+  else console.info(prefix, payload);
+}
 
 export default function DepositCenter() {
   const [amount, setAmount] = useState("100");
@@ -36,16 +55,31 @@ export default function DepositCenter() {
 
   const verify = useCallback(async () => {
     if (!id) return;
+    const startedAt = performance.now();
+    depositLog("info", "verify:start", { transactionId: id });
     try {
       const result = await api.deposits.webRabbitMomoVerify(id);
       setTransaction(result);
       const providerStatus = statusOf(result);
-      setMessage(result.message ?? "");
+      const providerReason = String(result.reason ?? result.message ?? "");
+      setMessage(providerReason);
+      depositLog("info", "verify:response", {
+        transactionId: id,
+        httpDurationMs: Math.round(performance.now() - startedAt),
+        status: result.status,
+        resolvedStatus: result.resolved_status,
+        reasonCode: result.reason_code ?? result.reasonCode,
+        reason: providerReason,
+        code: result.code,
+        settledAt: result.settled_at,
+        response: result,
+      });
       if (SUCCESS.has(providerStatus)) setStatus("success");
       else if (FAILURE.has(providerStatus)) setStatus("failed");
       else setStatus("pending");
       setPollCount((value) => value + 1);
     } catch (err) {
+      depositLog("warn", "verify:error", { transactionId: id, httpDurationMs: Math.round(performance.now() - startedAt), error: err instanceof Error ? err.message : String(err), httpStatus: err instanceof ApiError ? err.status : undefined });
       setMessage(err instanceof ApiError ? err.message : "We could not check the payment yet. We will keep trying.");
     }
   }, [id]);
@@ -67,17 +101,21 @@ export default function DepositCenter() {
   const submit = async (event: React.FormEvent) => {
     event.preventDefault(); setError("");
     const value = Number(amount); const normalizedPhone = normalizePhone(phone);
-    if (!Number.isFinite(value) || value < MIN_GHS) { setError(`Enter at least GHS ${MIN_GHS.toFixed(2)}.`); return; }
-    if (!/^0\d{9}$/.test(normalizedPhone)) { setError("Enter a valid Ghana number, for example 024 123 4567."); return; }
+    if (!Number.isFinite(value) || value < MIN_GHS) { depositLog("warn", "init:validation_failed", { field: "amount", amount: value, minimumAmount: MIN_GHS }); setError(`Enter at least GHS ${MIN_GHS.toFixed(2)}.`); return; }
+    if (!/^0\d{9}$/.test(normalizedPhone)) { depositLog("warn", "init:validation_failed", { field: "phone", phone: normalizedPhone }); setError("Enter a valid Ghana number, for example 024 123 4567."); return; }
     setLoading(true);
+    const startedAt = performance.now();
+    depositLog("info", "init:start", { amount: value, network, phone: normalizedPhone, phoneFormat: "Ghana local" });
     try {
       const result = await api.deposits.webRabbitMomoInit({ amount: value, phone: normalizedPhone, network });
-      if (!transactionId(result)) throw new Error("The payment provider did not return a transaction reference.");
-      setTransaction(result); setMessage(result.message ?? "Approve the payment prompt on your phone. Your wallet will update automatically."); setStatus("pending"); setPollCount(0);
-    } catch (err) { setError(err instanceof ApiError ? err.message : err instanceof Error ? err.message : "Could not start the deposit. Please try again."); }
+      const resultId = transactionId(result);
+      depositLog("info", "init:response", { transactionId: resultId || undefined, httpDurationMs: Math.round(performance.now() - startedAt), status: result.status, reasonCode: result.reason_code ?? result.reasonCode, reason: result.reason ?? result.message, code: result.code, response: result });
+      if (!resultId) throw new Error("The payment provider did not return a transaction reference.");
+      setTransaction(result); setMessage(String(result.reason ?? result.message ?? "Approve the payment prompt on your phone. Your wallet will update automatically.")); setStatus("pending"); setPollCount(0);
+    } catch (err) { depositLog("error", "init:error", { httpDurationMs: Math.round(performance.now() - startedAt), error: err instanceof Error ? err.message : String(err), httpStatus: err instanceof ApiError ? err.status : undefined }); setError(err instanceof ApiError ? err.message : err instanceof Error ? err.message : "Could not start the deposit. Please try again."); }
     finally { setLoading(false); }
   };
-  const reset = () => { if (timer.current) clearTimeout(timer.current); setStatus("idle"); setTransaction(null); setMessage(""); setError(""); setPollCount(0); };
+  const reset = () => { depositLog("info", "flow:reset", { transactionId: id, previousStatus: status }); if (timer.current) clearTimeout(timer.current); setStatus("idle"); setTransaction(null); setMessage(""); setError(""); setPollCount(0); };
   const copyReference = () => { if (!id) return; navigator.clipboard.writeText(id).then(() => { setCopied(true); window.setTimeout(() => setCopied(false), 1800); }).catch(() => undefined); };
   const selectedNetwork = NETWORKS.find((item) => item.value === network)!;
 
