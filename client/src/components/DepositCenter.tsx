@@ -49,7 +49,8 @@ function compressScreenshot(file: File): Promise<string> {
 }
 async function uploadScreenshot(dataUrl: string): Promise<string> {
   const key = import.meta.env.VITE_IMGBB_API_KEY as string | undefined;
-  if (!key) return dataUrl;
+  if (!key)
+    throw new Error("ImgBB upload is not configured. Please try again later.");
   const body = new FormData();
   body.append("key", key);
   body.append("image", dataUrl.split(",")[1] ?? dataUrl);
