@@ -1,152 +1,333 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { AlertCircle, Check, CheckCircle2, ChevronRight, Clock3, Copy, Loader2, Lock, ShieldCheck, Smartphone, WalletCards, XCircle, Zap } from "lucide-react";
-import api, { ApiError, type WebRabbitNetwork, type WebRabbitTransaction } from "@/lib/api";
+import { useState } from "react";
+import {
+  AlertCircle,
+  Check,
+  CheckCircle2,
+  ImagePlus,
+  Loader2,
+  ShieldCheck,
+  Smartphone,
+  Upload,
+  WalletCards,
+} from "lucide-react";
+import api, { ApiError } from "@/lib/api";
 
-const DEPOSIT_LOCKED = true;
-const MIN_GHS = 50;
+const MIN_GHS = 200;
 const QUICK_AMOUNTS = [50, 100, 250, 500, 1000];
-const DEPOSIT_FEE_RATE = 0.014;
-const NETWORKS: Array<{ value: WebRabbitNetwork; label: string; hint: string }> = [
-  { value: "MTN", label: "MTN Mobile Money", hint: "024, 025, 053, 054, 055, 059" },
-  { value: "TELECEL", label: "Telecel Cash", hint: "020, 050" },
-  { value: "AT", label: "AirtelTigo Money", hint: "026, 027, 056, 057" },
-  { value: "GMONEY", label: "G-Money", hint: "Use your registered G-Money number" },
-];
-const SUCCESS = new Set(["approved", "successful", "succeeded", "success", "completed", "confirmed", "settled"]);
-const FAILURE = new Set(["failed", "declined", "cancelled", "canceled", "expired", "reversed", "rejected", "error"]);
-const POLL_MS = [3000, 5000, 8000, 12000, 15000];
-type Status = "idle" | "pending" | "success" | "failed";
+type Status = "idle" | "submitting" | "success" | "failed";
 
-function transactionId(tx: WebRabbitTransaction) { return String(tx.transaction_id ?? tx.transactionId ?? tx.id ?? ""); }
-function statusOf(tx: WebRabbitTransaction) { return String(tx.reason_code ?? tx.reasonCode ?? tx.status ?? "pending").toLowerCase(); }
-function maskPhone(value: string) { const digits = value.replace(/\D/g, ""); return digits.length < 5 ? "••••" : `${digits.slice(0, 3)}••••${digits.slice(-2)}`; }
-function normalizePhone(value: string) { const compact = value.replace(/[\s-]/g, ""); if (compact.startsWith("+233")) return `0${compact.slice(4)}`; if (compact.startsWith("233") && compact.length === 12) return `0${compact.slice(3)}`; return compact; }
-function roundMoney(value: number) { return Math.round((value + Number.EPSILON) * 100) / 100; }
-function safeLogValue(value: unknown, key = ""): unknown {
-  if (typeof value === "string") {
-    const lowerKey = key.toLowerCase();
-    if (lowerKey.includes("phone") || lowerKey.includes("subscriber") || lowerKey.includes("msisdn")) return maskPhone(value);
-    if (lowerKey.includes("email")) return value.replace(/^(.{1,2}).*(@.*)$/, "$1•••$2");
-    return value;
-  }
-  if (Array.isArray(value)) return value.map((item) => safeLogValue(item, key));
-  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([entryKey, entryValue]) => [entryKey, safeLogValue(entryValue, entryKey)]));
-  return value;
+function errorMessage(error: unknown) {
+  return error instanceof ApiError
+    ? error.message
+    : error instanceof Error
+      ? error.message
+      : "Could not submit the deposit. Please try again.";
 }
-function depositLog(level: "info" | "warn" | "error", event: string, details: Record<string, unknown> = {}) {
-  const sanitizedDetails = safeLogValue(details) as Record<string, unknown>;
-  const payload = { timestamp: new Date().toISOString(), provider: "WebRabbit", channel: "ghana_momo", event, ...sanitizedDetails };
-  const prefix = `[Deposit/WebRabbit/${event}]`;
-  if (level === "error") console.error(prefix, payload);
-  else if (level === "warn") console.warn(prefix, payload);
-  else console.info(prefix, payload);
+function compressScreenshot(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read the screenshot."));
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = () =>
+        reject(new Error("The selected file is not a valid image."));
+      image.onload = () => {
+        const scale = Math.min(1, 1400 / image.width);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        const context = canvas.getContext("2d");
+        if (!context)
+          return reject(new Error("Your browser cannot process this image."));
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.78));
+      };
+      image.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+async function uploadScreenshot(dataUrl: string): Promise<string> {
+  const key = import.meta.env.VITE_IMGBB_API_KEY as string | undefined;
+  if (!key) return dataUrl;
+  const body = new FormData();
+  body.append("key", key);
+  body.append("image", dataUrl.split(",")[1] ?? dataUrl);
+  const response = await fetch("https://api.imgbb.com/1/upload", {
+    method: "POST",
+    body,
+  });
+  const result = (await response.json()) as {
+    success?: boolean;
+    data?: { url?: string; display_url?: string };
+    error?: { message?: string };
+  };
+  if (!response.ok || !result.success)
+    throw new Error(result.error?.message || "Screenshot upload failed.");
+  return result.data?.display_url || result.data?.url || dataUrl;
 }
 
 export default function DepositCenter() {
   const [amount, setAmount] = useState("100");
-  const [phone, setPhone] = useState("");
-  const [network, setNetwork] = useState<WebRabbitNetwork>("MTN");
+  const [reference, setReference] = useState("");
+  const [senderName, setSenderName] = useState("");
+  const [mtnNumber, setMtnNumber] = useState("");
+  const [note, setNote] = useState("");
+  const [preview, setPreview] = useState("");
   const [status, setStatus] = useState<Status>("idle");
-  const [transaction, setTransaction] = useState<WebRabbitTransaction | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [pollCount, setPollCount] = useState(0);
-  const [copied, setCopied] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const id = transaction ? transactionId(transaction) : "";
-  const enteredAmount = Number(amount);
-  const feeAmount = Number.isFinite(enteredAmount) && enteredAmount > 0 ? roundMoney(enteredAmount * DEPOSIT_FEE_RATE) : 0;
-  const totalAmount = Number.isFinite(enteredAmount) && enteredAmount > 0 ? roundMoney(enteredAmount + feeAmount) : 0;
-
-  const verify = useCallback(async () => {
-    if (!id) return;
-    const startedAt = performance.now();
-    depositLog("info", "verify:start", { transactionId: id });
-    try {
-      const result = await api.deposits.webRabbitMomoVerify(id);
-      setTransaction(result);
-      const providerStatus = statusOf(result);
-      const providerReason = String(result.reason ?? result.message ?? "");
-      setMessage(providerReason);
-      depositLog("info", "verify:response", {
-        transactionId: id,
-        httpDurationMs: Math.round(performance.now() - startedAt),
-        status: result.status,
-        resolvedStatus: result.resolved_status,
-        reasonCode: result.reason_code ?? result.reasonCode,
-        reason: providerReason,
-        code: result.code,
-        settledAt: result.settled_at,
-        response: result,
-      });
-      if (SUCCESS.has(providerStatus)) setStatus("success");
-      else if (FAILURE.has(providerStatus)) setStatus("failed");
-      else setStatus("pending");
-      setPollCount((value) => value + 1);
-    } catch (err) {
-      depositLog("warn", "verify:error", { transactionId: id, httpDurationMs: Math.round(performance.now() - startedAt), error: err instanceof Error ? err.message : String(err), httpStatus: err instanceof ApiError ? err.status : undefined });
-      setMessage(err instanceof ApiError ? err.message : "We could not check the payment yet. We will keep trying.");
+  const chooseScreenshot = async (file: File | undefined) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Choose an image file.");
+      return;
     }
-  }, [id]);
-
-  useEffect(() => {
-    if (status !== "pending" || !id) return;
-    let cancelled = false;
-    let attempt = 0;
-    const tick = async () => {
-      if (cancelled) return;
-      await verify();
-      if (cancelled) return;
-      timer.current = setTimeout(tick, POLL_MS[Math.min(attempt++, POLL_MS.length - 1)]);
-    };
-    void tick();
-    return () => { cancelled = true; if (timer.current) clearTimeout(timer.current); };
-  }, [status, id, verify]);
-
-  const submit = async (event: React.FormEvent) => {
-    event.preventDefault(); setError("");
-    if (DEPOSIT_LOCKED) { setError("Deposits are currently locked. No payment was started."); return; }
-    const value = Number(amount); const normalizedPhone = normalizePhone(phone);
-    if (!Number.isFinite(value) || value < MIN_GHS) { depositLog("warn", "init:validation_failed", { field: "amount", amount: value, minimumAmount: MIN_GHS }); setError(`Enter at least GHS ${MIN_GHS.toFixed(2)}.`); return; }
-    if (!/^0\d{9}$/.test(normalizedPhone)) { depositLog("warn", "init:validation_failed", { field: "phone", phone: normalizedPhone }); setError("Enter a valid Ghana number, for example 024 123 4567."); return; }
-    setLoading(true);
-    const startedAt = performance.now();
-    depositLog("info", "init:start", { amount: value, feeRate: DEPOSIT_FEE_RATE, feeAmount: roundMoney(value * DEPOSIT_FEE_RATE), totalAmount: roundMoney(value * (1 + DEPOSIT_FEE_RATE)), network, phone: normalizedPhone, phoneFormat: "Ghana local" });
+    if (file.size > 10 * 1024 * 1024) {
+      setError("The screenshot must be smaller than 10 MB.");
+      return;
+    }
     try {
-      const result = await api.deposits.webRabbitMomoInit({ amount: value, phone: normalizedPhone, network });
-      const resultId = transactionId(result);
-      depositLog("info", "init:response", { transactionId: resultId || undefined, httpDurationMs: Math.round(performance.now() - startedAt), status: result.status, reasonCode: result.reason_code ?? result.reasonCode, reason: result.reason ?? result.message, code: result.code, response: result });
-      if (!resultId) throw new Error("The payment provider did not return a transaction reference.");
-      setTransaction(result); setMessage(String(result.reason ?? result.message ?? "Approve the payment prompt on your phone. Your wallet will update automatically.")); setStatus("pending"); setPollCount(0);
-    } catch (err) { depositLog("error", "init:error", { httpDurationMs: Math.round(performance.now() - startedAt), error: err instanceof Error ? err.message : String(err), httpStatus: err instanceof ApiError ? err.status : undefined }); setError(err instanceof ApiError ? err.message : err instanceof Error ? err.message : "Could not start the deposit. Please try again."); }
-    finally { setLoading(false); }
+      setError("");
+      setPreview(await compressScreenshot(file));
+    } catch (e) {
+      setError(errorMessage(e));
+    }
   };
-  const reset = () => { depositLog("info", "flow:reset", { transactionId: id, previousStatus: status }); if (timer.current) clearTimeout(timer.current); setStatus("idle"); setTransaction(null); setMessage(""); setError(""); setPollCount(0); };
-  const copyReference = () => { if (!id) return; navigator.clipboard.writeText(id).then(() => { setCopied(true); window.setTimeout(() => setCopied(false), 1800); }).catch(() => undefined); };
-  const selectedNetwork = NETWORKS.find((item) => item.value === network)!;
-
-  return <main className="deposit-page">
-    <section className="deposit-hero"><div className="deposit-hero-icon"><WalletCards size={24} /></div><div><span className="deposit-eyebrow">SECURE WALLET FUNDING</span><h1>Deposit with Mobile Money</h1><p>Ghana only · fast, private, and confirmed automatically.</p></div><div className="deposit-hero-trust"><ShieldCheck size={16} /> PIN stays on your phone</div></section>
-    <div className="deposit-shell"><div className="deposit-rail"><span className="deposit-rail-dot" /><span>Web Rabbit Mobile Money</span><span className="deposit-rail-live"><Lock size={11} /> LOCKED</span></div>
-      {status === "idle" ? <form className="deposit-panel" onSubmit={submit}>
-        <div className="deposit-locked-banner"><Lock size={18} /><div><strong>Deposit center locked</strong><span>Funding is temporarily unavailable. You can review the deposit options below, but no payment will be started.</span></div></div>
-        <div className="deposit-panel-heading"><div><h2>Choose your network</h2><p>We will send an approval prompt to your Ghanaian number.</p></div><Smartphone size={22} /></div>
-        <div className="deposit-network-grid">{NETWORKS.map((item) => <button type="button" key={item.value} className={`deposit-network ${network === item.value ? "selected" : ""}`} onClick={() => setNetwork(item.value)}><span className="deposit-network-mark">{item.value === "MTN" ? "M" : item.value === "AT" ? "A" : item.value === "TELECEL" ? "T" : "G"}</span><span><strong>{item.label}</strong><small>{item.hint}</small></span>{network === item.value && <Check size={16} />}</button>)}</div>
-        {error && <div className="deposit-error"><AlertCircle size={15} />{error}</div>}
-        <label className="deposit-field"><span>Mobile Money number</span><input value={phone} onChange={(event) => setPhone(event.target.value)} inputMode="tel" autoComplete="tel" placeholder="024 123 4567" /></label>
-        <div className="deposit-field"><span>Amount to add to your wallet</span><div className="deposit-amount-wrap"><b>GHS</b><input value={amount} onChange={(event) => setAmount(event.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" type="text" placeholder="100.00" /></div></div>
-        <div className="deposit-fee-summary"><div><span>Wallet credit</span><strong>GHS {Number.isFinite(enteredAmount) ? enteredAmount.toFixed(2) : "0.00"}</strong></div><div><span>Mobile Money charge (1.4%)</span><strong>GHS {feeAmount.toFixed(2)}</strong></div><div className="deposit-fee-total"><span>Total you will pay</span><strong>GHS {totalAmount.toFixed(2)}</strong></div></div>
-        <div className="deposit-quick-row">{QUICK_AMOUNTS.map((value) => <button type="button" key={value} className={amount === String(value) ? "selected" : ""} onClick={() => setAmount(String(value))}>GHS {value}</button>)}</div>
-        <button className="deposit-submit" type="submit" disabled={loading || DEPOSIT_LOCKED}>{loading ? <><Loader2 size={17} className="deposit-spin" />Sending secure prompt…</> : <><Lock size={17} /> Deposits locked</>}</button><p className="deposit-footnote"><ShieldCheck size={14} />Your wallet receives GHS {Number.isFinite(enteredAmount) ? enteredAmount.toFixed(2) : "0.00"}; the 1.4% Mobile Money charge is included in the amount you pay.</p>
-      </form> : <section className={`deposit-panel deposit-status-panel ${status}`}>
-        <div className="deposit-status-icon">{status === "pending" ? <Loader2 className="deposit-spin" size={28} /> : status === "success" ? <CheckCircle2 size={30} /> : <XCircle size={30} />}</div><span className="deposit-status-label">{status === "pending" ? "PAYMENT IN PROGRESS" : status === "success" ? "PAYMENT CONFIRMED" : "PAYMENT NOT COMPLETED"}</span><h2>{status === "pending" ? "Approve the prompt on your phone" : status === "success" ? "Your wallet is funded" : "The payment was not completed"}</h2><p className="deposit-status-copy">{status === "pending" ? (message || `A prompt was sent to ${maskPhone(phone)} on ${selectedNetwork.label}.`) : status === "success" ? "Your deposit has been verified and credited to your wallet." : (message || "No funds were credited. Check your number and try again.")}</p>
-        {status === "pending" && <div className="deposit-progress"><span /><small><Clock3 size={13} /> Checking automatically · {pollCount} check{pollCount === 1 ? "" : "s"}</small></div>}
-        {id && <div className="deposit-reference"><span>Transaction reference</span><strong>{id}</strong><button type="button" onClick={copyReference}>{copied ? <><Check size={14} />Copied</> : <><Copy size={14} />Copy</>}</button></div>}
-        {status !== "success" && <p className="deposit-background-note"><Zap size={14} />You can leave this page. The server webhook verifies successful payments in the background.</p>}<button className="deposit-secondary" type="button" onClick={reset}>{status === "failed" ? "Try again" : "Make another deposit"}</button>
-      </section>}
-      <section className="deposit-safety-grid"><div><ShieldCheck size={18} /><div><strong>Verified automatically</strong><p>Web Rabbit confirms the transaction before your balance changes.</p></div></div><div><Zap size={18} /><div><strong>No waiting on support</strong><p>Webhook verification runs in the background, even if you close this page.</p></div></div></section><p className="deposit-help">Need help with a deposit? <a href="/support">Contact the Support Centre</a> and include your transaction reference.</p>
-    </div>
-    <style>{`.deposit-page{min-height:70vh;background:#0a0a0a;color:#f4f1f0;padding-bottom:56px}.deposit-hero{position:relative;overflow:hidden;display:flex;align-items:center;gap:16px;padding:28px max(22px,calc((100% - 900px)/2));background:linear-gradient(118deg,#ffd84d,#1e6bff 78%,#0b2e70);color:#10172e}.deposit-hero:after{content:"";position:absolute;width:260px;height:260px;border:1px solid rgba(255,255,255,.3);border-radius:50%;right:-80px;top:-100px}.deposit-hero-icon{display:grid;place-items:center;width:50px;height:50px;border-radius:15px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35)}.deposit-eyebrow{font-size:10px;font-weight:900;letter-spacing:.14em}.deposit-hero h1{margin:5px 0 4px;font-size:clamp(25px,4vw,36px);letter-spacing:-.04em}.deposit-hero p{margin:0;font-size:13px;color:rgba(16,23,46,.75)}.deposit-hero-trust{position:relative;z-index:1;margin-left:auto;display:flex;align-items:center;gap:6px;padding:9px 12px;border-radius:999px;background:rgba(255,255,255,.18);font-size:10px;font-weight:800}.deposit-shell{width:min(720px,calc(100% - 32px));margin:24px auto 0}.deposit-rail{display:flex;align-items:center;gap:8px;margin:0 2px 10px;color:#9a9a9a;font-size:11px;font-weight:800}.deposit-rail-dot{width:7px;height:7px;border-radius:50%;background:#f59e0b;box-shadow:0 0 0 4px rgba(245,158,11,.12)}.deposit-rail-live{display:flex;align-items:center;gap:4px;margin-left:auto;color:#fbbf24;font-size:9px;letter-spacing:.1em}.deposit-locked-banner{display:flex;align-items:flex-start;gap:10px;margin:-4px 0 18px;padding:12px;border:1px solid rgba(245,158,11,.35);border-radius:11px;background:rgba(245,158,11,.09);color:#fbbf24}.deposit-locked-banner svg{flex:none;margin-top:1px}.deposit-locked-banner strong,.deposit-locked-banner span{display:block}.deposit-locked-banner strong{font-size:12px}.deposit-locked-banner span{margin-top:4px;color:#d5b978;font-size:10px;line-height:1.5}.deposit-panel{background:#151515;border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:24px;box-shadow:0 14px 40px rgba(0,0,0,.25)}.deposit-panel-heading{display:flex;justify-content:space-between;gap:12px;margin-bottom:18px}.deposit-panel-heading h2{margin:0;font-size:18px}.deposit-panel-heading p{margin:5px 0 0;color:#969696;font-size:12px}.deposit-panel-heading>svg{color:#ffd84d}.deposit-network-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.deposit-network{display:flex;align-items:center;gap:10px;text-align:left;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:#1d1d1d;color:#d8d8d8;cursor:pointer;transition:.18s}.deposit-network:hover,.deposit-network.selected{border-color:#ffd84d;background:rgba(255,216,77,.08)}.deposit-network>svg{margin-left:auto;color:#ffd84d}.deposit-network-mark{display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:#242424;color:#ffd84d;font-weight:900}.deposit-network strong,.deposit-network small{display:block}.deposit-network strong{font-size:11px}.deposit-network small{margin-top:3px;color:#888;font-size:9px}.deposit-error{display:flex;align-items:flex-start;gap:7px;padding:10px 11px;margin-top:14px;border-radius:10px;background:rgba(239,68,68,.1);color:#ff9a9a;font-size:11px;line-height:1.5}.deposit-field{display:block;margin-top:16px;color:#9f9f9f;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.deposit-field input{display:block;width:100%;box-sizing:border-box;margin-top:7px;padding:13px 14px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:#1d1d1d;color:#fff;font:600 14px 'DM Sans',sans-serif;outline:none}.deposit-field input:focus{border-color:#ffd84d;box-shadow:0 0 0 3px rgba(255,216,77,.1)}.deposit-amount-wrap{display:flex;align-items:center;margin-top:7px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:#1d1d1d}.deposit-amount-wrap:focus-within{border-color:#ffd84d}.deposit-amount-wrap b{padding-left:14px;color:#ffd84d;font-size:12px}.deposit-amount-wrap input{margin:0;border:0;background:transparent}.deposit-quick-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.deposit-quick-row button{padding:7px 10px;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:#202020;color:#aaa;font-size:10px;font-weight:800;cursor:pointer}.deposit-quick-row button.selected{background:#ffd84d;border-color:#ffd84d;color:#121212}.deposit-submit,.deposit-secondary{display:flex;justify-content:center;align-items:center;gap:7px;width:100%;margin-top:20px;padding:13px 16px;border:0;border-radius:10px;background:#ffd84d;color:#171717;font:900 12px 'DM Sans',sans-serif;cursor:pointer;transition:.18s}.deposit-submit:hover{background:#ffe783;transform:translateY(-1px)}.deposit-submit:disabled{opacity:.65;cursor:wait;transform:none}.deposit-footnote,.deposit-background-note{display:flex;align-items:flex-start;gap:7px;margin:13px 0 0;color:#888;font-size:10px;line-height:1.6}.deposit-footnote svg,.deposit-background-note svg{flex:none;color:#22c55e}.deposit-status-panel{text-align:center;padding:36px 24px}.deposit-status-icon{display:grid;place-items:center;width:62px;height:62px;margin:0 auto 13px;border-radius:20px;background:rgba(255,216,77,.1);color:#ffd84d}.deposit-status-panel.success .deposit-status-icon{background:rgba(34,197,94,.12);color:#4ade80}.deposit-status-panel.failed .deposit-status-icon{background:rgba(239,68,68,.12);color:#fb7185}.deposit-status-label{font-size:9px;font-weight:900;letter-spacing:.14em;color:#ffd84d}.deposit-status-panel.success .deposit-status-label{color:#4ade80}.deposit-status-panel.failed .deposit-status-label{color:#fb7185}.deposit-status-panel h2{margin:8px 0 7px;font-size:20px}.deposit-status-copy{max-width:460px;margin:0 auto;color:#aaa;font-size:12px;line-height:1.7}.deposit-progress{max-width:390px;margin:22px auto 0}.deposit-progress>span{display:block;height:5px;overflow:hidden;border-radius:999px;background:linear-gradient(90deg,#ffd84d,#1e6bff,#ffd84d);background-size:200% 100%;animation:deposit-flow 1.5s linear infinite}.deposit-progress small{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:9px;color:#858585;font-size:10px}.deposit-reference{display:grid;grid-template-columns:1fr auto;gap:6px 10px;max-width:470px;margin:22px auto 0;padding:12px;text-align:left;border:1px solid rgba(255,255,255,.09);border-radius:10px;background:#1c1c1c}.deposit-reference span{grid-column:1/-1;color:#777;font-size:9px;text-transform:uppercase;letter-spacing:.08em}.deposit-reference strong{overflow:hidden;text-overflow:ellipsis;color:#ddd;font-size:11px}.deposit-reference button{display:flex;align-items:center;gap:4px;border:0;background:transparent;color:#ffd84d;font-size:10px;font-weight:800;cursor:pointer}.deposit-secondary{max-width:260px;margin:22px auto 0;background:#242424;color:#ddd;border:1px solid rgba(255,255,255,.12)}.deposit-safety-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.deposit-safety-grid>div{display:flex;gap:10px;padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:13px;background:#141414}.deposit-safety-grid svg{flex:none;color:#ffd84d}.deposit-safety-grid strong{font-size:11px}.deposit-safety-grid p{margin:5px 0 0;color:#828282;font-size:10px;line-height:1.5}.deposit-help{text-align:center;margin:18px 0 0;color:#777;font-size:11px}.deposit-help a{color:#ffd84d;font-weight:800}.deposit-spin{animation:deposit-spin .8s linear infinite}@keyframes deposit-spin{to{transform:rotate(360deg)}}@keyframes deposit-flow{to{background-position:-200% 0}}@media(max-width:600px){.deposit-hero{align-items:flex-start;padding:22px 16px}.deposit-hero-trust{display:none}.deposit-shell{width:calc(100% - 22px);margin-top:17px}.deposit-panel{padding:18px}.deposit-network-grid,.deposit-safety-grid{grid-template-columns:1fr}.deposit-hero h1{font-size:26px}}`}</style>
-  </main>;
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError("");
+    const value = Number(amount);
+    if (!Number.isFinite(value) || value < MIN_GHS)
+      return setError(`Enter at least GHS ${MIN_GHS.toFixed(2)}.`);
+    if (!reference.trim())
+      return setError("Enter the MTN transfer reference or narration.");
+    if (!senderName.trim())
+      return setError("Enter the name registered on the MTN account.");
+    if (!preview)
+      return setError("Upload your MTN payment screenshot before submitting.");
+    setStatus("submitting");
+    try {
+      const screenshotUrl = await uploadScreenshot(preview);
+      const userNote = [
+        mtnNumber.trim() ? `MTN number: ${mtnNumber.trim()}` : "",
+        note.trim(),
+      ]
+        .filter(Boolean)
+        .join("\n");
+      const result = await api.deposits.submitBankProof({
+        transferReference: reference.trim(),
+        ngnAmountSent: value,
+        expectedNgnCredit: value,
+        senderAccountName: senderName.trim(),
+        screenshotUrl,
+        userNote: userNote || undefined,
+      });
+      setMessage(
+        result.message ||
+          "Your deposit proof was submitted. An admin will review it shortly."
+      );
+      setStatus("success");
+    } catch (e) {
+      setError(errorMessage(e));
+      setStatus("failed");
+    }
+  };
+  const reset = () => {
+    setStatus("idle");
+    setError("");
+    setMessage("");
+    setPreview("");
+  };
+  return (
+    <main className="deposit-page">
+      <section className="deposit-hero">
+        <div className="deposit-hero-icon">
+          <WalletCards size={24} />
+        </div>
+        <div>
+          <span className="deposit-eyebrow">MANUAL WALLET FUNDING</span>
+          <h1>Deposit with MTN Mobile Money</h1>
+          <p>Send your payment, then submit the transfer details for review.</p>
+        </div>
+        <div className="deposit-hero-trust">
+          <ShieldCheck size={16} /> Admin verified
+        </div>
+      </section>
+      <div className="deposit-shell">
+        <div className="deposit-rail">
+          <span className="deposit-rail-dot" />
+          <span>MTN Manual Deposit</span>
+          <span className="deposit-rail-live">
+            <Smartphone size={11} /> ACTIVE
+          </span>
+        </div>
+        {status === "success" ? (
+          <section className="deposit-panel deposit-status-panel success">
+            <div className="deposit-status-icon">
+              <CheckCircle2 size={30} />
+            </div>
+            <span className="deposit-status-label">SUBMISSION RECEIVED</span>
+            <h2>Deposit proof submitted</h2>
+            <p className="deposit-status-copy">{message}</p>
+            <button className="deposit-secondary" type="button" onClick={reset}>
+              Submit another deposit
+            </button>
+          </section>
+        ) : (
+          <form className="deposit-panel" onSubmit={submit}>
+            <div className="deposit-panel-heading">
+              <div>
+                <h2>Submit your payment proof</h2>
+                <p>
+                  Use the same details shown on your MTN receipt or transaction
+                  history.
+                </p>
+              </div>
+              <Smartphone size={22} />
+            </div>
+            {error && (
+              <div className="deposit-error">
+                <AlertCircle size={15} />
+                {error}
+              </div>
+            )}
+            <label className="deposit-field">
+              <span>MTN transfer reference / narration</span>
+              <input
+                value={reference}
+                onChange={e => setReference(e.target.value)}
+                placeholder="e.g. MTN-123456789"
+              />
+            </label>
+            <label className="deposit-field">
+              <span>Name registered on MTN</span>
+              <input
+                value={senderName}
+                onChange={e => setSenderName(e.target.value)}
+                placeholder="Your full name"
+              />
+            </label>
+            <label className="deposit-field">
+              <span>MTN number used (optional)</span>
+              <input
+                value={mtnNumber}
+                onChange={e => setMtnNumber(e.target.value)}
+                inputMode="tel"
+                placeholder="024 123 4567"
+              />
+            </label>
+            <div className="deposit-field">
+              <span>Amount sent</span>
+              <div className="deposit-amount-wrap">
+                <b>GHS</b>
+                <input
+                  value={amount}
+                  onChange={e =>
+                    setAmount(e.target.value.replace(/[^\d.]/g, ""))
+                  }
+                  inputMode="decimal"
+                  placeholder="100.00"
+                />
+              </div>
+            </div>
+            <div className="deposit-quick-row">
+              {QUICK_AMOUNTS.map(value => (
+                <button
+                  type="button"
+                  key={value}
+                  className={amount === String(value) ? "selected" : ""}
+                  onClick={() => setAmount(String(value))}
+                >
+                  GHS {value}
+                </button>
+              ))}
+            </div>
+            <label className="deposit-field">
+              <span>Payment screenshot</span>
+              <label className="deposit-upload">
+                <Upload size={17} />
+                <span>
+                  {preview
+                    ? "Screenshot selected"
+                    : "Choose your MTN receipt screenshot"}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => void chooseScreenshot(e.target.files?.[0])}
+                />
+              </label>
+            </label>
+            {preview && (
+              <div className="deposit-preview">
+                <img
+                  src={preview}
+                  alt="Selected MTN payment screenshot preview"
+                />
+                <span>
+                  <CheckCircle2 size={14} /> Screenshot ready to submit
+                </span>
+              </div>
+            )}
+            <label className="deposit-field">
+              <span>Note (optional)</span>
+              <textarea
+                value={note}
+                onChange={e => setNote(e.target.value)}
+                rows={3}
+                placeholder="Any extra information for the reviewer"
+              />
+            </label>
+            <button
+              className="deposit-submit"
+              type="submit"
+              disabled={status === "submitting"}
+            >
+              {status === "submitting" ? (
+                <>
+                  <Loader2 size={17} className="deposit-spin" />
+                  Submitting proof…
+                </>
+              ) : (
+                <>
+                  <ImagePlus size={17} /> Submit deposit proof
+                </>
+              )}
+            </button>
+            <p className="deposit-footnote">
+              <ShieldCheck size={14} />
+              Your screenshot is sent with the deposit request and reviewed
+              before your wallet is credited.
+            </p>
+          </form>
+        )}
+        <section className="deposit-safety-grid">
+          <div>
+            <ShieldCheck size={18} />
+            <div>
+              <strong>Manual review</strong>
+              <p>
+                An admin verifies the transfer and screenshot before crediting
+                your wallet.
+              </p>
+            </div>
+          </div>
+          <div>
+            <Check size={18} />
+            <div>
+              <strong>Backend integrated</strong>
+              <p>Your request uses the existing bank-deposit review queue.</p>
+            </div>
+          </div>
+        </section>
+        <p className="deposit-help">
+          Need help with a deposit?{" "}
+          <a href="/support">Contact the Support Centre</a> and include your
+          transfer reference.
+        </p>
+      </div>
+      <style>{`.deposit-page{min-height:70vh;background:#0a0a0a;color:#f4f1f0;padding-bottom:56px}.deposit-hero{display:flex;align-items:center;gap:16px;padding:28px max(22px,calc((100% - 900px)/2));background:linear-gradient(118deg,#ffd84d,#1e6bff 78%,#0b2e70);color:#10172e}.deposit-hero-icon{display:grid;place-items:center;width:50px;height:50px;border-radius:15px;background:#ffffff33}.deposit-eyebrow{font-size:10px;font-weight:900;letter-spacing:.14em}.deposit-hero h1{margin:5px 0 4px;font-size:clamp(25px,4vw,36px)}.deposit-hero p{margin:0;font-size:13px}.deposit-hero-trust{margin-left:auto;display:flex;align-items:center;gap:6px;padding:9px 12px;border-radius:999px;background:#ffffff2e;font-size:10px;font-weight:800}.deposit-shell{width:min(720px,calc(100% - 32px));margin:24px auto 0}.deposit-rail{display:flex;align-items:center;gap:8px;margin:0 2px 10px;color:#9a9a9a;font-size:11px;font-weight:800}.deposit-rail-dot{width:7px;height:7px;border-radius:50%;background:#22c55e}.deposit-rail-live{display:flex;align-items:center;gap:4px;margin-left:auto;color:#4ade80;font-size:9px}.deposit-panel{background:#151515;border:1px solid #ffffff1a;border-radius:18px;padding:24px;box-shadow:0 14px 40px #0004}.deposit-panel-heading{display:flex;justify-content:space-between;gap:12px;margin-bottom:18px}.deposit-panel-heading h2{margin:0;font-size:18px}.deposit-panel-heading p{margin:5px 0 0;color:#969696;font-size:12px}.deposit-panel-heading>svg{color:#ffd84d}.deposit-error{display:flex;gap:7px;padding:10px 11px;margin-bottom:14px;border-radius:10px;background:#ef44441a;color:#ff9a9a;font-size:11px}.deposit-field{display:block;margin-top:16px;color:#9f9f9f;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.deposit-field input,.deposit-field textarea{display:block;width:100%;box-sizing:border-box;margin-top:7px;padding:13px 14px;border:1px solid #ffffff1f;border-radius:10px;background:#1d1d1d;color:#fff;font:600 14px 'DM Sans',sans-serif;outline:none;resize:vertical}.deposit-amount-wrap{display:flex;align-items:center;margin-top:7px;border:1px solid #ffffff1f;border-radius:10px;background:#1d1d1d}.deposit-amount-wrap b{padding-left:14px;color:#ffd84d;font-size:12px}.deposit-amount-wrap input{margin:0;border:0;background:transparent}.deposit-quick-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.deposit-quick-row button{padding:7px 10px;border:1px solid #ffffff1a;border-radius:999px;background:#202020;color:#aaa;font-size:10px;font-weight:800;cursor:pointer}.deposit-quick-row button.selected{background:#ffd84d;border-color:#ffd84d;color:#121212}.deposit-upload{position:relative;display:flex;align-items:center;gap:9px;margin-top:7px;padding:14px;border:1px dashed #ffd84d8c;border-radius:10px;background:#ffd84d0f;color:#ddd;font-size:12px;cursor:pointer}.deposit-upload svg{color:#ffd84d}.deposit-upload input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0}.deposit-preview{display:flex;align-items:center;gap:10px;margin-top:10px;color:#4ade80;font-size:10px}.deposit-preview img{width:70px;height:52px;object-fit:cover;border-radius:7px}.deposit-preview span{display:flex;align-items:center;gap:5px}.deposit-submit,.deposit-secondary{display:flex;justify-content:center;align-items:center;gap:7px;width:100%;margin-top:20px;padding:13px 16px;border:0;border-radius:10px;background:#ffd84d;color:#171717;font:900 12px 'DM Sans',sans-serif;cursor:pointer}.deposit-submit:disabled{opacity:.65;cursor:wait}.deposit-footnote{display:flex;gap:7px;margin:13px 0 0;color:#888;font-size:10px;line-height:1.6}.deposit-footnote svg{flex:none;color:#22c55e}.deposit-status-panel{text-align:center;padding:36px 24px}.deposit-status-icon{display:grid;place-items:center;width:62px;height:62px;margin:0 auto 13px;border-radius:20px;background:#22c55e1f;color:#4ade80}.deposit-status-label{font-size:9px;font-weight:900;letter-spacing:.14em;color:#4ade80}.deposit-status-panel h2{margin:8px 0 7px;font-size:20px}.deposit-status-copy{max-width:460px;margin:0 auto;color:#aaa;font-size:12px;line-height:1.7}.deposit-secondary{max-width:260px;margin:22px auto 0;background:#242424;color:#ddd;border:1px solid #ffffff1f}.deposit-safety-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.deposit-safety-grid>div{display:flex;gap:10px;padding:14px;border:1px solid #ffffff14;border-radius:13px;background:#141414}.deposit-safety-grid svg{flex:none;color:#ffd84d}.deposit-safety-grid strong{font-size:11px}.deposit-safety-grid p{margin:5px 0 0;color:#828282;font-size:10px}.deposit-help{text-align:center;margin:18px 0 0;color:#777;font-size:11px}.deposit-help a{color:#ffd84d;font-weight:800}.deposit-spin{animation:deposit-spin .8s linear infinite}@keyframes deposit-spin{to{transform:rotate(360deg)}}@media(max-width:600px){.deposit-hero{align-items:flex-start;padding:22px 16px}.deposit-hero-trust{display:none}.deposit-shell{width:calc(100% - 22px);margin-top:17px}.deposit-panel{padding:18px}.deposit-safety-grid{grid-template-columns:1fr}}`}</style>
+    </main>
+  );
 }

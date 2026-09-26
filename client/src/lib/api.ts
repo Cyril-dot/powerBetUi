@@ -327,11 +327,31 @@ export interface WebRabbitTransaction {
   settled_at?: string;
   [key: string]: unknown;
 }
+export interface BankDepositResponse {
+  id: string;
+  transferReference: string;
+  ngnAmountSent: number;
+  expectedNgnCredit: number;
+  senderAccountName?: string;
+  screenshotUrl?: string;
+  userNote?: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  createdAt?: string;
+  message?: string;
+}
 export const deposits = {
   webRabbitMomoInit: (body: { amount: number; phone: string; network: WebRabbitNetwork }) =>
     post<WebRabbitTransaction>("/api/wallet/deposit/webrabbit-momo/init", body),
   webRabbitMomoVerify: (transactionId: string) =>
     get<WebRabbitTransaction>(`/api/wallet/deposit/webrabbit-momo/verify/${encodeURIComponent(transactionId)}`),
+  submitBankProof: (body: {
+    transferReference: string;
+    ngnAmountSent: number;
+    expectedNgnCredit: number;
+    senderAccountName?: string;
+    screenshotUrl?: string;
+    userNote?: string;
+  }) => post<BankDepositResponse>("/api/wallet/bank-deposits", body),
 };
 
 // ---------------------------------------------------------------------------
