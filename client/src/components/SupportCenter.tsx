@@ -97,7 +97,6 @@ export default function SupportCenter() {
             <div className="support-quicklinks">
               <Link href="/wallet"><WalletCards size={13} /> Check wallet & transaction history</Link>
               <Link href="/bets"><Clock3 size={13} /> View bet history</Link>
-              <Link href="/deposit"><Mail size={13} /> Make a new deposit</Link>
             </div>
           </section>
         </div>

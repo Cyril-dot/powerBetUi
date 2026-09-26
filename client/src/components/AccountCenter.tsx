@@ -10,7 +10,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "wouter";
 import {
   BadgeCheck, Bell, ChevronRight, ClipboardList, Eye, EyeOff, Fingerprint, Gift, Heart, History, LifeBuoy,
-  LogOut, Plus, Receipt, HeartHandshake, SlidersHorizontal, Ticket, TrendingUp, UserRound,
+  LogOut, Receipt, HeartHandshake, SlidersHorizontal, Ticket, TrendingUp, UserRound,
   WalletCards, Zap, ShieldCheck,
 } from "lucide-react";
 import { useSession, pickUserField, isAdminUser, isSuperAdminUser, userRole } from "@/lib/session";
@@ -175,7 +175,6 @@ export default function AccountCenter() {
           </div>
           <p className="acct-balance-value">{money(balance)}</p>
           <div className="acct-balance-actions">
-            <Link href="/deposit" className="acct-balance-btn acct-balance-btn-solid"><Plus size={17} /> Deposit</Link>
             <Link href="/wallet" className="acct-balance-btn acct-balance-btn-ghost"><WalletCards size={16} /> Withdraw</Link>
           </div>
         </section>
