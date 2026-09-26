@@ -8,12 +8,14 @@ import {
   ArrowUpRight,
   CheckCircle2,
   CreditCard,
+  Plus,
   RefreshCw,
   Wifi,
   X,
 } from "lucide-react";
 import api, { ApiError, type Transaction } from "@/lib/api";
 import { useSession, pickUserField } from "@/lib/session";
+import DepositCenter from "./DepositCenter";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -87,6 +89,7 @@ export default function WalletCenter() {
   const [error,        setError]        = useState("");
   const [showBalance,  setShowBalance]  = useState(true);
 
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showWithdrawForm, setShowWithdrawForm] = useState(false);
   const [withdrawGateMessage, setWithdrawGateMessage] = useState("");
   const [withdrawGateTitle, setWithdrawGateTitle] = useState("Withdrawal requirements not met");
@@ -287,6 +290,9 @@ export default function WalletCenter() {
 
         {/* ── Action buttons ── */}
         <div className="wal-card-actions">
+          <button className="wal-action wal-action-solid" type="button" onClick={() => setShowPaymentModal(true)}>
+            <Plus size={16} /> Deposit
+          </button>
 
           <button
             className={`wal-action wal-action-ghost${showWithdrawForm ? " wal-action-active" : ""}`}
@@ -393,10 +399,19 @@ export default function WalletCenter() {
               <div className="wal-inline-gate" role="alert">
                 <strong>{withdrawGateTitle}</strong>
                 <span>{withdrawGateMessage}</span>
-                <Link href="/support" onClick={() => setWithdrawGateMessage("")}>Contact support</Link>
+                <Link href="/deposit" onClick={() => setWithdrawGateMessage("")}>Make a deposit</Link>
               </div>
             )}
           </section>
+        )}
+
+        {showPaymentModal && (
+          <div className="wal-payment-backdrop" role="presentation">
+            <section className="wal-payment-modal" role="dialog" aria-modal="true" aria-label="Make a deposit">
+              <button className="wal-modal-close" type="button" onClick={() => setShowPaymentModal(false)} aria-label="Close payment modal"><X size={18} /></button>
+              <DepositCenter />
+            </section>
+          </div>
         )}
 
         {withdrawSuccess && (
