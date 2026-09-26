@@ -226,6 +226,11 @@ body{font-size:16px}.utility{font-size:12px}.utility-links{gap:20px}.main-nav a{
 .deposit-quick-amounts{display:flex;gap:8px;flex-wrap:wrap}
 .deposit-quick-amounts button{padding:7px 12px;border-radius:999px;background:#181b16;color:#9da298;border:1px solid rgba(255,255,255,.09);font-size:11px;font-weight:700;cursor:pointer}
 .deposit-quick-amounts button.active{color:#16170f;background:var(--gold-hi);border-color:var(--gold-hi)}
+.deposit-fee-summary{display:grid;gap:8px;margin-top:14px;padding:13px 14px;border:1px solid rgba(255,216,77,.22);border-radius:12px;background:rgba(255,216,77,.06);color:#aaa;font-size:11px}
+.deposit-fee-summary>div{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.deposit-fee-summary strong{color:#e8e8e8;font-size:12px}
+.deposit-fee-summary .deposit-fee-total{margin-top:3px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1);color:#ffd84d;font-weight:900}
+.deposit-fee-summary .deposit-fee-total strong{color:#ffd84d;font-size:15px}
 .deposit-note{display:flex;align-items:flex-start;gap:7px;margin-top:4px;color:#8d9288;font-size:11px;line-height:1.6}
 .deposit-note svg{flex-shrink:0;margin-top:1px;color:var(--nature)}
 

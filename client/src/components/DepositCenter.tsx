@@ -4,6 +4,7 @@ import api, { ApiError, type WebRabbitNetwork, type WebRabbitTransaction } from 
 
 const MIN_GHS = 50;
 const QUICK_AMOUNTS = [50, 100, 250, 500, 1000];
+const DEPOSIT_FEE_RATE = 0.014;
 const NETWORKS: Array<{ value: WebRabbitNetwork; label: string; hint: string }> = [
   { value: "MTN", label: "MTN Mobile Money", hint: "024, 025, 053, 054, 055, 059" },
   { value: "TELECEL", label: "Telecel Cash", hint: "020, 050" },
@@ -19,6 +20,7 @@ function transactionId(tx: WebRabbitTransaction) { return String(tx.transaction_
 function statusOf(tx: WebRabbitTransaction) { return String(tx.reason_code ?? tx.reasonCode ?? tx.status ?? "pending").toLowerCase(); }
 function maskPhone(value: string) { const digits = value.replace(/\D/g, ""); return digits.length < 5 ? "••••" : `${digits.slice(0, 3)}••••${digits.slice(-2)}`; }
 function normalizePhone(value: string) { const compact = value.replace(/[\s-]/g, ""); if (compact.startsWith("+233")) return `0${compact.slice(4)}`; if (compact.startsWith("233") && compact.length === 12) return `0${compact.slice(3)}`; return compact; }
+function roundMoney(value: number) { return Math.round((value + Number.EPSILON) * 100) / 100; }
 function safeLogValue(value: unknown, key = ""): unknown {
   if (typeof value === "string") {
     const lowerKey = key.toLowerCase();
@@ -52,6 +54,9 @@ export default function DepositCenter() {
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const id = transaction ? transactionId(transaction) : "";
+  const enteredAmount = Number(amount);
+  const feeAmount = Number.isFinite(enteredAmount) && enteredAmount > 0 ? roundMoney(enteredAmount * DEPOSIT_FEE_RATE) : 0;
+  const totalAmount = Number.isFinite(enteredAmount) && enteredAmount > 0 ? roundMoney(enteredAmount + feeAmount) : 0;
 
   const verify = useCallback(async () => {
     if (!id) return;
@@ -105,7 +110,7 @@ export default function DepositCenter() {
     if (!/^0\d{9}$/.test(normalizedPhone)) { depositLog("warn", "init:validation_failed", { field: "phone", phone: normalizedPhone }); setError("Enter a valid Ghana number, for example 024 123 4567."); return; }
     setLoading(true);
     const startedAt = performance.now();
-    depositLog("info", "init:start", { amount: value, network, phone: normalizedPhone, phoneFormat: "Ghana local" });
+    depositLog("info", "init:start", { amount: value, feeRate: DEPOSIT_FEE_RATE, feeAmount: roundMoney(value * DEPOSIT_FEE_RATE), totalAmount: roundMoney(value * (1 + DEPOSIT_FEE_RATE)), network, phone: normalizedPhone, phoneFormat: "Ghana local" });
     try {
       const result = await api.deposits.webRabbitMomoInit({ amount: value, phone: normalizedPhone, network });
       const resultId = transactionId(result);
@@ -127,9 +132,10 @@ export default function DepositCenter() {
         <div className="deposit-network-grid">{NETWORKS.map((item) => <button type="button" key={item.value} className={`deposit-network ${network === item.value ? "selected" : ""}`} onClick={() => setNetwork(item.value)}><span className="deposit-network-mark">{item.value === "MTN" ? "M" : item.value === "AT" ? "A" : item.value === "TELECEL" ? "T" : "G"}</span><span><strong>{item.label}</strong><small>{item.hint}</small></span>{network === item.value && <Check size={16} />}</button>)}</div>
         {error && <div className="deposit-error"><AlertCircle size={15} />{error}</div>}
         <label className="deposit-field"><span>Mobile Money number</span><input value={phone} onChange={(event) => setPhone(event.target.value)} inputMode="tel" autoComplete="tel" placeholder="024 123 4567" /></label>
-        <div className="deposit-field"><span>Amount in Ghana cedis</span><div className="deposit-amount-wrap"><b>GHS</b><input value={amount} onChange={(event) => setAmount(event.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" type="text" placeholder="100.00" /></div></div>
+        <div className="deposit-field"><span>Amount to add to your wallet</span><div className="deposit-amount-wrap"><b>GHS</b><input value={amount} onChange={(event) => setAmount(event.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" type="text" placeholder="100.00" /></div></div>
+        <div className="deposit-fee-summary"><div><span>Wallet credit</span><strong>GHS {Number.isFinite(enteredAmount) ? enteredAmount.toFixed(2) : "0.00"}</strong></div><div><span>Mobile Money charge (1.4%)</span><strong>GHS {feeAmount.toFixed(2)}</strong></div><div className="deposit-fee-total"><span>Total you will pay</span><strong>GHS {totalAmount.toFixed(2)}</strong></div></div>
         <div className="deposit-quick-row">{QUICK_AMOUNTS.map((value) => <button type="button" key={value} className={amount === String(value) ? "selected" : ""} onClick={() => setAmount(String(value))}>GHS {value}</button>)}</div>
-        <button className="deposit-submit" type="submit" disabled={loading}>{loading ? <><Loader2 size={17} className="deposit-spin" />Sending secure prompt…</> : <>Send payment prompt <ChevronRight size={17} /></>}</button><p className="deposit-footnote"><ShieldCheck size={14} />You approve the charge with your own Mobile Money PIN. We never see or store it.</p>
+        <button className="deposit-submit" type="submit" disabled={loading}>{loading ? <><Loader2 size={17} className="deposit-spin" />Sending secure prompt…</> : <>Pay GHS {totalAmount.toFixed(2)} <ChevronRight size={17} /></>}</button><p className="deposit-footnote"><ShieldCheck size={14} />Your wallet receives GHS {Number.isFinite(enteredAmount) ? enteredAmount.toFixed(2) : "0.00"}; the 1.4% Mobile Money charge is included in the amount you pay.</p>
       </form> : <section className={`deposit-panel deposit-status-panel ${status}`}>
         <div className="deposit-status-icon">{status === "pending" ? <Loader2 className="deposit-spin" size={28} /> : status === "success" ? <CheckCircle2 size={30} /> : <XCircle size={30} />}</div><span className="deposit-status-label">{status === "pending" ? "PAYMENT IN PROGRESS" : status === "success" ? "PAYMENT CONFIRMED" : "PAYMENT NOT COMPLETED"}</span><h2>{status === "pending" ? "Approve the prompt on your phone" : status === "success" ? "Your wallet is funded" : "The payment was not completed"}</h2><p className="deposit-status-copy">{status === "pending" ? (message || `A prompt was sent to ${maskPhone(phone)} on ${selectedNetwork.label}.`) : status === "success" ? "Your deposit has been verified and credited to your wallet." : (message || "No funds were credited. Check your number and try again.")}</p>
         {status === "pending" && <div className="deposit-progress"><span /><small><Clock3 size={13} /> Checking automatically · {pollCount} check{pollCount === 1 ? "" : "s"}</small></div>}
