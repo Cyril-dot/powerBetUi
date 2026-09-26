@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import api, { ApiError, type Transaction } from "@/lib/api";
 import { useSession, pickUserField } from "@/lib/session";
-import DepositCenter from "./DepositCenter";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -89,7 +88,6 @@ export default function WalletCenter() {
   const [error,        setError]        = useState("");
   const [showBalance,  setShowBalance]  = useState(true);
 
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showWithdrawForm, setShowWithdrawForm] = useState(false);
   const [withdrawGateMessage, setWithdrawGateMessage] = useState("");
   const [withdrawGateTitle, setWithdrawGateTitle] = useState("Withdrawal requirements not met");
@@ -290,9 +288,9 @@ export default function WalletCenter() {
 
         {/* ── Action buttons ── */}
         <div className="wal-card-actions">
-          <button className="wal-action wal-action-solid" type="button" onClick={() => setShowPaymentModal(true)}>
+          <Link href="/deposit" className="wal-action wal-action-solid">
             <Plus size={16} /> Deposit
-          </button>
+          </Link>
 
           <button
             className={`wal-action wal-action-ghost${showWithdrawForm ? " wal-action-active" : ""}`}
@@ -403,15 +401,6 @@ export default function WalletCenter() {
               </div>
             )}
           </section>
-        )}
-
-        {showPaymentModal && (
-          <div className="wal-payment-backdrop" role="presentation">
-            <section className="wal-payment-modal" role="dialog" aria-modal="true" aria-label="Make a deposit">
-              <button className="wal-modal-close" type="button" onClick={() => setShowPaymentModal(false)} aria-label="Close payment modal"><X size={18} /></button>
-              <DepositCenter />
-            </section>
-          </div>
         )}
 
         {withdrawSuccess && (

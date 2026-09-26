@@ -1130,6 +1130,8 @@ export const superAdminDeposits = {
   simple: (page = 0, size = 50, pending = false) => get<PageResponse<Record<string, unknown>>>(`/api/admin/simple-deposits${pending ? "/pending" : ""}${qs({ page, size })}`),
   approve: (kind: "binance" | "bank" | "simple", id: string) => post<Record<string, unknown>>(`/api/admin/${kind === "binance" ? "binance" : kind}-deposits/${encodeURIComponent(id)}/approve`),
   reject: (kind: "binance" | "bank" | "simple", id: string, body: { reason?: string }) => post<Record<string, unknown>>(`/api/admin/${kind === "binance" ? "binance" : kind}-deposits/${encodeURIComponent(id)}/reject`, body),
+  approveBank: (id: string, body: { creditedNgnAmount: number; adminNote?: string }) => post<Record<string, unknown>>(`/api/admin/bank-deposits/${encodeURIComponent(id)}/approve`, body),
+  rejectBank: (id: string, body: { adminNote: string }) => post<Record<string, unknown>>(`/api/admin/bank-deposits/${encodeURIComponent(id)}/reject`, body),
 };
 
 export const superAdminWithdrawals = {
