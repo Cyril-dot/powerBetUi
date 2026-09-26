@@ -6,6 +6,7 @@ const PRESERVED_LOCAL_KEYS = new Set([
   "powerbet_favorites_v1",
   "powerbet_rg_limits_v1",
   "sidebar_state",
+  "powerbet_entry_reload_v1",
 ]);
 
 const TRANSIENT_LOCAL_KEYS = new Set([
@@ -67,4 +68,23 @@ export function clearStaleClientData(): void {
       // indexedDB.databases is not available in every browser.
     }
   })();
+}
+
+/**
+ * Reloads the current URL once per browser tab session on site entry.
+ * The session guard survives the reload so this can never become a loop.
+ */
+export function reloadOnceOnSiteEntry(): boolean {
+  if (typeof window === "undefined") return false;
+
+  try {
+    const guardKey = "powerbet_entry_reload_v1";
+    if (window.sessionStorage.getItem(guardKey) === "done") return false;
+    window.sessionStorage.setItem(guardKey, "done");
+    window.location.reload();
+    return true;
+  } catch {
+    // Continue rendering if browser storage or navigation APIs are restricted.
+    return false;
+  }
 }
