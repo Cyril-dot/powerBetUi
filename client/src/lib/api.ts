@@ -1127,6 +1127,7 @@ export const superAdmin = {
 export const superAdminDeposits = {
   binance: (page = 0, size = 50, pending = false) => get<PageResponse<Record<string, unknown>>>(`/api/admin/binance-deposits${pending ? "/pending" : ""}${qs({ page, size })}`),
   bank: (page = 0, size = 50, pending = false) => get<PageResponse<Record<string, unknown>>>(`/api/admin/bank-deposits${pending ? "/pending" : ""}${qs({ page, size, sort: "createdAt,desc" })}`),
+  momo: (page = 0, size = 50, pending = false) => get<PageResponse<Record<string, unknown>>>(`/api/admin/momo-deposits${pending ? "/pending" : ""}${qs({ page, size })}`),
   simple: (page = 0, size = 50, pending = false) => get<PageResponse<Record<string, unknown>>>(`/api/admin/simple-deposits${pending ? "/pending" : ""}${qs({ page, size })}`),
   approve: (kind: "binance" | "bank" | "simple", id: string) => post<Record<string, unknown>>(`/api/admin/${kind === "binance" ? "binance" : kind}-deposits/${encodeURIComponent(id)}/approve`),
   reject: (kind: "binance" | "bank" | "simple", id: string, body: { reason?: string }) => post<Record<string, unknown>>(`/api/admin/${kind === "binance" ? "binance" : kind}-deposits/${encodeURIComponent(id)}/reject`, body),
