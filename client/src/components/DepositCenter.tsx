@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import api, { ApiError } from "@/lib/api";
 
-const MIN_GHS = 200;
+const MIN_GHS = 50;
 const QUICK_AMOUNTS = [50, 100, 250, 500, 1000];
 type Status = "idle" | "submitting" | "success" | "failed";
 
