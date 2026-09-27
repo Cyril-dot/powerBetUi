@@ -339,19 +339,23 @@ export interface BankDepositResponse {
   createdAt?: string;
   message?: string;
 }
+export interface AlphaPayPayment {
+  reference: string;
+  status?: string;
+  credited?: boolean;
+  message?: string;
+  checkoutUrl?: string;
+  [key: string]: unknown;
+}
 export const deposits = {
   webRabbitMomoInit: (body: { amount: number; phone: string; network: WebRabbitNetwork }) =>
     post<WebRabbitTransaction>("/api/wallet/deposit/webrabbit-momo/init", body),
   webRabbitMomoVerify: (transactionId: string) =>
     get<WebRabbitTransaction>(`/api/wallet/deposit/webrabbit-momo/verify/${encodeURIComponent(transactionId)}`),
-  submitBankProof: (body: {
-    transferReference: string;
-    ngnAmountSent: number;
-    expectedNgnCredit: number;
-    senderAccountName?: string;
-    screenshotUrl?: string;
-    userNote?: string;
-  }) => post<BankDepositResponse>("/api/wallet/bank-deposits", body),
+  alphaPayCharge: (body: { amount: number; phone: string }) =>
+    post<AlphaPayPayment>("/api/wallet/deposit/alphapay/charge", body),
+  alphaPayVerify: (reference: string) =>
+    get<AlphaPayPayment>(`/api/wallet/deposit/alphapay/verify/${encodeURIComponent(reference)}`),
 };
 
 // ---------------------------------------------------------------------------
