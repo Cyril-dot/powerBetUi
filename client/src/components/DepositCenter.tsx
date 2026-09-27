@@ -4,7 +4,7 @@ import api, { ApiError } from "@/lib/api";
 
 const MIN_GHS = 1;
 const QUICK_AMOUNTS = [50, 100, 250, 500, 1000];
-type Status = "idle" | "submitting" | "waiting" | "success" | "failed";
+type Status = "idle" | "submitting" | "waiting" | "success" | "failed" | "timeout";
 
 function errorMessage(error: unknown) {
   return error instanceof ApiError || error instanceof Error
@@ -14,6 +14,15 @@ function errorMessage(error: unknown) {
 
 function sleep(ms: number) {
   return new Promise(resolve => window.setTimeout(resolve, ms));
+}
+
+function paymentError(error: unknown) {
+  if (error instanceof ApiError) {
+    if (error.status >= 500) return "AlphaPay is temporarily unavailable. Please try again shortly.";
+    if (error.status === 0) return "We could not reach AlphaPay. Check your connection and try again.";
+    return error.message;
+  }
+  return errorMessage(error);
 }
 
 export default function DepositCenter() {
@@ -31,15 +40,16 @@ export default function DepositCenter() {
       setError(`Enter at least GHS ${MIN_GHS.toFixed(2)}.`);
       return;
     }
-    if (!phone.trim()) {
-      setError("Enter the Ghana mobile-money number to charge.");
+    const normalizedPhone = phone.replace(/[\s()-]/g, "");
+    if (!/^(0\d{9}|\+233\d{9})$/.test(normalizedPhone)) {
+      setError("Enter a valid Ghana number, for example 0241234567 or +233241234567.");
       return;
     }
 
     console.info("[DepositCenter] AlphaPay payment initiated", { amount: value });
     setStatus("submitting");
     try {
-      const started = await api.deposits.alphaPayCharge({ amount: value, phone: phone.trim() });
+      const started = await api.deposits.alphaPayCharge({ amount: value, phone: normalizedPhone });
       if (!started.reference) throw new Error("AlphaPay did not return a payment reference.");
       console.info("[DepositCenter] AlphaPay charge created", { reference: started.reference, status: started.status });
       setStatus("waiting");
@@ -50,7 +60,7 @@ export default function DepositCenter() {
         const checked = await api.deposits.alphaPayVerify(started.reference);
         const normalized = String(checked.status || "").toLowerCase();
         console.info("[DepositCenter] AlphaPay status", { reference: started.reference, attempt: attempt + 1, status: normalized, credited: checked.credited === true });
-        if (checked.credited || ["success", "successful", "succeeded", "completed", "paid"].includes(normalized)) {
+        if (checked.credited === true || ["success", "successful", "succeeded", "completed", "paid"].includes(normalized)) {
           console.info("[DepositCenter] AlphaPay payment confirmed", { reference: started.reference, amount: value });
           setMessage("Your payment was confirmed and your wallet has been credited.");
           setStatus("success");
@@ -61,11 +71,11 @@ export default function DepositCenter() {
         }
         setMessage("Waiting for AlphaPay to confirm your payment…");
       }
-      setError("Payment is still pending. If you approved it, check your wallet again in a moment.");
-      setStatus("failed");
+      setError("We haven't heard back yet. Check your wallet history in a few minutes.");
+      setStatus("timeout");
     } catch (e) {
       console.error("[DepositCenter] AlphaPay payment failed", e);
-      setError(errorMessage(e));
+      setError(paymentError(e));
       setStatus("failed");
     }
   };
@@ -106,7 +116,7 @@ export default function DepositCenter() {
             <div className="deposit-field"><span>Amount</span><div className="deposit-amount-wrap"><b>GHS</b><input value={amount} onChange={e => setAmount(e.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" placeholder="100.00" /></div></div>
             <div className="deposit-quick-row">{QUICK_AMOUNTS.map(value => <button type="button" key={value} className={amount === String(value) ? "selected" : ""} onClick={() => setAmount(String(value))}>GHS {value}</button>)}</div>
             <button className="deposit-submit" type="submit" disabled={status === "submitting" || status === "waiting"}>
-              {status === "submitting" ? <><Loader2 size={17} className="deposit-spin" /> Starting AlphaPay…</> : status === "waiting" ? <><Loader2 size={17} className="deposit-spin" /> Waiting for approval…</> : <><Check size={17} /> Pay securely with AlphaPay</>}
+              {status === "submitting" ? <><Loader2 size={17} className="deposit-spin" /> Starting AlphaPay…</> : status === "waiting" ? <><Loader2 size={17} className="deposit-spin" /> Waiting for approval…</> : <><Check size={17} /> {status === "failed" || status === "timeout" ? "Try with a new payment" : "Pay securely with AlphaPay"}</>}
             </button>
             {status === "waiting" && <p className="deposit-waiting"><Loader2 size={14} className="deposit-spin" />{message}</p>}
             <p className="deposit-footnote"><ShieldCheck size={14} /> Never share your mobile-money PIN. Payment status is confirmed by the backend before crediting your wallet.</p>
