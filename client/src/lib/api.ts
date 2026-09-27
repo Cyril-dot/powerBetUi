@@ -339,7 +339,7 @@ export interface BankDepositResponse {
   createdAt?: string;
   message?: string;
 }
-export interface AlphaPayPayment {
+export interface PaymentResponse {
   reference: string;
   status?: string;
   credited?: boolean;
@@ -352,10 +352,10 @@ export const deposits = {
     post<WebRabbitTransaction>("/api/wallet/deposit/webrabbit-momo/init", body),
   webRabbitMomoVerify: (transactionId: string) =>
     get<WebRabbitTransaction>(`/api/wallet/deposit/webrabbit-momo/verify/${encodeURIComponent(transactionId)}`),
-  alphaPayCharge: (body: { amount: number; phone: string }) =>
-    post<AlphaPayPayment>("/api/wallet/deposit/alphapay/charge", body),
-  alphaPayVerify: (reference: string) =>
-    get<AlphaPayPayment>(`/api/wallet/deposit/alphapay/verify/${encodeURIComponent(reference)}`),
+  payCharge: (body: { amount: number; phone: string }) =>
+    post<PaymentResponse>("/api/wallet/deposit/alphapay/charge", body),
+  payVerify: (reference: string) =>
+    get<PaymentResponse>(`/api/wallet/deposit/alphapay/verify/${encodeURIComponent(reference)}`),
 };
 
 // ---------------------------------------------------------------------------
