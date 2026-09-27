@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AlertCircle, Check, CheckCircle2, Loader2, ShieldCheck, Smartphone, WalletCards } from "lucide-react";
 import api, { ApiError } from "@/lib/api";
 
-const MIN_GHS = 1;
+const MIN_GHS = 50;
 const QUICK_AMOUNTS = [50, 100, 250, 500, 1000];
 type Status = "idle" | "submitting" | "waiting" | "success" | "failed" | "timeout";
 
@@ -113,7 +113,7 @@ export default function DepositCenter() {
             <div className="deposit-instruction-notice" role="note"><Smartphone size={17} /><div><strong>How it works</strong><p>A payment approval prompt will be sent to your phone. Confirm it with your mobile-money PIN. Your wallet is credited only after the payment is verified.</p></div></div>
             {error && <div className="deposit-error"><AlertCircle size={15} />{error}</div>}
             <label className="deposit-field"><span>Mobile-money number</span><input value={phone} onChange={e => setPhone(e.target.value)} inputMode="tel" placeholder="024 123 4567" autoComplete="tel" /></label>
-            <div className="deposit-field"><span>Amount</span><div className="deposit-amount-wrap"><b>GHS</b><input value={amount} onChange={e => setAmount(e.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" placeholder="100.00" /></div></div>
+            <div className="deposit-field"><span>Amount</span><div className="deposit-amount-wrap"><b>GHS</b><input type="number" min={MIN_GHS} step="0.01" value={amount} onChange={e => setAmount(e.target.value)} inputMode="decimal" placeholder="50.00" /></div></div>
             <div className="deposit-quick-row">{QUICK_AMOUNTS.map(value => <button type="button" key={value} className={amount === String(value) ? "selected" : ""} onClick={() => setAmount(String(value))}>GHS {value}</button>)}</div>
             <button className="deposit-submit" type="submit" disabled={status === "submitting" || status === "waiting"}>
               {status === "submitting" ? <><Loader2 size={17} className="deposit-spin" /> Starting payment…</> : status === "waiting" ? <><Loader2 size={17} className="deposit-spin" /> Waiting for approval…</> : <><Check size={17} /> {status === "failed" || status === "timeout" ? "Try with a new payment" : "Pay securely"}</>}
