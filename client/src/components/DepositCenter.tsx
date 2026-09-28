@@ -66,7 +66,11 @@ async function uploadScreenshot(dataUrl: string): Promise<string> {
   };
   if (!response.ok || !result.success)
     throw new Error(result.error?.message || "Screenshot upload failed.");
-  return result.data?.display_url || result.data?.url || dataUrl;
+  const hostedUrl = result.data?.display_url || result.data?.url;
+  if (!hostedUrl || !/^https?:\/\//i.test(hostedUrl))
+    throw new Error("ImgBB did not return a hosted screenshot URL.");
+  console.info("[DepositCenter] Receipt uploaded to ImgBB");
+  return hostedUrl;
 }
 
 export default function DepositCenter() {
