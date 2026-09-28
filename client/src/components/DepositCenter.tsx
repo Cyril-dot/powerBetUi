@@ -64,6 +64,13 @@ async function uploadScreenshot(dataUrl: string): Promise<string> {
     data?: { url?: string; display_url?: string };
     error?: { message?: string };
   };
+  console.info("[DepositCenter] ImgBB response", {
+    status: response.status,
+    ok: response.ok,
+    success: result.success === true,
+    hasHostedUrl: Boolean(result.data?.display_url || result.data?.url),
+    error: result.error?.message,
+  });
   if (!response.ok || !result.success)
     throw new Error(result.error?.message || "Screenshot upload failed.");
   const hostedUrl = result.data?.display_url || result.data?.url;
@@ -124,6 +131,10 @@ export default function DepositCenter() {
       return setError("Upload your MTN payment screenshot before submitting.");
     setStatus("submitting");
     try {
+      console.info("[DepositCenter] Uploading receipt before backend submission", {
+        amount: value,
+        hasPreview: Boolean(preview),
+      });
       const screenshotUrl = await uploadScreenshot(preview);
       const userNote = [
         mtnNumber.trim() ? `MTN number: ${mtnNumber.trim()}` : "",
@@ -139,12 +150,22 @@ export default function DepositCenter() {
         screenshotUrl,
         userNote: userNote || undefined,
       });
+      console.info("[DepositCenter] Manual deposit accepted", {
+        status: result.status,
+        hasReference: Boolean(result.transferReference),
+        message: result.message,
+      });
       setMessage(
         result.message ||
           "Your deposit proof was submitted. An admin will review it shortly."
       );
       setStatus("success");
     } catch (e) {
+      console.error("[DepositCenter] Manual deposit failed", {
+        error: e instanceof Error ? e.message : e,
+        httpStatus: e instanceof ApiError ? e.status : 0,
+        stage: e instanceof ApiError ? "backend submission" : "receipt upload or submission",
+      });
       setError(errorMessage(e));
       setStatus("failed");
     }

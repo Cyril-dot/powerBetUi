@@ -156,6 +156,7 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
   if (body !== undefined) headers["Content-Type"] = "application/json";
 
   const debugScheduler = path.includes("/admin/matches/auto");
+  const debugDeposit = path.includes("/api/wallet/bank-deposits");
   const debugBody = (value: unknown): unknown => {
     if (!value || typeof value !== "object") return value;
     if (Array.isArray(value)) return value.map(debugBody);
@@ -170,6 +171,17 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
     console.groupCollapsed(`[Scheduler] ${method} ${BASE_URL}${path}`);
     console.info("Request headers", { ...headers, Authorization: headers.Authorization ? "Bearer [redacted]" : undefined });
     console.info("Request payload", debugBody(body));
+    console.groupEnd();
+  }
+  if (debugDeposit) {
+    console.groupCollapsed(`[DepositCenter] ${method} ${path}`);
+    console.info("Request", {
+      ...debugBody(body) as Record<string, unknown>,
+      screenshotUrl: body && typeof body === "object" && "screenshotUrl" in body
+        ? "[hosted receipt URL present]"
+        : undefined,
+    });
+    console.info("ImgBB URL requirement", "screenshotUrl must be an https URL, not base64 data");
     console.groupEnd();
   }
 
@@ -197,9 +209,11 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
   let payload: unknown;
   try { payload = text ? JSON.parse(text) : undefined; } catch { payload = text; }
   if (debugScheduler) console.info("[Scheduler] Response", { status: res.status, ok: res.ok, contentType: res.headers.get("content-type"), body: payload });
+  if (debugDeposit) console.info("[DepositCenter] Backend response", { status: res.status, ok: res.ok, contentType: res.headers.get("content-type"), body: payload });
 
   if (!res.ok) {
     if (debugScheduler) console.error("[Scheduler] HTTP failure", { status: res.status, url: `${BASE_URL}${path}`, body: payload });
+    if (debugDeposit) console.error("[DepositCenter] Backend rejected deposit", { status: res.status, url: `${BASE_URL}${path}`, body: payload });
     // Try to pull a human-readable message out of the response body.
     // Spring ApiException shape: { "message": "..." }
     let message = `Request failed (${res.status})`;
