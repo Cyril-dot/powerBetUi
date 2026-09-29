@@ -190,34 +190,40 @@ export default function WalletCenter() {
     e.preventDefault();
     setWithdrawNotice("");
     const amount = Number(withdrawForm.amount);
-    if (!amount || amount <= 0 || !withdrawForm.accountNumber || !withdrawForm.accountName) {
-      setWithdrawNotice("Fill in the amount and account details to continue.");
+    if (!amount || amount <= 0 || (!isAdmin && (!withdrawForm.accountNumber || !withdrawForm.accountName))) {
+      setWithdrawNotice(isAdmin
+        ? "Enter a valid withdrawal amount to continue."
+        : "Fill in the amount and account details to continue.");
       return;
     }
     if (balance === null || amount > balance) {
       const available = balance ?? 0;
       const shortfall = Math.max(0, amount - available);
-      setWithdrawNotice(`Insufficient balance. You can withdraw up to GHS ${available.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}. Reduce the amount by GHS ${shortfall.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} and try again.`);
+      setWithdrawNotice(`Insufficient balance. You can withdraw up to ${currencyCode} ${available.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}. Reduce the amount by ${currencyCode} ${shortfall.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} and try again.`);
       return;
     }
     setWithdrawing(true);
     try {
-      if (!(await checkWithdrawalEligibility())) {
+      if (!isAdmin && !(await checkWithdrawalEligibility())) {
         setWithdrawing(false);
         return;
       }
-      await api.withdrawals.submit({
-        amount,
-        currency:      currencyCode,
-        method:        withdrawForm.method,
-        accountNumber: withdrawForm.accountNumber,
-        accountName:   withdrawForm.accountName,
-        network:
-          withdrawForm.method === "MOBILE_MONEY"
-            ? withdrawForm.network
-            : undefined,
-      });
-      setWithdrawNotice(isAdmin ? "Withdrawal successful and complete." : "Withdrawal pending. Your request is waiting for review.");
+      if (isAdmin) {
+        await api.wallet.withdraw({ amount });
+      } else {
+        await api.withdrawals.submit({
+          amount,
+          currency:      currencyCode,
+          method:        withdrawForm.method,
+          accountNumber: withdrawForm.accountNumber,
+          accountName:   withdrawForm.accountName,
+          network:
+            withdrawForm.method === "MOBILE_MONEY"
+              ? withdrawForm.network
+              : undefined,
+        });
+      }
+      setWithdrawNotice(isAdmin ? "Withdrawal completed and recorded directly in your wallet." : "Withdrawal pending. Your request is waiting for review.");
       setWithdrawSuccess(true);
       setWithdrawForm({
         amount: "", method: "MOBILE_MONEY", accountNumber: "", accountName: "", network: "MTN",
@@ -312,7 +318,7 @@ export default function WalletCenter() {
 
         {showWithdrawForm && (
           <section className="wal-panel">
-            <h3>Request a withdrawal</h3>
+            <h3>{isAdmin ? "Withdraw from admin wallet" : "Request a withdrawal"}</h3>
             <form className="wal-form" onSubmit={submitWithdraw}>
               <label className="wal-field">
                 <span>Amount ({currencyCode})</span>
@@ -327,7 +333,7 @@ export default function WalletCenter() {
                 />
               </label>
 
-              <label className="wal-field">
+              {!isAdmin && <label className="wal-field">
                 <span>Method</span>
                 <select
                   value={withdrawForm.method}
@@ -338,9 +344,9 @@ export default function WalletCenter() {
                   <option value="MOBILE_MONEY">Mobile money</option>
                   <option value="BANK_TRANSFER">Bank transfer</option>
                 </select>
-              </label>
+              </label>}
 
-              {withdrawForm.method === "MOBILE_MONEY" && (
+              {!isAdmin && withdrawForm.method === "MOBILE_MONEY" && (
                 <label className="wal-field">
                   <span>Network</span>
                   <select
@@ -356,7 +362,7 @@ export default function WalletCenter() {
                 </label>
               )}
 
-              <label className="wal-field">
+              {!isAdmin && <label className="wal-field">
                 <span>Account number</span>
                 <input
                   value={withdrawForm.accountNumber}
@@ -365,9 +371,9 @@ export default function WalletCenter() {
                   }
                   placeholder="024 000 0000"
                 />
-              </label>
+              </label>}
 
-              <label className="wal-field">
+              {!isAdmin && <label className="wal-field">
                 <span>Account name</span>
                 <input
                   value={withdrawForm.accountName}
@@ -376,14 +382,14 @@ export default function WalletCenter() {
                   }
                   placeholder="Full name on the account"
                 />
-              </label>
+              </label>}
 
               <button
                 className="wal-submit"
                 type="submit"
                 disabled={withdrawing}
               >
-                {withdrawing ? "Submitting…" : "Request withdrawal"}
+                {withdrawing ? (isAdmin ? "Withdrawing…" : "Submitting…") : (isAdmin ? "Withdraw" : "Request withdrawal")}
               </button>
 
               {withdrawNotice && (
@@ -409,7 +415,7 @@ export default function WalletCenter() {
               <button className="wal-success-close" type="button" onClick={() => setWithdrawSuccess(false)} aria-label="Close withdrawal success message"><X size={18} /></button>
               <div className="wal-success-icon"><CheckCircle2 size={34} /></div>
               <h3 id="wal-success-title">{isAdmin ? "Withdrawal successful" : "Withdrawal pending"}</h3>
-              <p>{isAdmin ? "Your withdrawal was submitted successfully and is complete." : "Your withdrawal request is pending review. We will update your wallet when it is approved and settled."}</p>
+              <p>{isAdmin ? "Your withdrawal was completed directly and recorded in your wallet." : "Your withdrawal request is pending review. We will update your wallet when it is approved and settled."}</p>
               <button className="wal-submit" type="button" onClick={() => setWithdrawSuccess(false)}>Done</button>
             </section>
           </div>
