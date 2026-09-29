@@ -2673,3 +2673,24 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
   .sa-stat strong{font-size:14px!important}
   .sa-quick-links button{font-size:8px!important;padding:7px 5px!important}
 }
+
+/* Legal information pages */
+.legal-policy-page{max-width:1020px!important;padding:42px 16px 72px!important;color:#f1f5f2!important}
+.legal-policy-hero{position:relative;overflow:hidden;margin:0 0 18px;padding:30px 32px;border:1px solid rgba(127,218,157,.22);border-radius:18px;background:radial-gradient(ellipse at 85% 0%,rgba(52,145,83,.2),transparent 48%),linear-gradient(145deg,#151d18,#101412);box-shadow:0 12px 34px rgba(0,0,0,.22)}
+.legal-policy-hero .eyebrow{display:inline-flex;align-items:center;gap:8px;color:#94e7ae;font-size:11px;font-weight:800;letter-spacing:.15em}
+.legal-policy-hero h1{margin:12px 0 10px;color:#f4f8f5!important;font-size:clamp(32px,5vw,48px);font-weight:900;letter-spacing:-.045em;line-height:1.05}
+.legal-policy-hero p{max-width:690px;margin:0;color:#b8c5bd;font-size:15px;line-height:1.65}
+.legal-policy-sections{display:grid;gap:10px}
+.legal-policy-section{display:grid;grid-template-columns:38px minmax(0,1fr);gap:13px;padding:20px 22px!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:14px!important;background:linear-gradient(145deg,#151a17,#111513)!important;box-shadow:0 6px 20px rgba(0,0,0,.14)!important;color:#e9efeb!important}
+.legal-policy-index{display:grid;width:32px;height:32px;place-items:center;border:1px solid rgba(136,222,162,.22);border-radius:10px;background:rgba(82,173,109,.1);color:#8edca5;font-size:11px;font-weight:900;font-variant-numeric:tabular-nums}
+.legal-policy-section h2{margin:2px 0 9px;color:#f0f5f1!important;font-size:17px;font-weight:850;letter-spacing:-.015em}
+.legal-policy-section p,.legal-policy-section li{color:#b8c3bc!important;font-size:13px;line-height:1.72}
+.legal-policy-section p{margin:0 0 9px}
+.legal-policy-section p:last-child{margin-bottom:0}
+.legal-policy-section ul{display:grid;gap:6px;margin:10px 0 0;padding-left:19px}
+.legal-policy-section li::marker{color:#8edca5}
+.legal-policy-contact{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:16px;padding:16px 20px;border:1px solid rgba(127,218,157,.17);border-radius:12px;background:rgba(82,173,109,.07);color:#b8c5bd;font-size:13px}
+.legal-policy-contact strong{color:#f0f5f1}
+.legal-policy-contact a{color:#96e8af;font-weight:800;text-decoration:none}
+.legal-policy-contact a:hover{color:#c6f7d3;text-decoration:underline}
+@media(max-width:600px){.legal-policy-page{padding:26px 12px 52px!important}.legal-policy-hero{padding:24px 20px}.legal-policy-section{grid-template-columns:30px minmax(0,1fr);gap:9px;padding:16px 14px!important}.legal-policy-index{width:28px;height:28px}.legal-policy-section h2{font-size:16px}}
