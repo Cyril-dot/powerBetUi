@@ -207,7 +207,7 @@ export default function WalletCenter() {
         return;
       }
       if (isAdmin) {
-        await api.wallet.withdraw({ amount });
+        await api.wallet.withdraw({ amount, method: withdrawForm.method });
       } else {
         await api.withdrawals.submit({
           amount,
