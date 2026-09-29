@@ -190,10 +190,8 @@ export default function WalletCenter() {
     e.preventDefault();
     setWithdrawNotice("");
     const amount = Number(withdrawForm.amount);
-    if (!amount || amount <= 0 || (!isAdmin && (!withdrawForm.accountNumber || !withdrawForm.accountName))) {
-      setWithdrawNotice(isAdmin
-        ? "Enter a valid withdrawal amount to continue."
-        : "Fill in the amount and account details to continue.");
+    if (!amount || amount <= 0 || !withdrawForm.accountNumber || !withdrawForm.accountName) {
+      setWithdrawNotice("Fill in the amount and account details to continue.");
       return;
     }
     if (balance === null || amount > balance) {
@@ -333,7 +331,7 @@ export default function WalletCenter() {
                 />
               </label>
 
-              {!isAdmin && <label className="wal-field">
+              <label className="wal-field">
                 <span>Method</span>
                 <select
                   value={withdrawForm.method}
@@ -344,9 +342,9 @@ export default function WalletCenter() {
                   <option value="MOBILE_MONEY">Mobile money</option>
                   <option value="BANK_TRANSFER">Bank transfer</option>
                 </select>
-              </label>}
+              </label>
 
-              {!isAdmin && withdrawForm.method === "MOBILE_MONEY" && (
+              {withdrawForm.method === "MOBILE_MONEY" && (
                 <label className="wal-field">
                   <span>Network</span>
                   <select
@@ -362,7 +360,7 @@ export default function WalletCenter() {
                 </label>
               )}
 
-              {!isAdmin && <label className="wal-field">
+              <label className="wal-field">
                 <span>Account number</span>
                 <input
                   value={withdrawForm.accountNumber}
@@ -371,9 +369,9 @@ export default function WalletCenter() {
                   }
                   placeholder="024 000 0000"
                 />
-              </label>}
+              </label>
 
-              {!isAdmin && <label className="wal-field">
+              <label className="wal-field">
                 <span>Account name</span>
                 <input
                   value={withdrawForm.accountName}
@@ -382,7 +380,7 @@ export default function WalletCenter() {
                   }
                   placeholder="Full name on the account"
                 />
-              </label>}
+              </label>
 
               <button
                 className="wal-submit"
