@@ -99,6 +99,7 @@ export default function WalletCenter() {
   const [withdrawing,    setWithdrawing]    = useState(false);
   const [withdrawNotice, setWithdrawNotice] = useState("");
   const [withdrawSuccess, setWithdrawSuccess] = useState(false);
+  const [withdrawSuccessAmount, setWithdrawSuccessAmount] = useState<number | null>(null);
 
   // ── Data loader ──────────────────────────────────────────────────────────
 
@@ -222,6 +223,7 @@ export default function WalletCenter() {
         });
       }
       setWithdrawNotice(isAdmin ? "Withdrawal completed and recorded directly in your wallet." : "Withdrawal pending. Your request is waiting for review.");
+      setWithdrawSuccessAmount(amount);
       setWithdrawSuccess(true);
       setWithdrawForm({
         amount: "", method: "MOBILE_MONEY", accountNumber: "", accountName: "", network: "MTN",
@@ -413,6 +415,10 @@ export default function WalletCenter() {
               <button className="wal-success-close" type="button" onClick={() => setWithdrawSuccess(false)} aria-label="Close withdrawal success message"><X size={18} /></button>
               <div className="wal-success-icon"><CheckCircle2 size={34} /></div>
               <h3 id="wal-success-title">{isAdmin ? "Withdrawal successful" : "Withdrawal pending"}</h3>
+              <div className={`wal-withdrawal-amount${isAdmin ? " is-complete" : ""}`}>
+                <span>{isAdmin ? "Successfully withdrawn" : "Request amount"}</span>
+                <strong>{currencyCode} {(withdrawSuccessAmount ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+              </div>
               <p>{isAdmin ? "Your withdrawal was completed directly and recorded in your wallet." : "Your withdrawal request is pending review. We will update your wallet when it is approved and settled."}</p>
               <button className="wal-submit" type="button" onClick={() => setWithdrawSuccess(false)}>Done</button>
             </section>
@@ -613,6 +619,8 @@ function WalStyles() {
       .wal-payment-modal .dep-page{min-height:0;background:#fff}.wal-payment-modal .dep-hero{border-radius:16px 16px 0 0;padding:22px 24px}.wal-payment-modal .dep-body{padding:18px 20px 24px}.wal-payment-modal .dep-info-card,.wal-payment-modal .dep-log-panel{display:none}
       .wal-modal-close{position:absolute;top:10px;right:10px;z-index:3;width:32px;height:32px;display:grid;place-items:center;border:1px solid #d3dce8;border-radius:50%;background:#fff;color:#4e6076;cursor:pointer}
       .wal-success-close{position:absolute;top:10px;right:10px;width:32px;height:32px;display:grid;place-items:center;border:1px solid #303030;border-radius:50%;background:#202020;color:#d7d7d7;cursor:pointer}.wal-success-icon,.wal-gate-icon{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 12px;border-radius:50%;color:#8cf0b3;background:rgba(91,224,143,.13);border:1px solid rgba(91,224,143,.35)}.wal-gate-icon{width:54px;height:54px;color:#1e6bff;background:#eaf2ff;border-color:#b7d0f2}.wal-success-modal h3{margin:0 0 8px;color:#f5f5f5;font-size:20px}.wal-gate-modal h3{margin:0 0 10px;color:#173a68;font-size:27px;line-height:1.08;font-weight:900;letter-spacing:-.04em}.wal-success-modal p{margin:0 auto 18px;max-width:310px;color:#a4aaa7;font-size:13px;line-height:1.5}.wal-gate-modal p{margin:0 auto 20px;max-width:280px;color:#5f7489;font-size:14px;line-height:1.45}.wal-success-modal .wal-submit,.wal-gate-modal .wal-submit{width:100%;text-decoration:none}.wal-gate-modal .wal-submit{display:flex;align-items:center;justify-content:center;padding:13px;border-radius:10px;background:#1e6bff;color:#fff}
+      .wal-success-modal.wal-complete-modal{overflow:hidden;border-color:rgba(91,224,143,.55);background:radial-gradient(ellipse at top,rgba(52,145,83,.22),transparent 58%),linear-gradient(155deg,#18231c,#111513 72%);box-shadow:0 24px 80px rgba(0,0,0,.58),0 0 38px rgba(91,224,143,.12)}
+      .wal-withdrawal-amount{display:grid;gap:6px;margin:14px auto 16px;padding:16px 12px;border:1px solid rgba(255,255,255,.1);border-radius:13px;background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.018))}.wal-withdrawal-amount.is-complete{border-color:rgba(140,240,179,.3);background:linear-gradient(135deg,rgba(91,224,143,.14),rgba(255,255,255,.025))}.wal-withdrawal-amount span{color:#aebbb2;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}.wal-withdrawal-amount strong{color:#f4f7f4;font-size:clamp(27px,8vw,36px);font-weight:900;letter-spacing:-.045em;line-height:1.12;font-variant-numeric:tabular-nums}.wal-withdrawal-amount.is-complete strong{color:#b8ffd0}
       /* ── Withdrawal form ── */
       .wal-form  { display: flex; flex-direction: column; gap: 12px; }
       .wal-field {
