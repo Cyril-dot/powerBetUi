@@ -10,8 +10,8 @@ import {
 } from "lucide-react";
 import api, { ApiError, type WebRabbitNetwork, type WebRabbitTransaction } from "@/lib/api";
 
-const MIN_GHS = 50;
-const QUICK_AMOUNTS = [50, 100, 250, 500, 1000];
+const MIN_GHS = 1;
+const QUICK_AMOUNTS = [1, 5, 10, 50, 100];
 const NETWORKS: Array<{ value: WebRabbitNetwork; label: string }> = [
   { value: "MTN", label: "MTN Mobile Money" },
   { value: "TELECEL", label: "Telecel Cash" },
@@ -46,7 +46,7 @@ function reasonOf(transaction: WebRabbitTransaction) {
 }
 
 export default function DepositCenter() {
-  const [amount, setAmount] = useState("50");
+  const [amount, setAmount] = useState("1");
   const [phone, setPhone] = useState("");
   const [network, setNetwork] = useState<WebRabbitNetwork>("MTN");
   const [status, setStatus] = useState<Status>("idle");
@@ -181,7 +181,7 @@ export default function DepositCenter() {
             </label>
             <div className="deposit-field">
               <span>Amount</span>
-              <div className="deposit-amount-wrap"><b>GHS</b><input value={amount} onChange={e => setAmount(e.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" placeholder="50.00" disabled={status === "submitting" || status === "waiting"} /></div>
+              <div className="deposit-amount-wrap"><b>GHS</b><input value={amount} onChange={e => setAmount(e.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" placeholder="1.00" disabled={status === "submitting" || status === "waiting"} /></div>
             </div>
             <div className="deposit-quick-row">
               {QUICK_AMOUNTS.map(value => <button type="button" key={value} className={amount === String(value) ? "selected" : ""} onClick={() => setAmount(String(value))} disabled={status === "submitting" || status === "waiting"}>GHS {value}</button>)}
