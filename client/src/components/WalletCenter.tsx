@@ -419,7 +419,7 @@ export default function WalletCenter() {
                 <span>{isAdmin ? "Successfully withdrawn" : "Request amount"}</span>
                 <strong>{currencyCode} {(withdrawSuccessAmount ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
               </div>
-              <p>{isAdmin ? "Your withdrawal was completed directly and recorded in your wallet." : "Your withdrawal request is pending review. We will update your wallet when it is approved and settled."}</p>
+              {!isAdmin && <p>Your withdrawal request is pending review. We will update your wallet when it is approved and settled.</p>}
               <button className="wal-submit" type="button" onClick={() => setWithdrawSuccess(false)}>Done</button>
             </section>
           </div>
