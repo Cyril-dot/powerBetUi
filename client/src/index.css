@@ -2694,3 +2694,84 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .legal-policy-contact a{color:#96e8af;font-weight:800;text-decoration:none}
 .legal-policy-contact a:hover{color:#c6f7d3;text-decoration:underline}
 @media(max-width:600px){.legal-policy-page{padding:26px 12px 52px!important}.legal-policy-hero{padding:24px 20px}.legal-policy-section{grid-template-columns:30px minmax(0,1fr);gap:9px;padding:16px 14px!important}.legal-policy-index{width:28px;height:28px}.legal-policy-section h2{font-size:16px}}
+
+
+/* Flutterwave v4 Ghana Mobile Money deposits */
+.deposit-page{min-height:70vh;background:#0a0a0a;color:#f4f1f0;padding-bottom:56px}
+.deposit-hero{display:flex;align-items:center;gap:16px;padding:28px max(22px,calc((100% - 900px)/2));background:linear-gradient(118deg,#ffd84d,#1e6bff 78%,#0b2e70);color:#10172e}
+.deposit-hero-icon{display:grid;place-items:center;width:50px;height:50px;flex:none;border-radius:15px;background:#ffffff33}
+.deposit-eyebrow{font-size:10px;font-weight:900;letter-spacing:.14em}
+.deposit-hero h1{margin:5px 0 4px;font-size:clamp(25px,4vw,36px)}
+.deposit-hero p{margin:0;font-size:13px}
+.deposit-hero-trust{margin-left:auto;display:flex;align-items:center;gap:6px;padding:9px 12px;border-radius:999px;background:#ffffff2e;font-size:10px;font-weight:800;white-space:nowrap}
+.deposit-shell{width:min(720px,calc(100% - 32px));margin:24px auto 0}
+.deposit-rail{display:flex;align-items:center;gap:8px;margin:0 2px 10px;color:#9a9a9a;font-size:11px;font-weight:800}
+.deposit-rail-dot{width:7px;height:7px;border-radius:50%;background:#22c55e}
+.deposit-rail-live{display:flex;align-items:center;gap:4px;margin-left:auto;color:#4ade80;font-size:9px}
+.deposit-panel{background:#151515;border:1px solid #ffffff1a;border-radius:18px;padding:24px;box-shadow:0 14px 40px #0004}
+.deposit-panel-heading{display:flex;justify-content:space-between;gap:12px;margin-bottom:18px}
+.deposit-panel-heading h2{margin:0;color:#fff;font-size:18px}
+.deposit-panel-heading p{margin:5px 0 0;color:#969696;font-size:12px;line-height:1.55}
+.deposit-panel-heading>svg{flex:none;color:#ffd84d}
+.deposit-instruction-notice{display:flex;align-items:flex-start;gap:9px;margin:0 0 4px;padding:12px 13px;border:1px solid #2d754c;border-radius:11px;background:#10281a;color:#bcebc9}
+.deposit-instruction-notice>svg{flex:none;color:#62e18f;margin-top:1px}
+.deposit-instruction-notice strong{display:block;color:#e2f8e8;font-size:11px}
+.deposit-instruction-notice p{margin:5px 0 0;color:#a5c3ae;font-size:11px;line-height:1.55}
+.deposit-field{display:block;margin-top:16px;color:#b9b9b9;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.deposit-field>span,.deposit-field>label{display:block}
+.deposit-field input,.deposit-field select{display:block;width:100%;box-sizing:border-box;margin-top:7px;padding:13px 14px;border:1px solid #ffffff1f;border-radius:10px;background:#1d1d1d;color:#fff;font:600 14px 'DM Sans',sans-serif;outline:none}
+.deposit-field input:focus,.deposit-field select:focus{border-color:#ffd84d;box-shadow:0 0 0 3px #ffd84d22}
+.deposit-field input:disabled,.deposit-field select:disabled{opacity:.68}
+.deposit-amount-wrap{display:flex;align-items:center;margin-top:7px;border:1px solid #ffffff1f;border-radius:10px;background:#1d1d1d}
+.deposit-amount-wrap:focus-within{border-color:#ffd84d;box-shadow:0 0 0 3px #ffd84d22}
+.deposit-amount-wrap b{padding-left:14px;color:#ffd84d;font-size:12px}
+.deposit-amount-wrap input{margin:0;border:0;background:transparent}
+.deposit-quick-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.deposit-quick-row button{padding:7px 10px;border:1px solid #ffffff1a;border-radius:999px;background:#202020;color:#bbb;font-size:10px;font-weight:800;cursor:pointer}
+.deposit-quick-row button.selected{background:#ffd84d;border-color:#ffd84d;color:#121212}
+.deposit-quick-row button:disabled{opacity:.55;cursor:not-allowed}
+.deposit-submit,.deposit-secondary{display:flex;justify-content:center;align-items:center;gap:7px;width:100%;margin-top:20px;padding:13px 16px;border:0;border-radius:10px;background:#ffd84d;color:#171717;font:900 12px 'DM Sans',sans-serif;cursor:pointer}
+.deposit-submit:hover,.deposit-secondary:hover{background:#ffe477}
+.deposit-submit:disabled{opacity:.65;cursor:wait}
+.deposit-secondary{border:1px solid #ffffff22;background:#242424;color:#f3f3f3}
+.deposit-secondary:hover{background:#303030}
+.deposit-footnote{display:flex;gap:7px;margin:13px 0 0;color:#9a9a9a;font-size:10px;line-height:1.6}
+.deposit-footnote svg{flex:none;color:#22c55e}
+.deposit-error{display:flex;gap:7px;padding:10px 11px;margin:0 0 14px;border-radius:10px;background:#ef44441a;color:#ff9a9a;font-size:11px;line-height:1.5}
+.deposit-error svg{flex:none}
+.deposit-status-panel{text-align:center;padding:36px 24px}
+.deposit-status-panel.pending .deposit-status-icon{background:#ffd84d1f;color:#ffd84d}
+.deposit-status-panel.failed .deposit-status-icon{background:#ef44441a;color:#ff9a9a}
+.deposit-status-panel.timeout .deposit-status-icon{background:#1e6bff22;color:#87aaff}
+.deposit-status-icon{display:grid;place-items:center;width:62px;height:62px;margin:0 auto 13px;border-radius:20px;background:#22c55e1f;color:#4ade80}
+.deposit-status-label{font-size:9px;font-weight:900;letter-spacing:.14em;color:#4ade80}
+.deposit-status-panel.pending .deposit-status-label{color:#ffd84d}
+.deposit-status-panel.failed .deposit-status-label{color:#ff9a9a}
+.deposit-status-panel.timeout .deposit-status-label{color:#87aaff}
+.deposit-status-panel h2{margin:8px 0 7px;color:#fff;font-size:20px}
+.deposit-status-copy{max-width:460px;margin:0 auto;color:#c1c1c1;font-size:12px;line-height:1.65}
+.deposit-phone-hint{margin:11px 0 0;color:#b5b5b5;font-size:11px}
+.deposit-reference{margin:10px 0 0;color:#999;font-size:10px;overflow-wrap:anywhere}
+.deposit-reference code{color:#ffd84d;font-size:10px}
+.deposit-status-actions{display:flex;flex-direction:column;gap:0;max-width:380px;margin:0 auto}
+.deposit-warning{max-width:460px;margin:14px auto 0;color:#ffd77a;font-size:10px;line-height:1.6}
+.deposit-spin{animation:depositSpin 1s linear infinite}
+@keyframes depositSpin{to{transform:rotate(360deg)}}
+.deposit-diagnostics{margin-top:16px;padding:0 15px;border:1px solid #ffffff18;border-radius:12px;background:#121212;color:#d8d8d8}
+.deposit-diagnostics>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;color:#ddd;font-size:11px;font-weight:800;cursor:pointer;list-style:none}
+.deposit-diagnostics>summary::-webkit-details-marker{display:none}
+.deposit-diagnostics>summary:after{content:"＋";color:#ffd84d;font-size:14px}
+.deposit-diagnostics[open]>summary:after{content:"−"}
+.deposit-diagnostics>summary span{margin-left:auto;color:#969696;font-size:9px;font-weight:600}
+.deposit-diagnostics-body{padding:0 0 14px}
+.deposit-diagnostics-body>p{margin:0 0 10px;color:#969696;font-size:10px;line-height:1.5}
+.deposit-diagnostics-actions{display:flex;gap:8px;margin-bottom:9px}
+.deposit-diagnostics-actions button{display:inline-flex;align-items:center;gap:5px;padding:7px 9px;border:1px solid #ffffff1a;border-radius:7px;background:#202020;color:#ddd;font-size:10px;cursor:pointer}
+.deposit-diagnostics ol{display:grid;gap:5px;max-height:250px;overflow:auto;margin:0;padding:0;list-style:none}
+.deposit-diagnostics li{display:grid;grid-template-columns:auto auto minmax(80px,1fr);gap:4px 8px;padding:7px 8px;border-radius:7px;background:#191919;font-size:9px;line-height:1.4}
+.deposit-diagnostics li time,.deposit-diagnostics li small{color:#888}
+.deposit-diagnostics li b{color:#c4c4c4}
+.deposit-diagnostics li span{overflow-wrap:anywhere;color:#ddd}
+.deposit-diagnostics li code,.deposit-diagnostics li small{grid-column:3;color:#a6a6a6;font-size:8px;overflow-wrap:anywhere}
+.deposit-log-success b{color:#4ade80!important}.deposit-log-warn b{color:#ffd77a!important}.deposit-log-error b{color:#ff9a9a!important}
+@media(max-width:560px){.deposit-hero{align-items:flex-start;padding:22px 16px}.deposit-hero-icon{width:42px;height:42px}.deposit-hero-trust{align-self:center;padding:7px 8px;font-size:9px}.deposit-hero-trust svg{width:13px}.deposit-shell{width:min(720px,calc(100% - 22px));margin-top:17px}.deposit-panel{padding:19px 16px}.deposit-status-panel{padding:30px 16px}.deposit-rail{font-size:9px}.deposit-diagnostics li{grid-template-columns:auto 1fr}.deposit-diagnostics li span,.deposit-diagnostics li code,.deposit-diagnostics li small{grid-column:1/-1}.deposit-diagnostics-actions{flex-wrap:wrap}}

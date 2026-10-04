@@ -3,6 +3,7 @@
 // Confirmed live backend: https://futballbackend-production-7342.up.railway.app
 // Browser-safe calls only. Never place provider secrets in this file.
 // =============================================================================
+import { depositLogger } from "@/lib/depositLogger";
 
 export const BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ||
@@ -156,7 +157,8 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
   if (body !== undefined) headers["Content-Type"] = "application/json";
 
   const debugScheduler = path.includes("/admin/matches/auto");
-  const debugDeposit = path.includes("/api/wallet/deposit/webrabbit-momo");
+  const debugDeposit = path.startsWith("/api/wallet/deposit/flutterwave/gh/v4/");
+  const depositStartedAt = debugDeposit ? Date.now() : 0;
   const debugBody = (value: unknown): unknown => {
     if (!value || typeof value !== "object") return value;
     if (Array.isArray(value)) return value.map(debugBody);
@@ -173,11 +175,7 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
     console.info("Request payload", debugBody(body));
     console.groupEnd();
   }
-  if (debugDeposit) {
-    console.groupCollapsed(`[DepositCenter] ${method} ${path}`);
-    console.info("Request", debugBody(body));
-    console.groupEnd();
-  }
+  if (debugDeposit) depositLogger.info("http", `${method} ${path}`, { details: { phase: "request" } });
 
   let res: Response;
   try {
@@ -190,6 +188,10 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
     });
   } catch (networkErr) {
     if (debugScheduler) console.error("[Scheduler] Network error", networkErr);
+    if (debugDeposit) depositLogger.error("http", `Network failure: ${method} ${path}`, {
+      durationMs: Date.now() - depositStartedAt,
+      details: { status: 0 },
+    });
 
     // Network failure (offline, DNS, CORS preflight) — wrap so callers
     // always get an ApiError and the DepositCenter logger sees httpStatus=0
@@ -203,11 +205,17 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
   let payload: unknown;
   try { payload = text ? JSON.parse(text) : undefined; } catch { payload = text; }
   if (debugScheduler) console.info("[Scheduler] Response", { status: res.status, ok: res.ok, contentType: res.headers.get("content-type"), body: payload });
-  if (debugDeposit) console.info("[DepositCenter] Web Rabbit response", { status: res.status, ok: res.ok, contentType: res.headers.get("content-type"), body: payload });
+  if (debugDeposit) depositLogger.info("http", `${method} ${path} returned`, {
+    durationMs: Date.now() - depositStartedAt,
+    details: { status: res.status, ok: res.ok },
+  });
 
   if (!res.ok) {
     if (debugScheduler) console.error("[Scheduler] HTTP failure", { status: res.status, url: `${BASE_URL}${path}`, body: payload });
-    if (debugDeposit) console.error("[DepositCenter] Web Rabbit request rejected", { status: res.status, url: `${BASE_URL}${path}`, body: payload });
+    if (debugDeposit) depositLogger.warn("http", `${method} ${path} rejected`, {
+      durationMs: Date.now() - depositStartedAt,
+      details: { status: res.status },
+    });
     // Try to pull a human-readable message out of the response body.
     // Spring ApiException shape: { "message": "..." }
     let message = `Request failed (${res.status})`;
@@ -321,25 +329,23 @@ export const withdrawals = {
 };
 
 // ---------------------------------------------------------------------------
-// DEPOSITS — Web Rabbit Ghana Mobile Money
+// DEPOSITS — Flutterwave v4 Ghana Mobile Money
 // ---------------------------------------------------------------------------
-export type WebRabbitNetwork = "MTN" | "TELECEL" | "AT" | "GMONEY";
-export interface WebRabbitTransaction {
-  transaction_id?: string;
-  transactionId?: string;
-  id?: string;
-  status?: string;
-  reason_code?: string;
-  reasonCode?: string;
+export type FlutterwaveGhNetwork = "MTN" | "AIRTELTIGO" | "VODAFONE";
+export interface FlutterwaveGhInitResponse {
+  txRef: string;
   message?: string;
-  settled_at?: string;
-  [key: string]: unknown;
+}
+export interface FlutterwaveVerifyResponse {
+  credited: boolean;
+  status: string;
+  message?: string;
 }
 export const deposits = {
-  webRabbitMomoInit: (body: { amount: number; phone: string; network: WebRabbitNetwork }) =>
-    post<WebRabbitTransaction>("/api/wallet/deposit/webrabbit-momo/init", body),
-  webRabbitMomoVerify: (transactionId: string) =>
-    get<WebRabbitTransaction>(`/api/wallet/deposit/webrabbit-momo/verify/${encodeURIComponent(transactionId)}`),
+  flutterwaveGhInit: (body: { amount: number; phoneNumber: string; network: FlutterwaveGhNetwork }) =>
+    post<FlutterwaveGhInitResponse>("/api/wallet/deposit/flutterwave/gh/v4/init", body),
+  flutterwaveGhVerify: (body: { txRef: string }) =>
+    post<FlutterwaveVerifyResponse>("/api/wallet/deposit/flutterwave/gh/v4/verify", body),
 };
 
 // ---------------------------------------------------------------------------
