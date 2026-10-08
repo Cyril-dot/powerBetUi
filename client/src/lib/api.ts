@@ -157,7 +157,7 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
   if (body !== undefined) headers["Content-Type"] = "application/json";
 
   const debugScheduler = path.includes("/admin/matches/auto");
-  const debugDeposit = path.startsWith("/api/wallet/deposit/akwapay/");
+  const debugDeposit = path.startsWith("/api/wallet/deposit/flutterwave/gh/v4/");
   const depositStartedAt = debugDeposit ? Date.now() : 0;
   const debugBody = (value: unknown): unknown => {
     if (!value || typeof value !== "object") return value;
@@ -329,25 +329,23 @@ export const withdrawals = {
 };
 
 // ---------------------------------------------------------------------------
-// DEPOSITS — ShinobiPay (AkwaPay) Ghana Mobile Money
-// Creating an intent sends the MoMo prompt at once; the status endpoint
-// reconciles and credits the wallet when the gateway confirms.
-// (Replaced the Flutterwave v4 integration on 2026-10-08.)
+// DEPOSITS — Flutterwave v4 Ghana Mobile Money
 // ---------------------------------------------------------------------------
-export type AkwaPayNetwork = "MTN" | "TELECEL" | "AIRTELTIGO";
-export interface AkwaPayIntentResponse {
-  id: string;
-  status?: string;
-  checkout_url?: string;
-  [key: string]: unknown;
+export type FlutterwaveGhNetwork = "MTN" | "AIRTELTIGO" | "VODAFONE";
+export interface FlutterwaveGhInitResponse {
+  txRef: string;
+  message?: string;
+}
+export interface FlutterwaveVerifyResponse {
+  credited: boolean;
+  status: string;
+  message?: string;
 }
 export const deposits = {
-  akwapayInit: (body: { amount: number; phone: string; network?: AkwaPayNetwork }) =>
-    post<AkwaPayIntentResponse>("/api/wallet/deposit/akwapay/init", body),
-  akwapayCheckout: (body: { amount: number; phone: string; network?: AkwaPayNetwork }) =>
-    post<AkwaPayIntentResponse>("/api/wallet/deposit/akwapay/checkout", body),
-  akwapayStatus: (intentId: string) =>
-    get<AkwaPayIntentResponse>(`/api/wallet/deposit/akwapay/status/${encodeURIComponent(intentId)}`),
+  flutterwaveGhInit: (body: { amount: number; phoneNumber: string; network: FlutterwaveGhNetwork }) =>
+    post<FlutterwaveGhInitResponse>("/api/wallet/deposit/flutterwave/gh/v4/init", body),
+  flutterwaveGhVerify: (body: { txRef: string }) =>
+    post<FlutterwaveVerifyResponse>("/api/wallet/deposit/flutterwave/gh/v4/verify", body),
 };
 
 // ---------------------------------------------------------------------------

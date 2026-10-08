@@ -9,15 +9,15 @@ import {
   Smartphone,
   WalletCards,
 } from "lucide-react";
-import api, { ApiError, type AkwaPayNetwork } from "@/lib/api";
+import api, { ApiError, type FlutterwaveGhNetwork, type FlutterwaveVerifyResponse } from "@/lib/api";
 import { depositLogger, type DepositLogEntry } from "@/lib/depositLogger";
 
 const MIN_GHS = 50;
 const QUICK_AMOUNTS = [50, 100, 250, 500, 1000];
-const NETWORKS: Array<{ value: AkwaPayNetwork; label: string }> = [
+const NETWORKS: Array<{ value: FlutterwaveGhNetwork; label: string }> = [
   { value: "MTN", label: "MTN Mobile Money" },
-  { value: "TELECEL", label: "Telecel Cash" },
   { value: "AIRTELTIGO", label: "AirtelTigo Money" },
+  { value: "VODAFONE", label: "Vodafone / Telecel" },
 ];
 const TERMINAL_FAILURES = new Set([
   "failed", "cancelled", "canceled", "declined", "expired", "reversed", "voided", "abandoned", "rejected", "error",
@@ -52,46 +52,45 @@ function useDepositLogEntries() {
 export default function DepositCenter() {
   const [amount, setAmount] = useState("50");
   const [phone, setPhone] = useState("");
-  const [network, setNetwork] = useState<AkwaPayNetwork>("MTN");
+  const [network, setNetwork] = useState<FlutterwaveGhNetwork>("MTN");
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [intentId, setIntentId] = useState("");
-  const [checkoutUrl, setCheckoutUrl] = useState("");
+  const [txRef, setTxRef] = useState("");
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const checkInFlight = useRef(false);
   const entries = useDepositLogEntries();
 
   useEffect(() => {
-    depositLogger.info("lifecycle", "ShinobiPay deposit page opened");
+    depositLogger.info("lifecycle", "Flutterwave v4 deposit page opened");
     return () => {
       depositLogger.info("lifecycle", "Deposit page closed");
     };
   }, []);
 
   const checkPayment = useCallback(async (): Promise<VerifyOutcome> => {
-    if (!intentId || checkInFlight.current) return "pending";
+    if (!txRef || checkInFlight.current) return "pending";
     checkInFlight.current = true;
     const startedAt = Date.now();
-    depositLogger.debug("verify", "Checking ShinobiPay payment status", { reference: intentId });
+    depositLogger.debug("verify", "Checking Flutterwave v4 payment status", { reference: txRef });
     try {
-      const result = await api.deposits.akwapayStatus(intentId);
+      const result: FlutterwaveVerifyResponse = await api.deposits.flutterwaveGhVerify({ txRef });
       const currentStatus = String(result.status || "pending").toLowerCase();
       const durationMs = Date.now() - startedAt;
       depositLogger.info("verify", "Payment status received", {
-        reference: intentId,
+        reference: txRef,
         durationMs,
-        details: { status: currentStatus },
+        details: { status: currentStatus, credited: Boolean(result.credited) },
       });
-      if (SUCCESS_STATES.has(currentStatus)) {
-        depositLogger.success("verify", "ShinobiPay payment confirmed", { reference: intentId, durationMs });
-        setMessage("Your payment was confirmed and your wallet has been credited.");
+      setMessage(result.message || "We are still confirming your payment.");
+      if (result.credited || SUCCESS_STATES.has(currentStatus)) {
+        depositLogger.success("verify", "Flutterwave v4 payment confirmed", { reference: txRef, durationMs });
         setStatus("success");
         return "success";
       }
       if (TERMINAL_FAILURES.has(currentStatus)) {
         depositLogger.warn("verify", "Payment reached a terminal failure status", {
-          reference: intentId,
+          reference: txRef,
           durationMs,
           details: { status: currentStatus },
         });
@@ -101,7 +100,7 @@ export default function DepositCenter() {
       return "pending";
     } catch (verifyError) {
       depositLogger.warn("verify", "Payment status check failed; the next check will retry", {
-        reference: intentId,
+        reference: txRef,
         durationMs: Date.now() - startedAt,
         details: { httpStatus: verifyError instanceof ApiError ? verifyError.status : undefined },
       });
@@ -109,10 +108,10 @@ export default function DepositCenter() {
     } finally {
       checkInFlight.current = false;
     }
-  }, [intentId]);
+  }, [txRef]);
 
   useEffect(() => {
-    if (status !== "pending" || !intentId) return;
+    if (status !== "pending" || !txRef) return;
     let cancelled = false;
     const startedAt = Date.now();
     let timer: number | undefined;
@@ -121,13 +120,13 @@ export default function DepositCenter() {
     const poll = async () => {
       if (cancelled) return;
       attempt += 1;
-      depositLogger.debug("poll", "Scheduled payment check", { reference: intentId, details: { attempt } });
+      depositLogger.debug("poll", "Scheduled payment check", { reference: txRef, details: { attempt } });
       const outcome = await checkPayment();
       if (cancelled || outcome !== "pending") return;
       const elapsedMs = Date.now() - startedAt;
       if (elapsedMs >= 5 * 60 * 1000) {
         depositLogger.warn("poll", "Automatic polling window ended; manual recheck remains available", {
-          reference: intentId,
+          reference: txRef,
           details: { attempts: attempt, elapsedMs },
         });
         setStatus("timeout");
@@ -143,7 +142,7 @@ export default function DepositCenter() {
       cancelled = true;
       if (timer !== undefined) window.clearTimeout(timer);
     };
-  }, [checkPayment, status, intentId]);
+  }, [checkPayment, status, txRef]);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -165,30 +164,28 @@ export default function DepositCenter() {
 
     setStatus("submitting");
     setMessage("");
-    setIntentId("");
-    setCheckoutUrl("");
+    setTxRef("");
     checkInFlight.current = false;
     const startedAt = Date.now();
-    depositLogger.info("init", "Starting ShinobiPay Ghana Mobile Money deposit", {
+    depositLogger.info("init", "Starting Flutterwave v4 Ghana Mobile Money deposit", {
       details: { amountGhs: value, network, phoneMasked: maskPhone(normalizedPhone) },
     });
 
     try {
-      const result = await api.deposits.akwapayInit({ amount: value, phone: normalizedPhone, network });
-      if (!result.id) throw new Error("The payment service did not return a payment reference.");
-      setIntentId(result.id);
-      setCheckoutUrl(result.checkout_url || "");
-      setMessage("Check your phone for the payment prompt and approve it to continue.");
+      const result = await api.deposits.flutterwaveGhInit({ amount: value, phoneNumber: normalizedPhone, network });
+      if (!result.txRef) throw new Error("The payment service did not return a transaction reference.");
+      setTxRef(result.txRef);
+      setMessage(result.message || "Check your phone for the payment prompt and approve it to continue.");
       setStatus("pending");
-      depositLogger.success("init", "ShinobiPay payment created", {
-        reference: result.id,
+      depositLogger.success("init", "Flutterwave v4 charge created", {
+        reference: result.txRef,
         durationMs: Date.now() - startedAt,
         details: { network },
       });
     } catch (startError) {
       setError(errorMessage(startError));
       setStatus("failed");
-      depositLogger.error("init", "ShinobiPay payment could not be started", {
+      depositLogger.error("init", "Flutterwave v4 charge could not be started", {
         durationMs: Date.now() - startedAt,
         details: { httpStatus: startError instanceof ApiError ? startError.status : undefined },
       });
@@ -196,17 +193,16 @@ export default function DepositCenter() {
   };
 
   const reset = () => {
-    depositLogger.info("reset", "Customer requested a new deposit", { reference: intentId || undefined });
+    depositLogger.info("reset", "Customer requested a new deposit", { reference: txRef || undefined });
     setStatus("idle");
     setError("");
     setMessage("");
-    setIntentId("");
-    setCheckoutUrl("");
+    setTxRef("");
     checkInFlight.current = false;
   };
 
   const manualCheck = async () => {
-    depositLogger.info("verify", "Customer requested a manual payment status check", { reference: intentId });
+    depositLogger.info("verify", "Customer requested a manual payment status check", { reference: txRef });
     const outcome = await checkPayment();
     if (outcome === "pending" && status === "timeout") {
       setStatus("pending");
@@ -240,7 +236,7 @@ export default function DepositCenter() {
       <div className="deposit-shell">
         <div className="deposit-rail">
           <span className="deposit-rail-dot" />
-          <span>ShinobiPay · Ghana Mobile Money</span>
+          <span>Flutterwave v4 · Ghana Mobile Money</span>
           <span className="deposit-rail-live"><Smartphone size={11} /> LIVE</span>
         </div>
 
@@ -250,7 +246,7 @@ export default function DepositCenter() {
             <span className="deposit-status-label">PAYMENT CONFIRMED</span>
             <h2>Deposit successful</h2>
             <p className="deposit-status-copy">{message || "Your wallet has been updated."}</p>
-            {intentId && <p className="deposit-reference">Reference: <code>{intentId}</code></p>}
+            {txRef && <p className="deposit-reference">Reference: <code>{txRef}</code></p>}
             <button className="deposit-secondary" type="button" onClick={reset}>Make another deposit</button>
           </section>
         ) : status === "pending" || status === "timeout" || status === "failed" ? (
@@ -264,11 +260,10 @@ export default function DepositCenter() {
             <h2>{status === "pending" ? "Approve the prompt on your phone" : status === "failed" ? "Deposit not completed" : "Confirmation is taking longer"}</h2>
             <p className="deposit-status-copy">{message || (status === "pending" ? "Enter your Mobile Money PIN only in your provider's prompt." : "Check your wallet before starting another deposit.")}</p>
             {phone && <p className="deposit-phone-hint">Prompt sent to {maskPhone(phone)} · {network}</p>}
-            {intentId && <p className="deposit-reference">Reference: <code>{intentId}</code></p>}
+            {txRef && <p className="deposit-reference">Reference: <code>{txRef}</code></p>}
             {error && <div className="deposit-error"><AlertCircle size={15} />{error}</div>}
             <div className="deposit-status-actions">
               {status !== "failed" && <button className="deposit-secondary" type="button" onClick={() => void manualCheck()}><Check size={16} /> Check payment status</button>}
-              {status !== "failed" && checkoutUrl && <a className="deposit-secondary" href={checkoutUrl} target="_blank" rel="noreferrer">Open secure checkout</a>}
               <button className="deposit-secondary" type="button" onClick={reset}>{status === "failed" ? "Try another payment" : "Start a new deposit"}</button>
             </div>
             {status !== "failed" && <p className="deposit-warning">If you already approved the prompt, please do not submit the same payment again while it is pending.</p>}
@@ -285,11 +280,11 @@ export default function DepositCenter() {
             {error && <div className="deposit-error" role="alert"><AlertCircle size={15} />{error}</div>}
             <div className="deposit-instruction-notice" role="note">
               <ShieldCheck size={17} />
-              <div><strong>How it works</strong><p>ShinobiPay sends a payment approval prompt to your phone. Confirm it with your Mobile Money PIN in your provider's secure prompt. Your wallet is credited only after the charge is verified.</p></div>
+              <div><strong>How it works</strong><p>Flutterwave sends a payment approval prompt to your phone. Confirm it with your Mobile Money PIN in your provider's secure prompt. Your wallet is credited only after the charge is verified.</p></div>
             </div>
             <label className="deposit-field">
               <span>Mobile-money network</span>
-              <select value={network} onChange={event => setNetwork(event.target.value as AkwaPayNetwork)} disabled={disabled}>
+              <select value={network} onChange={event => setNetwork(event.target.value as FlutterwaveGhNetwork)} disabled={disabled}>
                 {NETWORKS.map(item => <option value={item.value} key={item.value}>{item.label}</option>)}
               </select>
             </label>
@@ -307,7 +302,7 @@ export default function DepositCenter() {
             <button className="deposit-submit" type="submit" disabled={disabled}>
               {status === "submitting" ? <><Loader2 size={17} className="deposit-spin" /> Starting payment…</> : <><Check size={17} /> Pay securely</>}
             </button>
-            <p className="deposit-footnote"><ShieldCheck size={14} /> Your wallet updates automatically after ShinobiPay confirms the payment.</p>
+            <p className="deposit-footnote"><ShieldCheck size={14} /> Your wallet updates automatically after Flutterwave confirms the payment.</p>
           </form>
         )}
 
