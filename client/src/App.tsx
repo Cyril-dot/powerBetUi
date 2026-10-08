@@ -33,7 +33,7 @@ import SuperAdminPage from "./pages/SuperAdminPage";
 import { SessionProvider, useSession, pickUserField } from "./lib/session";
 import { flagForCountry, codeLabel, flagImageUrl, COUNTRY_OPTIONS } from "./lib/countries";
 import NotFound from "./pages/NotFound";
-import { Bell, ChevronDown, ChevronRight, CircleHelp, Clock3, Copy, CreditCard, Flame, Gamepad2, Gift, Headphones, Info, Layers3, LayoutGrid, Minus, MoreHorizontal, Play, Plus, Radio, ScanBarcode, Search, ShieldCheck, Sparkles, Ticket, Trophy, UserRound, WalletCards, X, Zap } from "lucide-react";
+import { Bell, ChevronDown, ChevronRight, CircleHelp, Clock3, Copy, CreditCard, Eye, EyeOff, Flame, Gamepad2, Gift, Headphones, Info, Layers3, LayoutGrid, Minus, MoreHorizontal, Play, Plus, Radio, ScanBarcode, Search, ShieldCheck, Sparkles, Ticket, Trophy, UserRound, WalletCards, X, Zap } from "lucide-react";
 
 const hero = "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1600&auto=format&fit=crop";
 
@@ -84,7 +84,7 @@ function AuthField({ label, value, onChange, type = "text", placeholder = "" }: 
 }
 
 function AuthPasswordField({ confirm = false, value, onChange, visible, onToggleVisible, password, passwordStrong }: { confirm?: boolean; value: string; onChange: (v: string) => void; visible: boolean; onToggleVisible: () => void; password?: string; passwordStrong?: boolean }) {
-  return <label className="auth-field"><span>{confirm ? "Confirm password" : "Password"}</span><div className="auth-input-wrap"><input value={value} onChange={(e) => onChange(e.target.value)} type={visible ? "text" : "password"} placeholder={confirm ? "Repeat your password" : "At least 8 characters"} /><button type="button" onClick={onToggleVisible}>{visible ? "Hide" : "Show"}</button></div>{!confirm && password && <small className={passwordStrong ? "valid-text" : "error-text"}>{passwordStrong ? "Strong password" : "Use 8+ characters with a letter and number"}</small>}</label>;
+  return <label className="auth-field"><span>{confirm ? "Confirm password" : "Password"}</span><div className="auth-input-wrap"><input value={value} onChange={(e) => onChange(e.target.value)} type={visible ? "text" : "password"} placeholder={confirm ? "Repeat your password" : "At least 8 characters"} /><button type="button" onClick={onToggleVisible} aria-label={visible ? "Hide password" : "Show password"}>{visible ? <EyeOff size={18}/> : <Eye size={18}/>}</button></div>{!confirm && password && <small className={passwordStrong ? "valid-text" : "error-text"}>{passwordStrong ? "Strong password" : "Use 8+ characters with a letter and number"}</small>}</label>;
 }
 
 function AccountAuth({ mode }: { mode: "login" | "register" }) {
