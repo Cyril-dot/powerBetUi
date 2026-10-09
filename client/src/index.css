@@ -3154,3 +3154,13 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .hh-dots{gap:4px}
 .hh-dot{width:6px;height:6px}
 .hh-dot.active{width:17px}
+
+/* Header logo fix (owner, 2026-10-09: "why isn't the site logo showing"):
+   superbet-pixel-notch.svg is a WIDE 980x150 wordmark, but a legacy rule
+   ("Custom square logo mark sizing") forced it into 38x38px, crushing the
+   wordmark into an invisible sliver. Height-driven sizing restores it.
+   The MSport-style mobile tab row is also removed here (owner's order) —
+   its markup is gone, so the .m-tabs rules above are inert. */
+.header .brand.brand-logo img{display:block !important;width:auto !important;height:30px !important;object-fit:contain !important}
+.footer-brand img{width:auto !important;height:30px !important;object-fit:contain !important}
+@media(max-width:560px){.header .brand.brand-logo img{height:23px !important}}
