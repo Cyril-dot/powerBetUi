@@ -3246,3 +3246,8 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
    row no longer spans the full card — 84% wide (max 320px), centred. */
 .sb-odds-row,.featured-card-odds,.admin-game-odds{width:84% !important;max-width:320px !important;margin-left:auto !important;margin-right:auto !important}
 @media(max-width:560px){.sb-odds-row,.featured-card-odds,.admin-game-odds{width:86% !important;max-width:300px !important}}
+
+/* Header NOT sticky/fixed (owner, 2026-10-09: "dont mk it static or
+   fixed") — the top header scrolls away with the page like normal
+   content; it no longer stays pinned while scrolling. */
+.header{position:relative !important;top:auto !important}
