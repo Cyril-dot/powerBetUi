@@ -1,8 +1,9 @@
 // =============================================================================
 // sportsbook.ts — match aggregation, normalization & synthetic odds engine
 // Every match reaching the UI gets an odds map. Real odds (from the feed) are
-// fully clickable. Synthetic odds (generated when the feed has none) and live
-// odds are shown at full color but are NOT clickable — display-only.
+// fully clickable, and LIVE odds are clickable too — live matches render in
+// their own dark Live Matches section and are stakeable in-play. Only ended
+// matches are display-only.
 // =============================================================================
 
 import api, { type Match } from "./api";

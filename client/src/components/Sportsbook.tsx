@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
-import { Bike, ChevronRight, CircleDot, Dumbbell, Flame, RefreshCw, Sparkles, Star, Trophy, TriangleAlert, Zap } from "lucide-react";
+import { Bike, ChevronRight, CircleDot, Dumbbell, Flame, Radio, RefreshCw, Sparkles, Star, Trophy, TriangleAlert, Zap } from "lucide-react";
 import {
   categorise, fetchAdminMatches, fetchSport, formatKickoff, formatKickoffDate, getLastFetchStatus, liveClock,
   isMatchLive, parseKickoff, TWO_WAY_SPORTS,
@@ -344,6 +344,132 @@ function FeaturedMatchCard({ match, hasDraw, picks, onPick }: { match: EnrichedM
   );
 }
 
+/**
+ * LIVE MATCHES — flat dark live list, built to the owner's reference image
+ * (2026-10-09): near-black rows separated by hairline dividers (no boxed
+ * cards), a meta line on top (red dot + "In-Play 48'" in red, league in
+ * grey, admin games carry a red SPECIAL pill in the HOT slot), team names
+ * stacked on the left in white, scores stacked in green, and dark grey
+ * odds chips with green prices on the right. Live odds are fully
+ * stakeable — there is no live gate.
+ */
+function LiveRefRow({
+  match, hasDraw, picks, onPick,
+}: { match: EnrichedMatch; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void }) {
+  const odds = match.oddsMap;
+  const prevOddsRef = useRef<Record<string, number>>({});
+  useEffect(() => {
+    const cur: Record<string, number> = {};
+    if (odds?.home) cur["1"] = odds.home;
+    if (odds?.draw) cur["X"] = odds.draw;
+    if (odds?.away) cur["2"] = odds.away;
+    prevOddsRef.current = cur;
+  });
+  const moveOf = (sel: string, val: number): "up" | "down" | undefined => {
+    const prev = prevOddsRef.current[sel];
+    if (!prev || !val || prev === val) return undefined;
+    return val > prev ? "up" : "down";
+  };
+  const matchLabel = `${match.homeTeam} vs ${match.awayTeam}`;
+  const isSel = (sel: string) => picks.some((p) => p.id === match.id && p.market === "1X2" && p.selection === sel);
+  const pick = (sel: string, odd: number) => onPick({
+    id: match.id, match: matchLabel, market: "1X2", selection: sel, odd,
+    league: match.league, homeTeam: match.homeTeam, awayTeam: match.awayTeam,
+    kickoffAt: match.kickoffAt, isLive: true, scoreHome: match.scoreHome, scoreAway: match.scoreAway,
+  });
+  const slots = hasDraw
+    ? [["1", odds?.home ?? 0], ["X", odds?.draw ?? 0], ["2", odds?.away ?? 0]]
+    : [["1", odds?.home ?? 0], ["2", odds?.away ?? 0]];
+  const matchHref = `/match/${match.id}?sport=${encodeURIComponent(match.sport ?? "football")}${match.isAdmin ? "&admin=1" : ""}`;
+
+  return (
+    <div className="lref-row">
+      <div className="lref-meta">
+        {match.isAdmin && <span className="lref-hot">SPECIAL</span>}
+        <span className="lref-inplay"><i className="lref-dot" aria-hidden="true" />In-Play&nbsp;<LiveClock match={match} /></span>
+        <span className="lref-league">{match.league || match.sport || ""}</span>
+      </div>
+      <div className="lref-main">
+        <Link href={matchHref} className="lref-teams">
+          <span className="lref-team">{match.homeTeam}</span>
+          <span className="lref-team">{match.awayTeam}</span>
+        </Link>
+        <div className="lref-scores" aria-label="Score">
+          <span>{match.scoreHome ?? 0}</span>
+          <span>{match.scoreAway ?? 0}</span>
+        </div>
+        <div className="lref-odds">
+          {slots.map(([label, val]) => {
+            const empty = !(val as number) || (val as number) <= 0;
+            const move = empty ? undefined : moveOf(label as string, val as number);
+            return (
+              <button
+                key={label as string}
+                type="button"
+                className={`lref-odd${isSel(label as string) ? " sel" : ""}${empty ? " empty" : ""}${move ? ` moved-${move}` : ""}`}
+                disabled={empty}
+                onClick={() => pick(label as string, val as number)}
+                aria-label={`${label} ${empty ? "unavailable" : (val as number).toFixed(2)}`}
+              >
+                <b>{empty ? "—" : (val as number).toFixed(2)}{move && <i className={`lref-move ${move}`} aria-hidden="true">{move === "up" ? "▲" : "▼"}</i>}</b>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LiveMatchList({ list, hasDraw, picks, onPick }: { list: EnrichedMatch[]; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void }) {
+  const [visible, setVisible] = useState(PAGE_SIZE);
+  useEffect(() => { setVisible(PAGE_SIZE); }, [list.length]);
+  if (list.length === 0) return <p className="live-empty">No matches are live right now — games appear here the moment they kick off, with live odds you can bet on straight away.</p>;
+  const shown = list.slice(0, visible);
+  return (
+    <>
+      {shown.map((m) => <LiveRefRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} />)}
+      {visible < list.length && (
+        <button className="sb-load-more live-load-more" onClick={() => setVisible((v) => v + PAGE_SIZE)} type="button">
+          Show more live ({list.length - visible} remaining)
+        </button>
+      )}
+    </>
+  );
+}
+
+function LiveMatchesSection({
+  list, hasDraw, picks, onPick, loading,
+}: { list: EnrichedMatch[]; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void; loading: boolean }) {
+  return (
+    <section id="sb-section-live" className="panel sb-section sb-live-section sb-live-dark">
+      <div className="sb-section-head live-head">
+        <span className="live-head-title">
+          <i className="live-dot live-dot-green" aria-hidden="true" />
+          <Radio size={15} />
+          Live Matches
+          <b>({list.length})</b>
+        </span>
+        <span className="live-head-pill"><i className="live-dot live-dot-green" aria-hidden="true" /> LIVE</span>
+      </div>
+      <div className="sb-section-body live-body">
+        {list.length > 0 && (
+          <div className="lref-colhead" aria-hidden="true">
+            <span className="lref-colhead-fill" />
+            <span className="lref-colhead-scores" />
+            <div className="lref-colhead-odds">
+              {(hasDraw ? ["1", "X", "2"] : ["1", "2"]).map((l) => <span key={l}>{l}</span>)}
+            </div>
+          </div>
+        )}
+        {loading && list.length === 0 ? <SkeletonRows /> : (
+          <LiveMatchList list={list} hasDraw={hasDraw} picks={picks} onPick={onPick} />
+        )}
+      </div>
+    </section>
+  );
+}
+
 function SectionShell({
   title, icon, count, live, special, badge, id, children,
 }: { title: string; icon: React.ReactNode; count?: number; live?: boolean; special?: boolean; badge?: string; id?: string; children: React.ReactNode }) {
@@ -500,14 +626,26 @@ export default function Sportsbook({
     return map;
   }, [current]);
 
+  // LIVE GATE REMOVED: every live fixture — public feed AND admin-created —
+  // belongs in the Live Matches section. Admin live games are merged in and
+  // deduped by id (the grouped.live copy wins when both sources carry it).
+  const liveMatches = useMemo(() => {
+    const byId = new Map<string, EnrichedMatch>();
+    for (const m of grouped.live) byId.set(m.id, m);
+    for (const m of adminMatches) {
+      if (isMatchLive(m) && !byId.has(m.id)) byId.set(m.id, m);
+    }
+    return Array.from(byId.values()).sort(topSixFirst);
+  }, [grouped.live, adminMatches]);
+
   useEffect(() => {
     onMeta?.({
       sport, leagues, leagueCounts,
-      counts: { live: grouped.live.length, today: grouped.today.length, upcoming: grouped.upcoming.length, total: current.length },
+      counts: { live: liveMatches.length, today: grouped.today.length, upcoming: grouped.upcoming.length, total: current.length },
       loading,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sport, leagues.join("|"), loading, grouped.live.length, grouped.today.length, grouped.upcoming.length, current.length]);
+  }, [sport, leagues.join("|"), loading, liveMatches.length, grouped.today.length, grouped.upcoming.length, current.length]);
 
   const applyFilter = (list: EnrichedMatch[]) => (leagueFilter ? list.filter((m) => m.league === leagueFilter) : list);
   const applyHoursFilter = (list: EnrichedMatch[]) => {
@@ -519,9 +657,7 @@ export default function Sportsbook({
       return diffH >= 0 && diffH <= hoursFilter;
     });
   };
-  // Public live fixtures are intentionally blocked. Only admin-created live
-  // fixtures are allowed into the visible Live Now section.
-  const adminLiveMatches = adminMatches.filter((m) => isMatchLive(m));
+  const visibleLive = applyFilter(liveMatches);
 
   return (
     <div className="sb-wrap">
@@ -551,6 +687,10 @@ export default function Sportsbook({
           </div>
           <button onClick={() => load(sport)} type="button">Retry</button>
         </div>
+      )}
+
+      {!hideLive && (
+        <LiveMatchesSection list={visibleLive} hasDraw={hasDraw} picks={picks} onPick={onPick} loading={loading} />
       )}
 
       {mode === "all" && sport === "football" && adminMatches.length > 0 && (

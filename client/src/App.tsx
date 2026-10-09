@@ -341,7 +341,7 @@ function AdminFeaturedGames({ picks, onPick }: { picks: Pick[]; onPick: (p: Pick
     let active = true;
     const load = () => fetchAdminMatches().then((rows) => {
       if (!active) return;
-      const visible = rows.filter((m) => !isMatchLive(m) && !["FINISHED", "ENDED", "COMPLETED", "CANCELLED", "POSTPONED"].includes(String(m.status ?? "").toUpperCase()));
+      const visible = rows.filter((m) => !["FINISHED", "ENDED", "COMPLETED", "CANCELLED", "POSTPONED"].includes(String(m.status ?? "").toUpperCase()));
       setMatches(visible);
     }).catch(() => { if (active) setMatches([]); }).finally(() => { if (active) setLoading(false); });
     load();
