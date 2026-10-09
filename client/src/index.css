@@ -3164,3 +3164,85 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .header .brand.brand-logo img{display:block !important;width:auto !important;height:30px !important;object-fit:contain !important}
 .footer-brand img{width:auto !important;height:30px !important;object-fit:contain !important}
 @media(max-width:560px){.header .brand.brand-logo img{height:23px !important}}
+
+/* Today label icon chip + MATCH CARD TEAM NAMES (owner, 2026-10-09: team
+   names "not showing well... sizing is small"). The name rules in this file
+   are a pile of conflicting overrides (10.5px wrap on mobile, near-white
+   colour, four sizes) — this final block settles them: bigger, bolder,
+   dark, one clean line. */
+.fm-ball-icon{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#e8f3ff;color:#1e6bff}
+.sb-team-name{font-size:15px !important;font-weight:800 !important;color:#0d2138 !important;white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important;line-height:1.25 !important;letter-spacing:-.01em}
+.sb-team-line{gap:9px !important}
+@media(max-width:560px){.sb-team-name{font-size:14.5px !important}}
+
+/* Odds row breathing room + ODDS CARD upgrade (owner, 2026-10-09: "add
+   padding under the odds... and the odds card improve it"): more space
+   under the odds inside each match card, and richer odds buttons — soft
+   gradient, rounded, hairline border + top light, bigger price, label
+   always visible, gold-edged blue gradient when selected. */
+.sb-row{padding-bottom:16px !important}
+.sb-odds-row{gap:8px !important;margin-top:2px}
+.sb-odd{min-height:44px !important;border-radius:10px !important;background:linear-gradient(180deg,#ffffff,#edf3fb) !important;border:1px solid #c7dbf3 !important;box-shadow:0 1px 2px rgba(11,55,110,.07),inset 0 1px 0 #ffffff !important;gap:1px !important;transition:transform .13s ease,border-color .15s ease,box-shadow .15s ease !important}
+.sb-odd span{display:block !important;font-size:9px !important;font-weight:800 !important;letter-spacing:.09em;color:#7d93ad !important}
+.sb-odd b{font-size:15px !important;font-weight:900 !important;color:#0b376e !important;line-height:1.1}
+.sb-odd:active:not(:disabled){transform:scale(.97)}
+@media(hover:hover){.sb-odd:hover:not(:disabled):not(.sel){border-color:#1e6bff !important;box-shadow:0 4px 10px rgba(30,107,255,.16),inset 0 1px 0 #ffffff !important}}
+.sb-odd.sel{background:linear-gradient(135deg,#2b7fff,#1e6bff) !important;border-color:#ffc531 !important;box-shadow:0 6px 14px rgba(30,107,255,.35) !important}
+.sb-odd.sel span{color:rgba(255,255,255,.78) !important}
+.sb-odd.sel b{color:#ffffff !important}
+.sb-odd.empty,.sb-odd.display-only{background:#f1f5f9 !important;border-color:#dde6ef !important;box-shadow:none !important}
+.sb-odd.empty b,.sb-odd.display-only b{color:#9db2c6 !important}
+@media(max-width:560px){.sb-row{padding-bottom:15px !important}.sb-odd{min-height:42px !important}}
+
+/* ODDS CARD — full upgrade (owner, 2026-10-09, supersedes every "compact
+   odds pass" above): the tiles were shrunk to 24-26px slivers with the
+   1/X/2 labels hidden and the row squeezed to 88% width. Now: full-width
+   row, tall premium segmented tiles — blue gradient label band on top,
+   big price under it, gold-edged blue gradient when selected. */
+.sb-odds-row,.featured-card-odds,.admin-game-odds{width:100% !important;max-width:none !important;margin-left:0 !important;margin-right:0 !important;gap:8px !important}
+.sb-odds-row .sb-odd,.featured-card-odds .sb-odd,.admin-game-odd{min-height:54px !important;padding:0 !important;border-radius:12px !important;overflow:hidden !important;display:flex !important;flex-direction:column !important;align-items:stretch !important;justify-content:flex-start !important;background:#ffffff !important;border:1px solid #b9d2f2 !important;box-shadow:0 1px 2px rgba(11,55,110,.06) !important;transition:transform .13s ease,border-color .15s ease,box-shadow .15s ease !important}
+.sb-odds-row .sb-odd span,.featured-card-odds .sb-odd span,.admin-game-odd span{display:block !important;width:100% !important;padding:5px 4px 4px !important;background:linear-gradient(90deg,#2f74d0,#1e6bff) !important;color:#ffffff !important;font-size:10px !important;font-weight:800 !important;letter-spacing:.07em !important;line-height:1 !important;text-align:center !important}
+.sb-odds-row .sb-odd b,.featured-card-odds .sb-odd b,.admin-game-odd b{display:block !important;width:100% !important;padding:8px 4px 9px !important;font-size:17px !important;font-weight:900 !important;color:#0b376e !important;line-height:1.05 !important;text-align:center !important}
+.sb-odds-row .sb-odd:active:not(:disabled),.featured-card-odds .sb-odd:active:not(:disabled){transform:scale(.97)}
+@media(hover:hover){.sb-odds-row .sb-odd:hover:not(:disabled):not(.sel):not(.selected){border-color:#1e6bff !important;box-shadow:0 4px 10px rgba(30,107,255,.15) !important}}
+.sb-odds-row .sb-odd.sel,.sb-odds-row .sb-odd.selected,.featured-card-odds .sb-odd.sel,.featured-card-odds .sb-odd.selected{background:linear-gradient(160deg,#2b7fff,#1e6bff) !important;border-color:#ffc531 !important;box-shadow:0 6px 14px rgba(30,107,255,.32) !important}
+.sb-odds-row .sb-odd.sel span,.sb-odds-row .sb-odd.selected span,.featured-card-odds .sb-odd.sel span,.featured-card-odds .sb-odd.selected span{background:#1246a8 !important;color:rgba(255,255,255,.85) !important}
+.sb-odds-row .sb-odd.sel b,.sb-odds-row .sb-odd.selected b,.featured-card-odds .sb-odd.sel b,.featured-card-odds .sb-odd.selected b{color:#ffffff !important}
+.sb-odds-row .sb-odd.empty,.sb-odds-row .sb-odd.display-only{background:#f1f5f9 !important;box-shadow:none !important}
+.sb-odds-row .sb-odd.empty span,.sb-odds-row .sb-odd.display-only span{background:#dbe5f0 !important;color:#7d93ad !important}
+.sb-odds-row .sb-odd.empty b,.sb-odds-row .sb-odd.display-only b{color:#9db2c6 !important}
+.sb-odds-row .sb-more{min-height:54px !important;border-radius:12px !important}
+@media(max-width:560px){.sb-odds-row .sb-odd,.featured-card-odds .sb-odd,.admin-game-odd{min-height:50px !important}.sb-odds-row .sb-odd b,.featured-card-odds .sb-odd b{font-size:16px !important}.sb-odds-row .sb-more{min-height:50px !important}}
+
+/* ODDS CARD — PLAIN, improved (owner correction, 2026-10-09: "it should be
+   plane but just improve how it looked" — supersedes the segmented
+   blue-band tile above): one flat tile, no bands, no gradients — light
+   flat fill, small muted label over a big bold price, selected is a solid
+   blue fill. Bigger and cleaner than the old compact slivers. */
+.sb-odds-row .sb-odd,.featured-card-odds .sb-odd,.admin-game-odd{min-height:46px !important;padding:7px 4px !important;border-radius:10px !important;background:#edf2f8 !important;border:1px solid #d8e4f2 !important;box-shadow:none !important;display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;gap:1px !important}
+.sb-odds-row .sb-odd span,.featured-card-odds .sb-odd span,.admin-game-odd span{display:block !important;width:auto !important;padding:0 !important;background:transparent !important;color:#7d93ad !important;font-size:9.5px !important;font-weight:800 !important;letter-spacing:.08em !important;line-height:1.1 !important;text-align:center !important}
+.sb-odds-row .sb-odd b,.featured-card-odds .sb-odd b,.admin-game-odd b{display:block !important;width:auto !important;padding:0 !important;font-size:16px !important;font-weight:900 !important;color:#0b376e !important;line-height:1.15 !important;text-align:center !important}
+@media(hover:hover){.sb-odds-row .sb-odd:hover:not(:disabled):not(.sel):not(.selected){background:#e1ebf9 !important;border-color:#b9d2f2 !important;box-shadow:none !important}}
+.sb-odds-row .sb-odd.sel,.sb-odds-row .sb-odd.selected,.featured-card-odds .sb-odd.sel,.featured-card-odds .sb-odd.selected{background:#1e6bff !important;border-color:#1e6bff !important;box-shadow:none !important}
+.sb-odds-row .sb-odd.sel span,.sb-odds-row .sb-odd.selected span,.featured-card-odds .sb-odd.sel span,.featured-card-odds .sb-odd.selected span{background:transparent !important;color:rgba(255,255,255,.75) !important}
+.sb-odds-row .sb-odd.sel b,.sb-odds-row .sb-odd.selected b,.featured-card-odds .sb-odd.sel b,.featured-card-odds .sb-odd.selected b{color:#ffffff !important}
+.sb-odds-row .sb-odd.empty,.sb-odds-row .sb-odd.display-only{background:#f4f7fa !important;border-color:#e2eaf2 !important}
+.sb-odds-row .sb-odd.empty span,.sb-odds-row .sb-odd.display-only span{background:transparent !important;color:#a7bccd !important}
+.sb-odds-row .sb-odd.empty b,.sb-odds-row .sb-odd.display-only b{color:#a7bccd !important}
+.sb-odds-row .sb-more{min-height:46px !important}
+@media(max-width:560px){.sb-odds-row .sb-odd,.featured-card-odds .sb-odd,.admin-game-odd{min-height:44px !important}.sb-odds-row .sb-more{min-height:44px !important}}
+
+/* ODDS CARD sizing trim (owner, 2026-10-09: "reduce the sizing u can do
+   better"): same plain flat tile, tighter — 38px tall, 14.5px price,
+   slimmer label, 9px radius, 6px gaps. */
+.sb-odds-row,.featured-card-odds,.admin-game-odds{gap:6px !important}
+.sb-odds-row .sb-odd,.featured-card-odds .sb-odd,.admin-game-odd{min-height:38px !important;padding:5px 4px !important;border-radius:9px !important}
+.sb-odds-row .sb-odd span,.featured-card-odds .sb-odd span,.admin-game-odd span{font-size:8.5px !important}
+.sb-odds-row .sb-odd b,.featured-card-odds .sb-odd b,.admin-game-odd b{font-size:14.5px !important}
+.sb-odds-row .sb-more{min-height:38px !important}
+@media(max-width:560px){.sb-odds-row .sb-odd,.featured-card-odds .sb-odd,.admin-game-odd{min-height:37px !important}.sb-odds-row .sb-more{min-height:37px !important}}
+
+/* ODDS ROW width trim (owner, 2026-10-09: "reduce the width"): the odds
+   row no longer spans the full card — 84% wide (max 320px), centred. */
+.sb-odds-row,.featured-card-odds,.admin-game-odds{width:84% !important;max-width:320px !important;margin-left:auto !important;margin-right:auto !important}
+@media(max-width:560px){.sb-odds-row,.featured-card-odds,.admin-game-odds{width:86% !important;max-width:300px !important}}

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
-import { Bike, ChevronRight, CircleDot, Dumbbell, Flame, Radio, RefreshCw, Sparkles, Star, Trophy, TriangleAlert, Zap } from "lucide-react";
+import { Bike, CalendarDays, ChevronRight, CircleDot, Dumbbell, Flame, Radio, RefreshCw, Sparkles, Star, Trophy, TriangleAlert, Zap } from "lucide-react";
 import {
   categorise, fetchAdminMatches, fetchSport, formatKickoff, formatKickoffDate, getLastFetchStatus, liveClock,
   isMatchLive, parseKickoff, TWO_WAY_SPORTS,
@@ -806,13 +806,23 @@ export default function Sportsbook({
 
       {mode === "all" && (
         <>
-          {!UPCOMING_ONLY && <SectionShell id="sb-section-today" title="Today" icon={<Trophy size={14} />} count={applyFilter(grouped.today).length}>
-            {loading && grouped.today.length === 0 ? (
-              <SkeletonRows />
-            ) : (
-              <PaginatedLeagueList list={applyFilter(grouped.today)} hasDraw={hasDraw} picks={picks} onPick={onPick} emptyLabel="No matches scheduled for today." />
-            )}
-          </SectionShell>}
+          {!UPCOMING_ONLY && (
+            <section id="sb-section-today" className="panel sb-section sb-today-section">
+              <div className="fm-head">
+                <span className="fm-ball fm-ball-icon" aria-hidden="true"><CalendarDays size={16} /></span>
+                <h2 className="fm-title">Today</h2>
+                <span className="fm-sub">({applyFilter(grouped.today).length})</span>
+                <span className="fm-tag">{new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}</span>
+              </div>
+              <div className="sb-section-body">
+                {loading && grouped.today.length === 0 ? (
+                  <SkeletonRows />
+                ) : (
+                  <PaginatedLeagueList list={applyFilter(grouped.today)} hasDraw={hasDraw} picks={picks} onPick={onPick} emptyLabel="No matches scheduled for today." />
+                )}
+              </div>
+            </section>
+          )}
 
           <SectionShell id="sb-section-upcoming" title="Upcoming" icon={<Trophy size={14} />} count={applyFilter(grouped.upcoming).length}>
             {loading && grouped.upcoming.length === 0 ? (
