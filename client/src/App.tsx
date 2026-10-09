@@ -34,7 +34,7 @@ const SuperAdminPage = lazy(() => import("./pages/SuperAdminPage"));
 import { SessionProvider, useSession, pickUserField } from "./lib/session";
 import { flagForCountry, codeLabel, flagImageUrl, COUNTRY_OPTIONS } from "./lib/countries";
 const NotFound = lazy(() => import("./pages/NotFound"));
-import { Bell, ChevronDown, ChevronRight, CircleHelp, Clock3, Copy, CreditCard, Eye, EyeOff, Flame, Gamepad2, Gift, Headphones, Info, Layers3, LayoutGrid, Minus, MoreHorizontal, Play, Plus, Radio, ScanBarcode, Search, ShieldCheck, Sparkles, Ticket, Trophy, UserRound, WalletCards, X, Zap } from "lucide-react";
+import { Bell, CalendarDays, ChevronDown, ChevronRight, CircleHelp, Clock3, Copy, CreditCard, Eye, EyeOff, Flame, Gamepad2, Gift, Headphones, Info, Layers3, LayoutGrid, Minus, MoreHorizontal, Play, Plus, Radio, ScanBarcode, Search, ShieldCheck, Sparkles, Ticket, Trophy, UserRound, WalletCards, X, Zap } from "lucide-react";
 
 const hero = "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1600&auto=format&fit=crop";
 
@@ -73,7 +73,7 @@ function Header({ onMenu }: { onMenu: () => void }) {
   }, []);
   return <>
     <div className="utility"><div className="wrap utility-inner"><Link href="/" aria-label="SUPER BET home" className="utility-brand"><span className="utility-wordmark">SUPER BET</span></Link><span className="utility-links"><Link href="/deposit">Deposit</Link><Link href="/support">Support</Link>{token ? <><Link href="/bets">Bet history</Link><Link href="/account">My account <ChevronDown size={12}/></Link></> : <><Link href="/login">Log in</Link><Link href="/register">Join now</Link></>}</span></div></div>
-    <header className="header"><div className="wrap header-inner"><Link href="/" className="brand brand-logo" aria-label="SUPERBET home"><img src={mark} alt="SUPERBET" /></Link><nav id="primary-navigation" className="main-nav">{nav.map(([label, href]) => <Link key={href} href={href} className={location === href ? "active" : ""} onClick={() => document.body.classList.remove("menu-open")}>{label}{label === "Live" && <i className="live-dot"/>}</Link>)}</nav><div className="header-actions"><button className="icon-button" aria-label="Search" onClick={()=>window.location.href="/search"}><Search size={17}/></button>{token ? <><div className="header-wallet-group"><Link href="/wallet" className="header-balance"><span className="balance-label">Balance</span><strong>{balance !== null ? `GHS ${balance.toLocaleString("en-GH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "GHS 0.00"}</strong></Link><Link href="/deposit" className="header-deposit"><span>Deposit</span><ChevronRight size={13} /></Link></div><Link href="/account" className="login-link">My account</Link></> : <><Link href="/login" className="login-link">Log in</Link><Link href="/register" className="header-join-button">Join now</Link></>}</div></div></header>
+    <header className="header"><div className="wrap header-inner"><Link href="/" className="brand brand-logo" aria-label="SUPERBET home"><img src={mark} alt="SUPERBET" /></Link><nav id="primary-navigation" className="main-nav">{nav.map(([label, href]) => <Link key={href} href={href} className={location === href ? "active" : ""} onClick={() => document.body.classList.remove("menu-open")}>{label}{label === "Live" && <i className="live-dot"/>}</Link>)}</nav><div className="header-actions"><button className="icon-button" aria-label="Search" onClick={()=>window.location.href="/search"}><Search size={17}/></button>{token ? <><div className="header-wallet-group"><Link href="/wallet" className="header-balance"><span className="balance-label">Balance</span><strong>{balance !== null ? `GHS ${balance.toLocaleString("en-GH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "GHS 0.00"}</strong></Link><Link href="/deposit" className="header-deposit"><span>Deposit</span><ChevronRight size={13} /></Link></div><Link href="/account" className="login-link">My account</Link></> : <><Link href="/login" className="login-link">Log in</Link><Link href="/register" className="header-join-button">Join now</Link></>}</div></div><nav className="m-tabs" aria-label="Sections">{[["Home", "/"], ["Live", "/live"], ["Sports", "/sports"], ["Games", "/casino"], ["Virtual", "/casino"], ["Jackpot", "/promos"]].map(([label, href]) => <Link key={label} href={href} className={(location === href && (label === "Home" ? location === "/" : label === "Live" ? location === "/live" : label === "Sports" ? location === "/sports" : label === "Games" ? location === "/casino" : label === "Jackpot" ? location === "/promos" : false)) ? "active" : ""}>{label}{label === "Live" && <i className="live-dot" />}</Link>)}</nav></header>
   </>;
 }
 function Footer(){ return <footer><div className="wrap footer-grid"><div><Link href="/" className="brand footer-brand"><img src={mark} alt="SUPERBET" /></Link><p className="muted">The smarter way to follow the moment.</p><div className="partner-badge"><Trophy size={24}/><span>Official<br/>Sports Partner</span></div></div><div><h4>Bet with confidence</h4><Link href="/">About SUPERBET</Link><Link href="/promos">Promotions</Link><Link href="/responsible-gaming">Responsible gaming</Link><Link href="/terms-and-conditions">Terms and Conditions</Link><Link href="/refund-policy">Refund Policy</Link><Link href="/">Privacy policy</Link></div><div><h4>How to play</h4><Link href="/">FAQ</Link><Link href="/live">Live betting</Link><Link href="/casino">Games</Link></div><div><h4>Connect with us</h4><Link href="/help"><Headphones size={14}/> Customer support</Link><Link href="/affiliate"><Copy size={14}/> Copy referral link</Link><Link href="/login"><Bell size={14}/> Get notifications</Link></div></div><div className="footer-bottom wrap"><span>18+ &nbsp; Play responsibly. Gambling can be addictive.</span><span>© 2026 SUPERBET. All rights reserved.</span></div></footer> }
@@ -193,69 +193,85 @@ function PromoCarousel() {
 }
 
 const ICON_NAV_ITEMS: { label: string; icon: typeof Flame; href: string }[] = [
-  { label: "All Sports", icon: LayoutGrid, href: "/sports" },
+  { label: "Soccer", icon: Trophy, href: "/sports" },
+  { label: "Today", icon: CalendarDays, href: "/" },
   { label: "Live", icon: Radio, href: "/live" },
-  { label: "Booking", icon: ScanBarcode, href: "/booking-code" },
-  { label: "Casino", icon: Gamepad2, href: "/casino" },
+  { label: "Games", icon: Gamepad2, href: "/casino" },
+  { label: "Booking Codes", icon: Ticket, href: "/booking-code" },
   { label: "Promos", icon: Gift, href: "/promos" },
-  { label: "More", icon: MoreHorizontal, href: "/account" },
 ];
 
 /** Icon quick-links for the homepage. The former Today/Football pill row is removed. */
 function IconNavAndPills() {
   return (
-    <div className="joined-nav-block">
-      <nav className="icon-nav-row" aria-label="Quick links">
-        {ICON_NAV_ITEMS.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Link key={item.label} href={item.href} className="icon-nav-item">
-              <span className="icon-nav-icon"><Icon size={19} /></span>
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
-    </div>
+    <nav className="qa-card" aria-label="Quick links">
+      {ICON_NAV_ITEMS.map((item) => {
+        const Icon = item.icon;
+        return (
+          <Link key={item.label} href={item.href} className="qa-item">
+            <span className="qa-icon"><Icon size={20} /></span>
+            <span className="qa-label">{item.label}</span>
+          </Link>
+        );
+      })}
+    </nav>
   );
 }
 
 function HomeQuickNav() {
   return (
     <div className="home-quick-nav">
-      <PromoCarousel />
       <IconNavAndPills />
     </div>
   );
 }
 
 function TrustPanel(){ return <section className="panel simple-card" style={{padding:'20px 18px'}}><div className="side-title" style={{padding:'0 0 12px', border:'none'}}><ShieldCheck size={15}/> Why Super Bet</div><p className="muted" style={{fontSize:11, lineHeight:1.7}}>Real odds sourced live from our sports data feed. Matches without live pricing yet are clearly marked as estimated so you always know which prices are confirmed and which are a placeholder.</p></section> }
-function Hero(){
-  return <>
-    <section className="hero">
-      <div className="hero-shapes" aria-hidden="true">
-        <span className="hero-shape hero-shape-a"/>
-        <span className="hero-shape hero-shape-b"/>
-        <span className="hero-dots"/>
-      </div>
-      <div className="hero-photo-mask"><img src={hero}/></div>
-      <div className="hero-sheen"/>
-      <div className="hero-shimmer"/>
-      <span className="hero-live-chip"><i className="live-dot"/> Live markets updating now</span>
-      <div className="hero-copy">
-        <h1>Build your<br/><span className="hero-mark"><em>winning</em></span> slip.</h1>
-        <p className="hero-subtext">Live odds. Smarter bets. Better wins.</p>
-        <Link href="/sports" className="hero-bet-now">Bet now <ChevronRight size={15}/></Link>
-        <div className="hero-stats">
-          <span><Radio size={13}/> Live odds, every match</span>
-          <span><Zap size={13}/> Instant bet placement</span>
-          <span><ShieldCheck size={13}/> Secure & licensed</span>
+// ---------------------------------------------------------------------------
+// HomeHero — MSport-style hero banner carousel (owner, 2026-10-09): a dark
+// banner with a gold tag pill, big Barlow Condensed headline, gold CTA and
+// carousel dots, auto-rotating. Slides point at real Super Bet pages only.
+// ---------------------------------------------------------------------------
+// Hero imagery (owner, 2026-10-09): ONE carousel of SEVEN slides, every
+// slide a full background image with its own copy — and the LAST slide is
+// the iPhone 16 prize slide, its photo as the background (no separate
+// prize box). All image URLs verified live.
+const HERO_SLIDES: { tag: string; title: React.ReactNode; sub: string; cta: string; href: string; image: string; pos?: string }[] = [
+  { tag: "Super Bet Football", title: "Bet on the big leagues", sub: "Premier League, La Liga, Champions League — every big match with live odds.", cta: "Bet now", href: "/sports", image: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=1200&auto=format&fit=crop" },
+  { tag: "Live Betting", title: "Live odds, every minute", sub: "In-play markets update second by second as the action happens.", cta: "Go live", href: "/live", image: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1200&auto=format&fit=crop", pos: "center 30%" },
+  { tag: "Premier League", title: "The Prem is home", sub: "Every Premier League match, every weekend — priced and ready to back.", cta: "See matches", href: "/", image: "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Premier_League_Newcastle-Arsenal_2023-05-07_24.jpg/960px-Premier_League_Newcastle-Arsenal_2023-05-07_24.jpg", pos: "center 22%" },
+  { tag: "Top 10 Leagues", title: "Europe's best, one board", sub: "Featured matches from the top 10 leagues, all in one place.", cta: "View featured", href: "/", image: "https://images.unsplash.com/photo-1553778263-73a83bab9b0c?q=80&w=1200&auto=format&fit=crop" },
+  { tag: "Booking Codes", title: "Load a slip in seconds", sub: "Got a booking code? Load the full slip instantly and make it yours.", cta: "Enter a code", href: "/booking-code", image: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=1200&auto=format&fit=crop", pos: "center 25%" },
+  { tag: "Promotions", title: "Boosts, free bets & rewards", sub: "Fresh offers land in the promotions centre — see what is live today.", cta: "View offers", href: "/promos", image: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?q=80&w=1200&auto=format&fit=crop" },
+  { tag: "Super Bet Rewards", title: <>Win an <span className="hh-gold">iPhone 16</span></>, sub: "Plus a PlayStation 5 and weekly cash prizes. Bet on the Premier League and the top leagues to enter.", cta: "Enter now", href: "/promos", image: "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/IPhone_16_Pro_Max_Desert_Titanium_Rear.png/500px-IPhone_16_Pro_Max_Desert_Titanium_Rear.png", pos: "68% 32%" },
+];
+function HomeHero() {
+  const [index, setIndex] = useState(0);
+  useEffect(() => {
+    const t = window.setInterval(() => setIndex((i) => (i + 1) % HERO_SLIDES.length), 5000);
+    return () => window.clearInterval(t);
+  }, []);
+  return (
+    <section className="hh" aria-label="Featured promotions">
+      {HERO_SLIDES.map((s, i) => (
+        <div key={s.tag} className={`hh-slide${i === index ? " active" : ""}`} aria-hidden={i !== index}>
+          <img className="hh-bg" src={s.image} alt="" style={s.pos ? { objectPosition: s.pos } : undefined} loading={i === 0 ? "eager" : "lazy"} />
+          <div className="hh-shade" />
+          <div className="hh-copy">
+            <span className="hh-tag">{s.tag}</span>
+            <h2 className="hh-title">{s.title}</h2>
+            <p className="hh-sub">{s.sub}</p>
+            <Link href={s.href} className="hh-cta">{s.cta} <ChevronRight size={14} /></Link>
+          </div>
         </div>
+      ))}
+      <div className="hh-dots">
+        {HERO_SLIDES.map((s, i) => (
+          <button key={s.tag} type="button" aria-label={`Show banner ${i + 1}`} className={`hh-dot${i === index ? " active" : ""}`} onClick={() => setIndex(i)} />
+        ))}
       </div>
-      <div className="hero-progress"><span className="active"/><span/><span/></div>
     </section>
-    <img className="wide-banner" src={virtualBanner}/>
-  </>
+  );
 }
 function BetSlip({ picks, setPicks, onPlace }: { picks: Pick[]; setPicks: (p: Pick[])=>void; onPlace: (stake: number)=>Promise<void> }){ const MIN_STAKE=100; const [stake,setStake]=useState(1); const [stakeEdited,setStakeEdited]=useState(false); const [placing,setPlacing]=useState(false); const [notice,setNotice]=useState(""); const total=picks.reduce((a,b)=>a*b.odd,1); const place=async()=>{ setNotice(""); setPlacing(true); try { await onPlace(stake); setPicks([]); setNotice("Bet placed successfully."); } catch (error) { setNotice(error instanceof ApiError ? error.message : "We could not place this bet. Please try again."); } finally { setPlacing(false); } }; return <aside className="betslip panel"><div className="betslip-tabs"><span className="active">Betslip</span><span>Cashout</span></div>{picks.length===0?<div className="empty-slip"><WalletCards size={34}/><h3>Your betslip is empty</h3><p>{notice || "Click on the odds to add selections and build your bet."}</p><Link href="/" className="ghost-button">Browse matches</Link></div>:<><div className="slip-header"><span>Singles</span><button onClick={()=>setPicks([])}>Clear all</button></div>{picks.map(p=><div className="slip-pick" key={`${p.id}-${p.selection}`}><div><b>{p.match}</b><small>{p.market} · {p.selection}</small></div><strong>{p.odd.toFixed(2)}</strong><button onClick={()=>setPicks(picks.filter(x=>x!==p))}><X size={14}/></button></div>)}<div className="slip-summary"><div><span>Potential return</span><b>GHS {(stake*total).toFixed(2)}</b></div><label>Stake<input value={stake} onChange={e=>{setStakeEdited(true);setStake(Number(e.target.value)||0)}} type="number" min={MIN_STAKE}/><small>Minimum GHS {MIN_STAKE}</small></label><button className={`gold-button full${stake < MIN_STAKE ? " stake-button-disabled" : ""}`} onClick={place} disabled={placing || stake < MIN_STAKE}>{placing ? "Placing…" : "Place bet"} <Zap size={15}/></button>{stakeEdited && stake < MIN_STAKE && <small className="stake-error" role="alert">Deposit an additional GHS {Math.max(0, MIN_STAKE - stake).toFixed(2)} to place this bet.</small>}{notice&&<small className="auth-notice" role="alert">{notice}</small>}</div></>}</aside> }
 /**
@@ -360,7 +376,7 @@ function AdminFeaturedGames({ picks, onPick }: { picks: Pick[]; onPick: (p: Pick
 }
 
 function Home({ onPick, picks, setPicks, onPlace }: {onPick:(p:Pick)=>void;picks:Pick[];setPicks:(p:Pick[])=>void;onPlace:(stake:number)=>Promise<void>}){
-  return <><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><main className="wrap page-grid"><SideNav/><div className="main-column"><Hero/><HomeQuickNav/><Sportsbook picks={picks} onPick={onPick}/></div><div className="right-column"><BetSlip picks={picks} setPicks={setPicks} onPlace={onPlace}/><TrustPanel/></div></main><Footer/></>
+  return <><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><main className="wrap page-grid"><SideNav/><div className="main-column"><HomeHero/><HomeQuickNav/><Sportsbook picks={picks} onPick={onPick}/></div><div className="right-column"><BetSlip picks={picks} setPicks={setPicks} onPlace={onPlace}/><TrustPanel/></div></main><Footer/></>
 }
 function Casino(){ return <><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><main className="wrap casino-page"><div className="casino-hero"><div className="hero-shapes"><span className="hero-shape hero-shape-a"/><span className="hero-shape hero-shape-b"/><span className="hero-dots"/></div><img src={casinoFeature}/><div><span className="eyebrow">Super Bet originals</span><h1>Casino games<br/><em>coming soon.</em></h1><p>We're building out real casino games backed by a live provider — no placeholder games shown here in the meantime.</p></div></div><section className="panel simple-card" style={{marginTop:24}}><Sparkles size={24}/><h3>Nothing to show yet, honestly</h3><p>Rather than fill this page with demo game tiles that don't actually work, we're leaving it empty until real casino games are integrated. Check back soon, or head to the <Link href="/" style={{color:'var(--gold-hi)',fontWeight:800}}>sportsbook</Link> in the meantime.</p></section></main><Footer/></> }
 

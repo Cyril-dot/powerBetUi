@@ -556,7 +556,13 @@ function TopLeaguesSection({
   if (list.length === 0) return null;
   const shown = leagueId === "all" ? list : list.filter((m) => topTenLeagueOf(m)?.id === leagueId);
   return (
-    <SectionShell title="Top 10 Leagues" icon={<Trophy size={14} />} count={list.length} special badge="UPCOMING">
+    <section className="panel sb-section sb-top10-section">
+      <div className="fm-head">
+        <span className="fm-ball" aria-hidden="true">⚽</span>
+        <h2 className="fm-title">Featured Matches</h2>
+        <span className="fm-tag">Upcoming</span>
+      </div>
+      <div className="sb-section-body">
       <div className="t10-chips" role="tablist" aria-label="Filter top leagues">
         <button type="button" role="tab" aria-selected={leagueId === "all"} className={`t10-chip${leagueId === "all" ? " active" : ""}`} onClick={() => setLeagueId("all")}>All<b>{list.length}</b></button>
         {present.map((l) => (
@@ -570,7 +576,8 @@ function TopLeaguesSection({
           <TopLeagueCard key={m.id} match={m} leagueLabel={topTenLeagueOf(m)?.label ?? m.league ?? ""} hasDraw={hasDraw} picks={picks} onPick={onPick} />
         ))}
       </div>
-    </SectionShell>
+      </div>
+    </section>
   );
 }
 

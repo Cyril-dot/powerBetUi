@@ -3077,3 +3077,80 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .t10-when b{display:block;font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;letter-spacing:.015em;line-height:.95;color:#0b376e;font-variant-numeric:tabular-nums}
 .t10-when small{display:block;margin-top:3px;font-size:11px;font-weight:700;color:#8496ab;font-variant-numeric:tabular-nums}
 @media(max-width:560px){.t10-card{flex-basis:86%}}
+
+/* ============================================================================
+   HOME TOP SECTION (owner, 2026-10-09 — MSport homepage reference): hero
+   banner carousel + white quick-actions card, and the FEATURED MATCHES label
+   on the Top 10 Leagues section.
+   ============================================================================ */
+.hh{position:relative;min-height:196px;border-radius:16px;overflow:hidden;background:#0a1120;box-shadow:0 14px 34px rgba(6,20,40,.35)}
+.hh-slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .6s ease}
+.hh-slide.active{opacity:1;pointer-events:auto}
+.hh-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%}
+.hh-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,10,22,.94) 30%,rgba(5,10,22,.55) 62%,rgba(5,10,22,.15) 100%)}
+.hh-motif{position:absolute;right:6px;top:50%;transform:translateY(-50%) rotate(-10deg);color:rgba(255,255,255,.10);pointer-events:none}
+.hh-copy{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:20px 20px 30px;max-width:78%}
+.hh-tag{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;background:linear-gradient(135deg,#ffc531,#f59e0b);color:#261900;font-size:9.5px;font-weight:900;letter-spacing:.11em;text-transform:uppercase}
+.hh-title{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:800;line-height:.95;letter-spacing:-.01em;text-transform:uppercase;color:#fff}
+.hh-sub{font-size:12px;line-height:1.45;color:rgba(255,255,255,.78);max-width:300px}
+.hh-cta{display:inline-flex;align-items:center;gap:3px;margin-top:2px;padding:8px 15px;border-radius:999px;background:linear-gradient(135deg,#ffc531,#f59e0b);color:#261900;font-size:12px;font-weight:900;box-shadow:0 6px 16px rgba(245,158,11,.4)}
+.hh-dots{position:absolute;left:0;right:0;bottom:10px;z-index:2;display:flex;justify-content:center;gap:5px}
+.hh-dot{width:7px;height:7px;border-radius:999px;border:0;padding:0;background:rgba(255,255,255,.35);cursor:pointer;transition:all .25s ease}
+.hh-dot.active{width:20px;background:#ffc531}
+@media(max-width:560px){.hh{min-height:186px}.hh-copy{padding:16px 16px 28px;max-width:86%}.hh-title{font-size:29px}.hh-sub{font-size:11.5px}}
+.qa-card{display:flex;background:#fff;border:1px solid #e2eaf5;border-radius:14px;padding:12px 6px 10px;box-shadow:0 6px 18px rgba(11,55,110,.07)}
+.qa-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;-webkit-tap-highlight-color:transparent}
+.qa-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#eef4fc;color:#0b376e;transition:transform .15s ease,background .15s ease}
+.qa-item:active .qa-icon{transform:scale(.92);background:#dcecff}
+.qa-label{font-size:9.5px;font-weight:700;color:#33506e;text-align:center;line-height:1.15}
+@media(max-width:560px){.qa-icon{width:37px;height:37px}.qa-label{font-size:9px}}
+.fm-head{display:flex;align-items:center;gap:8px;padding:13px 14px 11px;border-bottom:1px solid #eef2f8}
+.fm-ball{font-size:17px;line-height:1}
+.fm-title{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;color:#0b1f3a;white-space:nowrap}
+.fm-sub{font-size:11px;font-weight:700;color:#8496ab;white-space:nowrap}
+.fm-sub b{color:#5b7186}
+.fm-tag{margin-left:auto;flex-shrink:0;padding:4px 10px;border-radius:999px;background:#e8f3ff;color:#1e6bff;font-size:9.5px;font-weight:900;letter-spacing:.09em;text-transform:uppercase}
+.hh-tone-a .hh-shade{background:linear-gradient(115deg,#070d1c 25%,#0d2148 65%,#1e6bff 135%)}
+.hh-tone-b .hh-shade{background:linear-gradient(115deg,#0d0a1f 25%,#241457 65%,#6d4dff 135%)}
+.hh-tone-c .hh-shade{background:linear-gradient(115deg,#041a16 25%,#0a3548 65%,#0ea5a4 135%)}
+
+/* Hero promo slide + mobile tab row (owner, 2026-10-09: "same image, partial
+   background... top prem team image and win prizes like iPhone 16"). */
+.hh-tone-promo .hh-shade{background:linear-gradient(90deg,rgba(4,8,18,.96) 34%,rgba(4,8,18,.62) 60%,rgba(4,8,18,.18) 100%)}
+.hh-photo{position:absolute;top:0;right:0;bottom:0;width:64%;height:100%;object-fit:cover;object-position:center 42%;-webkit-mask-image:linear-gradient(90deg,transparent,#000 46%);mask-image:linear-gradient(90deg,transparent,#000 46%)}
+.hh-gold{background:linear-gradient(120deg,#ffd964,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hh-copy.narrow{max-width:64%}
+.hh-prize{position:absolute;right:12px;bottom:26px;z-index:2;margin:0;width:96px;transform:rotate(-4deg)}
+.hh-prize figcaption{margin-top:5px;text-align:center;font-size:8.5px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#ffc531}
+@media(max-width:560px){.hh-prize{width:82px;right:10px;bottom:24px}.hh-copy.narrow{max-width:62%}}
+.m-tabs{display:none}
+@media(max-width:820px){
+  .m-tabs{display:flex;align-items:stretch;gap:2px;padding:0 6px;border-top:1px solid rgba(255,255,255,.14)}
+  .m-tabs a{position:relative;flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:9px 2px 10px;color:rgba(255,255,255,.82);font-family:'Barlow Condensed',sans-serif;font-size:14.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+  .m-tabs a.active{color:#fff}
+  .m-tabs a.active:after{content:"";position:absolute;left:14%;right:14%;bottom:0;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#ffc531,#f59e0b)}
+}
+@media(max-width:560px){.hh{min-height:222px}.hh-title{font-size:28px}.hh-sub{font-size:11.5px;line-height:1.4}}
+
+/* Promo slide carousels (owner, 2026-10-09): background images crossfade,
+   and the prize frame is its own carousel with dots. */
+.hh-photo{opacity:0;transition:opacity .9s ease}
+.hh-photo.active{opacity:1}
+.hh-prize-frame{position:relative;display:block;width:100%;aspect-ratio:4/3.4;border-radius:10px;border:2px solid #ffc531;background:linear-gradient(160deg,#232f47,#0a1120);box-shadow:0 10px 24px rgba(0,0,0,.55),0 0 0 4px rgba(255,197,49,.18);overflow:hidden}
+.hh-prize-frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:0;transition:opacity .7s ease}
+.hh-prize-frame img.active{opacity:1}
+.hh-prize figcaption{margin-top:5px;text-align:center;font-size:8.5px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#ffc531;white-space:nowrap}
+.hh-prize-dots{display:flex;justify-content:center;gap:4px;margin-top:4px}
+.hh-prize-dots button{width:5px;height:5px;border-radius:999px;border:0;padding:0;background:rgba(255,255,255,.35);cursor:pointer}
+.hh-prize-dots button.active{width:13px;background:#ffc531}
+.hh-prize{width:104px}
+.hh-prize figcaption{letter-spacing:.04em;font-size:8px}
+@media(max-width:560px){.hh-prize{width:92px}}
+
+/* Unified hero (owner, 2026-10-09): ONE carousel, 7 full-background image
+   slides, the iPhone prize slide LAST — no separate prize box. */
+.hh-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+.hh .hh-shade{background:linear-gradient(90deg,rgba(5,10,22,.93) 26%,rgba(5,10,22,.52) 58%,rgba(5,10,22,.12) 100%)}
+.hh-dots{gap:4px}
+.hh-dot{width:6px;height:6px}
+.hh-dot.active{width:17px}
