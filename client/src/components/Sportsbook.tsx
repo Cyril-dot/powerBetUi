@@ -785,23 +785,6 @@ export default function Sportsbook({
 
   return (
     <div className="sb-wrap">
-      {mode === "all" && (
-        <div className="sb-tabs">
-          {SPORT_TABS.map((t) => {
-            const Icon = t.icon;
-            return (
-              <button key={t.key} className={`sb-tab${sport === t.key ? " active" : ""}`} onClick={() => setSport(t.key)} type="button">
-                <span className="sb-tab-swatch" style={{ background: t.swatch }}><Icon size={12} /></span>
-                {t.label}
-              </button>
-            );
-          })}
-          <button className="sb-refresh" onClick={() => load(sport)} aria-label="Refresh matches" type="button">
-            <RefreshCw size={14} className={loading ? "spin" : ""} />
-          </button>
-        </div>
-      )}
-
       {apiUnreachable && (
         <div className="sb-error-banner">
           <TriangleAlert size={15} />
@@ -820,18 +803,6 @@ export default function Sportsbook({
       {!hideLive && (
         <LiveMatchesSection list={visibleLive} hasDraw={hasDraw} picks={picks} onPick={onPick} loading={loading} />
       )}
-
-      {mode === "all" && sport === "football" && adminMatches.length > 0 && (
-        <SectionShell title="Featured matches" icon={<Zap size={14} />} count={adminMatches.length} special badge="FEATURED">
-          <FeaturedMatchCarousel list={[...adminMatches].sort((a, b) => {
-            const at = a.kickoffAt ? parseKickoff(a.kickoffAt).getTime() : Number.MAX_SAFE_INTEGER;
-            const bt = b.kickoffAt ? parseKickoff(b.kickoffAt).getTime() : Number.MAX_SAFE_INTEGER;
-            return at - bt;
-          })} hasDraw={hasDraw} picks={picks} onPick={onPick} />
-        </SectionShell>
-      )}
-
-
 
       {mode === "all" && (
         <>
