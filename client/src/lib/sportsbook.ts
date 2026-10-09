@@ -866,12 +866,13 @@ export async function fetchFootball(onProgress?: (matches: EnrichedMatch[]) => v
     tracked(api.publicFootball.allCupsLive()),
   ]);
 
-  // Stage 3: finished results and the odds index are lower priority and are
-  // fetched only after live/upcoming/today have been requested.
-  const [withOdds, results] = await Promise.all([
-    settleList(api.publicFootball.withAllOdds()),
-    settleList(api.publicFootball.results(50)),
-  ]);
+  // Stage 3: finished results are lower priority and are fetched only after
+  // live/upcoming/today have been requested. The with-all-odds index is NOT
+  // fetched here any more: it is a ~6MB payload, the core feeds already
+  // embed per-match odds, and waiting for it made the whole board feel slow
+  // (owner, 2026-10-09). It now runs as a background gap-fill at the end of
+  // this function, only when some visible match still has no odds.
+  const results = await settleList(api.publicFootball.results(50));
 
   // Pull embedded odds out of every response shape that can carry them, not
   // just withAllOdds — "live"/"upcoming"/"today" can each embed their own
@@ -879,12 +880,10 @@ export async function fetchFootball(onProgress?: (matches: EnrichedMatch[]) => v
   // silently discarded because those three were only run through the
   // odds-less unwrapList(). Whichever source has the fullest odds list for a
   // given match id wins.
-  const withOddsItems = unwrapWithOdds(withOdds, "football");
   const liveOddsItems = unwrapWithOdds(live, "football");
   const upcomingOddsItems = unwrapWithOdds(upcoming, "football");
   const todayOddsItems = unwrapWithOdds(today, "football");
   const oddsById = new Map<string, unknown[]>();
-  mergeOddsById(oddsById, withOddsItems);
   mergeOddsById(oddsById, liveOddsItems);
   mergeOddsById(oddsById, upcomingOddsItems);
   mergeOddsById(oddsById, todayOddsItems);
@@ -899,7 +898,7 @@ export async function fetchFootball(onProgress?: (matches: EnrichedMatch[]) => v
   // getLastFetchStatus() / the network tab for that specific path.
   log("raw per-source match counts", {
     allMatches: allMatches === undefined ? "FAILED" : unwrapList(allMatches, "football").length,
-    withOdds: withOdds === undefined ? "FAILED" : withOddsItems.length,
+    withOdds: "deferred (background gap-fill only)",
     live: live === undefined ? "FAILED" : unwrapList(live, "football").length,
     upcoming: upcoming === undefined ? "FAILED" : unwrapList(upcoming, "football").length,
     today: today === undefined ? "FAILED" : unwrapList(today, "football").length,
@@ -911,7 +910,6 @@ export async function fetchFootball(onProgress?: (matches: EnrichedMatch[]) => v
 
   const all: EnrichedMatch[] = [
     ...unwrapList(allMatches, "football"),
-    ...withOddsItems.map((i) => i.match),
     ...unwrapList(live, "football"),
     ...unwrapList(upcoming, "football"),
     ...unwrapList(today, "football"),
@@ -975,6 +973,29 @@ export async function fetchFootball(onProgress?: (matches: EnrichedMatch[]) => v
   const catCounts = { live: 0, today: 0, upcoming: 0, ended: 0, hidden: 0 };
   for (const m of final) { const c = categorise(m); if (c) catCounts[c]++; else catCounts.hidden++; }
   log("final match count after all dedup passes", final.length, "categorised as", catCounts);
+
+  // Background gap-fill (see stage 3 note): only when a visible match still
+  // has no odds do we pay for the ~6MB odds index — off the critical path,
+  // and the upgraded list is published through onProgress when it lands.
+  const missingOdds = final.filter((m) => !m.oddsMap && !FINISHED_STATUSES.has(m.status ?? ""));
+  if (onProgress && missingOdds.length > 0) {
+    void settleList(api.publicFootball.withAllOdds()).then((raw) => {
+      if (raw === undefined) return;
+      const idx = new Map<string, unknown[]>();
+      mergeOddsById(idx, unwrapWithOdds(raw, "football"));
+      let changed = false;
+      const upgraded = final.map((m) => {
+        if (m.oddsMap) return m;
+        const rawOdds = idx.get(m.id);
+        if (!rawOdds?.length) return m;
+        const oddsMap = extractOddsMap(rawOdds, m.homeTeam, m.awayTeam);
+        if (!oddsMap) return m;
+        changed = true;
+        return { ...m, oddsMap };
+      });
+      if (changed) onProgress(upgraded);
+    }).catch(() => undefined);
+  }
   return final;
 }
 
