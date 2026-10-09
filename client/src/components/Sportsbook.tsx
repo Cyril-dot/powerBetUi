@@ -30,6 +30,31 @@ const ENDED_PAGE_SIZE = 5;
 // Keep all active match categories visible: live first, then today, then upcoming.
 const UPCOMING_ONLY = false;
 const TOP_SIX_LEAGUE_KEYS = new Set(TOP_SIX_COMPETITIONS.filter((c) => c.tier === "league").map((c) => c.key));
+
+/**
+ * TOP 10 LEAGUES (owner, 2026-10-09 — homepage section modelled on the
+ * MSport reference): the six catalogued top leagues plus the Champions
+ * League, Europa League, Primeira Liga and the Championship, matched by
+ * resolved competition key where the catalogue has one and by league name
+ * for the rest.
+ */
+const TOP_TEN_LEAGUES: { id: string; label: string; keys?: string[]; pattern?: RegExp }[] = [
+  { id: "premier-league", label: "Premier League", keys: ["england.premier-league"] },
+  { id: "la-liga", label: "La Liga", keys: ["spain.la-liga"] },
+  { id: "serie-a", label: "Serie A", keys: ["italy.serie-a"] },
+  { id: "bundesliga", label: "Bundesliga", keys: ["germany.bundesliga"] },
+  { id: "ligue-1", label: "Ligue 1", keys: ["france.ligue-1"] },
+  { id: "champions-league", label: "Champions League", pattern: /champions league/i },
+  { id: "europa-league", label: "Europa League", pattern: /europa league/i },
+  { id: "eredivisie", label: "Eredivisie", keys: ["netherlands.eredivisie"] },
+  { id: "primeira-liga", label: "Primeira Liga", pattern: /primeira|liga portugal/i },
+  { id: "championship", label: "Championship", pattern: /championship/i },
+];
+const topTenLeagueOf = (m: EnrichedMatch) => TOP_TEN_LEAGUES.find((l) => (
+  (l.keys && m.competitionKey && l.keys.includes(m.competitionKey)) ||
+  (l.pattern && l.pattern.test(m.league ?? ""))
+));
+
 const topSixFirst = (a: EnrichedMatch, b: EnrichedMatch) => {
   const aTop = a.competitionKey && TOP_SIX_LEAGUE_KEYS.has(a.competitionKey) ? 0 : 1;
   const bTop = b.competitionKey && TOP_SIX_LEAGUE_KEYS.has(b.competitionKey) ? 0 : 1;
@@ -470,6 +495,85 @@ function LiveMatchesSection({
   );
 }
 
+
+/**
+ * One Top-10 card, MSport-style: league line on top, crests + team names
+ * stacked on the left, the kickoff time BIG on the right with the date
+ * under it, and the normal 1X2 odds row underneath so it bets exactly
+ * like every other card.
+ */
+function TopLeagueCard({
+  match, leagueLabel, hasDraw, picks, onPick,
+}: { match: EnrichedMatch; leagueLabel: string; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void }) {
+  const odds = match.oddsMap;
+  const matchLabel = `${match.homeTeam} vs ${match.awayTeam}`;
+  const isSel = (sel: string) => picks.some((p) => p.id === match.id && p.market === "1X2" && p.selection === sel);
+  const pick = (sel: string, odd: number) => onPick({
+    id: match.id, match: matchLabel, market: "1X2", selection: sel, odd,
+    league: match.league, homeTeam: match.homeTeam, awayTeam: match.awayTeam,
+    kickoffAt: match.kickoffAt, isLive: false, scoreHome: match.scoreHome, scoreAway: match.scoreAway,
+  });
+  const slots = hasDraw
+    ? [["1", odds?.home ?? 0], ["X", odds?.draw ?? 0], ["2", odds?.away ?? 0]]
+    : [["1", odds?.home ?? 0], ["2", odds?.away ?? 0]];
+  const matchHref = `/match/${match.id}?sport=${encodeURIComponent(match.sport ?? "football")}${match.isAdmin ? "&admin=1" : ""}`;
+  const d = parseKickoff(match.kickoffAt);
+  const dayMonth = Number.isNaN(d.getTime()) ? "" : `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
+  return (
+    <article className="t10-card">
+      <div className="t10-card-top">
+        <span className="t10-league">{leagueIconFor(match.league || match.sport)}{leagueLabel}</span>
+        <span className="t10-date">{formatKickoffDate(match.kickoffAt)}</span>
+      </div>
+      <Link href={matchHref} className="t10-main">
+        <span className="t10-teams">
+          <span className="t10-team"><TeamCrest url={match.displayHomeLogo} name={match.homeTeam ?? ""} /><span>{match.homeTeam}</span></span>
+          <span className="t10-team"><TeamCrest url={match.displayAwayLogo} name={match.awayTeam ?? ""} /><span>{match.awayTeam}</span></span>
+        </span>
+        <span className="t10-when"><b>{formatKickoff(match.kickoffAt)}</b><small>{dayMonth}</small></span>
+      </Link>
+      <div className="sb-odds-row">
+        {slots.map(([label, val]) => (
+          <OddButton key={label as string} label={label as string} value={val as number} clickable selected={isSel(label as string)} onClick={() => pick(label as string, val as number)} />
+        ))}
+      </div>
+    </article>
+  );
+}
+
+/**
+ * TOP 10 LEAGUES — upcoming fixtures from the ten biggest competitions,
+ * as a swipeable card rail with league filter chips (MSport reference,
+ * owner 2026-10-09). Renders nothing when no top-10 fixture is upcoming.
+ */
+function TopLeaguesSection({
+  list, hasDraw, picks, onPick,
+}: { list: EnrichedMatch[]; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void }) {
+  const [leagueId, setLeagueId] = useState<string>("all");
+  const present = useMemo(() => TOP_TEN_LEAGUES
+    .map((l) => ({ ...l, count: list.filter((m) => topTenLeagueOf(m)?.id === l.id).length }))
+    .filter((l) => l.count > 0), [list]);
+  if (list.length === 0) return null;
+  const shown = leagueId === "all" ? list : list.filter((m) => topTenLeagueOf(m)?.id === leagueId);
+  return (
+    <SectionShell title="Top 10 Leagues" icon={<Trophy size={14} />} count={list.length} special badge="UPCOMING">
+      <div className="t10-chips" role="tablist" aria-label="Filter top leagues">
+        <button type="button" role="tab" aria-selected={leagueId === "all"} className={`t10-chip${leagueId === "all" ? " active" : ""}`} onClick={() => setLeagueId("all")}>All<b>{list.length}</b></button>
+        {present.map((l) => (
+          <button key={l.id} type="button" role="tab" aria-selected={leagueId === l.id} className={`t10-chip${leagueId === l.id ? " active" : ""}`} onClick={() => setLeagueId(l.id)}>
+            {leagueIconFor(l.label)}{l.label}<b>{l.count}</b>
+          </button>
+        ))}
+      </div>
+      <div className="t10-rail">
+        {shown.map((m) => (
+          <TopLeagueCard key={m.id} match={m} leagueLabel={topTenLeagueOf(m)?.label ?? m.league ?? ""} hasDraw={hasDraw} picks={picks} onPick={onPick} />
+        ))}
+      </div>
+    </SectionShell>
+  );
+}
+
 function SectionShell({
   title, icon, count, live, special, badge, id, children,
 }: { title: string; icon: React.ReactNode; count?: number; live?: boolean; special?: boolean; badge?: string; id?: string; children: React.ReactNode }) {
@@ -657,6 +761,19 @@ export default function Sportsbook({
       return diffH >= 0 && diffH <= hoursFilter;
     });
   };
+  // TOP 10 LEAGUES: every not-yet-started fixture from the ten biggest
+  // competitions (today's remaining games + the upcoming bucket), soonest
+  // first, for the homepage rail.
+  const topTenUpcoming = useMemo(() => {
+    const now = Date.now();
+    return [...grouped.today, ...grouped.upcoming]
+      .filter((m) => {
+        const t = m.kickoffAt ? parseKickoff(m.kickoffAt).getTime() : 0;
+        return t > now && !!topTenLeagueOf(m);
+      })
+      .sort((a, b) => (parseKickoff(a.kickoffAt).getTime() || 0) - (parseKickoff(b.kickoffAt).getTime() || 0));
+  }, [grouped.today, grouped.upcoming]);
+
   const visibleLive = applyFilter(liveMatches);
 
   return (
@@ -691,6 +808,10 @@ export default function Sportsbook({
 
       {!hideLive && (
         <LiveMatchesSection list={visibleLive} hasDraw={hasDraw} picks={picks} onPick={onPick} loading={loading} />
+      )}
+
+      {mode === "all" && sport === "football" && (
+        <TopLeaguesSection list={applyFilter(topTenUpcoming)} hasDraw={hasDraw} picks={picks} onPick={onPick} />
       )}
 
       {mode === "all" && sport === "football" && adminMatches.length > 0 && (

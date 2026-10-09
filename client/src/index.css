@@ -3050,3 +3050,30 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
   .lref-colhead-odds{gap:5px}
   .lref-colhead-odds span{width:54px}
 }
+
+/* ============================================================================
+   TOP 10 LEAGUES (owner, 2026-10-09): the ORIGINAL MSport-style white card —
+   league + date on top, teams STACKED with crests on the left, kickoff time
+   BIG on the right with the date under it, normal 1X2 odds row below. The
+   timer is set in Barlow Condensed (owner: the old timer font was "boring")
+   — the tall sporty condensed face the brand/nav already use.
+   ============================================================================ */
+.t10-chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.t10-chips::-webkit-scrollbar{display:none}
+.t10-chip{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;border:1px solid #d7e3f4;background:#fff;color:#33506e;font-size:12px;font-weight:800;cursor:pointer;transition:all .15s ease;-webkit-tap-highlight-color:transparent}
+.t10-chip b{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#eef4fc;color:#5b7186;font-size:10.5px;font-weight:900}
+.t10-chip.active{background:linear-gradient(135deg,#ffc531,#f59e0b);border-color:#d97706;color:#261900;box-shadow:0 4px 12px rgba(245,158,11,.35)}
+.t10-chip.active b{background:rgba(38,25,0,.16);color:#261900}
+.t10-rail{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.t10-rail::-webkit-scrollbar{display:none}
+.t10-card{flex:0 0 86%;max-width:330px;scroll-snap-align:start;background:#fff;border:1px solid #dce7f5;border-radius:16px;padding:13px;display:flex;flex-direction:column;gap:11px;box-shadow:0 4px 14px rgba(11,55,110,.06)}
+.t10-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.t10-league{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#5b7186;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t10-date{font-size:11px;font-weight:600;color:#8496ab;white-space:nowrap}
+.t10-main{display:flex;align-items:center;justify-content:space-between;gap:10px;text-decoration:none}
+.t10-teams{display:flex;flex-direction:column;gap:8px;min-width:0}
+.t10-team{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:#12283f;white-space:nowrap}
+.t10-when{flex-shrink:0;text-align:right}
+.t10-when b{display:block;font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;letter-spacing:.015em;line-height:.95;color:#0b376e;font-variant-numeric:tabular-nums}
+.t10-when small{display:block;margin-top:3px;font-size:11px;font-weight:700;color:#8496ab;font-variant-numeric:tabular-nums}
+@media(max-width:560px){.t10-card{flex-basis:86%}}
