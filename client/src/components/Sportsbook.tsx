@@ -813,12 +813,12 @@ export default function Sportsbook({
         </div>
       )}
 
-      {!hideLive && (
-        <LiveMatchesSection list={visibleLive} hasDraw={hasDraw} picks={picks} onPick={onPick} loading={loading} />
-      )}
-
       {mode === "all" && sport === "football" && (
         <TopLeaguesSection list={applyFilter(topTenUpcoming)} hasDraw={hasDraw} picks={picks} onPick={onPick} />
+      )}
+
+      {!hideLive && (
+        <LiveMatchesSection list={visibleLive} hasDraw={hasDraw} picks={picks} onPick={onPick} loading={loading} />
       )}
 
       {mode === "all" && sport === "football" && adminMatches.length > 0 && (
