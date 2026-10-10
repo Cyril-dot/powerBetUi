@@ -157,7 +157,7 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
   if (body !== undefined) headers["Content-Type"] = "application/json";
 
   const debugScheduler = path.includes("/admin/matches/auto");
-  const debugDeposit = path.startsWith("/api/wallet/deposit/flutterwave/gh/v4/");
+  const debugDeposit = path.startsWith("/api/wallet/deposit/akwapay/");
   const depositStartedAt = debugDeposit ? Date.now() : 0;
   const debugBody = (value: unknown): unknown => {
     if (!value || typeof value !== "object") return value;
@@ -329,23 +329,25 @@ export const withdrawals = {
 };
 
 // ---------------------------------------------------------------------------
-// DEPOSITS — Flutterwave v4 Ghana Mobile Money
+// DEPOSITS — ShinobiPay Ghana Mobile Money (direct MoMo push)
 // ---------------------------------------------------------------------------
-export type FlutterwaveGhNetwork = "MTN" | "AIRTELTIGO" | "VODAFONE";
-export interface FlutterwaveGhInitResponse {
-  txRef: string;
-  message?: string;
+export type ShinobiPayNetwork = "MTN" | "TELECEL" | "AIRTELTIGO";
+export interface ShinobiPayInitResponse {
+  id?: string;
+  status?: string;
+  reference?: string;
+  [key: string]: unknown;
 }
-export interface FlutterwaveVerifyResponse {
-  credited: boolean;
-  status: string;
-  message?: string;
+export interface ShinobiPayStatusResponse {
+  id?: string;
+  status?: string;
+  [key: string]: unknown;
 }
 export const deposits = {
-  flutterwaveGhInit: (body: { amount: number; phoneNumber: string; network: FlutterwaveGhNetwork }) =>
-    post<FlutterwaveGhInitResponse>("/api/wallet/deposit/flutterwave/gh/v4/init", body),
-  flutterwaveGhVerify: (body: { txRef: string }) =>
-    post<FlutterwaveVerifyResponse>("/api/wallet/deposit/flutterwave/gh/v4/verify", body),
+  shinobiPayInit: (body: { amount: number; phone: string; network: ShinobiPayNetwork }) =>
+    post<ShinobiPayInitResponse>("/api/wallet/deposit/akwapay/init", body),
+  shinobiPayStatus: (intentId: string) =>
+    get<ShinobiPayStatusResponse>(`/api/wallet/deposit/akwapay/status/${encodeURIComponent(intentId)}`),
 };
 
 // ---------------------------------------------------------------------------
