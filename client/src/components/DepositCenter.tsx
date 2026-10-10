@@ -12,7 +12,7 @@ import {
 import api, { ApiError, type ShinobiPayNetwork, type ShinobiPayStatusResponse } from "@/lib/api";
 import { depositLogger, type DepositLogEntry } from "@/lib/depositLogger";
 
-const MIN_GHS = 50;
+const MIN_GHS = 1;
 const QUICK_AMOUNTS = [50, 100, 250, 500, 1000];
 const NETWORKS: Array<{ value: ShinobiPayNetwork; label: string }> = [
   { value: "MTN", label: "MTN Mobile Money" },
