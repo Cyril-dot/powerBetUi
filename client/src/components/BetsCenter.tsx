@@ -226,16 +226,26 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
       const kickoffAt = match.kickoffAt ?? raw.kickoff_at ?? raw.startTime ?? raw.start_time ?? raw.scheduledAt ?? raw.commenceTime ?? raw.eventStartTime ?? raw.kickoff ?? raw.matchDate;
       return kickoffAt && !match.kickoffAt ? { ...match, kickoffAt: String(kickoffAt) } : match;
     };
+    // The football catalog endpoints wrap every match as { match, odds },
+    // while the detail endpoints and the admin-matches endpoints return
+    // the match bare. Normalise both shapes to the match itself, or
+    // catalog lookups never match an id and start times go missing.
+    const unwrapMatch = (entry: unknown): Match | null => {
+      if (!entry || typeof entry !== "object") return null;
+      const e = entry as Record<string, unknown>;
+      const m = (e.match && typeof e.match === "object" ? e.match : e) as Match;
+      return m && typeof m === "object" ? m : null;
+    };
     const refresh = () => Promise.all([
       Promise.allSettled(ids.map(async (mid) => { try { return await api.matches.getById(mid); } catch { try { return await api.publicAdminMatches.getById(mid); } catch { return null; } } })),
-      Promise.allSettled([api.matches.today(), api.matches.upcoming(), api.matches.live(), api.matches.future(), api.publicAdminMatches.getAll()]),
+      Promise.allSettled([api.matches.today(), api.matches.upcoming(), api.matches.live(), api.matches.future(), api.matches.results(50), api.publicAdminMatches.getAll()]),
     ]).then(([directResults, catalogResults]) => {
       if (cancelled) return;
-      const catalog = catalogResults.flatMap((result) => result.status === "fulfilled" ? result.value : []).map(normalizeMatchTiming);
+      const catalog = catalogResults.flatMap((result) => result.status === "fulfilled" && Array.isArray(result.value) ? result.value : []).map(unwrapMatch).filter((m): m is Match => m != null).map(normalizeMatchTiming);
       setMatchScores((prev) => {
         const next = { ...prev };
         directResults.forEach((result, i) => {
-          const direct = result.status === "fulfilled" ? result.value : null;
+          const direct = result.status === "fulfilled" ? unwrapMatch(result.value) : null;
           const listed = catalog.find((match) => match.id === ids[i] || match.externalId === ids[i]);
           if (direct || listed) {
             const base = normalizeMatchTiming((listed ?? {}) as Match);
