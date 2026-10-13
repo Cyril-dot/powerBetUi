@@ -830,7 +830,7 @@ function reconcileFootballBackendIds(matches: EnrichedMatch[]): EnrichedMatch[] 
   });
 }
 
-export async function fetchFootball(onProgress?: (matches: EnrichedMatch[]) => void): Promise<EnrichedMatch[]> {
+export async function fetchFootball(onProgress?: (matches: EnrichedMatch[]) => void, opts?: { restGate?: Promise<void>; liveOnly?: boolean }): Promise<EnrichedMatch[]> {
   resetFetchStats();
   const log = (...args: unknown[]) => { /* eslint-disable-next-line no-console */ console.debug("[sportsbook][fetchFootball]", ...args); };
   // The /matches feeds are the canonical sportsbook sources. Their nested
@@ -851,20 +851,34 @@ export async function fetchFootball(onProgress?: (matches: EnrichedMatch[]) => v
   const earlySources: unknown[] = [];
   const publishEarly = (value: unknown) => { earlySources.push(value); onProgress?.(preview(earlySources)); };
   const tracked = <T,>(request: Promise<T>) => settleList(request).then((value) => { publishEarly(value); return value; });
-  const [allMatches, live, upcoming, today] = await Promise.all([
-    tracked(api.publicFootball.getAll()),
-    tracked(api.publicFootball.live()),
-    tracked(api.publicFootball.upcoming()),
-    tracked(api.publicFootball.today()),
-  ]);
+  // Stage 1 is live-only: the board paints its in-play matches the moment
+  // this one small feed lands, instead of making the most time-sensitive
+  // feed queue behind the full catalog download.
+  const live = await tracked(api.publicFootball.live());
+
+  // The remaining feeds are heavy (the full catalog especially). When the
+  // caller supplies a gate, hold them back until the reader scrolls towards
+  // the sections they feed — a fallback timer on the caller side opens the
+  // gate anyway, so nothing depends on scrolling to arrive eventually.
+  if (opts?.restGate) await opts.restGate;
+
+  const [allMatches, upcoming, today] = opts?.liveOnly
+    ? [undefined, undefined, undefined]
+    : await Promise.all([
+        tracked(api.publicFootball.getAll()),
+        tracked(api.publicFootball.upcoming()),
+        tracked(api.publicFootball.today()),
+      ]);
 
   // Cup feeds are additional sources and should not hold back the core
   // football sections. They are merged when they finish.
-  const [cupsUp, cupsToday, cupsLive] = await Promise.all([
-    tracked(api.publicFootball.allCupsUpcoming()),
-    tracked(api.publicFootball.allCupsToday()),
-    tracked(api.publicFootball.allCupsLive()),
-  ]);
+  const [cupsUp, cupsToday, cupsLive] = opts?.liveOnly
+    ? [undefined, undefined, undefined]
+    : await Promise.all([
+        tracked(api.publicFootball.allCupsUpcoming()),
+        tracked(api.publicFootball.allCupsToday()),
+        tracked(api.publicFootball.allCupsLive()),
+      ]);
 
   // Stage 3: finished results are lower priority and are fetched only after
   // live/upcoming/today have been requested. The with-all-odds index is NOT
@@ -872,7 +886,7 @@ export async function fetchFootball(onProgress?: (matches: EnrichedMatch[]) => v
   // embed per-match odds, and waiting for it made the whole board feel slow
   // (owner, 2026-10-09). It now runs as a background gap-fill at the end of
   // this function, only when some visible match still has no odds.
-  const results = await settleList(api.publicFootball.results(50));
+  const results = opts?.liveOnly ? undefined : await settleList(api.publicFootball.results(50));
 
   // Pull embedded odds out of every response shape that can carry them, not
   // just withAllOdds — "live"/"upcoming"/"today" can each embed their own
@@ -1046,9 +1060,9 @@ export async function fetchMma(): Promise<EnrichedMatch[]> {
   return ensureOdds(dedupById(all));
 }
 
-export async function fetchSport(sport: SportKey, onProgress?: (matches: EnrichedMatch[]) => void): Promise<EnrichedMatch[]> {
+export async function fetchSport(sport: SportKey, onProgress?: (matches: EnrichedMatch[]) => void, opts?: { restGate?: Promise<void>; liveOnly?: boolean }): Promise<EnrichedMatch[]> {
   switch (sport) {
-    case "football": return fetchFootball(onProgress);
+    case "football": return fetchFootball(onProgress, opts);
     case "basketball": return fetchBasketball();
     case "tennis": return fetchTennis();
     case "baseball": return fetchBaseball();

@@ -664,18 +664,58 @@ export default function Sportsbook({
   const [matches, setMatches] = useState<Record<SportKey, EnrichedMatch[]>>({ football: [], basketball: [], tennis: [], baseball: [], nfl: [], mma: [] });
   const [adminMatches, setAdminMatches] = useState<EnrichedMatch[]>([]);
   const [loading, setLoading] = useState(true);
+  const [restLoading, setRestLoading] = useState(true);
   const [apiUnreachable, setApiUnreachable] = useState(false);
+  // Scroll gate for the heavy football feeds: the first board load fetches
+  // the live feed only; the gate opens when the reader scrolls towards the
+  // sections below Live (or after a fallback delay), and stays open for
+  // every later refresh. The watcher arms only once the live rows have
+  // painted — before that the page is still short and empty, so the
+  // sentinel would sit next to the fold and open the gate instantly.
+  const gateRef = useRef<{ promise: Promise<void>; open: () => void } | null>(null);
+  const unlockedRef = useRef(false);
+  const restSentinelRef = useRef<HTMLDivElement | null>(null);
+  const [livePainted, setLivePainted] = useState(false);
+  const makeGate = () => {
+    let open!: () => void;
+    const promise = new Promise<void>((resolve) => { open = () => { unlockedRef.current = true; resolve(); }; });
+    gateRef.current = { promise, open };
+    return promise;
+  };
+  useEffect(() => {
+    if (!livePainted) return;
+    const node = restSentinelRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0]?.isIntersecting) gateRef.current?.open(); },
+      { rootMargin: "900px 0px" },
+    );
+    observer.observe(node);
+    const fallback = setTimeout(() => gateRef.current?.open(), 20_000);
+    return () => { observer.disconnect(); clearTimeout(fallback); };
+  }, [livePainted]);
   const [liveLeagueTab, setLiveLeagueTab] = useState<string | null>(null);
   const loaded = useRef<Set<SportKey>>(new Set());
 
   const load = async (s: SportKey) => {
     setLoading(true);
+    setRestLoading(true);
     try {
+      let firstBatch = true;
       const progress = s === "football"
-        ? (batch: EnrichedMatch[]) => setMatches((prev) => ({ ...prev, football: batch }))
+        ? (batch: EnrichedMatch[]) => {
+            setMatches((prev) => ({ ...prev, football: batch }));
+            // The first football batch is the live feed — the board's main
+            // loading state ends there, not after the heavy feeds finish.
+            if (firstBatch) { firstBatch = false; setLoading(false); setLivePainted(true); }
+          }
         : undefined;
       const adminPromise = s === "football" ? fetchAdminMatches().then((admin) => { setAdminMatches(admin); return admin; }) : Promise.resolve(adminMatches);
-      const sportPromise = fetchSport(s, progress);
+      const opts = s !== "football" ? undefined
+        : mode === "live-only" ? { liveOnly: true }
+        : unlockedRef.current ? undefined
+        : { restGate: gateRef.current?.promise ?? makeGate() };
+      const sportPromise = fetchSport(s, progress, opts);
       const [sportResult] = await Promise.all([sportPromise, adminPromise]);
       setMatches((prev) => ({ ...prev, [s]: sportResult }));
       loaded.current.add(s);
@@ -684,6 +724,8 @@ export default function Sportsbook({
       setApiUnreachable(true);
     } finally {
       setLoading(false);
+      setRestLoading(false);
+      if (s === "football") setLivePainted(true);
     }
   };
 
@@ -804,6 +846,8 @@ export default function Sportsbook({
         <LiveMatchesSection list={visibleLive} hasDraw={hasDraw} picks={picks} onPick={onPick} loading={loading} />
       )}
 
+      {mode === "all" && <div ref={restSentinelRef} aria-hidden="true" style={{ height: 1 }} />}
+
       {mode === "all" && (
         <>
           {!UPCOMING_ONLY && (
@@ -815,7 +859,7 @@ export default function Sportsbook({
                 <span className="fm-tag">{new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}</span>
               </div>
               <div className="sb-section-body">
-                {loading && grouped.today.length === 0 ? (
+                {(loading || restLoading) && grouped.today.length === 0 ? (
                   <SkeletonRows />
                 ) : (
                   <PaginatedLeagueList list={applyFilter(grouped.today)} hasDraw={hasDraw} picks={picks} onPick={onPick} emptyLabel="No matches scheduled for today." />
@@ -825,7 +869,7 @@ export default function Sportsbook({
           )}
 
           <SectionShell id="sb-section-upcoming" title="Upcoming" icon={<Trophy size={14} />} count={applyFilter(grouped.upcoming).length}>
-            {loading && grouped.upcoming.length === 0 ? (
+            {(loading || restLoading) && grouped.upcoming.length === 0 ? (
               <SkeletonRows />
             ) : (
               <PaginatedLeagueList list={applyFilter(grouped.upcoming)} hasDraw={hasDraw} picks={picks} onPick={onPick} emptyLabel="No upcoming matches found." />
