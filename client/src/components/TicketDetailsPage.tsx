@@ -56,8 +56,8 @@ function normalizeFinishedScore(raw: unknown): Match | null {
 async function loadTicketMatchScores(ids: string[]): Promise<Record<string, Match>> {
   const byId: Record<string, Match> = {};
   const direct = await Promise.allSettled(ids.map(async (matchId) => {
-    try { return await api.matches.getById(matchId); }
-    catch { return api.adminMatches.getById(matchId); }
+    try { return await api.publicFootball.getById(matchId); }
+    catch { return api.publicAdminMatches.getById(matchId); }
   }));
   direct.forEach((result, index) => {
     if (result.status === "fulfilled") {
@@ -76,7 +76,6 @@ async function loadTicketMatchScores(ids: string[]): Promise<Record<string, Matc
   // feeds contain the final score after the match endpoint has stopped
   // returning live fields or the slip response omits them entirely.
   const feeds = await Promise.allSettled([
-    api.matches.results(100),
     api.publicFootball.results(100),
     api.publicBasketball.results(100),
     api.publicTennis.results(100),

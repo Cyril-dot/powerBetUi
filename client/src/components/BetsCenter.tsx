@@ -237,8 +237,8 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
       return m && typeof m === "object" ? m : null;
     };
     const refresh = () => Promise.all([
-      Promise.allSettled(ids.map(async (mid) => { try { return await api.matches.getById(mid); } catch { try { return await api.publicAdminMatches.getById(mid); } catch { return null; } } })),
-      Promise.allSettled([api.matches.today(), api.matches.upcoming(), api.matches.live(), api.matches.future(), api.matches.results(50), api.publicAdminMatches.getAll()]),
+      Promise.allSettled(ids.map(async (mid) => { try { return await api.publicFootball.getById(mid); } catch { try { return await api.publicAdminMatches.getById(mid); } catch { return null; } } })),
+      Promise.allSettled([api.publicFootball.today(), api.publicFootball.upcoming(), api.publicFootball.live(), api.publicFootball.future(), api.publicFootball.results(50), api.publicAdminMatches.getAll()]),
     ]).then(([directResults, catalogResults]) => {
       if (cancelled) return;
       const catalog = catalogResults.flatMap((result) => result.status === "fulfilled" && Array.isArray(result.value) ? result.value : []).map(unwrapMatch).filter((m): m is Match => m != null).map(normalizeMatchTiming);
