@@ -204,6 +204,7 @@ export default function BetslipPage({
   const [stakeEdited, setStakeEdited] = useState(false);
   const [placing, setPlacing] = useState(false);
   const [notice, setNotice] = useState<{ type: "error" | "success"; text: string } | null>(null);
+  const [placedInfo, setPlacedInfo] = useState<{ stake: number; totalOdds: number; potentialReturn: number; count: number } | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
 
   useEffect(() => {
@@ -235,9 +236,8 @@ export default function BetslipPage({
     setPlacing(true);
     try {
       await onPlace(stakeValue);
-      try { window.sessionStorage.setItem(BET_PLACED_NOTICE_KEY, JSON.stringify({ placedAt: Date.now(), text: "Bet placed successfully" })); } catch { /* storage may be unavailable */ }
+      setPlacedInfo({ stake: stakeValue, totalOdds, potentialReturn, count: picks.length });
       setPicks([]);
-      setLocation("/open-bets");
     } catch (e) {
       setNotice({ type: "error", text: e instanceof ApiError ? e.message : "We could not place this bet. Please try again." });
     } finally {
@@ -285,6 +285,23 @@ export default function BetslipPage({
             <button className={`gold-button full${stakeInvalid ? " stake-button-disabled" : ""}`} onClick={place} disabled={placing || stakeInvalid}>{placing ? "Placing…" : "Place Bet"}</button>
             {notice && <small className={notice.type === "error" ? "auth-notice" : "auth-notice bp-success"}>{notice.text}</small>}
           </aside>
+        </div>
+      )}
+      {placedInfo && (
+        <div className="pb-success-overlay" onClick={() => setPlacedInfo(null)}>
+          <div className="pb-success-card" onClick={(e) => e.stopPropagation()}>
+            <div className="pb-success-badge"><CheckCircle2 size={34} /></div>
+            <h3>Bet placed successfully</h3>
+            <p>Your bet is in. Good luck!</p>
+            <div className="pb-success-rows">
+              <div><span>Selections</span><b>{placedInfo.count}</b></div>
+              <div><span>Stake</span><b>GHS {placedInfo.stake.toFixed(2)}</b></div>
+              <div><span>Total odds</span><b>{placedInfo.totalOdds.toFixed(2)}</b></div>
+              <div className="ret"><span>Potential return</span><b>GHS {placedInfo.potentialReturn.toFixed(2)}</b></div>
+            </div>
+            <button className="gold-button full" onClick={() => setLocation("/open-bets")}>View my bets</button>
+            <button className="ghost-button full" onClick={() => setPlacedInfo(null)}>Done</button>
+          </div>
         </div>
       )}
     </main>

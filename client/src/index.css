@@ -3251,3 +3251,17 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
    fixed") — the top header scrolls away with the page like normal
    content; it no longer stays pinned while scrolling. */
 .header{position:relative !important;top:auto !important}
+
+/* Bet-placed success popup — centred on the page (owner request 2026-10-13) */
+.pb-success-overlay{position:fixed;inset:0;z-index:120;background:rgba(9,11,16,.58);display:flex;align-items:center;justify-content:center;padding:16px}
+.pb-success-card{background:#fff;color:#20242d;width:100%;max-width:380px;border-radius:14px;border:1px solid var(--line);box-shadow:0 26px 70px rgba(0,0,0,.4);padding:28px 24px 22px;text-align:center}
+.pb-success-badge{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:rgba(30,158,90,.13);display:grid;place-items:center;color:#1e9e5a}
+.pb-success-card h3{font:700 26px 'Barlow Condensed',sans-serif;letter-spacing:.02em;margin:0 0 6px}
+.pb-success-card p{color:#5f6673;font-size:13px;margin:0}
+.pb-success-rows{margin:16px 0;text-align:left;border:1px solid var(--line);border-radius:10px;padding:6px 14px}
+.pb-success-rows>div{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px;border-bottom:1px dashed rgba(32,36,45,.12)}
+.pb-success-rows>div:last-child{border-bottom:0}
+.pb-success-rows span{color:#5f6673}
+.pb-success-rows b{font-weight:800}
+.pb-success-rows .ret b{color:#1e9e5a}
+.pb-success-card .ghost-button{margin-top:8px}
