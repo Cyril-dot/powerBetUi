@@ -331,25 +331,23 @@ export const withdrawals = {
 };
 
 // ---------------------------------------------------------------------------
-// DEPOSITS — ShinobiPay Ghana Mobile Money (direct MoMo push)
+// DEPOSITS — manual Mobile Money (proof reviewed by the admin queue)
+// Ghana manual deposits reuse the bank-deposit endpoint and proof fields
+// (the same contract the Nigerian bank flow submits to); only the labels
+// and payment destination differ. ShinobiPay was removed at the owner's
+// direction on 2026-10-13.
 // ---------------------------------------------------------------------------
-export type ShinobiPayNetwork = "MTN" | "TELECEL" | "AIRTELTIGO";
-export interface ShinobiPayInitResponse {
-  id?: string;
-  status?: string;
-  reference?: string;
-  [key: string]: unknown;
-}
-export interface ShinobiPayStatusResponse {
-  id?: string;
-  status?: string;
-  [key: string]: unknown;
-}
 export const deposits = {
-  shinobiPayInit: (body: { amount: number; phone: string; network: ShinobiPayNetwork }) =>
-    post<ShinobiPayInitResponse>("/api/wallet/deposit/akwapay/init", body),
-  shinobiPayStatus: (intentId: string) =>
-    get<ShinobiPayStatusResponse>(`/api/wallet/deposit/akwapay/status/${encodeURIComponent(intentId)}`),
+  submitBankDeposit: (body: {
+    transferReference: string;
+    ngnAmountSent: number;
+    expectedNgnCredit: number;
+    senderAccountName?: string;
+    screenshotUrl?: string;
+    userNote?: string;
+  }) => post<Record<string, unknown>>("/api/wallet/bank-deposits", body),
+  myBankDeposits: (page = 0, size = 10) =>
+    get<PageResponse<Record<string, unknown>>>(`/api/wallet/bank-deposits${qs({ page, size })}`),
 };
 
 // ---------------------------------------------------------------------------

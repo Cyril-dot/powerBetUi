@@ -1,334 +1,293 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { Link } from "wouter";
 import {
   AlertCircle,
   Check,
   CheckCircle2,
-  ClipboardCopy,
+  Copy,
+  Hourglass,
+  ImagePlus,
   Loader2,
   ShieldCheck,
   Smartphone,
   WalletCards,
+  X,
 } from "lucide-react";
-import api, { ApiError, type ShinobiPayNetwork, type ShinobiPayStatusResponse } from "@/lib/api";
-import { depositLogger, type DepositLogEntry } from "@/lib/depositLogger";
+import api, { ApiError } from "@/lib/api";
 
+/* Manual MTN Mobile Money deposit (owner details, 2026-10-13). The flow
+   follows the Nigerian bank manual deposit: same endpoint
+   (POST /api/wallet/bank-deposits), same fields — only the destination
+   and labels differ. Proof screenshots are hosted on imgbb and the
+   hosted link is sent as screenshotUrl. */
+const MOMO_NETWORK = "MTN";
+const MOMO_NUMBER = "0536676400";
+const MOMO_NAME = "ISAAC SENIOR APPIAH";
 const MIN_GHS = 50;
 const QUICK_AMOUNTS = [50, 100, 250, 500, 1000];
-const NETWORKS: Array<{ value: ShinobiPayNetwork; label: string }> = [
-  { value: "MTN", label: "MTN Mobile Money" },
-  { value: "TELECEL", label: "Telecel (Vodafone)" },
-  { value: "AIRTELTIGO", label: "AirtelTigo Money" },
-];
-const TERMINAL_FAILURES = new Set([
-  "failed", "cancelled", "canceled", "declined", "expired", "reversed", "voided", "abandoned", "rejected", "error",
-]);
-const SUCCESS_STATES = new Set(["succeeded", "successful", "success", "completed", "credited"]);
-type Status = "idle" | "submitting" | "pending" | "success" | "failed" | "timeout";
-type VerifyOutcome = "pending" | "success" | "failed";
+const IMGBB_KEY = "52c2be32af44539f7563f97a067eb1a1";
 
-function normalizeGhanaPhone(phone: string) {
-  return phone.replace(/\D/g, "");
+type Row = Record<string, unknown>;
+type Step = "info" | "proof" | "done";
+
+const asNum = (value: unknown) => { const n = Number(value); return Number.isFinite(n) ? n : 0; };
+const asText = (value: unknown, fallback = "—") => value === null || value === undefined || value === "" ? fallback : String(value);
+const ghs = (value: unknown) => `GHS ${asNum(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const formatDate = (value: unknown) => { const d = new Date(asText(value, "")); return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }); };
+
+/* Compress a proof image (max 800px wide, JPEG) to a data URL for
+   preview + upload, the same way the bank form does. */
+function compressImageFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 800; const scale = img.width > MAX ? MAX / img.width : 1;
+        const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+        const c = document.createElement("canvas"); c.width = w; c.height = h;
+        c.getContext("2d")!.drawImage(img, 0, 0, w, h);
+        const d = c.toDataURL("image/jpeg", 0.72);
+        resolve(d.length > 524288 ? c.toDataURL("image/jpeg", 0.45) : d);
+      };
+      img.onerror = reject;
+      img.src = ev.target!.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
-function maskPhone(phone: string) {
-  const digits = normalizeGhanaPhone(phone);
-  return digits.length >= 3 ? `••••••${digits.slice(-3)}` : "••••";
+/* Host the compressed proof on imgbb and return its URL — the hosted
+   link is what gets sent to the backend as screenshotUrl. */
+async function uploadToImgbb(dataUrl: string): Promise<string> {
+  const body = new FormData();
+  body.append("key", IMGBB_KEY);
+  body.append("image", dataUrl.replace(/^data:image\/[a-z]+;base64,/, ""));
+  const res = await fetch("https://api.imgbb.com/1/upload", { method: "POST", body });
+  const json = (await res.json().catch(() => null)) as { data?: { url?: string } } | null;
+  const url = json?.data?.url;
+  if (!res.ok || !url) throw new Error("Image upload failed");
+  return url;
 }
 
-function errorMessage(error: unknown) {
-  return error instanceof ApiError
-    ? error.message
-    : error instanceof Error
-      ? error.message
-      : "Could not start the payment. Please try again.";
-}
-
-function useDepositLogEntries() {
-  const [entries, setEntries] = useState<DepositLogEntry[]>(() => depositLogger.getEntries());
-  useEffect(() => depositLogger.subscribe(setEntries), []);
-  return entries;
+function CopyRow({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+  const [copied, setCopied] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(value); setCopied(true); setFailed(false); setTimeout(() => setCopied(false), 1800); }
+    catch { setFailed(true); setTimeout(() => setFailed(false), 2200); }
+  };
+  return <div className="deposit-copy-row">
+    <div><span>{label}</span><b className={mono ? "mono" : ""}>{value}</b></div>
+    <button type="button" onClick={copy}>{copied ? <><Check size={13} /> Copied</> : failed ? "Copy failed — long-press" : <><Copy size={13} /> Copy</>}</button>
+  </div>;
 }
 
 export default function DepositCenter() {
+  const signedIn = typeof window !== "undefined" && !!window.localStorage.getItem("accessToken");
+  const [step, setStep] = useState<Step>("info");
   const [amount, setAmount] = useState("50");
-  const [phone, setPhone] = useState("");
-  const [network, setNetwork] = useState<ShinobiPayNetwork>("MTN");
-  const [status, setStatus] = useState<Status>("idle");
-  const [message, setMessage] = useState("");
+  const [senderName, setSenderName] = useState("");
+  const [reference, setReference] = useState("");
+  const [note, setNote] = useState("");
+  const [screenshot, setScreenshot] = useState("");
+  const [compressing, setCompressing] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [intentId, setIntentId] = useState("");
-  const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
-  const checkInFlight = useRef(false);
-  const entries = useDepositLogEntries();
+  const [errs, setErrs] = useState<Record<string, string>>({});
+  const [history, setHistory] = useState<Row[]>([]);
 
-  useEffect(() => {
-    depositLogger.info("lifecycle", "ShinobiPay deposit page opened");
-    return () => {
-      depositLogger.info("lifecycle", "Deposit page closed");
-    };
-  }, []);
+  const loadHistory = async () => {
+    try { const page = await api.deposits.myBankDeposits(0, 10); setHistory(Array.isArray(page.content) ? (page.content as Row[]) : []); }
+    catch { /* history is informational — a failed load just hides it */ }
+  };
+  useEffect(() => { if (signedIn) void loadHistory(); }, []);
 
-  const checkPayment = useCallback(async (): Promise<VerifyOutcome> => {
-    if (!intentId || checkInFlight.current) return "pending";
-    checkInFlight.current = true;
-    const startedAt = Date.now();
-    depositLogger.debug("verify", "Checking ShinobiPay payment status", { reference: intentId });
+  const amountValue = parseFloat(amount);
+  const amountValid = Number.isFinite(amountValue) && amountValue >= MIN_GHS;
+
+  const handleFile = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    setCompressing(true); setErrs((p) => ({ ...p, screenshot: "" }));
+    try { setScreenshot(await compressImageFile(file)); }
+    catch { setErrs((p) => ({ ...p, screenshot: "Could not process that image. Try another file." })); }
+    finally { setCompressing(false); }
+  };
+
+  const goProof = () => {
+    if (!amountValid) { setErrs({ amount: `Minimum deposit is GHS ${MIN_GHS}.` }); return; }
+    setErrs({}); setError(""); setStep("proof");
+  };
+
+  const submit = async (ev: FormEvent) => {
+    ev.preventDefault();
+    const e: Record<string, string> = {};
+    if (!senderName.trim()) e.senderName = "Enter the name on the Mobile Money account you sent from";
+    if (!reference.trim() || reference.trim().length < 5) e.reference = "Enter the transaction ID from your MoMo receipt";
+    if (!screenshot) e.screenshot = "A payment screenshot is required";
+    setErrs(e);
+    if (Object.keys(e).length) return;
+    setSubmitting(true); setError("");
     try {
-      const result: ShinobiPayStatusResponse = await api.deposits.shinobiPayStatus(intentId);
-      const currentStatus = String(result.status || "pending").toLowerCase();
-      const durationMs = Date.now() - startedAt;
-      depositLogger.info("verify", "Payment status received", {
-        reference: intentId,
-        durationMs,
-        details: { status: currentStatus },
+      const screenshotUrl = await uploadToImgbb(screenshot);
+      await api.deposits.submitBankDeposit({
+        transferReference: reference.trim(),
+        ngnAmountSent: amountValue,
+        expectedNgnCredit: amountValue,
+        senderAccountName: senderName.trim(),
+        screenshotUrl,
+        userNote: note.trim() || undefined,
       });
-      if (SUCCESS_STATES.has(currentStatus)) {
-        depositLogger.success("verify", "ShinobiPay payment confirmed", { reference: intentId, durationMs });
-        setMessage("Your wallet has been updated.");
-        setStatus("success");
-        return "success";
-      }
-      if (TERMINAL_FAILURES.has(currentStatus)) {
-        depositLogger.warn("verify", "Payment reached a terminal failure status", {
-          reference: intentId,
-          durationMs,
-          details: { status: currentStatus },
-        });
-        setStatus("failed");
-        return "failed";
-      }
-      return "pending";
-    } catch (verifyError) {
-      depositLogger.warn("verify", "Payment status check failed; the next check will retry", {
-        reference: intentId,
-        durationMs: Date.now() - startedAt,
-        details: { httpStatus: verifyError instanceof ApiError ? verifyError.status : undefined },
-      });
-      return "pending";
-    } finally {
-      checkInFlight.current = false;
-    }
-  }, [intentId]);
-
-  useEffect(() => {
-    if (status !== "pending" || !intentId) return;
-    let cancelled = false;
-    const startedAt = Date.now();
-    let timer: number | undefined;
-    let attempt = 0;
-
-    const poll = async () => {
-      if (cancelled) return;
-      attempt += 1;
-      depositLogger.debug("poll", "Scheduled payment check", { reference: intentId, details: { attempt } });
-      const outcome = await checkPayment();
-      if (cancelled || outcome !== "pending") return;
-      const elapsedMs = Date.now() - startedAt;
-      if (elapsedMs >= 5 * 60 * 1000) {
-        depositLogger.warn("poll", "Automatic polling window ended; manual recheck remains available", {
-          reference: intentId,
-          details: { attempts: attempt, elapsedMs },
-        });
-        setStatus("timeout");
-        setMessage("This payment is still being confirmed. If you approved the prompt, do not pay again; check your wallet or retry the status check.");
-        return;
-      }
-      const nextDelay = elapsedMs < 30_000 ? 3_000 : elapsedMs < 90_000 ? 7_000 : 15_000;
-      timer = window.setTimeout(() => void poll(), nextDelay);
-    };
-
-    timer = window.setTimeout(() => void poll(), 3_000);
-    return () => {
-      cancelled = true;
-      if (timer !== undefined) window.clearTimeout(timer);
-    };
-  }, [checkPayment, status, intentId]);
-
-  const submit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError("");
-    const value = Number(amount);
-    const normalizedPhone = normalizeGhanaPhone(phone);
-
-    if (!Number.isFinite(value) || value < MIN_GHS) {
-      setError(`Enter at least GHS ${MIN_GHS.toFixed(2)}.`);
-      depositLogger.warn("init", "Deposit amount did not pass validation", { details: { minimumGhs: MIN_GHS } });
-      return;
-    }
-    const nationalNumber = normalizedPhone.startsWith("233") ? normalizedPhone.slice(3) : normalizedPhone.startsWith("0") ? normalizedPhone.slice(1) : normalizedPhone;
-    if (nationalNumber.length !== 9) {
-      setError("Enter a valid Ghana mobile-money number (9 digits, with or without the 0 or +233 prefix).");
-      depositLogger.warn("init", "Mobile-money number did not pass validation", { details: { digitCount: normalizedPhone.length } });
-      return;
-    }
-
-    setStatus("submitting");
-    setMessage("");
-    setIntentId("");
-    checkInFlight.current = false;
-    const startedAt = Date.now();
-    depositLogger.info("init", "Starting ShinobiPay Ghana Mobile Money deposit", {
-      details: { amountGhs: value, network, phoneMasked: maskPhone(normalizedPhone) },
-    });
-
-    try {
-      const localPhone = `0${nationalNumber}`;
-      const result = await api.deposits.shinobiPayInit({ amount: value, phone: localPhone, network });
-      const newIntentId = typeof result.id === "string" ? result.id : "";
-      if (!newIntentId) throw new Error("The payment service did not return a transaction ID.");
-      setIntentId(newIntentId);
-      setMessage("Check your phone for the payment prompt and approve it with your Mobile Money PIN.");
-      setStatus("pending");
-      depositLogger.success("init", "ShinobiPay charge created", {
-        reference: newIntentId,
-        durationMs: Date.now() - startedAt,
-        details: { network },
-      });
-    } catch (startError) {
-      setError(errorMessage(startError));
-      setStatus("failed");
-      depositLogger.error("init", "ShinobiPay charge could not be started", {
-        durationMs: Date.now() - startedAt,
-        details: { httpStatus: startError instanceof ApiError ? startError.status : undefined },
-      });
-    }
+      setStep("done");
+      void loadHistory();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : err instanceof Error && err.message === "Image upload failed"
+        ? "We could not upload your screenshot. Check your connection and try again — the deposit was not submitted."
+        : "We could not submit this deposit. Please try again.");
+    } finally { setSubmitting(false); }
   };
 
   const reset = () => {
-    depositLogger.info("reset", "Customer requested a new deposit", { reference: intentId || undefined });
-    setStatus("idle");
-    setError("");
-    setMessage("");
-    setIntentId("");
-    checkInFlight.current = false;
+    setStep("info"); setAmount("50"); setSenderName(""); setReference(""); setNote("");
+    setScreenshot(""); setErrs({}); setError("");
   };
 
-  const manualCheck = async () => {
-    depositLogger.info("verify", "Customer requested a manual payment status check", { reference: intentId });
-    const outcome = await checkPayment();
-    if (outcome === "pending" && status === "timeout") {
-      setStatus("pending");
-      setMessage("Still confirming your payment. We will keep checking for a little longer.");
-    }
-  };
-
-  const copyDiagnostics = async () => {
-    try {
-      await navigator.clipboard.writeText(depositLogger.toSupportText());
-      depositLogger.info("diagnostics", "Support diagnostics copied to clipboard");
-    } catch {
-      depositLogger.warn("diagnostics", "Clipboard access was unavailable");
-    }
-  };
-
-  const disabled = status === "submitting" || status === "pending";
+  const chipClass = (status: string) => status === "APPROVED" ? "ok" : status === "REJECTED" ? "bad" : "wait";
 
   return (
     <main className="deposit-page">
       <section className="deposit-hero">
         <div className="deposit-hero-icon"><WalletCards size={24} /></div>
         <div>
-          <span className="deposit-eyebrow">INSTANT WALLET FUNDING</span>
+          <span className="deposit-eyebrow">MANUAL WALLET FUNDING</span>
           <h1>Deposit with Mobile Money</h1>
-          <p>Approve a secure payment prompt on your phone to fund your wallet.</p>
+          <p>Send money to our MTN line, then submit your payment proof. We credit your wallet once the transfer is confirmed.</p>
         </div>
-        <div className="deposit-hero-trust"><ShieldCheck size={16} /> Secure payment</div>
+        <div className="deposit-hero-trust"><ShieldCheck size={16} /> Reviewed by our team</div>
       </section>
 
       <div className="deposit-shell">
         <div className="deposit-rail">
           <span className="deposit-rail-dot" />
-          <span>ShinobiPay · Ghana Mobile Money</span>
-          <span className="deposit-rail-live"><Smartphone size={11} /> LIVE</span>
+          <span>Manual deposit · MTN Mobile Money</span>
+          <span className="deposit-rail-live"><Smartphone size={11} /> {MOMO_NETWORK}</span>
         </div>
 
-        {status === "success" ? (
-          <section className="deposit-panel deposit-status-panel success" role="status">
-            <div className="deposit-status-icon"><CheckCircle2 size={30} /></div>
-            <span className="deposit-status-label">PAYMENT CONFIRMED</span>
-            <h2>Deposit successful</h2>
-            <p className="deposit-status-copy">{message || "Your wallet has been updated."}</p>
-            {intentId && <p className="deposit-reference">Reference: <code>{intentId}</code></p>}
-            <button className="deposit-secondary" type="button" onClick={reset}>Make another deposit</button>
+        {!signedIn ? (
+          <section className="deposit-panel deposit-status-panel">
+            <div className="deposit-status-icon"><Smartphone size={28} /></div>
+            <span className="deposit-status-label">SIGN IN REQUIRED</span>
+            <h2>Log in to make a deposit</h2>
+            <p className="deposit-status-copy">You need an account so we can credit the right wallet when your transfer is confirmed.</p>
+            <Link href="/login" className="deposit-submit" style={{ textDecoration: "none" }}>Log in</Link>
           </section>
-        ) : status === "pending" || status === "timeout" || status === "failed" ? (
-          <section className={`deposit-panel deposit-status-panel ${status}`} role="status">
-            <div className="deposit-status-icon">
-              {status === "pending" ? <Loader2 size={28} className="deposit-spin" /> : status === "failed" ? <AlertCircle size={28} /> : <ShieldCheck size={28} />}
-            </div>
-            <span className="deposit-status-label">
-              {status === "pending" ? "AWAITING MOBILE MONEY APPROVAL" : status === "failed" ? "PAYMENT NOT COMPLETED" : "PAYMENT STILL CONFIRMING"}
-            </span>
-            <h2>{status === "pending" ? "Approve the prompt on your phone" : status === "failed" ? "Deposit not completed" : "Confirmation is taking longer"}</h2>
-            <p className="deposit-status-copy">{message || (status === "pending" ? "Enter your Mobile Money PIN only in your provider's prompt." : "Check your wallet before starting another deposit.")}</p>
-            {phone && <p className="deposit-phone-hint">Prompt sent to {maskPhone(phone)} · {network}</p>}
-            {intentId && <p className="deposit-reference">Reference: <code>{intentId}</code></p>}
-            {error && <div className="deposit-error"><AlertCircle size={15} />{error}</div>}
+        ) : step === "done" ? (
+          <section className="deposit-panel deposit-status-panel success" role="status">
+            <div className="deposit-status-icon"><Hourglass size={28} /></div>
+            <span className="deposit-status-label">PROOF SUBMITTED</span>
+            <h2>Deposit under review</h2>
+            <p className="deposit-status-copy">Your transfer of {ghs(amountValue)} is being checked. Your wallet is credited as soon as it is confirmed — usually within a few minutes.</p>
             <div className="deposit-status-actions">
-              {status !== "failed" && <button className="deposit-secondary" type="button" onClick={() => void manualCheck()}><Check size={16} /> Check payment status</button>}
-              <button className="deposit-secondary" type="button" onClick={reset}>{status === "failed" ? "Try another payment" : "Start a new deposit"}</button>
+              <button className="deposit-secondary" type="button" onClick={reset}>Make another deposit</button>
+              <Link href="/wallet" className="deposit-secondary" style={{ textDecoration: "none" }}>Go to wallet</Link>
             </div>
-            {status !== "failed" && <p className="deposit-warning">If you already approved the prompt, please do not submit the same payment again while it is pending.</p>}
+          </section>
+        ) : step === "info" ? (
+          <section className="deposit-panel">
+            <div className="deposit-panel-heading">
+              <div>
+                <h2>Send to this MTN number</h2>
+                <p>Transfer the amount you want to deposit to this Mobile Money line, then continue to submit your proof.</p>
+              </div>
+              <Smartphone size={22} />
+            </div>
+            <div className="deposit-steps" aria-hidden>
+              <span className="now">1 · Send money</span><span>2 · Submit proof</span><span>3 · We credit you</span>
+            </div>
+            <div className="deposit-copy-card">
+              <CopyRow label="Network" value={`${MOMO_NETWORK} Mobile Money`} />
+              <CopyRow label="MoMo number" value={MOMO_NUMBER} mono />
+              <CopyRow label="Account name" value={MOMO_NAME} />
+            </div>
+            <div className="deposit-instruction-notice" role="note">
+              <ShieldCheck size={17} />
+              <div><strong>Before you send</strong><p>Send only from your own Mobile Money account and keep the receipt — you will enter the transaction ID and upload a screenshot of the payment on the next step. Minimum deposit is GHS {MIN_GHS}.</p></div>
+            </div>
+            <div className="deposit-field">
+              <label htmlFor="deposit-amount">Amount to deposit</label>
+              <div className="deposit-amount-wrap"><b>GHS</b><input id="deposit-amount" value={amount} onChange={(ev) => { setAmount(ev.target.value.replace(/[^\d.]/g, "")); setErrs((p) => ({ ...p, amount: "" })); }} inputMode="decimal" placeholder="50.00" /></div>
+              {errs.amount && <small className="deposit-field-error">{errs.amount}</small>}
+            </div>
+            <div className="deposit-quick-row">
+              {QUICK_AMOUNTS.map((value) => <button type="button" key={value} className={amount === String(value) ? "selected" : ""} onClick={() => setAmount(String(value))}>GHS {value}</button>)}
+            </div>
+            <button className="deposit-submit" type="button" onClick={goProof}><Check size={17} /> I've sent the money</button>
+            <p className="deposit-footnote"><ShieldCheck size={14} /> Your wallet is credited after our team confirms the transfer.</p>
           </section>
         ) : (
           <form className="deposit-panel" onSubmit={submit}>
             <div className="deposit-panel-heading">
               <div>
-                <h2>Pay securely with Mobile Money</h2>
-                <p>Select your network, enter your number, and approve the prompt sent to your phone.</p>
+                <h2>Submit your payment proof</h2>
+                <p>Tell us where the money came from so we can match and credit it fast.</p>
               </div>
               <Smartphone size={22} />
             </div>
-            {error && <div className="deposit-error" role="alert"><AlertCircle size={15} />{error}</div>}
-            <div className="deposit-instruction-notice" role="note">
-              <ShieldCheck size={17} />
-              <div><strong>How it works</strong><p>ShinobiPay sends a payment approval prompt to your phone. Confirm it with your Mobile Money PIN in your provider's secure prompt. Your wallet is credited automatically once the payment is confirmed.</p></div>
+            <div className="deposit-steps" aria-hidden>
+              <span>1 · Send money</span><span className="now">2 · Submit proof</span><span>3 · We credit you</span>
             </div>
+            {error && <div className="deposit-error" role="alert"><AlertCircle size={15} />{error}</div>}
+            <div className="deposit-summary-line"><span>Amount sent</span><b>{ghs(amountValue)}</b></div>
+            <div className="deposit-summary-line"><span>Sent to</span><b>{MOMO_NETWORK} · {MOMO_NUMBER} · {MOMO_NAME}</b></div>
             <label className="deposit-field">
-              <span>Mobile-money network</span>
-              <select value={network} onChange={event => setNetwork(event.target.value as ShinobiPayNetwork)} disabled={disabled}>
-                {NETWORKS.map(item => <option value={item.value} key={item.value}>{item.label}</option>)}
-              </select>
+              <span>Your Mobile Money account name</span>
+              <input value={senderName} onChange={(ev) => { setSenderName(ev.target.value); setErrs((p) => ({ ...p, senderName: "" })); }} placeholder="The name on the account you sent from" autoComplete="name" />
+              {errs.senderName && <small className="deposit-field-error">{errs.senderName}</small>}
             </label>
             <label className="deposit-field">
-              <span>Mobile-money number</span>
-              <input value={phone} onChange={event => setPhone(event.target.value)} inputMode="tel" autoComplete="tel" placeholder="024 123 4567 or +233 24 123 4567" disabled={disabled} />
+              <span>Transaction ID / reference</span>
+              <input value={reference} onChange={(ev) => { setReference(ev.target.value); setErrs((p) => ({ ...p, reference: "" })); }} placeholder="e.g. 12345678901 — from your MoMo receipt" />
+              {errs.reference && <small className="deposit-field-error">{errs.reference}</small>}
             </label>
             <div className="deposit-field">
-              <label htmlFor="deposit-amount">Amount</label>
-              <div className="deposit-amount-wrap"><b>GHS</b><input id="deposit-amount" value={amount} onChange={event => setAmount(event.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" placeholder="50.00" disabled={disabled} /></div>
+              <span>Payment screenshot</span>
+              {screenshot ? (
+                <div className="deposit-upload-preview">
+                  <img src={screenshot} alt="Your payment proof" />
+                  <button type="button" onClick={() => setScreenshot("")}><X size={13} /> Remove</button>
+                </div>
+              ) : (
+                <label className="deposit-upload">
+                  <input type="file" accept="image/*" onChange={handleFile} hidden />
+                  {compressing ? <><Loader2 size={20} className="deposit-spin" /> Processing image…</> : <><ImagePlus size={20} /> Tap to upload the payment screenshot</>}
+                </label>
+              )}
+              {errs.screenshot && <small className="deposit-field-error">{errs.screenshot}</small>}
             </div>
-            <div className="deposit-quick-row">
-              {QUICK_AMOUNTS.map(value => <button type="button" key={value} className={amount === String(value) ? "selected" : ""} onClick={() => setAmount(String(value))} disabled={disabled}>GHS {value}</button>)}
-            </div>
-            <button className="deposit-submit" type="submit" disabled={disabled}>
-              {status === "submitting" ? <><Loader2 size={17} className="deposit-spin" /> Starting payment…</> : <><Check size={17} /> Pay securely</>}
+            <label className="deposit-field">
+              <span>Note (optional)</span>
+              <input value={note} onChange={(ev) => setNote(ev.target.value)} placeholder="Anything we should know about this transfer" maxLength={1000} />
+            </label>
+            <button className="deposit-submit" type="submit" disabled={submitting || compressing}>
+              {submitting ? <><Loader2 size={17} className="deposit-spin" /> Submitting proof…</> : <><CheckCircle2 size={17} /> Submit proof</>}
             </button>
-            <p className="deposit-footnote"><ShieldCheck size={14} /> Your wallet updates automatically after ShinobiPay confirms the payment.</p>
+            <button className="deposit-secondary" type="button" onClick={() => { setStep("info"); setError(""); }} disabled={submitting}>Back to payment details</button>
           </form>
         )}
 
-        <details className="deposit-diagnostics" open={diagnosticsOpen} onToggle={event => setDiagnosticsOpen(event.currentTarget.open)}>
-          <summary>Payment diagnostics <span>{entries.length} events</span></summary>
-          <div className="deposit-diagnostics-body">
-            <p>Recent deposit events for troubleshooting. Phone numbers, credentials, and provider response payloads are not recorded here.</p>
-            <div className="deposit-diagnostics-actions">
-              <button type="button" onClick={() => void copyDiagnostics()}><ClipboardCopy size={14} /> Copy logs</button>
-              <button type="button" onClick={() => depositLogger.clear()}>Clear logs</button>
-            </div>
-            <ol aria-live="polite">
-              {entries.slice(-12).reverse().map(entry => (
-                <li key={entry.id} className={`deposit-log-${entry.level}`}>
-                  <time>{new Date(entry.timestamp).toLocaleTimeString()}</time>
-                  <b>{entry.context}</b>
-                  <span>{entry.message}</span>
-                  {entry.reference && <code>{entry.reference}</code>}
-                  {entry.details?.status !== undefined && <small>status: {String(entry.details.status)}</small>}
-                </li>
-              ))}
-            </ol>
-          </div>
-        </details>
+        {signedIn && history.length > 0 && (
+          <section className="deposit-panel deposit-requests">
+            <h2>Your deposit requests</h2>
+            {history.map((row, i) => {
+              const status = asText(row.status, "PENDING");
+              return <div className="deposit-request-row" key={asText(row.id, String(i))}>
+                <div><b>{ghs(row.ngnAmountSent)}</b><small>{formatDate(row.createdAt)} · Ref {asText(row.transferReference)}</small>{status === "REJECTED" && asText(row.adminNote, "") !== "—" && <small className="rej">Reason: {asText(row.adminNote)}</small>}</div>
+                <span className={`deposit-chip ${chipClass(status)}`}>{status}</span>
+              </div>;
+            })}
+          </section>
+        )}
       </div>
     </main>
   );
