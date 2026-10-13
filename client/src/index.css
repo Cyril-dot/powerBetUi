@@ -3265,3 +3265,35 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .pb-success-rows b{font-weight:800}
 .pb-success-rows .ret b{color:#1e9e5a}
 .pb-success-card .ghost-button{margin-top:8px}
+
+/* Player affiliate centre */
+.aff-page{padding-top:26px;padding-bottom:60px}
+.aff-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.aff-head h1{font:800 42px/.95 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:-.01em;margin-top:6px}
+.aff-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0}
+.aff-stat{padding:18px;display:flex;flex-direction:column;gap:6px;color:var(--blue)}
+.aff-stat small{color:#5f6673;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+.aff-stat strong{font-size:21px;color:#20242d}
+.aff-panel{padding:22px;margin-bottom:18px}
+.aff-panel h2{display:flex;align-items:center;gap:8px;font:700 23px 'Barlow Condensed',sans-serif;margin:0 0 6px;color:#20242d}
+.aff-sub{color:#5f6673;font-size:13px;margin:0 0 8px}
+.aff-link-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.aff-link-row code{flex:1;min-width:220px;background:#f4f6fa;border:1px solid var(--line);border-radius:8px;padding:11px 12px;font-size:13px;overflow:auto;white-space:nowrap;color:#20242d}
+.aff-input{flex:1;min-width:220px;padding:11px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px}
+.aff-table-wrap{overflow-x:auto}
+.aff-table{width:100%;border-collapse:collapse;font-size:13px;color:#20242d}
+.aff-table th{text-align:left;color:#5f6673;font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.aff-table td{padding:9px 10px;border-bottom:1px solid rgba(32,36,45,.07);white-space:nowrap}
+.aff-form{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px}
+.aff-form label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#39424f}
+.aff-form input{padding:11px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px}
+@media(max-width:820px){.aff-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.aff-form{grid-template-columns:1fr}.aff-head h1{font-size:34px}}
+
+/* Super-admin prompt modal (replaces window.prompt in money flows) */
+.sa-prompt-overlay{position:fixed;inset:0;z-index:130;background:rgba(9,11,16,.58);display:flex;align-items:center;justify-content:center;padding:16px}
+.sa-prompt-card{background:#fff;color:#20242d;width:100%;max-width:360px;border-radius:12px;padding:22px;box-shadow:0 26px 70px rgba(0,0,0,.4)}
+.sa-prompt-card h3{margin:0 0 12px;font:700 22px 'Barlow Condensed',sans-serif}
+.sa-prompt-card label{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:700;color:#39424f}
+.sa-prompt-card input{padding:11px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px}
+.sa-prompt-actions{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}

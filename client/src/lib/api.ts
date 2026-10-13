@@ -235,6 +235,8 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
       }
     }
     if (message === `Request failed (${res.status})`) message = `Request failed (${res.status}) at ${path}`;
+    // Never surface internal operation ids from server error text.
+    message = message.replace(/operationId=[0-9a-fA-F-]{36}\s*/g, "").trim() || message;
     throw new ApiError(message, res.status);
   }
 
@@ -1030,7 +1032,6 @@ export const adminAffiliate = {
   getReferredUsers: () => get<Record<string, unknown>[]>("/api/admin/affiliate/referred-users"),
   getLinks: () => get<Record<string, unknown>[]>("/api/admin/affiliate/links"),
   createLink: (body: { label?: string; expiresAt?: string }) => post<Record<string, unknown>>("/api/admin/affiliate/links", body),
-  getPayoutWindow: () => get<Record<string, boolean>>("/api/admin/affiliate/payout-window"),
   requestPayout: () => post<Record<string, unknown>>("/api/admin/affiliate/payout-request"),
   getPayoutHistory: (page = 0, size = 20) => get<PageResponse<Record<string, unknown>>>(`/api/admin/affiliate/payout-requests${qs({ page, size })}`),
   dailySummary: (date?: string) => get<Record<string, unknown>>(`/api/admin/affiliate/commission/daily-summary${qs({ date })}`),
@@ -1079,7 +1080,6 @@ export const superAdminPayouts = {
 
 export const superAdminAffiliateWithdrawals = {
   getPending: () => get<Record<string, unknown>[]>("/api/super-admin/affiliate-withdrawals/pending"),
-  list: (page = 0, size = 20, status?: string) => get<PageResponse<Record<string, unknown>>>(`/api/super-admin/affiliate-withdrawals${qs({ page, size, status })}`),
   process: (id: string) => post<Record<string, unknown>>(`/api/super-admin/affiliate-withdrawals/${id}/process`),
   reject: (id: string, body: Record<string, string>) => post<Record<string, unknown>>(`/api/super-admin/affiliate-withdrawals/${id}/reject`, body),
 };
