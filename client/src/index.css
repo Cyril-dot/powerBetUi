@@ -3319,9 +3319,9 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .deposit-summary-line:last-child{border-bottom:0}
 .deposit-summary-line b{color:#fff;text-align:right;font-size:13px}
 .deposit-summary-line b.gold{color:#ffd84d;font-size:14px}
-.deposit-upload{display:flex;align-items:center;justify-content:center;gap:9px;border:1.5px dashed #ffffff30;border-radius:12px;padding:28px 16px;color:#e8e8e8;font-weight:700;font-size:13px;cursor:pointer;background:#1d1d1d;text-align:center;margin-top:7px;transition:border-color .15s}
-.deposit-upload svg{color:#ffd84d;flex:none}
-.deposit-upload:hover{border-color:#ffd84d}
+.deposit-panel label.deposit-upload{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;border:1.5px dashed #ffffff30;border-radius:12px;padding:26px 16px;color:#e8e8e8;font-weight:700;font-size:13px;cursor:pointer;background:#1d1d1d;text-align:center;margin-top:7px;transition:border-color .15s}
+.deposit-panel .deposit-upload svg{color:#ffd84d;flex:none}
+.deposit-panel label.deposit-upload:hover{border-color:#ffd84d}
 .deposit-upload-preview{display:flex;align-items:flex-start;gap:12px;margin-top:7px}
 .deposit-upload-preview img{max-width:210px;max-height:210px;border-radius:10px;border:1px solid #ffffff1f;object-fit:contain;background:#0a0a0a}
 .deposit-upload-preview button{display:inline-flex;align-items:center;gap:5px;border:1px solid #ffffff22;background:#242424;border-radius:8px;padding:8px 12px;font-size:11px;font-weight:800;color:#ff8fa3;cursor:pointer}
