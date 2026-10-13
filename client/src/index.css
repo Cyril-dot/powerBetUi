@@ -3298,32 +3298,48 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .sa-prompt-card input{padding:11px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px}
 .sa-prompt-actions{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
 
-/* Manual deposit (MTN proof flow) */
-.deposit-steps{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 4px}
-.deposit-steps span{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#8494a7;background:#eef2f7;border-radius:99px;padding:6px 11px}
-.deposit-steps span.now{color:#fff;background:var(--blue)}
-.deposit-copy-card{border:1px solid var(--line);border-radius:12px;padding:6px 16px;margin:14px 0;background:#fbfcfe}
-.deposit-copy-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px dashed rgba(32,36,45,.12)}
+/* Manual deposit (MTN proof flow) — styled on the deposit panel's
+   dark + gold system (#151515 panel, #1d1d1d surfaces, #ffd84d accent) */
+.deposit-steps{display:flex;gap:7px;flex-wrap:wrap;margin:2px 0 16px}
+.deposit-steps span{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#8f8f8f;background:#202020;border:1px solid #ffffff14;border-radius:999px;padding:7px 12px}
+.deposit-steps span.now{color:#171717;background:#ffd84d;border-color:#ffd84d}
+.deposit-steps span.done{color:#ffd84d;border-color:#ffd84d55;background:#ffd84d14}
+.deposit-copy-card{border:1px solid #ffffff1f;border-radius:12px;padding:4px 16px;margin:0 0 16px;background:#1d1d1d}
+.deposit-copy-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px dashed #ffffff1c}
 .deposit-copy-row:last-child{border-bottom:0}
-.deposit-copy-row span{display:block;color:#5f6673;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
-.deposit-copy-row b{font-size:15px;color:#20242d}
-.deposit-copy-row b.mono{font-family:ui-monospace,Menlo,monospace;letter-spacing:.04em}
-.deposit-copy-row button{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 11px;font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;white-space:nowrap}
-.deposit-field-error{display:block;margin-top:6px;color:#c2334e;font-size:12px;font-weight:600}
-.deposit-summary-line{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 2px;border-bottom:1px dashed rgba(32,36,45,.12);font-size:13px;color:#5f6673}
-.deposit-summary-line b{color:#20242d;text-align:right}
-.deposit-upload{display:flex;align-items:center;justify-content:center;gap:9px;border:1.5px dashed #b9c6d6;border-radius:12px;padding:26px 16px;color:var(--blue);font-weight:700;font-size:13.5px;cursor:pointer;background:#f7fafd;text-align:center}
-.deposit-upload:hover{border-color:var(--blue)}
-.deposit-upload-preview{display:flex;align-items:flex-start;gap:12px}
-.deposit-upload-preview img{max-width:210px;max-height:210px;border-radius:10px;border:1px solid var(--line);object-fit:contain;background:#0a1016}
-.deposit-upload-preview button{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 11px;font-size:12px;font-weight:700;color:#c2334e;cursor:pointer}
-.deposit-requests h2{font:700 22px 'Barlow Condensed',sans-serif;margin:0 0 8px;color:#20242d}
-.deposit-request-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(32,36,45,.07)}
+.deposit-copy-row span{display:block;color:#9a9a9a;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.deposit-copy-row b{font-size:15px;color:#fff;font-weight:700}
+.deposit-copy-row b.mono{font-family:ui-monospace,Menlo,monospace;letter-spacing:.06em;color:#ffd84d;font-size:17px}
+.deposit-copy-row button{display:inline-flex;align-items:center;gap:5px;border:1px solid #ffffff22;background:#242424;border-radius:8px;padding:8px 12px;font-size:11px;font-weight:800;color:#ffd84d;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s,border-color .15s}
+.deposit-copy-row button:hover{border-color:#ffd84d88}
+.deposit-copy-row button.copied{background:#123524;border-color:#2d754c;color:#62e18f}
+.deposit-field-error{display:block;margin-top:7px;color:#ff8fa3;font:600 12px 'DM Sans',sans-serif;text-transform:none;letter-spacing:0}
+.deposit-summary-card{border:1px solid #ffffff1f;border-radius:12px;padding:4px 16px;margin:0 0 6px;background:#1d1d1d}
+.deposit-summary-line{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px dashed #ffffff1c;font-size:12px;color:#9a9a9a}
+.deposit-summary-line:last-child{border-bottom:0}
+.deposit-summary-line b{color:#fff;text-align:right;font-size:13px}
+.deposit-summary-line b.gold{color:#ffd84d;font-size:14px}
+.deposit-upload{display:flex;align-items:center;justify-content:center;gap:9px;border:1.5px dashed #ffffff30;border-radius:12px;padding:28px 16px;color:#e8e8e8;font-weight:700;font-size:13px;cursor:pointer;background:#1d1d1d;text-align:center;margin-top:7px;transition:border-color .15s}
+.deposit-upload svg{color:#ffd84d;flex:none}
+.deposit-upload:hover{border-color:#ffd84d}
+.deposit-upload-preview{display:flex;align-items:flex-start;gap:12px;margin-top:7px}
+.deposit-upload-preview img{max-width:210px;max-height:210px;border-radius:10px;border:1px solid #ffffff1f;object-fit:contain;background:#0a0a0a}
+.deposit-upload-preview button{display:inline-flex;align-items:center;gap:5px;border:1px solid #ffffff22;background:#242424;border-radius:8px;padding:8px 12px;font-size:11px;font-weight:800;color:#ff8fa3;cursor:pointer}
+.deposit-field input.mono-input{font-family:ui-monospace,Menlo,monospace;letter-spacing:.04em}
+.deposit-requests h2{margin:0 0 6px;color:#fff;font-size:18px}
+.deposit-request-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #ffffff10}
 .deposit-request-row:last-child{border-bottom:0}
-.deposit-request-row b{font-size:14.5px;color:#20242d}
-.deposit-request-row small{display:block;color:#5f6673;font-size:12px;margin-top:2px}
-.deposit-request-row small.rej{color:#c2334e}
-.deposit-chip{font-size:10.5px;font-weight:800;letter-spacing:.06em;border-radius:99px;padding:5px 10px;white-space:nowrap}
-.deposit-chip.wait{color:#92600a;background:rgba(230,164,30,.16)}
-.deposit-chip.ok{color:#157347;background:rgba(30,158,90,.14)}
-.deposit-chip.bad{color:#c2334e;background:rgba(220,60,90,.12)}
+.deposit-request-row b{font-size:14.5px;color:#fff}
+.deposit-request-row small{display:block;color:#969696;font-size:12px;margin-top:3px}
+.deposit-request-row small.rej{color:#ff8fa3}
+.deposit-request-row a.proof-link{color:#ffd84d;font-weight:700;text-decoration:none}
+.deposit-chip{font-size:10px;font-weight:900;letter-spacing:.07em;border-radius:999px;padding:6px 11px;white-space:nowrap;text-transform:uppercase}
+.deposit-chip.wait{color:#ffd84d;background:#ffd84d1a}
+.deposit-chip.ok{color:#4ade80;background:#22c55e24}
+.deposit-chip.bad{color:#ff8fa3;background:#ff5a781f}
+@media (max-width:560px){
+  .deposit-copy-row{flex-wrap:wrap}
+  .deposit-copy-row button{margin-left:auto}
+  .deposit-summary-line b{font-size:12px}
+  .deposit-upload-preview{flex-direction:column}
+}

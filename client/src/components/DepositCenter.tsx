@@ -80,7 +80,7 @@ function CopyRow({ label, value, mono = false }: { label: string; value: string;
   };
   return <div className="deposit-copy-row">
     <div><span>{label}</span><b className={mono ? "mono" : ""}>{value}</b></div>
-    <button type="button" onClick={copy}>{copied ? <><Check size={13} /> Copied</> : failed ? "Copy failed — long-press" : <><Copy size={13} /> Copy</>}</button>
+    <button type="button" onClick={copy} className={copied ? "copied" : ""}>{copied ? <><Check size={13} /> Copied</> : failed ? "Copy failed — long-press" : <><Copy size={13} /> Copy</>}</button>
   </div>;
 }
 
@@ -235,11 +235,13 @@ export default function DepositCenter() {
               <Smartphone size={22} />
             </div>
             <div className="deposit-steps" aria-hidden>
-              <span>1 · Send money</span><span className="now">2 · Submit proof</span><span>3 · We credit you</span>
+              <span className="done"><Check size={11} /> Send money</span><span className="now">2 · Submit proof</span><span>3 · We credit you</span>
             </div>
             {error && <div className="deposit-error" role="alert"><AlertCircle size={15} />{error}</div>}
-            <div className="deposit-summary-line"><span>Amount sent</span><b>{ghs(amountValue)}</b></div>
-            <div className="deposit-summary-line"><span>Sent to</span><b>{MOMO_NETWORK} · {MOMO_NUMBER} · {MOMO_NAME}</b></div>
+            <div className="deposit-summary-card">
+              <div className="deposit-summary-line"><span>Amount sent</span><b className="gold">{ghs(amountValue)}</b></div>
+              <div className="deposit-summary-line"><span>Sent to</span><b>{MOMO_NETWORK} · {MOMO_NUMBER} · {MOMO_NAME}</b></div>
+            </div>
             <label className="deposit-field">
               <span>Your Mobile Money account name</span>
               <input value={senderName} onChange={(ev) => { setSenderName(ev.target.value); setErrs((p) => ({ ...p, senderName: "" })); }} placeholder="The name on the account you sent from" autoComplete="name" />
@@ -247,7 +249,7 @@ export default function DepositCenter() {
             </label>
             <label className="deposit-field">
               <span>Transaction ID / reference</span>
-              <input value={reference} onChange={(ev) => { setReference(ev.target.value); setErrs((p) => ({ ...p, reference: "" })); }} placeholder="e.g. 12345678901 — from your MoMo receipt" />
+              <input className="mono-input" value={reference} onChange={(ev) => { setReference(ev.target.value); setErrs((p) => ({ ...p, reference: "" })); }} placeholder="e.g. 12345678901 — from your MoMo receipt" />
               {errs.reference && <small className="deposit-field-error">{errs.reference}</small>}
             </label>
             <div className="deposit-field">
@@ -282,7 +284,7 @@ export default function DepositCenter() {
             {history.map((row, i) => {
               const status = asText(row.status, "PENDING");
               return <div className="deposit-request-row" key={asText(row.id, String(i))}>
-                <div><b>{ghs(row.ngnAmountSent)}</b><small>{formatDate(row.createdAt)} · Ref {asText(row.transferReference)}</small>{status === "REJECTED" && asText(row.adminNote, "") !== "—" && <small className="rej">Reason: {asText(row.adminNote)}</small>}</div>
+                <div><b>{ghs(row.ngnAmountSent)}</b><small>{formatDate(row.createdAt)} · Ref {asText(row.transferReference)}{typeof row.screenshotUrl === "string" && row.screenshotUrl.startsWith("http") && <> · <a className="proof-link" href={row.screenshotUrl} target="_blank" rel="noreferrer">View proof</a></>}</small>{status === "REJECTED" && asText(row.adminNote, "") !== "—" && <small className="rej">Reason: {asText(row.adminNote)}</small>}</div>
                 <span className={`deposit-chip ${chipClass(status)}`}>{status}</span>
               </div>;
             })}
