@@ -219,12 +219,12 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
     let cancelled = false;
     const normalizeMatchTiming = (match: Match): Match => {
       const raw = match as Match & Record<string, unknown>;
-      const kickoffAt = match.kickoffAt ?? raw.startTime ?? raw.scheduledAt ?? raw.commenceTime ?? raw.eventStartTime;
+      const kickoffAt = match.kickoffAt ?? raw.kickoff_at ?? raw.startTime ?? raw.start_time ?? raw.scheduledAt ?? raw.commenceTime ?? raw.eventStartTime ?? raw.kickoff ?? raw.matchDate;
       return kickoffAt && !match.kickoffAt ? { ...match, kickoffAt: String(kickoffAt) } : match;
     };
     const refresh = () => Promise.all([
       Promise.allSettled(ids.map(async (mid) => { try { return await api.matches.getById(mid); } catch { try { return await api.publicAdminMatches.getById(mid); } catch { return null; } } })),
-      Promise.allSettled([api.matches.today(), api.matches.upcoming(), api.matches.live(), api.publicAdminMatches.getAll()]),
+      Promise.allSettled([api.matches.today(), api.matches.upcoming(), api.matches.live(), api.matches.future(), api.publicAdminMatches.getAll()]),
     ]).then(([directResults, catalogResults]) => {
       if (cancelled) return;
       const catalog = catalogResults.flatMap((result) => result.status === "fulfilled" ? result.value : []).map(normalizeMatchTiming);
@@ -234,7 +234,15 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
           const direct = result.status === "fulfilled" ? result.value : null;
           const listed = catalog.find((match) => match.id === ids[i] || match.externalId === ids[i]);
           if (direct || listed) {
-            const merged = { ...(listed ?? {}), ...(direct ?? {}) } as Match;
+            const base = normalizeMatchTiming((listed ?? {}) as Match);
+            const over = normalizeMatchTiming((direct ?? {}) as Match);
+            const merged = { ...base, ...over } as Match;
+            // A detail payload that omits a field must not erase the
+            // catalog's value — the kickoff is why this map exists, and
+            // a null score would hide a live score the catalog has.
+            if (!merged.kickoffAt && base.kickoffAt) merged.kickoffAt = base.kickoffAt;
+            if (merged.scoreHome == null && base.scoreHome != null) merged.scoreHome = base.scoreHome;
+            if (merged.scoreAway == null && base.scoreAway != null) merged.scoreAway = base.scoreAway;
             next[ids[i]] = normalizeMatchTiming(merged);
           }
         });
