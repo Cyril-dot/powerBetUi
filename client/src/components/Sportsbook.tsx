@@ -862,7 +862,7 @@ export default function Sportsbook({
                 {(loading || restLoading) && grouped.today.length === 0 ? (
                   <SkeletonRows />
                 ) : (
-                  <PaginatedLeagueList list={applyFilter(grouped.today)} hasDraw={hasDraw} picks={picks} onPick={onPick} emptyLabel="No matches scheduled for today." />
+                  <PaginatedLeagueList list={applyFilter(grouped.today)} hasDraw={hasDraw} picks={picks} onPick={onPick} emptyLabel="No matches scheduled for today." pageSize={10} />
                 )}
               </div>
             </section>
