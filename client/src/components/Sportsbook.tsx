@@ -597,21 +597,21 @@ function SectionShell({
 }
 
 function PaginatedLeagueList({
-  list, hasDraw, picks, onPick, emptyLabel,
-}: { list: EnrichedMatch[]; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void; emptyLabel: string }) {
-  const [visible, setVisible] = useState(PAGE_SIZE);
+  list, hasDraw, picks, onPick, emptyLabel, pageSize = PAGE_SIZE,
+}: { list: EnrichedMatch[]; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void; emptyLabel: string; pageSize?: number }) {
+  const [visible, setVisible] = useState(pageSize);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => { setVisible(PAGE_SIZE); }, [list.length]);
+  useEffect(() => { setVisible(pageSize); }, [list.length, pageSize]);
   useEffect(() => {
     const node = sentinelRef.current;
     if (!node || visible >= list.length) return;
     const observer = new IntersectionObserver(
-      (entries) => { if (entries[0]?.isIntersecting) setVisible((v) => Math.min(v + PAGE_SIZE, list.length)); },
+      (entries) => { if (entries[0]?.isIntersecting) setVisible((v) => Math.min(v + pageSize, list.length)); },
       { rootMargin: "240px 0px" },
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [list.length, visible]);
+  }, [list.length, visible, pageSize]);
 
   if (list.length === 0) return <p className="sb-empty">{emptyLabel}</p>;
 
@@ -842,7 +842,7 @@ export default function Sportsbook({
         <TopLeaguesSection list={applyFilter(topTenUpcoming)} hasDraw={hasDraw} picks={picks} onPick={onPick} />
       )}
 
-      {!hideLive && (
+      {!hideLive && (mode === "live-only" || loading || visibleLive.length > 0) && (
         <LiveMatchesSection list={visibleLive} hasDraw={hasDraw} picks={picks} onPick={onPick} loading={loading} />
       )}
 
@@ -872,7 +872,7 @@ export default function Sportsbook({
             {(loading || restLoading) && grouped.upcoming.length === 0 ? (
               <SkeletonRows />
             ) : (
-              <PaginatedLeagueList list={applyFilter(grouped.upcoming)} hasDraw={hasDraw} picks={picks} onPick={onPick} emptyLabel="No upcoming matches found." />
+              <PaginatedLeagueList list={applyFilter(grouped.upcoming)} hasDraw={hasDraw} picks={picks} onPick={onPick} emptyLabel="No upcoming matches found." pageSize={10} />
             )}
           </SectionShell>
 
