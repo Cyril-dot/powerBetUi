@@ -1154,19 +1154,40 @@ export function normalizeSportKey(raw: unknown): SportKey {
   return (known as string[]).includes(s) ? (s as SportKey) : "football";
 }
 
+// Admin-match odds are fetched one match at a time from the backend, and
+// the board re-polls the admin list every few seconds — without a cache
+// that is a burst of per-match requests on every single poll. Odds are
+// reused for 30s (they drift slowly by design) and a cold load fans out
+// at most 4 at a time instead of the whole list at once.
+const adminOddsCache = new Map<string, { at: number; odds: unknown[] }>();
+const ADMIN_ODDS_TTL_MS = 30_000;
+
+async function adminOddsFor(id: string): Promise<unknown[]> {
+  const hit = adminOddsCache.get(id);
+  if (hit && Date.now() - hit.at < ADMIN_ODDS_TTL_MS) return hit.odds;
+  const odds = await settleList(api.publicAdminMatches.odds(id));
+  const arr = Array.isArray(odds) ? odds : [];
+  if (arr.length) adminOddsCache.set(id, { at: Date.now(), odds: arr });
+  return arr;
+}
+
 export async function fetchAdminMatches(): Promise<EnrichedMatch[]> {
   const raw = await settleList(api.publicAdminMatches.getAll());
   const list = Array.isArray(raw) ? raw : [];
   if (!list.length) return [];
-  const withOdds = await Promise.all(
-    list.map(async (m) => {
-      const odds = await settleList(api.publicAdminMatches.odds(m.id));
-      const oddsMap = extractOddsMap(Array.isArray(odds) ? odds : [], m.homeTeam, m.awayTeam);
+  const liveIds = new Set(list.map((m) => m.id));
+  for (const id of Array.from(adminOddsCache.keys())) if (!liveIds.has(id)) adminOddsCache.delete(id);
+  const withOdds: EnrichedMatch[] = [];
+  for (let i = 0; i < list.length; i += 4) {
+    const batch = list.slice(i, i + 4);
+    withOdds.push(...await Promise.all(batch.map(async (m) => {
+      const odds = await adminOddsFor(m.id);
+      const oddsMap = extractOddsMap(odds, m.homeTeam, m.awayTeam);
       const homeLogo = adminLogo((m as Match).homeLogo, m.homeTeam, "home", ADMIN_LOGO_ASSIGNMENT_SALT);
       const awayLogo = adminLogo((m as Match).awayLogo, m.awayTeam, "away", ADMIN_LOGO_ASSIGNMENT_SALT);
       return { ...m, sport: normalizeSportKey(m.sport), homeLogo, awayLogo, displayHomeLogo: homeLogo, displayAwayLogo: awayLogo, oddsMap, isAdmin: true } as EnrichedMatch;
-    })
-  );
+    })));
+  }
   const complete = ensureOdds(withOdds);
   return filterVisibleAdminMatches(complete.map((match) => ({
     ...match,
