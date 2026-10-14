@@ -2730,13 +2730,6 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .deposit-quick-row button{padding:7px 10px;border:1px solid #ffffff1a;border-radius:999px;background:#202020;color:#bbb;font-size:10px;font-weight:800;cursor:pointer}
 .deposit-quick-row button.selected{background:#ffd84d;border-color:#ffd84d;color:#121212}
 .deposit-quick-row button:disabled{opacity:.55;cursor:not-allowed}
-.fw-country{display:flex;gap:8px}
-.fw-country button{flex:1;padding:13px 10px;border:1px solid #ffffff1a;border-radius:12px;background:#202020;color:#bbb;font:800 13px 'DM Sans',sans-serif;cursor:pointer}
-.fw-country button.selected{background:#ffd84d;border-color:#ffd84d;color:#121212}
-.fw-methods{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:4px}
-.fw-methods button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border:1px solid #ffffff1a;border-radius:12px;background:#202020;color:#bbb;font:800 10.5px 'DM Sans',sans-serif;cursor:pointer;text-align:center}
-.fw-methods button.selected{background:#ffd84d;border-color:#ffd84d;color:#121212}
-@media (max-width:480px){.fw-methods{grid-template-columns:repeat(2,1fr)}}
 .deposit-submit,.deposit-secondary{display:flex;justify-content:center;align-items:center;gap:7px;width:100%;margin-top:20px;padding:13px 16px;border:0;border-radius:10px;background:#ffd84d;color:#171717;font:900 12px 'DM Sans',sans-serif;cursor:pointer}
 .deposit-submit:hover,.deposit-secondary:hover{background:#ffe477}
 .deposit-submit:disabled{opacity:.65;cursor:wait}

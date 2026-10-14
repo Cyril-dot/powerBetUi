@@ -331,28 +331,21 @@ export const withdrawals = {
 };
 
 // ---------------------------------------------------------------------------
-// DEPOSITS — Flutterwave v4 for both countries (owner direction
-// 2026-10-14, replacing the manual MTN proof flow). Contracts mirror the
-// backend's FlutterwaveGhV4DepositController /
-// FlutterwaveNgBankV4DepositController exactly. The bank-deposits
-// endpoint remains only for reading older manual submissions.
+// DEPOSITS — manual Mobile Money (proof reviewed by the admin queue)
+// Ghana manual deposits reuse the bank-deposit endpoint and proof fields
+// (the same contract the Nigerian bank flow submits to); only the labels
+// and payment destination differ. ShinobiPay was removed at the owner's
+// direction on 2026-10-13.
 // ---------------------------------------------------------------------------
 export const deposits = {
-  ghInit: (body: { amount: number; phoneNumber: string; network: string }) =>
-    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/gh/v4/init", body),
-  ghVerify: (txRef: string) =>
-    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/gh/v4/verify", { txRef }),
-  ngTransferInit: (amount: number) =>
-    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/v4/ng-bank/init/bank-transfer", { amount }),
-  ngBankInit: (amount: number) =>
-    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/v4/ng-bank/init", { amount }),
-  ngUssdInit: (body: { amount: number; bankCode: string }) =>
-    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/v4/ng-ussd/init", body),
-  ngUssdBanks: () => get<unknown>("/api/wallet/deposit/flutterwave/v4/ng-ussd/banks"),
-  ngOpayInit: (amount: number) =>
-    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/v4/ng-opay/init", { amount }),
-  ngVerify: (reference: string) =>
-    get<Record<string, unknown>>(`/api/wallet/deposit/flutterwave/v4/ng/verify${qs({ ref: reference })}`),
+  submitBankDeposit: (body: {
+    transferReference: string;
+    ngnAmountSent: number;
+    expectedNgnCredit: number;
+    senderAccountName?: string;
+    screenshotUrl?: string;
+    userNote?: string;
+  }) => post<Record<string, unknown>>("/api/wallet/bank-deposits", body),
   myBankDeposits: (page = 0, size = 10) =>
     get<PageResponse<Record<string, unknown>>>(`/api/wallet/bank-deposits${qs({ page, size })}`),
 };
