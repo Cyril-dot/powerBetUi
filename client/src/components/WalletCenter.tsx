@@ -333,34 +333,22 @@ export default function WalletCenter() {
                 />
               </label>
 
+              {/* Payouts are Ghana Mobile Money only — the Nigerian
+                  bank-transfer payout option was removed at the
+                  owner's direction (2026-10-14). */}
               <label className="wal-field">
-                <span>Method</span>
+                <span>Network</span>
                 <select
-                  value={withdrawForm.method}
+                  value={withdrawForm.network}
                   onChange={(e) =>
-                    setWithdrawForm((f) => ({ ...f, method: e.target.value }))
+                    setWithdrawForm((f) => ({ ...f, network: e.target.value }))
                   }
                 >
-                  <option value="MOBILE_MONEY">Mobile money</option>
-                  <option value="BANK_TRANSFER">Bank transfer</option>
+                  <option value="MTN">MTN</option>
+                  <option value="TELECEL">Telecel</option>
+                  <option value="AIRTELTIGO">AirtelTigo</option>
                 </select>
               </label>
-
-              {withdrawForm.method === "MOBILE_MONEY" && (
-                <label className="wal-field">
-                  <span>Network</span>
-                  <select
-                    value={withdrawForm.network}
-                    onChange={(e) =>
-                      setWithdrawForm((f) => ({ ...f, network: e.target.value }))
-                    }
-                  >
-                    <option value="MTN">MTN</option>
-                    <option value="TELECEL">Telecel</option>
-                    <option value="AIRTELTIGO">AirtelTigo</option>
-                  </select>
-                </label>
-              )}
 
               <label className="wal-field">
                 <span>Account number</span>
