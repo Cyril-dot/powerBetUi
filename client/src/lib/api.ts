@@ -1,13 +1,13 @@
 // =============================================================================
 // api.ts — Super Bet full backend integration layer
-// Confirmed live backend: https://futballbackend-production-7342.up.railway.app
+// Canonical backend: https://futballbackend-production-12e9.up.railway.app
+// (override with VITE_API_BASE_URL at build time)
 // Browser-safe calls only. Never place provider secrets in this file.
 // =============================================================================
-import { depositLogger } from "@/lib/depositLogger";
 
 export const BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ||
-  "https://futballbackend-production-15ee.up.railway.app";
+  "https://futballbackend-production-12e9.up.railway.app";
 
 // ---------------------------------------------------------------------------
 // Shared types
@@ -157,8 +157,7 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
   if (body !== undefined) headers["Content-Type"] = "application/json";
 
   const debugScheduler = path.includes("/admin/matches/auto");
-  const debugDeposit = path.startsWith("/api/wallet/deposit/akwapay/");
-  const depositStartedAt = debugDeposit ? Date.now() : 0;
+  const debugDeposit = path.includes("/api/wallet/deposit/webrabbit-momo");
   const debugBody = (value: unknown): unknown => {
     if (!value || typeof value !== "object") return value;
     if (Array.isArray(value)) return value.map(debugBody);
@@ -175,7 +174,11 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
     console.info("Request payload", debugBody(body));
     console.groupEnd();
   }
-  if (debugDeposit) depositLogger.info("http", `${method} ${path}`, { details: { phase: "request" } });
+  if (debugDeposit) {
+    console.groupCollapsed(`[DepositCenter] ${method} ${path}`);
+    console.info("Request", debugBody(body));
+    console.groupEnd();
+  }
 
   let res: Response;
   try {
@@ -188,10 +191,6 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
     });
   } catch (networkErr) {
     if (debugScheduler) console.error("[Scheduler] Network error", networkErr);
-    if (debugDeposit) depositLogger.error("http", `Network failure: ${method} ${path}`, {
-      durationMs: Date.now() - depositStartedAt,
-      details: { status: 0 },
-    });
 
     // Network failure (offline, DNS, CORS preflight) — wrap so callers
     // always get an ApiError and the DepositCenter logger sees httpStatus=0
@@ -205,17 +204,11 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
   let payload: unknown;
   try { payload = text ? JSON.parse(text) : undefined; } catch { payload = text; }
   if (debugScheduler) console.info("[Scheduler] Response", { status: res.status, ok: res.ok, contentType: res.headers.get("content-type"), body: payload });
-  if (debugDeposit) depositLogger.info("http", `${method} ${path} returned`, {
-    durationMs: Date.now() - depositStartedAt,
-    details: { status: res.status, ok: res.ok },
-  });
+  if (debugDeposit) console.info("[DepositCenter] Web Rabbit response", { status: res.status, ok: res.ok, contentType: res.headers.get("content-type"), body: payload });
 
   if (!res.ok) {
     if (debugScheduler) console.error("[Scheduler] HTTP failure", { status: res.status, url: `${BASE_URL}${path}`, body: payload });
-    if (debugDeposit) depositLogger.warn("http", `${method} ${path} rejected`, {
-      durationMs: Date.now() - depositStartedAt,
-      details: { status: res.status },
-    });
+    if (debugDeposit) console.error("[DepositCenter] Web Rabbit request rejected", { status: res.status, url: `${BASE_URL}${path}`, body: payload });
     // Try to pull a human-readable message out of the response body.
     // Spring ApiException shape: { "message": "..." }
     let message = `Request failed (${res.status})`;
@@ -235,8 +228,6 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
       }
     }
     if (message === `Request failed (${res.status})`) message = `Request failed (${res.status}) at ${path}`;
-    // Never surface internal operation ids from server error text.
-    message = message.replace(/operationId=[0-9a-fA-F-]{36}\s*/g, "").trim() || message;
     throw new ApiError(message, res.status);
   }
 
@@ -331,30 +322,25 @@ export const withdrawals = {
 };
 
 // ---------------------------------------------------------------------------
-// DEPOSITS — Flutterwave v4 for both countries (owner direction
-// 2026-10-14, replacing the manual MTN proof flow). Contracts mirror the
-// backend's FlutterwaveGhV4DepositController /
-// FlutterwaveNgBankV4DepositController exactly. The bank-deposits
-// endpoint remains only for reading older manual submissions.
+// DEPOSITS — Web Rabbit Ghana Mobile Money
 // ---------------------------------------------------------------------------
+export type WebRabbitNetwork = "MTN" | "TELECEL" | "AT" | "GMONEY";
+export interface WebRabbitTransaction {
+  transaction_id?: string;
+  transactionId?: string;
+  id?: string;
+  status?: string;
+  reason_code?: string;
+  reasonCode?: string;
+  message?: string;
+  settled_at?: string;
+  [key: string]: unknown;
+}
 export const deposits = {
-  ghInit: (body: { amount: number; phoneNumber: string; network: string }) =>
-    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/gh/v4/init", body),
-  ghVerify: (txRef: string) =>
-    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/gh/v4/verify", { txRef }),
-  ngTransferInit: (amount: number) =>
-    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/v4/ng-bank/init/bank-transfer", { amount }),
-  ngBankInit: (amount: number) =>
-    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/v4/ng-bank/init", { amount }),
-  ngUssdInit: (body: { amount: number; bankCode: string }) =>
-    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/v4/ng-ussd/init", body),
-  ngUssdBanks: () => get<unknown>("/api/wallet/deposit/flutterwave/v4/ng-ussd/banks"),
-  ngOpayInit: (amount: number) =>
-    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/v4/ng-opay/init", { amount }),
-  ngVerify: (reference: string) =>
-    get<Record<string, unknown>>(`/api/wallet/deposit/flutterwave/v4/ng/verify${qs({ ref: reference })}`),
-  myBankDeposits: (page = 0, size = 10) =>
-    get<PageResponse<Record<string, unknown>>>(`/api/wallet/bank-deposits${qs({ page, size })}`),
+  webRabbitMomoInit: (body: { amount: number; phone: string; network: WebRabbitNetwork }) =>
+    post<WebRabbitTransaction>("/api/wallet/deposit/webrabbit-momo/init", body),
+  webRabbitMomoVerify: (transactionId: string) =>
+    get<WebRabbitTransaction>(`/api/wallet/deposit/webrabbit-momo/verify/${encodeURIComponent(transactionId)}`),
 };
 
 // ---------------------------------------------------------------------------
@@ -366,7 +352,11 @@ export const bets = {
   place: (body: { stake: number; currency?: string; selections: Array<{ matchId: string; market: string; selection: string; submittedOdds: number }>; bookingCodeUsedId?: string }) =>
     post<Bet>("/api/bets", body),
   getOne: (id: string) => get<Bet>(`/api/bets/${id}`),
-  cashout: (id: string) => post<Bet>(`/api/bets/${encodeURIComponent(id)}/cashout`),
+  cashoutPreview: (id: string, pct = 100) =>
+    get<{ amount: number; pct: number }>(`/api/bets/${encodeURIComponent(id)}/cashout/preview?pct=${pct}`),
+  cashoutFull: (id: string) => post<Bet>(`/api/bets/${encodeURIComponent(id)}/cashout/full`, {}),
+  cashoutPartial: (id: string, pct: number) =>
+    post<Bet>(`/api/bets/${encodeURIComponent(id)}/cashout/partial?pct=${pct}`, {}),
   getUnseenWins: () => get<Bet[]>("/api/bets/unseen-wins"),
   dismissWin: (id: string) => post<void>(`/api/bets/${id}/dismiss-win`),
 };
@@ -1037,6 +1027,7 @@ export const adminAffiliate = {
   getReferredUsers: () => get<Record<string, unknown>[]>("/api/admin/affiliate/referred-users"),
   getLinks: () => get<Record<string, unknown>[]>("/api/admin/affiliate/links"),
   createLink: (body: { label?: string; expiresAt?: string }) => post<Record<string, unknown>>("/api/admin/affiliate/links", body),
+  getPayoutWindow: () => get<Record<string, boolean>>("/api/admin/affiliate/payout-window"),
   requestPayout: () => post<Record<string, unknown>>("/api/admin/affiliate/payout-request"),
   getPayoutHistory: (page = 0, size = 20) => get<PageResponse<Record<string, unknown>>>(`/api/admin/affiliate/payout-requests${qs({ page, size })}`),
   dailySummary: (date?: string) => get<Record<string, unknown>>(`/api/admin/affiliate/commission/daily-summary${qs({ date })}`),
@@ -1085,6 +1076,7 @@ export const superAdminPayouts = {
 
 export const superAdminAffiliateWithdrawals = {
   getPending: () => get<Record<string, unknown>[]>("/api/super-admin/affiliate-withdrawals/pending"),
+  list: (page = 0, size = 20, status?: string) => get<PageResponse<Record<string, unknown>>>(`/api/super-admin/affiliate-withdrawals${qs({ page, size, status })}`),
   process: (id: string) => post<Record<string, unknown>>(`/api/super-admin/affiliate-withdrawals/${id}/process`),
   reject: (id: string, body: Record<string, string>) => post<Record<string, unknown>>(`/api/super-admin/affiliate-withdrawals/${id}/reject`, body),
 };

@@ -7,6 +7,7 @@ import api, { ApiError, type Bet, type Match } from "@/lib/api";
 import { resolveIsAdmin } from "./WalletCenter";
 import { BET_PLACED_NOTICE_KEY } from "./BetslipPage";
 import { useSession } from "../lib/session";
+import CashoutPanel from "./CashoutPanel";
 
 const HIDDEN_TICKETS_KEY = "powerbet_hidden_tickets";
 
@@ -122,9 +123,10 @@ function HistoryCard({ bet, scores }: { bet: Bet; scores: Record<string, Match> 
   );
 }
 
-/* ── Open-bet card: admins can trigger the backend cashout action. ── */
-function OpenBetCard({ bet, scores, isAdmin, onCashout }: { bet: Bet; scores: Record<string, Match>; isAdmin: boolean; onCashout: (bet: Bet) => Promise<void> }) {
+/* ── Open-bet card: users can cash out via the live backend offer. ── */
+function OpenBetCard({ bet, scores, onCashoutDone }: { bet: Bet; scores: Record<string, Match>; onCashoutDone: () => void }) {
   const [expanded, setExpanded] = useState(true);
+  const [showCashout, setShowCashout] = useState(false);
   const isMultiple = bet.selections.length > 1;
 
   return (
@@ -142,12 +144,8 @@ function OpenBetCard({ bet, scores, isAdmin, onCashout }: { bet: Bet; scores: Re
                   <div className="bh-open-leg-head"><b>{s.market || "1X2"} · {s.homeTeam ?? scores[s.matchId]?.homeTeam ?? "Home"} vs {s.awayTeam ?? scores[s.matchId]?.awayTeam ?? "Away"}</b>{isOpenMatchLive(scores[s.matchId]) && <span className="bh-live-match"><i /><small>live</small><b>{openMatchClock(scores[s.matchId])}</b></span>}</div>
                   {openMatchStartTime(scores[s.matchId]) && <small className="bh-open-kickoff">{openMatchStartTime(scores[s.matchId])}</small>}
                   <small>{s.selection} @ {s.oddsLocked?.toFixed(2)}</small>
-                  {isOpenMatchLive(scores[s.matchId]) && (
-                    <>
-                      <div className="bh-open-team-row"><span>{s.homeTeam ?? scores[s.matchId]?.homeTeam ?? "Home"}</span>{scores[s.matchId]?.scoreHome != null && <strong>{scores[s.matchId].scoreHome}</strong>}</div>
-                      <div className="bh-open-team-row"><span>{s.awayTeam ?? scores[s.matchId]?.awayTeam ?? "Away"}</span>{scores[s.matchId]?.scoreAway != null && <strong>{scores[s.matchId].scoreAway}</strong>}</div>
-                    </>
-                  )}
+                  <div className="bh-open-team-row"><span>{s.homeTeam ?? scores[s.matchId]?.homeTeam ?? "Home"}</span>{isOpenMatchLive(scores[s.matchId]) && scores[s.matchId]?.scoreHome != null && <strong>{scores[s.matchId].scoreHome}</strong>}</div>
+                  <div className="bh-open-team-row"><span>{s.awayTeam ?? scores[s.matchId]?.awayTeam ?? "Away"}</span>{isOpenMatchLive(scores[s.matchId]) && scores[s.matchId]?.scoreAway != null && <strong>{scores[s.matchId].scoreAway}</strong>}</div>
                 </div>
               </div>
             ))}
@@ -160,9 +158,16 @@ function OpenBetCard({ bet, scores, isAdmin, onCashout }: { bet: Bet; scores: Re
           <div><span>Stake</span><b>{bet.stake.toFixed(2)}</b></div>
           <div><span>Pot. Win</span><b>{bet.potentialReturn.toFixed(2)}</b></div>
         </div>
-        <button type="button" className="bh-cashout-btn" onClick={() => undefined} title="Cashout">
+        <button type="button" className="bh-cashout-btn" onClick={() => setShowCashout((v) => !v)} title="Cashout">
           Cashout
         </button>
+        {showCashout && (
+          <CashoutPanel
+            bet={bet}
+            onDone={() => { setShowCashout(false); onCashoutDone(); }}
+            onClose={() => setShowCashout(false)}
+          />
+        )}
       </div>
     </div>
   );
@@ -223,40 +228,22 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
     let cancelled = false;
     const normalizeMatchTiming = (match: Match): Match => {
       const raw = match as Match & Record<string, unknown>;
-      const kickoffAt = match.kickoffAt ?? raw.kickoff_at ?? raw.startTime ?? raw.start_time ?? raw.scheduledAt ?? raw.commenceTime ?? raw.eventStartTime ?? raw.kickoff ?? raw.matchDate;
+      const kickoffAt = match.kickoffAt ?? raw.startTime ?? raw.scheduledAt ?? raw.commenceTime ?? raw.eventStartTime;
       return kickoffAt && !match.kickoffAt ? { ...match, kickoffAt: String(kickoffAt) } : match;
     };
-    // The football catalog endpoints wrap every match as { match, odds },
-    // while the detail endpoints and the admin-matches endpoints return
-    // the match bare. Normalise both shapes to the match itself, or
-    // catalog lookups never match an id and start times go missing.
-    const unwrapMatch = (entry: unknown): Match | null => {
-      if (!entry || typeof entry !== "object") return null;
-      const e = entry as Record<string, unknown>;
-      const m = (e.match && typeof e.match === "object" ? e.match : e) as Match;
-      return m && typeof m === "object" ? m : null;
-    };
     const refresh = () => Promise.all([
-      Promise.allSettled(ids.map(async (mid) => { try { return await api.publicFootball.getById(mid); } catch { try { return await api.publicAdminMatches.getById(mid); } catch { return null; } } })),
-      Promise.allSettled([api.publicFootball.today(), api.publicFootball.upcoming(), api.publicFootball.live(), api.publicFootball.future(), api.publicFootball.results(50), api.publicAdminMatches.getAll()]),
+      Promise.allSettled(ids.map(async (mid) => { try { return await api.matches.getById(mid); } catch { try { return await api.publicAdminMatches.getById(mid); } catch { return null; } } })),
+      Promise.allSettled([api.matches.today(), api.matches.upcoming(), api.matches.live(), api.publicAdminMatches.getAll()]),
     ]).then(([directResults, catalogResults]) => {
       if (cancelled) return;
-      const catalog = catalogResults.flatMap((result) => result.status === "fulfilled" && Array.isArray(result.value) ? result.value : []).map(unwrapMatch).filter((m): m is Match => m != null).map(normalizeMatchTiming);
+      const catalog = catalogResults.flatMap((result) => result.status === "fulfilled" ? result.value : []).map(normalizeMatchTiming);
       setMatchScores((prev) => {
         const next = { ...prev };
         directResults.forEach((result, i) => {
-          const direct = result.status === "fulfilled" ? unwrapMatch(result.value) : null;
+          const direct = result.status === "fulfilled" ? result.value : null;
           const listed = catalog.find((match) => match.id === ids[i] || match.externalId === ids[i]);
           if (direct || listed) {
-            const base = normalizeMatchTiming((listed ?? {}) as Match);
-            const over = normalizeMatchTiming((direct ?? {}) as Match);
-            const merged = { ...base, ...over } as Match;
-            // A detail payload that omits a field must not erase the
-            // catalog's value — the kickoff is why this map exists, and
-            // a null score would hide a live score the catalog has.
-            if (!merged.kickoffAt && base.kickoffAt) merged.kickoffAt = base.kickoffAt;
-            if (merged.scoreHome == null && base.scoreHome != null) merged.scoreHome = base.scoreHome;
-            if (merged.scoreAway == null && base.scoreAway != null) merged.scoreAway = base.scoreAway;
+            const merged = { ...(listed ?? {}), ...(direct ?? {}) } as Match;
             next[ids[i]] = normalizeMatchTiming(merged);
           }
         });
@@ -295,14 +282,6 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
   }, [filteredSettled]);
 
   const clearFilters = () => { setStatusFilter("ALL"); setResultFilter("ALL"); };
-  const cashout = async (bet: Bet) => {
-    try {
-      await api.bets.cashout(bet.id);
-      await load();
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Cashout could not be completed.");
-    }
-  };
 
   return (
     <div className="bc-page">
@@ -372,7 +351,7 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
             </div>
           ) : (
             <div className="bc-flat-list">
-              {filteredOpen.map((bet) => <OpenBetCard key={bet.id} bet={bet} scores={matchScores} isAdmin={isAdmin} onCashout={cashout} />)}
+              {filteredOpen.map((bet) => <OpenBetCard key={bet.id} bet={bet} scores={matchScores} onCashoutDone={load} />)}
             </div>
           )
         ) : filteredSettled.length === 0 ? (
@@ -519,7 +498,7 @@ function BetsCenterStyles() {
       .bh-leg-info .bh-open-kickoff{ margin-top:4px; color:#c9962c; font-size:.68rem; font-weight:800; letter-spacing:.01em; }
       .bh-leg-teams{ margin-top:1px; }
       .bh-toggle-details{ color:var(--nature); font-size:.72rem; font-weight:800; cursor:pointer; }
-      .bh-cashout-btn{ width:100%; padding:13px; border-radius:10px; background:rgba(30,107,255); color:rgba(30,107,255); font-size:.8rem; font-weight:800; cursor:not-allowed; }
+      .bh-cashout-btn{ width:100%; padding:13px; border:none; border-radius:10px; background:#1e6bff; color:#fff; font-size:.8rem; font-weight:800; cursor:pointer; }
 
       .bc-placement-success{ display:flex; align-items:center; gap:11px; margin:14px 10px 0; padding:13px 14px; border:1px solid #8ed9ad; border-radius:14px; background:linear-gradient(135deg,#eafff1,#f5fff8); color:#174b32; box-shadow:0 8px 22px rgba(26,130,75,.12); }
       .bc-placement-success .bc-success-icon{ width:32px; height:32px; border-radius:50%; display:grid; place-items:center; flex-shrink:0; color:#fff; background:linear-gradient(135deg,#1eaf61,#087b43); }
