@@ -319,7 +319,19 @@ export const withdrawals = {
 };
 
 // ---------------------------------------------------------------------------
-// DEPOSITS — Web Rabbit Ghana Mobile Money
+// DEPOSITS — Flutterwave v4 for both countries (owner direction
+// 2026-10-14, replacing the manual MTN proof flow). Contracts mirror the
+// backend's FlutterwaveGhV4DepositController /
+// FlutterwaveNgBankV4DepositController exactly. The bank-deposits
+// endpoint remains only for reading older manual submissions.
+//
+// RESTORED 2026-10-15: the "Full integration" commit (2a46577) was made
+// from an older working copy and accidentally replaced this object with
+// the WebRabbit-era one — DepositCenter kept calling ghInit /
+// myBankDeposits, threw "is not a function" in its mount effect, and
+// the deposit + wallet pages white-screened. The WebRabbit methods are
+// kept below the Flutterwave ones so nothing that references them
+// breaks; DepositCenter uses the Flutterwave set.
 // ---------------------------------------------------------------------------
 export type WebRabbitNetwork = "MTN" | "TELECEL" | "AT" | "GMONEY";
 export interface WebRabbitTransaction {
@@ -334,6 +346,23 @@ export interface WebRabbitTransaction {
   [key: string]: unknown;
 }
 export const deposits = {
+  ghInit: (body: { amount: number; phoneNumber: string; network: string }) =>
+    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/gh/v4/init", body),
+  ghVerify: (txRef: string) =>
+    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/gh/v4/verify", { txRef }),
+  ngTransferInit: (amount: number) =>
+    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/v4/ng-bank/init/bank-transfer", { amount }),
+  ngBankInit: (amount: number) =>
+    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/v4/ng-bank/init", { amount }),
+  ngUssdInit: (body: { amount: number; bankCode: string }) =>
+    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/v4/ng-ussd/init", body),
+  ngUssdBanks: () => get<unknown>("/api/wallet/deposit/flutterwave/v4/ng-ussd/banks"),
+  ngOpayInit: (amount: number) =>
+    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/v4/ng-opay/init", { amount }),
+  ngVerify: (reference: string) =>
+    get<Record<string, unknown>>(`/api/wallet/deposit/flutterwave/v4/ng/verify${qs({ ref: reference })}`),
+  myBankDeposits: (page = 0, size = 10) =>
+    get<PageResponse<Record<string, unknown>>>(`/api/wallet/bank-deposits${qs({ page, size })}`),
   webRabbitMomoInit: (body: { amount: number; phone: string; network: WebRabbitNetwork }) =>
     post<WebRabbitTransaction>("/api/wallet/deposit/webrabbit-momo/init", body),
   webRabbitMomoVerify: (transactionId: string) =>
