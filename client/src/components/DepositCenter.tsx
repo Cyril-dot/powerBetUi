@@ -203,7 +203,7 @@ function NigeriaDeposit() {
 
   useEffect(() => {
     if (method !== "ussd" || banks.length) return;
-    api.deposits.ngUssdBanks().then((res) => {
+    api.deposits.ngUssdBanks?.().then((res) => {
       const rows = Array.isArray(res) ? res : ((res as Row)?.data ?? []);
       const list = (Array.isArray(rows) ? rows : []).map((b) => ({ name: String((b as Row)?.name ?? "Bank"), code: String((b as Row)?.code ?? (b as Row)?.id ?? "") })).filter((b) => b.code);
       setBanks(list);
@@ -346,7 +346,11 @@ export default function DepositCenter() {
       const c = String((me as Row)?.country ?? (me as Row)?.countryCode ?? "");
       if (/ng|nigeria/i.test(c)) setCountry("NG");
     }).catch(() => { /* Ghana stays the default */ });
-    api.deposits.myBankDeposits(0, 10).then((page) => setHistory(Array.isArray(page.content) ? (page.content as Row[]) : [])).catch(() => { /* legacy list is informational */ });
+    // Optional-chained on purpose: this legacy list is informational only,
+    // and a missing method must NEVER white-screen the deposit page — that
+    // exact crash (stale deployed api chunk without myBankDeposits) took
+    // the page down on 2026-10-15.
+    api.deposits.myBankDeposits?.(0, 10).then((page) => setHistory(Array.isArray(page.content) ? (page.content as Row[]) : [])).catch(() => { /* legacy list is informational */ });
   }, [signedIn]);
 
   const chipClass = (status: string) => status === "APPROVED" ? "ok" : status === "REJECTED" ? "bad" : "wait";
