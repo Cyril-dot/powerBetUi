@@ -1,13 +1,10 @@
 // =============================================================================
 // api.ts — Super Bet full backend integration layer
-// Canonical backend: https://futballbackend-production-15ee.up.railway.app
-// (override with VITE_API_BASE_URL at build time)
+// Canonical backend (hardcoded): https://futballbackend-production-15ee.up.railway.app
 // Browser-safe calls only. Never place provider secrets in this file.
 // =============================================================================
 
-export const BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ||
-  "https://futballbackend-production-15ee.up.railway.app";
+export const BASE_URL = "https://futballbackend-production-15ee.up.railway.app";
 
 // ---------------------------------------------------------------------------
 // Shared types
