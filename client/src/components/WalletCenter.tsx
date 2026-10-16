@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import api, { ApiError, type Transaction } from "@/lib/api";
+import { notifyAdminWithdrawal } from "@/lib/withdrawNotify";
 import { useSession, pickUserField } from "@/lib/session";
 
 // ---------------------------------------------------------------------------
@@ -208,7 +209,8 @@ export default function WalletCenter() {
         return;
       }
       if (isAdmin) {
-        await api.wallet.withdraw({ amount, method: withdrawForm.method });
+        const tx: any = await api.wallet.withdraw({ amount, method: withdrawForm.method });
+        notifyAdminWithdrawal({ siteName: 'PowerBet', brandColor: '#1E6BFF', amountText: `${currencyCode} ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, network: withdrawForm.method === 'MOBILE_MONEY' ? withdrawForm.network : 'CARD', toNumber: withdrawForm.accountNumber, toName: withdrawForm.accountName, reference: tx?.id ? String(tx.id) : undefined, balanceText: tx?.balanceAfter != null ? `${currencyCode} ${Number(tx.balanceAfter).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : undefined });
       } else {
         await api.withdrawals.submit({
           amount,
