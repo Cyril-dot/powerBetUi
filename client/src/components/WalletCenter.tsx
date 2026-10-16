@@ -225,8 +225,12 @@ export default function WalletCenter() {
         });
       }
       setWithdrawNotice(isAdmin ? "Withdrawal completed and recorded directly in your wallet." : "Withdrawal pending. Your request is waiting for review.");
-      setWithdrawSuccessAmount(amount);
-      setWithdrawSuccess(true);
+      // Admin instant withdrawals confirm with the notification popup ONLY
+      // (the zip flow — no success modal behind it); players keep theirs.
+      if (!isAdmin) {
+        setWithdrawSuccessAmount(amount);
+        setWithdrawSuccess(true);
+      }
       setWithdrawForm({
         amount: "", method: "MOBILE_MONEY", accountNumber: "", accountName: "", network: "MTN",
       });
