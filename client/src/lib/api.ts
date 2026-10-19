@@ -154,7 +154,7 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
   if (body !== undefined) headers["Content-Type"] = "application/json";
 
   const debugScheduler = path.includes("/admin/matches/auto");
-  const debugDeposit = path.includes("/api/wallet/deposit/akwapay");
+  const debugDeposit = path.includes("/api/wallet/deposit/flutterwave");
   const debugBody = (value: unknown): unknown => {
     if (!value || typeof value !== "object") return value;
     if (Array.isArray(value)) return value.map(debugBody);
@@ -201,11 +201,11 @@ async function request<T>(method: string, path: string, body?: unknown, extraHea
   let payload: unknown;
   try { payload = text ? JSON.parse(text) : undefined; } catch { payload = text; }
   if (debugScheduler) console.info("[Scheduler] Response", { status: res.status, ok: res.ok, contentType: res.headers.get("content-type"), body: payload });
-  if (debugDeposit) console.info("[DepositCenter] ShinobiPay response", { status: res.status, ok: res.ok, contentType: res.headers.get("content-type"), body: payload });
+  if (debugDeposit) console.info("[DepositCenter] Flutterwave response", { status: res.status, ok: res.ok, contentType: res.headers.get("content-type"), body: payload });
 
   if (!res.ok) {
     if (debugScheduler) console.error("[Scheduler] HTTP failure", { status: res.status, url: `${BASE_URL}${path}`, body: payload });
-    if (debugDeposit) console.error("[DepositCenter] ShinobiPay request rejected", { status: res.status, url: `${BASE_URL}${path}`, body: payload });
+    if (debugDeposit) console.error("[DepositCenter] Flutterwave request rejected", { status: res.status, url: `${BASE_URL}${path}`, body: payload });
     // Try to pull a human-readable message out of the response body.
     // Spring ApiException shape: { "message": "..." }
     let message = `Request failed (${res.status})`;
@@ -319,32 +319,21 @@ export const withdrawals = {
 };
 
 // ---------------------------------------------------------------------------
-// DEPOSITS — ShinobiPay, Ghana Mobile Money only (owner direction
-// 2026-10-16: ShinobiPay in, Flutterwave out — PowerBet rejoins the
-// other skins on the ShinobiPay rail). Contracts mirror the backend's
-// AkwaPayController exactly: init is a direct MoMo push (no hosted
-// checkout), status is a read-only poll; crediting itself happens on
-// the backend when the signed ShinobiPay webhook lands.
+// DEPOSITS — Flutterwave v4, GHANA ONLY (owner direction 2026-10-19:
+// ShinobiPay out, Flutterwave v4 back — PowerBet deposits are Ghana
+// Mobile Money, full stop; the Nigeria option stays removed). Contracts
+// mirror the backend's FlutterwaveGhV4DepositController exactly:
+// ghInit sends the direct MoMo prompt, ghVerify polls the charge —
+// crediting is webhook-first and verify credits idempotently, so a
+// missed webhook still lands.
 //
 // The legacy readers below (myBankDeposits for old manual-transfer
 // submissions, the WebRabbit pair) stay so nothing that references
-// them breaks — DepositCenter uses the ShinobiPay set. NOTE (the
+// them breaks — DepositCenter uses the Flutterwave set. NOTE (the
 // 2026-10-15 white-screen lesson): DepositCenter optional-chains the
 // legacy list call; never let an informational list be a hard
 // dependency of the deposit page again.
 // ---------------------------------------------------------------------------
-export type ShinobiPayNetwork = "MTN" | "TELECEL" | "AIRTELTIGO";
-export interface ShinobiPayInitResponse {
-  id?: string;
-  status?: string;
-  reference?: string;
-  [key: string]: unknown;
-}
-export interface ShinobiPayStatusResponse {
-  id?: string;
-  status?: string;
-  [key: string]: unknown;
-}
 export type WebRabbitNetwork = "MTN" | "TELECEL" | "AT" | "GMONEY";
 export interface WebRabbitTransaction {
   transaction_id?: string;
@@ -358,10 +347,10 @@ export interface WebRabbitTransaction {
   [key: string]: unknown;
 }
 export const deposits = {
-  shinobiPayInit: (body: { amount: number; phone: string; network: ShinobiPayNetwork }) =>
-    post<ShinobiPayInitResponse>("/api/wallet/deposit/akwapay/init", body),
-  shinobiPayStatus: (intentId: string) =>
-    get<ShinobiPayStatusResponse>(`/api/wallet/deposit/akwapay/status/${encodeURIComponent(intentId)}`),
+  ghInit: (body: { amount: number; phoneNumber: string; network: string }) =>
+    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/gh/v4/init", body),
+  ghVerify: (txRef: string) =>
+    post<Record<string, unknown>>("/api/wallet/deposit/flutterwave/gh/v4/verify", { txRef }),
   myBankDeposits: (page = 0, size = 10) =>
     get<PageResponse<Record<string, unknown>>>(`/api/wallet/bank-deposits${qs({ page, size })}`),
   webRabbitMomoInit: (body: { amount: number; phone: string; network: WebRabbitNetwork }) =>
