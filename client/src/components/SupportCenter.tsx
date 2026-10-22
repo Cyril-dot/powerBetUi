@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { Clock3, Headphones, Mail, MessageCircle, Search, ShieldCheck, WalletCards } from "lucide-react";
 
 const FAQS: { category: string; q: string; a: string }[] = [
-  { category: "Account", q: "How do I create a Super Bet account?", a: "Tap Join now, enter your email and a password, then complete your profile with your name and phone number. You can start browsing markets immediately after signup." },
+  { category: "Account", q: "How do I create a PlayBet account?", a: "Tap Join now, enter your email and a password, then complete your profile with your name and phone number. You can start browsing markets immediately after signup." },
   { category: "Account", q: "I forgot my password — what do I do?", a: "On the login page, select \"Forgot password?\" and follow the reset link sent to your email address." },
   { category: "Deposits", q: "How long do deposits take to reflect?", a: "ShinobiPay mobile-money deposits are credited automatically after you approve the payment prompt and the payment is confirmed. Confirmation usually takes seconds, but can take longer while your provider responds." },
   { category: "Deposits", q: "My mobile-money deposit hasn't been credited yet", a: "Confirm that you approved the ShinobiPay payment prompt on your phone. If the payment is still pending, do not submit it again; check your wallet and contact Support with the payment time and reference shown on the Deposit page." },
