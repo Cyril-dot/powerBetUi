@@ -452,6 +452,7 @@ function normalizeMatch(raw: unknown, sport: SportKey): EnrichedMatch | null {
     source: (r.source as Match["source"]) ?? "ESPN", homeTeam, awayTeam, league, status,
     leagueLogo: sanitizeLogo(String(r.leagueLogo ?? r.league_logo ?? (r.competition && typeof r.competition === "object" ? ((r.competition as Record<string, unknown>).logo ?? (r.competition as Record<string, unknown>).logoUrl ?? "") : ""))),
     kickoffAt, scoreHome, scoreAway, homeLogo, awayLogo, sport, minutePlayed, createdAt: String(r.createdAt ?? ""),
+    featured: r.featured === true || r.featured === "true",
     competitionKey: resolvedCompetition?.key,
     competitionTier: resolvedCompetition?.tier,
     competitionCountry: resolvedCompetition?.country,

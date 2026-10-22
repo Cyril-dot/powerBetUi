@@ -207,6 +207,16 @@
 .pb-live-odds .pb-odd small{font:700 10px var(--pb-mono);color:#8FA5CC}
 .pb-live-odds .pb-odd.pb-sel small{color:var(--pb-green-ink)}
 
+/* ── 3b · LIVE — SportyBet-mirror light ground (owner card pick,
+   2026-10-22): the white sp-list panel needs the section on paper, not
+   the night-arena navy. Section head colours follow the Coming Up
+   section; the green top beam stays as the brand seam. */
+.pb-live.pb-live-sporty{background:var(--pb-paper);color:var(--pb-ink)}
+.pb-live.pb-live-sporty .pb-kicker{color:var(--pb-green-deep)}
+.pb-live.pb-live-sporty .pb-kicker .pb-dot{background:var(--pb-green-deep)}
+.pb-live.pb-live-sporty .pb-sec-title{color:var(--pb-ink)}
+.pb-live.pb-live-sporty .pb-sec-link{color:var(--pb-green-deep)}
+
 /* ── 5 · UPCOMING — clean light timeline ──────────────── */
 .pb-upcoming{background:var(--pb-paper);padding:44px 0 52px;border-top:1px solid var(--pb-paper-2)}
 .pb-upcoming .pb-kicker{color:var(--pb-green-deep)}

@@ -14,38 +14,12 @@ import {
   categorise, fetchAdminMatches, fetchSport, isMatchLive, parseKickoff,
   type EnrichedMatch,
 } from "@/lib/sportsbook";
-import { LiveClock, type Pick } from "./Sportsbook";
+import { type Pick } from "./Sportsbook";
+import {
+  SportyGroupHead, SportyMarketTabs, SportyMatchCard, sportyDayKey, sportyDayLabel,
+  type CardMarket,
+} from "./SportyCards";
 import "../playbet.css";
-
-/* ── team monogram chips (colours from the approved sample) ─────────── */
-const TC: Record<string, string> = {
-  "Arsenal": "#C8102E", "Chelsea": "#034694", "Real Madrid": "#7A6A2F", "FC Barcelona": "#A50044",
-  "Manchester United": "#DA291C", "Tottenham Hotspur": "#132257", "Newcastle United": "#3A3A3A",
-  "Aston Villa": "#670E36", "AC Milan": "#A6192E", "Napoli": "#0873B8", "Atlético Madrid": "#CB3524",
-  "Sevilla FC": "#B03A2E", "VfB Stuttgart": "#B03030", "Eintracht Frankfurt": "#5A5A5A",
-  "Brighton": "#0057B8", "West Ham United": "#7A263A", "Valencia CF": "#B8860B", "Real Betis": "#00954C",
-  "AS Roma": "#8E1F2F", "Lazio": "#5B9BD5", "RB Leipzig": "#B03A4B", "Bayer Leverkusen": "#8A8D00",
-  "AS Monaco": "#B03040", "Olympique Lyon": "#2456A6", "Ajax": "#B03030", "PSV Eindhoven": "#C0392B",
-  "Manchester City": "#6CABDD", "Bayern Munich": "#DC052D", "Inter Milan": "#0068A8", "Liverpool": "#C8102E",
-};
-const initialsOf = (n: string) => n.split(/\s+/).filter((w) => /[A-Za-z]/.test(w[0] ?? "")).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
-function chipColor(name: string): string {
-  if (TC[name]) return TC[name];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-  return `hsl(${210 + (hash % 40)}, 55%, ${26 + (hash % 14)}%)`;
-}
-function MonoChip({ name, size }: { name: string; size?: number }) {
-  return (
-    <span
-      className="pb-mono-chip"
-      style={{ background: chipColor(name), ...(size ? { width: size, height: size, fontSize: Math.round(size * 0.39) } : {}) }}
-      aria-hidden="true"
-    >
-      {initialsOf(name)}
-    </span>
-  );
-}
 
 /* ── hero carousel (slides verbatim from the approved sample) ───────── */
 type HeroSlide = {
@@ -204,73 +178,17 @@ const TICKER: [string, string, string][] = [
   ["Kofi B.", "GH₵ 21,600", "Correct Score"], ["Nana K.", "GH₵ 9,120", "vFootball"],
   ["Akosua T.", "GH₵ 5,480", "Plinko"], ["Kwabena O.", "GH₵ 17,205", "Premier League Multi"],
 ];
-/* ── odds button (same Pick contract as Sportsbook) ─────────────────── */
-function PbOdd({ match, sel, label, value, live, picks, onPick }: {
-  match: EnrichedMatch; sel: "1" | "X" | "2"; label: string; value: number; live: boolean;
-  picks: Pick[]; onPick: (p: Pick) => void;
-}) {
-  const empty = !value || value <= 0;
-  const selected = picks.some((p) => p.id === match.id && p.market === "1X2" && p.selection === sel);
-  return (
-    <button
-      type="button"
-      className={`pb-odd${selected ? " pb-sel" : ""}`}
-      disabled={empty}
-      aria-label={`${label} ${empty ? "unavailable" : value.toFixed(2)}`}
-      onClick={() => onPick({
-        id: match.id, match: `${match.homeTeam} vs ${match.awayTeam}`, market: "1X2", selection: sel, odd: value,
-        league: match.league, homeTeam: match.homeTeam, awayTeam: match.awayTeam,
-        kickoffAt: match.kickoffAt, isLive: live, scoreHome: match.scoreHome, scoreAway: match.scoreAway,
-      })}
-    >
-      <small>{label}</small><span>{empty ? "—" : value.toFixed(2)}</span>
-    </button>
-  );
-}
-function OddsRow({ match, live, picks, onPick }: { match: EnrichedMatch; live: boolean; picks: Pick[]; onPick: (p: Pick) => void }) {
-  const o = match.oddsMap;
-  return (
-    <>
-      <PbOdd match={match} sel="1" label="1" value={o?.home ?? 0} live={live} picks={picks} onPick={onPick} />
-      <PbOdd match={match} sel="X" label="X" value={o?.draw ?? 0} live={live} picks={picks} onPick={onPick} />
-      <PbOdd match={match} sel="2" label="2" value={o?.away ?? 0} live={live} picks={picks} onPick={onPick} />
-    </>
-  );
-}
-
-function halfLabel(m: EnrichedMatch): string {
-  const s = (m.status ?? "").toUpperCase();
-  if (s.includes("SECOND") || s === "2H" || s === "2ND") return "2nd Half";
-  if (s.includes("FIRST") || s === "1H" || s === "1ST") return "1st Half";
-  if (s.includes("HALF") || s === "HT") return "Half Time";
-  if (s.includes("EXTRA") || s === "ET") return "Extra Time";
-  if (s.includes("PEN") || s.includes("SHOOT")) return "Pens";
-  return "Live";
-}
-
-function dayLabel(kickoffAt?: string): string {
-  if (!kickoffAt) return "";
-  const d = parseKickoff(kickoffAt);
-  if (Number.isNaN(d.getTime())) return "";
-  const now = new Date();
-  const startOf = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
-  const diffDays = Math.round((startOf(d) - startOf(now)) / 86_400_000);
-  if (diffDays <= 0) return "Today";
-  if (diffDays === 1) return "Tmrw";
-  return d.toLocaleDateString("en-GB", { weekday: "short" });
-}
-function timeLabel(kickoffAt?: string): string {
-  if (!kickoffAt) return "—";
-  const d = parseKickoff(kickoffAt);
-  if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-}
+/* Match cards render through the shared SportyBet-mirror system
+   (SportyCards.tsx) — same Pick contract as the sportsbook, so betslip
+   behaviour is unchanged. */
 
 /* ── the homepage ───────────────────────────────────────────────────── */
 export default function PlayBetHome({ picks, onPick }: { picks: Pick[]; onPick: (p: Pick) => void }) {
   const [matches, setMatches] = useState<EnrichedMatch[]>([]);
   const [adminMatches, setAdminMatches] = useState<EnrichedMatch[]>([]);
   const [loading, setLoading] = useState(true);
+  // One market-tab selection shared by the In-Play and Coming Up lists.
+  const [cardMarket, setCardMarket] = useState<CardMarket>("1X2");
 
   useEffect(() => {
     let active = true;
@@ -317,6 +235,17 @@ export default function PlayBetHome({ picks, onPick }: { picks: Pick[]; onPick: 
     return { live: liveList, upcoming: up };
   }, [matches, adminMatches]);
 
+  // Coming Up grouped under SportyBet-style date bands, kickoff order kept.
+  const upcomingGroups = useMemo(() => {
+    const byDay = new Map<string, EnrichedMatch[]>();
+    for (const m of upcoming) {
+      const key = sportyDayKey(m.kickoffAt);
+      if (!byDay.has(key)) byDay.set(key, []);
+      byDay.get(key)!.push(m);
+    }
+    return Array.from(byDay.entries());
+  }, [upcoming]);
+
   const podium = [WINNERS[1], WINNERS[0], WINNERS[2]];
 
   return (
@@ -347,57 +276,45 @@ export default function PlayBetHome({ picks, onPick }: { picks: Pick[]; onPick: 
         </div>
       </section>
 
-      {/* LIVE */}
-      <section className="pb-live" id="live">
+      {/* LIVE — SportyBet-mirror list on a light ground */}
+      <section className="pb-live pb-live-sporty" id="live">
         <div className="pb-wrap">
           <div className="pb-sec-head">
             <div className="pb-grow"><p className="pb-kicker"><span className="pb-dot" />Live now · {live.length} in play</p><h2 className="pb-sec-title">In-Play Arena</h2></div>
             <Link className="pb-sec-link" href="/live">All live →</Link>
           </div>
-          <div className="pb-seg"><button type="button" className="pb-on">1X2</button><button type="button">Over / Under</button><button type="button">Double Chance</button><button type="button">Both Teams To Score</button></div>
           {live.length === 0 ? (
-            <p className="pb-empty-note">{loading ? "Loading live matches…" : "No matches are live right now — games appear here the moment they kick off, with live odds you can bet on straight away."}</p>
+            <p className="pb-empty-note" style={{ color: "var(--pb-ink-2)", background: "#fff", borderColor: "#DFE7F0" }}>{loading ? "Loading live matches…" : "No matches are live right now — games appear here the moment they kick off, with live odds you can bet on straight away."}</p>
           ) : (
-            <div className="pb-live-grid">
+            <div className="sp-list">
+              <SportyMarketTabs market={cardMarket} onChange={setCardMarket} />
+              <SportyGroupHead label="Live · In-Play" live market={cardMarket} hasDraw />
               {live.slice(0, 6).map((m) => (
-                <article key={m.id} className="pb-live-card">
-                  <div className="pb-live-min"><b><LiveClock match={m} /></b><span>{halfLabel(m)}</span><div className="pb-pulse-dot" /></div>
-                  <div className="pb-live-main">
-                    <div className="pb-live-lg"><span>{m.league || m.sport || "Football"}</span></div>
-                    <div className="pb-live-team"><MonoChip name={m.homeTeam ?? ""} size={27} />{m.homeTeam}<span className="pb-score">{m.scoreHome ?? 0}</span></div>
-                    <div className="pb-live-team pb-dim"><MonoChip name={m.awayTeam ?? ""} size={27} />{m.awayTeam}<span className="pb-score">{m.scoreAway ?? 0}</span></div>
-                    <div className="pb-live-odds"><OddsRow match={m} live picks={picks} onPick={onPick} /></div>
-                  </div>
-                </article>
+                <SportyMatchCard key={m.id} match={m} market={cardMarket} hasDraw picks={picks} onPick={onPick} />
               ))}
             </div>
           )}
         </div>
       </section>
 
-      {/* UPCOMING */}
+      {/* UPCOMING — SportyBet-mirror list grouped by date */}
       <section className="pb-upcoming" id="upcoming">
         <div className="pb-wrap">
           <div className="pb-sec-head">
             <div className="pb-grow"><p className="pb-kicker">Fixture list</p><h2 className="pb-sec-title">Coming Up</h2></div>
-            <div className="pb-date-seg"><button type="button" className="pb-on">Today</button><button type="button">Tomorrow</button><button type="button">Weekend</button></div>
+            <Link className="pb-sec-link" href="/sports">All fixtures →</Link>
           </div>
           {upcoming.length === 0 ? (
             <p className="pb-empty-note" style={{ color: "var(--pb-ink-2)", background: "#fff", borderColor: "#DFE7F0" }}>{loading ? "Loading fixtures…" : "No upcoming fixtures are available right now — check back soon."}</p>
           ) : (
-            <div className="pb-timeline">
-              {upcoming.map((m) => (
-                <div key={m.id} className="pb-tl-row">
-                  <div className="pb-tl-time"><b>{timeLabel(m.kickoffAt)}</b><span>{dayLabel(m.kickoffAt)}</span></div>
-                  <div className="pb-tl-dot" />
-                  <article className="pb-tl-card">
-                    <div className="pb-tl-lg"><span>{m.league || m.sport || "Football"} · {dayLabel(m.kickoffAt) === "Tmrw" ? "Tomorrow" : dayLabel(m.kickoffAt)}</span></div>
-                    <div className="pb-tl-teams">
-                      <div className="pb-tl-team"><MonoChip name={m.homeTeam ?? ""} size={25} />{m.homeTeam}</div>
-                      <div className="pb-tl-team"><MonoChip name={m.awayTeam ?? ""} size={25} />{m.awayTeam}</div>
-                    </div>
-                    <div className="pb-tl-odds"><OddsRow match={m} live={false} picks={picks} onPick={onPick} /></div>
-                  </article>
+            <div className="sp-list">
+              <SportyMarketTabs market={cardMarket} onChange={setCardMarket} />
+              {upcomingGroups.map(([day, ms]) => (
+                <div key={day}>
+                  <SportyGroupHead label={sportyDayLabel(ms[0].kickoffAt)} market={cardMarket} hasDraw />
+                  {ms.map((m) => (
+                    <SportyMatchCard key={m.id} match={m} market={cardMarket} hasDraw picks={picks} onPick={onPick} />
+                  ))}
                 </div>
               ))}
             </div>

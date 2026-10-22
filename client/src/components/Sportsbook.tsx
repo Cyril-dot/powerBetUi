@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
-import { Bike, CalendarDays, ChevronRight, CircleDot, Dumbbell, Flame, Radio, RefreshCw, Sparkles, Star, Trophy, TriangleAlert, Zap } from "lucide-react";
+import { Bike, CalendarDays, CircleDot, Dumbbell, Flame, Radio, RefreshCw, Sparkles, Star, Trophy, TriangleAlert, Zap } from "lucide-react";
 import {
   categorise, fetchAdminMatches, fetchSport, formatKickoff, formatKickoffDate, getLastFetchStatus, liveClock,
   isMatchLive, parseKickoff, TWO_WAY_SPORTS,
   type EnrichedMatch, type SportKey,
 } from "@/lib/sportsbook";
+import {
+  SportyGroupHead, SportyMarketTabs, SportyMatchCard, sportyDayKey, sportyDayLabel,
+  type CardMarket,
+} from "./SportyCards";
 import { DEFAULT_ADMIN_CREST } from "@/lib/logoCatalog";
 import { TOP_SIX_COMPETITIONS } from "@/lib/competitionCatalog";
-import { useFavorites } from "@/lib/favorites";
 
 export type Pick = {
   id: string; match: string; market: string; selection: string; odd: number;
@@ -98,24 +101,6 @@ function OddButton({
   );
 }
 
-function Countdown({ kickoffAt }: { kickoffAt?: string }) {
-  const [, force] = useState(0);
-  useEffect(() => {
-    if (!kickoffAt) return;
-    const t = setInterval(() => force((n) => n + 1), 30_000);
-    return () => clearInterval(t);
-  }, [kickoffAt]);
-  if (!kickoffAt) return null;
-  const diff = parseKickoff(kickoffAt).getTime() - Date.now();
-  if (Number.isNaN(diff)) return null;
-  if (diff <= 0) return <span className="sb-countdown">Starting soon</span>;
-  const days = Math.floor(diff / 86_400_000);
-  const hours = Math.floor((diff % 86_400_000) / 3_600_000);
-  const mins = Math.floor((diff % 3_600_000) / 60_000);
-  const text = days > 0 ? `${days}d ${hours}h` : hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
-  return <span className="sb-countdown">in {text}</span>;
-}
-
 /**
  * Ticks independently of the 30s data-poll cycle so the running minute count
  * actually advances smoothly (every 15s) instead of only jumping forward
@@ -153,86 +138,18 @@ function leagueIconFor(league?: string): string {
   let hash = 0; for (let i = 0; i < value.length; i++) hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
   return LEAGUE_ICONS[hash % LEAGUE_ICONS.length];
 }
+/**
+ * Every match row on the board renders through the shared SportyBet-mirror
+ * card (SportyCards.tsx) — one card system for Live / Today / Upcoming /
+ * Ended. The Pick contract, favourites and ended behaviour are unchanged;
+ * only the presentation moved.
+ */
 function MatchRow({
-  match, hasDraw, picks, onPick, isAdmin = false, ended = false,
-}: { match: EnrichedMatch; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void; isAdmin?: boolean; ended?: boolean }) {
-  const isLive = !ended && isMatchLive(match);
-  // Live odds remain selectable when a price is available; ended matches are display-only.
-  const clickable = !ended;
-  const odds = match.oddsMap;
-  const matchLabel = `${match.homeTeam} vs ${match.awayTeam}`;
-  const { has, toggle } = useFavorites();
-  const favored = has("match", match.id);
-  const isSel = (sel: string) => picks.some((p) => p.id === match.id && p.market === "1X2" && p.selection === sel);
-  const pick = (sel: string, odd: number) => onPick({
-    id: match.id, match: matchLabel, market: "1X2", selection: sel, odd,
-    league: match.league, homeTeam: match.homeTeam, awayTeam: match.awayTeam,
-    kickoffAt: match.kickoffAt, isLive, scoreHome: match.scoreHome, scoreAway: match.scoreAway,
-  });
-
-  const slots = hasDraw
-    ? [["1", odds?.home ?? 0], ["X", odds?.draw ?? 0], ["2", odds?.away ?? 0]]
-    : [["1", odds?.home ?? 0], ["2", odds?.away ?? 0]];
-
-  const matchHref = `/match/${match.id}?sport=${encodeURIComponent(match.sport ?? "football")}${isAdmin ? "&admin=1" : ""}`;
-  const showScore = isLive || ended;
-
+  match, hasDraw, picks, onPick, isAdmin = false, ended = false, market = "1X2",
+}: { match: EnrichedMatch; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void; isAdmin?: boolean; ended?: boolean; market?: CardMarket }) {
+  void isAdmin; // admin state rides on match.isAdmin inside the card
   return (
-    <div className={`sb-row${isLive ? " is-live" : ""}${isAdmin ? " is-admin" : ""}${ended ? " is-ended" : ""}`}>
-      <div className="sb-row-top">
-        <span className="sb-row-badges">
-          <button
-            className={`sb-fav${favored ? " active" : ""}`}
-            onClick={(e) => { e.preventDefault(); toggle({ kind: "match", id: match.id, label: matchLabel, meta: match.league }); }}
-            aria-label={favored ? "Remove from favorites" : "Add to favorites"}
-            type="button"
-          >
-            <Star size={13} fill={favored ? "currentColor" : "none"} />
-          </button>
-          <span className="sb-league-icon" title={match.league || match.sport || "League"} aria-label={match.league || match.sport || "League"}>{leagueIconFor(match.league || match.sport)}</span>
-          {match.isSyntheticOdds && !isLive && !ended && <span className="sb-badge synth">EST. ODDS</span>}
-        </span>
-        <span className={`sb-row-time${isLive ? " sb-live-corner" : ""}`}>
-          {ended ? <span className="sb-badge ft">FT</span> : isLive ? <><span className="sb-live-label" role="img" aria-label="Live"><i className="live-dot" /><Radio size={12} /></span><small className="sb-live-minute"><LiveClock match={match} /></small></> : (
-            <>
-              {formatKickoffDate(match.kickoffAt)} {formatKickoff(match.kickoffAt)}
-              <Countdown kickoffAt={match.kickoffAt} />
-            </>
-          )}
-        </span>
-      </div>
-
-      <Link href={matchHref} className="sb-fixture">
-        <span className="sb-team-line">
-          <TeamCrest url={match.displayHomeLogo} name={match.homeTeam ?? ""} />
-          <span className="sb-team-name">{match.homeTeam}</span>
-          {showScore && match.scoreHome != null && <em className="sb-team-score">{match.scoreHome}</em>}
-        </span>
-        <span className="sb-fixture-vs" aria-hidden="true">VS</span>
-        <span className="sb-team-line">
-          <TeamCrest url={match.displayAwayLogo} name={match.awayTeam ?? ""} />
-          <span className="sb-team-name">{match.awayTeam}</span>
-          {showScore && match.scoreAway != null && <em className="sb-team-score">{match.scoreAway}</em>}
-        </span>
-      </Link>
-
-      {ended ? (
-        <Link href={matchHref} className="sb-ended-note">Final score — view match <ChevronRight size={13} /></Link>
-      ) : (
-      <div className="sb-odds-row">
-        {slots.map(([label, val]) => (
-          <OddButton
-            key={label as string}
-            label={label as string}
-            value={val as number}
-            clickable={clickable}
-            selected={isSel(label as string)}
-            onClick={() => pick(label as string, val as number)}
-          />
-        ))}
-      </div>
-      )}
-    </div>
+    <SportyMatchCard match={match} market={market} hasDraw={hasDraw} picks={picks} onPick={onPick} ended={ended} />
   );
 }
 
@@ -250,18 +167,20 @@ function EndedMatchList({ list, hasDraw, picks, onPick }: { list: EnrichedMatch[
   const shown = list.slice(0, visible);
   const byDay = new Map<string, EnrichedMatch[]>();
   for (const m of shown) {
-    const key = formatKickoffDate(m.kickoffAt) || "Recent";
+    const key = sportyDayKey(m.kickoffAt);
     if (!byDay.has(key)) byDay.set(key, []);
     byDay.get(key)!.push(m);
   }
   return (
     <>
-      {Array.from(byDay.entries()).map(([day, matches]) => (
-        <div key={day}>
-          <div className="sb-league-hdr">{day} <b>{matches.length}</b></div>
-          {matches.map((m) => <MatchRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} ended />)}
-        </div>
-      ))}
+      <div className="sp-list">
+        {Array.from(byDay.entries()).map(([day, matches]) => (
+          <div key={day}>
+            <SportyGroupHead label={sportyDayLabel(matches[0].kickoffAt)} market="1X2" hasDraw={hasDraw} cols={false} />
+            {matches.map((m) => <MatchRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} ended />)}
+          </div>
+        ))}
+      </div>
       {visible < list.length && (
         <button className="sb-load-more" onClick={() => setVisible((v) => v + ENDED_PAGE_SIZE)} type="button">
           Show more ({list.length - visible} remaining)
@@ -370,102 +289,20 @@ function FeaturedMatchCard({ match, hasDraw, picks, onPick }: { match: EnrichedM
 }
 
 /**
- * LIVE MATCHES — flat dark live list, built to the owner's reference image
- * (2026-10-09): near-black rows separated by hairline dividers (no boxed
- * cards), a meta line on top (red dot + "In-Play 48'" in red, league in
- * grey, admin games carry a red SPECIAL pill in the HOT slot), team names
- * stacked on the left in white, scores stacked in green, and dark grey
- * odds chips with green prices on the right. Live odds are fully
- * stakeable — there is no live gate.
+ * LIVE MATCHES — SportyBet-mirror white list panel inside the dark section
+ * shell: market tab strip, "Live · In-Play" group band with the market's
+ * column headers, then the shared SportyMatchCard rows. Live odds are
+ * fully stakeable — there is no live gate — and the cards keep the live
+ * clock and price-movement arrows the old rows had.
  */
-function LiveRefRow({
-  match, hasDraw, picks, onPick,
-}: { match: EnrichedMatch; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void }) {
-  const odds = match.oddsMap;
-  const prevOddsRef = useRef<Record<string, number>>({});
-  useEffect(() => {
-    const cur: Record<string, number> = {};
-    if (odds?.home) cur["1"] = odds.home;
-    if (odds?.draw) cur["X"] = odds.draw;
-    if (odds?.away) cur["2"] = odds.away;
-    prevOddsRef.current = cur;
-  });
-  const moveOf = (sel: string, val: number): "up" | "down" | undefined => {
-    const prev = prevOddsRef.current[sel];
-    if (!prev || !val || prev === val) return undefined;
-    return val > prev ? "up" : "down";
-  };
-  const matchLabel = `${match.homeTeam} vs ${match.awayTeam}`;
-  const isSel = (sel: string) => picks.some((p) => p.id === match.id && p.market === "1X2" && p.selection === sel);
-  const pick = (sel: string, odd: number) => onPick({
-    id: match.id, match: matchLabel, market: "1X2", selection: sel, odd,
-    league: match.league, homeTeam: match.homeTeam, awayTeam: match.awayTeam,
-    kickoffAt: match.kickoffAt, isLive: true, scoreHome: match.scoreHome, scoreAway: match.scoreAway,
-  });
-  const slots = hasDraw
-    ? [["1", odds?.home ?? 0], ["X", odds?.draw ?? 0], ["2", odds?.away ?? 0]]
-    : [["1", odds?.home ?? 0], ["2", odds?.away ?? 0]];
-  const matchHref = `/match/${match.id}?sport=${encodeURIComponent(match.sport ?? "football")}${match.isAdmin ? "&admin=1" : ""}`;
-
-  return (
-    <div className="lref-row">
-      <div className="lref-meta">
-        {match.isAdmin && <span className="lref-hot">SPECIAL</span>}
-        <span className="lref-inplay"><i className="lref-dot" aria-hidden="true" />In-Play&nbsp;<LiveClock match={match} /></span>
-        <span className="lref-league">{match.league || match.sport || ""}</span>
-      </div>
-      <div className="lref-main">
-        <Link href={matchHref} className="lref-teams">
-          <span className="lref-team">{match.homeTeam}</span>
-          <span className="lref-team">{match.awayTeam}</span>
-        </Link>
-        <div className="lref-scores" aria-label="Score">
-          <span>{match.scoreHome ?? 0}</span>
-          <span>{match.scoreAway ?? 0}</span>
-        </div>
-        <div className="lref-odds">
-          {slots.map(([label, val]) => {
-            const empty = !(val as number) || (val as number) <= 0;
-            const move = empty ? undefined : moveOf(label as string, val as number);
-            return (
-              <button
-                key={label as string}
-                type="button"
-                className={`lref-odd${isSel(label as string) ? " sel" : ""}${empty ? " empty" : ""}${move ? ` moved-${move}` : ""}`}
-                disabled={empty}
-                onClick={() => pick(label as string, val as number)}
-                aria-label={`${label} ${empty ? "unavailable" : (val as number).toFixed(2)}`}
-              >
-                <b>{empty ? "—" : (val as number).toFixed(2)}{move && <i className={`lref-move ${move}`} aria-hidden="true">{move === "up" ? "▲" : "▼"}</i>}</b>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function LiveMatchList({ list, hasDraw, picks, onPick }: { list: EnrichedMatch[]; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void }) {
+function LiveMatchesSection({
+  list, hasDraw, picks, onPick, loading, market, onMarketChange,
+}: {
+  list: EnrichedMatch[]; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void; loading: boolean;
+  market: CardMarket; onMarketChange: (m: CardMarket) => void;
+}) {
   const [visible, setVisible] = useState(PAGE_SIZE);
   useEffect(() => { setVisible(PAGE_SIZE); }, [list.length]);
-  if (list.length === 0) return <p className="live-empty">No matches are live right now — games appear here the moment they kick off, with live odds you can bet on straight away.</p>;
-  const shown = list.slice(0, visible);
-  return (
-    <>
-      {shown.map((m) => <LiveRefRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} />)}
-      {visible < list.length && (
-        <button className="sb-load-more live-load-more" onClick={() => setVisible((v) => v + PAGE_SIZE)} type="button">
-          Show more live ({list.length - visible} remaining)
-        </button>
-      )}
-    </>
-  );
-}
-
-function LiveMatchesSection({
-  list, hasDraw, picks, onPick, loading,
-}: { list: EnrichedMatch[]; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void; loading: boolean }) {
   return (
     <section id="sb-section-live" className="panel sb-section sb-live-section sb-live-dark">
       <div className="sb-section-head live-head">
@@ -478,17 +315,23 @@ function LiveMatchesSection({
         <span className="live-head-pill"><i className="live-dot live-dot-green" aria-hidden="true" /> LIVE</span>
       </div>
       <div className="sb-section-body live-body">
-        {list.length > 0 && (
-          <div className="lref-colhead" aria-hidden="true">
-            <span className="lref-colhead-fill" />
-            <span className="lref-colhead-scores" />
-            <div className="lref-colhead-odds">
-              {(hasDraw ? ["1", "X", "2"] : ["1", "2"]).map((l) => <span key={l}>{l}</span>)}
+        {loading && list.length === 0 ? <SkeletonRows /> : list.length === 0 ? (
+          <p className="live-empty">No matches are live right now — games appear here the moment they kick off, with live odds you can bet on straight away.</p>
+        ) : (
+          <>
+            <div className="sp-list">
+              <SportyMarketTabs market={market} onChange={onMarketChange} />
+              <SportyGroupHead label="Live · In-Play" live market={market} hasDraw={hasDraw} />
+              {list.slice(0, visible).map((m) => (
+                <SportyMatchCard key={m.id} match={m} market={market} hasDraw={hasDraw} picks={picks} onPick={onPick} />
+              ))}
             </div>
-          </div>
-        )}
-        {loading && list.length === 0 ? <SkeletonRows /> : (
-          <LiveMatchList list={list} hasDraw={hasDraw} picks={picks} onPick={onPick} />
+            {visible < list.length && (
+              <button className="sb-load-more live-load-more" onClick={() => setVisible((v) => v + PAGE_SIZE)} type="button">
+                Show more live ({list.length - visible} remaining)
+              </button>
+            )}
+          </>
         )}
       </div>
     </section>
@@ -497,47 +340,18 @@ function LiveMatchesSection({
 
 
 /**
- * One Top-10 card, MSport-style: league line on top, crests + team names
- * stacked on the left, the kickoff time BIG on the right with the date
- * under it, and the normal 1X2 odds row underneath so it bets exactly
- * like every other card.
+ * One Top-10 rail slide — the same shared SportyBet-mirror card as every
+ * other listing (compact width), so the rail bets exactly like the lists.
  */
 function TopLeagueCard({
-  match, leagueLabel, hasDraw, picks, onPick,
-}: { match: EnrichedMatch; leagueLabel: string; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void }) {
-  const odds = match.oddsMap;
-  const matchLabel = `${match.homeTeam} vs ${match.awayTeam}`;
-  const isSel = (sel: string) => picks.some((p) => p.id === match.id && p.market === "1X2" && p.selection === sel);
-  const pick = (sel: string, odd: number) => onPick({
-    id: match.id, match: matchLabel, market: "1X2", selection: sel, odd,
-    league: match.league, homeTeam: match.homeTeam, awayTeam: match.awayTeam,
-    kickoffAt: match.kickoffAt, isLive: false, scoreHome: match.scoreHome, scoreAway: match.scoreAway,
-  });
-  const slots = hasDraw
-    ? [["1", odds?.home ?? 0], ["X", odds?.draw ?? 0], ["2", odds?.away ?? 0]]
-    : [["1", odds?.home ?? 0], ["2", odds?.away ?? 0]];
-  const matchHref = `/match/${match.id}?sport=${encodeURIComponent(match.sport ?? "football")}${match.isAdmin ? "&admin=1" : ""}`;
-  const d = parseKickoff(match.kickoffAt);
-  const dayMonth = Number.isNaN(d.getTime()) ? "" : `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
+  match, hasDraw, picks, onPick, market,
+}: { match: EnrichedMatch; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void; market: CardMarket }) {
   return (
-    <article className="t10-card">
-      <div className="t10-card-top">
-        <span className="t10-league">{leagueIconFor(match.league || match.sport)}{leagueLabel}</span>
-        <span className="t10-date">{formatKickoffDate(match.kickoffAt)}</span>
+    <div className="sp-slide">
+      <div className="sp-list">
+        <SportyMatchCard match={match} market={market} hasDraw={hasDraw} picks={picks} onPick={onPick} compact />
       </div>
-      <Link href={matchHref} className="t10-main">
-        <span className="t10-teams">
-          <span className="t10-team"><TeamCrest url={match.displayHomeLogo} name={match.homeTeam ?? ""} /><span>{match.homeTeam}</span></span>
-          <span className="t10-team"><TeamCrest url={match.displayAwayLogo} name={match.awayTeam ?? ""} /><span>{match.awayTeam}</span></span>
-        </span>
-        <span className="t10-when"><b>{formatKickoff(match.kickoffAt)}</b><small>{dayMonth}</small></span>
-      </Link>
-      <div className="sb-odds-row">
-        {slots.map(([label, val]) => (
-          <OddButton key={label as string} label={label as string} value={val as number} clickable selected={isSel(label as string)} onClick={() => pick(label as string, val as number)} />
-        ))}
-      </div>
-    </article>
+    </div>
   );
 }
 
@@ -547,8 +361,8 @@ function TopLeagueCard({
  * owner 2026-10-09). Renders nothing when no top-10 fixture is upcoming.
  */
 function TopLeaguesSection({
-  list, hasDraw, picks, onPick,
-}: { list: EnrichedMatch[]; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void }) {
+  list, hasDraw, picks, onPick, market,
+}: { list: EnrichedMatch[]; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void; market: CardMarket }) {
   const [leagueId, setLeagueId] = useState<string>("all");
   const present = useMemo(() => TOP_TEN_LEAGUES
     .map((l) => ({ ...l, count: list.filter((m) => topTenLeagueOf(m)?.id === l.id).length }))
@@ -573,7 +387,7 @@ function TopLeaguesSection({
       </div>
       <div className="t10-rail">
         {shown.map((m) => (
-          <TopLeagueCard key={m.id} match={m} leagueLabel={topTenLeagueOf(m)?.label ?? m.league ?? ""} hasDraw={hasDraw} picks={picks} onPick={onPick} />
+          <TopLeagueCard key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} market={market} />
         ))}
       </div>
       </div>
@@ -596,9 +410,20 @@ function SectionShell({
   );
 }
 
+/**
+ * Today / Upcoming lists in the SportyBet-mirror system: white panel,
+ * market tab strip, matches grouped under SportyBet-style date bands
+ * ("22/10 Thursday") with the active market's column headers. Pagination
+ * behaviour is unchanged — the visible window grows through the same
+ * scroll sentinel as before; grouping only re-buckets the visible slice
+ * by calendar day, preserving the board's sort order within each day.
+ */
 function PaginatedLeagueList({
-  list, hasDraw, picks, onPick, emptyLabel, pageSize = PAGE_SIZE,
-}: { list: EnrichedMatch[]; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void; emptyLabel: string; pageSize?: number }) {
+  list, hasDraw, picks, onPick, emptyLabel, pageSize = PAGE_SIZE, market, onMarketChange,
+}: {
+  list: EnrichedMatch[]; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void; emptyLabel: string; pageSize?: number;
+  market: CardMarket; onMarketChange: (m: CardMarket) => void;
+}) {
   const [visible, setVisible] = useState(pageSize);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => { setVisible(pageSize); }, [list.length, pageSize]);
@@ -615,26 +440,24 @@ function PaginatedLeagueList({
 
   if (list.length === 0) return <p className="sb-empty">{emptyLabel}</p>;
 
-  const byLeague = new Map<string, EnrichedMatch[]>();
-  for (const m of list) { const key = m.league || "Other"; if (!byLeague.has(key)) byLeague.set(key, []); byLeague.get(key)!.push(m); }
-
-  let shown = 0;
-  const rows: React.ReactNode[] = [];
-  for (const [league, matches] of Array.from(byLeague.entries())) {
-    if (shown >= visible) break;
-    const remaining = visible - shown;
-    const slice = matches.slice(0, remaining);
-    shown += slice.length;
-    rows.push(
-      <div key={league}>
-        {slice.map((m: EnrichedMatch) => <MatchRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} />)}
-      </div>
-    );
+  const byDay = new Map<string, EnrichedMatch[]>();
+  for (const m of list.slice(0, visible)) {
+    const key = sportyDayKey(m.kickoffAt);
+    if (!byDay.has(key)) byDay.set(key, []);
+    byDay.get(key)!.push(m);
   }
 
   return (
     <>
-      {rows}
+      <div className="sp-list">
+        <SportyMarketTabs market={market} onChange={onMarketChange} />
+        {Array.from(byDay.entries()).map(([day, matches]) => (
+          <div key={day}>
+            <SportyGroupHead label={sportyDayLabel(matches[0].kickoffAt)} market={market} hasDraw={hasDraw} />
+            {matches.map((m) => <MatchRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} market={market} />)}
+          </div>
+        ))}
+      </div>
       {visible < list.length && <div ref={sentinelRef} className="sb-load-sentinel" aria-hidden="true" />}
     </>
   );
@@ -660,6 +483,9 @@ export default function Sportsbook({
   const [internalSport, setInternalSport] = useState<SportKey>("football");
   const sport = sportProp ?? internalSport;
   const setSport = onSportChange ?? setInternalSport;
+  // One market-tab selection shared by every list on the board (SportyBet
+  // switches the market for the whole list from a single strip).
+  const [cardMarket, setCardMarket] = useState<CardMarket>("1X2");
 
   const [matches, setMatches] = useState<Record<SportKey, EnrichedMatch[]>>({ football: [], basketball: [], tennis: [], baseball: [], nfl: [], mma: [] });
   const [adminMatches, setAdminMatches] = useState<EnrichedMatch[]>([]);
@@ -839,11 +665,11 @@ export default function Sportsbook({
       )}
 
       {mode === "all" && sport === "football" && (
-        <TopLeaguesSection list={applyFilter(topTenUpcoming)} hasDraw={hasDraw} picks={picks} onPick={onPick} />
+        <TopLeaguesSection list={applyFilter(topTenUpcoming)} hasDraw={hasDraw} picks={picks} onPick={onPick} market={cardMarket} />
       )}
 
       {!hideLive && (mode === "live-only" || loading || visibleLive.length > 0) && (
-        <LiveMatchesSection list={visibleLive} hasDraw={hasDraw} picks={picks} onPick={onPick} loading={loading} />
+        <LiveMatchesSection list={visibleLive} hasDraw={hasDraw} picks={picks} onPick={onPick} loading={loading} market={cardMarket} onMarketChange={setCardMarket} />
       )}
 
       {mode === "all" && <div ref={restSentinelRef} aria-hidden="true" style={{ height: 1 }} />}
@@ -862,7 +688,7 @@ export default function Sportsbook({
                 {(loading || restLoading) && grouped.today.length === 0 ? (
                   <SkeletonRows />
                 ) : (
-                  <PaginatedLeagueList list={applyFilter(grouped.today)} hasDraw={hasDraw} picks={picks} onPick={onPick} emptyLabel="No matches scheduled for today." pageSize={10} />
+                  <PaginatedLeagueList list={applyFilter(grouped.today)} hasDraw={hasDraw} picks={picks} onPick={onPick} emptyLabel="No matches scheduled for today." pageSize={10} market={cardMarket} onMarketChange={setCardMarket} />
                 )}
               </div>
             </section>
@@ -872,7 +698,7 @@ export default function Sportsbook({
             {(loading || restLoading) && grouped.upcoming.length === 0 ? (
               <SkeletonRows />
             ) : (
-              <PaginatedLeagueList list={applyFilter(grouped.upcoming)} hasDraw={hasDraw} picks={picks} onPick={onPick} emptyLabel="No upcoming matches found." pageSize={10} />
+              <PaginatedLeagueList list={applyFilter(grouped.upcoming)} hasDraw={hasDraw} picks={picks} onPick={onPick} emptyLabel="No upcoming matches found." pageSize={10} market={cardMarket} onMarketChange={setCardMarket} />
             )}
           </SectionShell>
 
