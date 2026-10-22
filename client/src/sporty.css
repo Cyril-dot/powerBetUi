@@ -12,7 +12,12 @@
   color: var(--sp-ink);
   -webkit-font-smoothing: antialiased;
 }
-.sp-list { background: #fff; border: 1px solid #e3e3e3; border-radius: 6px; overflow: hidden; }
+/* Lists run full-bleed (owner: "the width should be 100%"): no side
+   borders, no rounded outer frame — the white ground goes edge to edge
+   and only the top/bottom hairlines separate the list from the page. */
+.sp-list { background: #fff; border-top: 1px solid #e3e3e3; border-bottom: 1px solid #e3e3e3; overflow: hidden; }
+/* Rail slides are cards by design, so a slide's list keeps its frame. */
+.sp-slide .sp-list { border: 1px solid #e3e3e3; border-radius: 6px; }
 .sp-list *, .sp-list .sp-match * { box-sizing: border-box; }
 .sp-list button, .sp-list .sp-match button { font-family: 'Roboto', Arial, sans-serif; }
 
@@ -72,6 +77,26 @@
 .sp-list .sp-compact .sp-obox { width: 54px; }
 .sp-list .sp-compact .sp-team { font-size: 13.5px; }
 .sp-list .sp-compact .sp-meta { font-size: 11px; }
+
+/* Sportsbook sections full-bleed on the single-column layout: the
+   sections break out of the .wrap page padding and shed the floating-
+   panel frame (side borders, radius, shadow) so the white list touches
+   both screen edges, SportyBet-style. The breakout margin is derived
+   from the viewport (the page column is symmetrically padded, so
+   (100% - 100vw)/2 is exactly minus that padding at every breakpoint)
+   instead of hard-coding a padding value that other layers override.
+   Desktop keeps the sidebar layout, where the list already spans its
+   column edge to edge. */
+@media (max-width: 960px) {
+  .sb-wrap section.sb-section {
+    /* !important + the extra element selector outrank the older
+       hard-coded -16px/-11px breakout on .sb-live-section.sb-live-dark
+       in index.css, whose values no longer match the .wrap padding. */
+    margin-left: calc((100% - 100vw) / 2) !important; margin-right: calc((100% - 100vw) / 2) !important;
+    border-left: none !important; border-right: none !important;
+    border-radius: 0 !important; box-shadow: none !important;
+  }
+}
 
 @media (max-width: 380px) {
   .sp-list .sp-obox { width: 58px; }

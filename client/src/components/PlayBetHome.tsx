@@ -276,50 +276,55 @@ export default function PlayBetHome({ picks, onPick }: { picks: Pick[]; onPick: 
         </div>
       </section>
 
-      {/* LIVE — SportyBet-mirror list on a light ground */}
+      {/* LIVE — SportyBet-mirror list on a light ground. The list itself
+          sits OUTSIDE .pb-wrap: full-bleed, edge to edge (owner: "the
+          width should be 100%"); only the section head stays padded. */}
       <section className="pb-live pb-live-sporty" id="live">
         <div className="pb-wrap">
           <div className="pb-sec-head">
             <div className="pb-grow"><p className="pb-kicker"><span className="pb-dot" />Live now · {live.length} in play</p><h2 className="pb-sec-title">In-Play Arena</h2></div>
             <Link className="pb-sec-link" href="/live">All live →</Link>
           </div>
-          {live.length === 0 ? (
+          {live.length === 0 && (
             <p className="pb-empty-note" style={{ color: "var(--pb-ink-2)", background: "#fff", borderColor: "#DFE7F0" }}>{loading ? "Loading live matches…" : "No matches are live right now — games appear here the moment they kick off, with live odds you can bet on straight away."}</p>
-          ) : (
-            <div className="sp-list">
-              <SportyMarketTabs market={cardMarket} onChange={setCardMarket} />
-              <SportyGroupHead label="Live · In-Play" live market={cardMarket} hasDraw />
-              {live.slice(0, 6).map((m) => (
-                <SportyMatchCard key={m.id} match={m} market={cardMarket} hasDraw picks={picks} onPick={onPick} />
-              ))}
-            </div>
           )}
         </div>
+        {live.length > 0 && (
+          <div className="sp-list">
+            <SportyMarketTabs market={cardMarket} onChange={setCardMarket} />
+            <SportyGroupHead label="Live · In-Play" live market={cardMarket} hasDraw />
+            {live.slice(0, 6).map((m) => (
+              <SportyMatchCard key={m.id} match={m} market={cardMarket} hasDraw picks={picks} onPick={onPick} />
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* UPCOMING — SportyBet-mirror list grouped by date */}
+      {/* UPCOMING — SportyBet-mirror list grouped by date, full-bleed
+          like the live list (only the section head stays in .pb-wrap) */}
       <section className="pb-upcoming" id="upcoming">
         <div className="pb-wrap">
           <div className="pb-sec-head">
             <div className="pb-grow"><p className="pb-kicker">Fixture list</p><h2 className="pb-sec-title">Coming Up</h2></div>
             <Link className="pb-sec-link" href="/sports">All fixtures →</Link>
           </div>
-          {upcoming.length === 0 ? (
+          {upcoming.length === 0 && (
             <p className="pb-empty-note" style={{ color: "var(--pb-ink-2)", background: "#fff", borderColor: "#DFE7F0" }}>{loading ? "Loading fixtures…" : "No upcoming fixtures are available right now — check back soon."}</p>
-          ) : (
-            <div className="sp-list">
-              <SportyMarketTabs market={cardMarket} onChange={setCardMarket} />
-              {upcomingGroups.map(([day, ms]) => (
-                <div key={day}>
-                  <SportyGroupHead label={sportyDayLabel(ms[0].kickoffAt)} market={cardMarket} hasDraw />
-                  {ms.map((m) => (
-                    <SportyMatchCard key={m.id} match={m} market={cardMarket} hasDraw picks={picks} onPick={onPick} />
-                  ))}
-                </div>
-              ))}
-            </div>
           )}
         </div>
+        {upcoming.length > 0 && (
+          <div className="sp-list">
+            <SportyMarketTabs market={cardMarket} onChange={setCardMarket} />
+            {upcomingGroups.map(([day, ms]) => (
+              <div key={day}>
+                <SportyGroupHead label={sportyDayLabel(ms[0].kickoffAt)} market={cardMarket} hasDraw />
+                {ms.map((m) => (
+                  <SportyMatchCard key={m.id} match={m} market={cardMarket} hasDraw picks={picks} onPick={onPick} />
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* CASINO */}
