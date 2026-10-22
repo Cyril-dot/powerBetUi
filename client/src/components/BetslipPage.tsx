@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { CheckCircle2, ChevronRight, Info, Loader2, QrCode, Radio, Trash2, WalletCards, X } from "lucide-react";
 import api, { ApiError } from "@/lib/api";
 import { parseKickoff } from "@/lib/sportsbook";
-import { buildMatchLabel, extractOdds, selectionToPick } from "@/lib/bookingCode";
+import { buildMatchLabel, extractOdds, selectionState, selectionToPick } from "@/lib/bookingCode";
 import type { Pick } from "./Sportsbook";
 
 function formatCountdown(kickoffAt?: string): string {
@@ -63,7 +63,7 @@ function SelectionCard({ pick, onRemove }: { pick: Pick; onRemove: () => void })
 // ---------------------------------------------------------------------------
 
 interface RedeemResult {
-  booking?: Record<string, unknown>;
+  booking?: Record<string, unknown> & { selections?: unknown[] };
   enrichedSelections?: Record<string, unknown>[];
   currentTotalOdds?: number;
 }
@@ -84,6 +84,11 @@ function BookingCodePanel({ picks, onAdd }: { picks: Pick[]; onAdd: (newPicks: P
     setAdded(false);
     try {
       const data = (await api.booking.redeem({ code: trimmed })) as RedeemResult;
+      const status = String(data?.booking?.status ?? "").toUpperCase();
+      if (status && status !== "ACTIVE") {
+        setError(status === "EXPIRED" ? "That booking code has expired." : "That booking code is no longer active.");
+        return;
+      }
       const selections = data?.enrichedSelections ?? [];
       if (!Array.isArray(selections) || selections.length === 0) {
         setError("That code has no valid selections right now.");
@@ -100,9 +105,18 @@ function BookingCodePanel({ picks, onAdd }: { picks: Pick[]; onAdd: (newPicks: P
   const enrichedSelections = result?.enrichedSelections ?? [];
   const bookingData = result?.booking ?? {};
   const totalOdds = result?.currentTotalOdds ?? Number(bookingData.totalOdds ?? 0);
+  // Honest availability: selections the payload marks started/unavailable are
+  // previewed and flagged but never loaded; selections the code carried that
+  // the backend no longer returns are reported as missing, not dropped quietly.
+  const rows = enrichedSelections.map((sel) => ({ sel, state: selectionState(sel) }));
+  const loadable = rows.filter((r) => !r.state.started && !r.state.unavailable);
+  const startedCount = rows.filter((r) => r.state.started && !r.state.unavailable).length;
+  const unavailableCount = rows.filter((r) => r.state.unavailable).length;
+  const totalInCode = Array.isArray(bookingData.selections) ? bookingData.selections.length : null;
+  const missingCount = totalInCode != null && totalInCode > enrichedSelections.length ? totalInCode - enrichedSelections.length : 0;
 
   const handleAddToSlip = () => {
-    const mapped = enrichedSelections.map(selectionToPick);
+    const mapped = loadable.map((r) => selectionToPick(r.sel));
     const existingKeys = new Set(picks.map((p) => `${p.id}-${p.market}-${p.selection}`));
     const fresh = mapped.filter((p) => !existingKeys.has(`${p.id}-${p.market}-${p.selection}`));
     onAdd(fresh);
@@ -140,20 +154,43 @@ function BookingCodePanel({ picks, onAdd }: { picks: Pick[]; onAdd: (newPicks: P
             <span className="bc-preview-code">{String(bookingData.code ?? code)}</span>
             <span className="bc-preview-meta">{enrichedSelections.length} selection{enrichedSelections.length !== 1 ? "s" : ""} · Odds {totalOdds.toFixed(2)}×</span>
           </div>
+          {missingCount > 0 && (
+            <div className="bc-note">{missingCount} of the {totalInCode} selections in this code {missingCount !== 1 ? "are" : "is"} no longer available and {missingCount !== 1 ? "were" : "was"} not loaded.</div>
+          )}
           <div className="bc-preview-list">
-            {enrichedSelections.map((sel, i) => (
-              <div className="bc-preview-row" key={i}>
-                <div>
-                  <small>{buildMatchLabel(sel)}</small>
-                  <b>{String(sel.market ?? "")}: {String(sel.selection ?? "")}</b>
+            {rows.map(({ sel, state }, i) => {
+              const blocked = state.started || state.unavailable;
+              return (
+                <div className={`bc-preview-row${blocked ? " blocked" : ""}`} key={i}>
+                  <div>
+                    <small>{buildMatchLabel(sel)}</small>
+                    <b>{String(sel.market ?? "")}: {String(sel.selection ?? "")}</b>
+                    {state.unavailable
+                      ? <span className="bc-flag grey">Unavailable</span>
+                      : state.started
+                        ? <span className="bc-flag red">Already started</span>
+                        : null}
+                  </div>
+                  <span>{extractOdds(sel).toFixed(2)}</span>
                 </div>
-                <span>{extractOdds(sel).toFixed(2)}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
-          <button type="button" className="gold-button full bc-add-btn" onClick={handleAddToSlip} disabled={added}>
-            {added ? <><CheckCircle2 size={14} /> Added to slip</> : `Add ${enrichedSelections.length} Selection${enrichedSelections.length !== 1 ? "s" : ""} to Slip`}
-          </button>
+          {(startedCount > 0 || unavailableCount > 0) && (
+            <p className="bc-excluded">
+              {[
+                startedCount > 0 ? `${startedCount} already started` : "",
+                unavailableCount > 0 ? `${unavailableCount} unavailable` : "",
+              ].filter(Boolean).join(" · ")} — these won't be added to your slip.
+            </p>
+          )}
+          {loadable.length > 0 ? (
+            <button type="button" className="gold-button full bc-add-btn" onClick={handleAddToSlip} disabled={added}>
+              {added ? <><CheckCircle2 size={14} /> Added to slip</> : `Add ${loadable.length} Selection${loadable.length !== 1 ? "s" : ""} to Slip`}
+            </button>
+          ) : (
+            <div className="bc-error"><Info size={13} /> All selections in this code have already started or are unavailable — nothing to add.</div>
+          )}
         </div>
       )}
     </section>
@@ -163,30 +200,37 @@ function BookingCodePanel({ picks, onAdd }: { picks: Pick[]; onAdd: (newPicks: P
 function BookingCodeStyles() {
   return (
     <style>{`
-      .bc-panel{ padding:20px 22px; margin-top:14px; }
+      .bc-panel{ padding:20px 22px; margin-top:14px; font-family:Roboto,Arial,sans-serif; }
       .bc-title h3{ display:flex; align-items:center; gap:7px; }
-      .bc-sub{ margin:6px 0 14px; color:#8b8b8b; font-size:.78rem; line-height:1.5; }
-      .bc-input-row{ display:flex; align-items:stretch; gap:0; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#0A0A0A; transition:border-color .15s ease; }
-      .bc-input-row:focus-within{ border-color:var(--gold); }
-      .bc-input-row.has-error{ border-color:var(--blue); }
-      .bc-input{ flex:1; min-width:0; padding:12px 14px; border:0; outline:0; background:transparent; color:#F4F1F0; font:700 13px 'DM Sans',sans-serif; letter-spacing:.08em; text-transform:uppercase; }
-      .bc-input::placeholder{ text-transform:none; letter-spacing:normal; color:#8b8b8b; font-weight:500; }
-      .bc-load-btn{ flex-shrink:0; padding:0 20px; background:var(--blue); color:#fff; font:800 11px 'DM Sans',sans-serif; letter-spacing:.04em; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; justify-content:center; min-width:64px; transition:opacity .15s ease; }
+      .bc-sub{ margin:6px 0 14px; color:#71809a; font-size:.78rem; line-height:1.5; }
+      .bc-input-row{ display:flex; align-items:stretch; gap:0; border:1px solid #dfe5ec; border-radius:10px; overflow:hidden; background:#fff; transition:border-color .15s ease; }
+      .bc-input-row:focus-within{ border-color:#00A651; box-shadow:0 0 0 3px rgba(0,166,81,.15); }
+      .bc-input-row.has-error{ border-color:#e57373; }
+      .bc-input{ flex:1; min-width:0; padding:12px 14px; border:0; outline:0; background:transparent; color:#20242d; font:700 13px Roboto,Arial,sans-serif; letter-spacing:.08em; text-transform:uppercase; }
+      .bc-input::placeholder{ text-transform:none; letter-spacing:normal; color:#9aa5b5; font-weight:500; }
+      .bc-load-btn{ flex-shrink:0; padding:0 20px; background:#00A651; color:#fff; font:800 11px Roboto,Arial,sans-serif; letter-spacing:.04em; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; justify-content:center; min-width:64px; transition:opacity .15s ease; border:0; }
       .bc-load-btn:disabled{ opacity:.55; cursor:not-allowed; }
       .bc-spin{ animation:bcSpin .8s linear infinite; }
       @keyframes bcSpin{ to{ transform:rotate(360deg); } }
-      .bc-error{ display:flex; align-items:center; gap:6px; margin-top:9px; padding:8px 11px; border-radius:8px; background:rgba(30,107,255); border:1px solid rgba(30,107,255); color:var(--blue); font-size:.72rem; font-weight:600; }
-      .bc-preview{ margin-top:14px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#141414; }
+      .bc-error{ display:flex; align-items:center; gap:6px; margin-top:9px; padding:8px 11px; border-radius:8px; background:#fdecec; border:1px solid #f3c2c2; color:#c62828; font-size:.72rem; font-weight:600; }
+      .bc-note{ margin:10px 12px 0; padding:8px 11px; border-radius:8px; background:#fff6db; border:1px solid #eed88f; color:#7a5b00; font-size:.72rem; font-weight:600; line-height:1.45; }
+      .bc-preview{ margin-top:14px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#fff; }
       .bc-preview-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 14px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
-      .bc-preview-code{ font:800 13px 'DM Sans',sans-serif; letter-spacing:.1em; color:var(--gold-hi); }
-      .bc-preview-meta{ font-size:.7rem; color:#8b8b8b; }
+      .bc-preview-code{ font:800 13px Roboto,Arial,sans-serif; letter-spacing:.1em; color:#00A651; }
+      .bc-preview-meta{ font-size:.7rem; color:#71809a; }
       .bc-preview-list{ max-height:180px; overflow-y:auto; }
       .bc-preview-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 14px; border-top:1px solid var(--line); }
       .bc-preview-row:first-child{ border-top:none; }
-      .bc-preview-row small{ display:block; color:#8b8b8b; font-size:.68rem; }
-      .bc-preview-row b{ display:block; margin-top:2px; font-size:.78rem; color:#F4F1F0; }
-      .bc-preview-row span{ flex-shrink:0; font-weight:800; color:var(--gold-hi); font-size:.82rem; }
+      .bc-preview-row.blocked{ opacity:.55; }
+      .bc-preview-row small{ display:block; color:#71809a; font-size:.68rem; }
+      .bc-preview-row b{ display:block; margin-top:2px; font-size:.78rem; color:#20242d; }
+      .bc-preview-row span{ flex-shrink:0; font-weight:800; color:#0b7a43; font-size:.82rem; }
+      .bc-flag{ display:inline-block; margin-top:4px; font-size:9px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; padding:2px 7px; border-radius:999px; }
+      .bc-flag.red{ background:#fdecec; color:#c62828; }
+      .bc-flag.grey{ background:#eef0f2; color:#6b7280; }
+      .bc-excluded{ margin:10px 14px 0; font-size:.72rem; color:#71809a; line-height:1.5; }
       .bc-add-btn{ margin:12px; width:calc(100% - 24px); display:flex; align-items:center; justify-content:center; gap:7px; }
+      .gold-button.bc-add-btn{ background:#00A651; }
       @media(max-width:960px){ .bc-panel{ margin-top:12px; } }
     `}</style>
   );
@@ -267,6 +311,7 @@ export default function BetslipPage({
           <BookingCodePanel picks={picks} onAdd={addFromBookingCode} />
         </>
       ) : (
+        <>
         <div className="bp-grid">
           <div className="bp-list">
             {picks.map((p) => <SelectionCard key={`${p.id}-${p.selection}-${p.market}`} pick={p} onRemove={() => remove(p)} />)}
@@ -286,6 +331,8 @@ export default function BetslipPage({
             {notice && <small className={notice.type === "error" ? "auth-notice" : "auth-notice bp-success"}>{notice.text}</small>}
           </aside>
         </div>
+        <BookingCodePanel picks={picks} onAdd={addFromBookingCode} />
+        </>
       )}
       {placedInfo && (
         <div className="pb-success-overlay" onClick={() => setPlacedInfo(null)}>

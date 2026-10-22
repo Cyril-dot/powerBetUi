@@ -1,5 +1,5 @@
 // Super UI / Black Gold Fieldhouse: reference-faithful sportsbook terminal, sharp information density, purposeful motion, green live/action accents.
-import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { Link, Route, Switch, useLocation, useSearch } from "wouter";
 import api, { ApiError } from "./lib/api";
 import { isBettableMatchId } from "./lib/sportsbook";
@@ -318,49 +318,79 @@ function HomeHero() {
 }
 function BetSlip({ picks, setPicks, onPlace }: { picks: Pick[]; setPicks: (p: Pick[])=>void; onPlace: (stake: number)=>Promise<void> }){ const MIN_STAKE=100; const [stake,setStake]=useState(1); const [stakeEdited,setStakeEdited]=useState(false); const [placing,setPlacing]=useState(false); const [notice,setNotice]=useState(""); const [placedInfo,setPlacedInfo]=useState<{stake:number;total:number;count:number}|null>(null); const total=picks.reduce((a,b)=>a*b.odd,1); const place=async()=>{ setNotice(""); setPlacing(true); try { await onPlace(stake); const info={stake,total,count:picks.length}; setPicks([]); setPlacedInfo(info); } catch (error) { setNotice(error instanceof ApiError ? error.message : "We could not place this bet. Please try again."); } finally { setPlacing(false); } }; return <aside className="betslip panel"><div className="betslip-tabs"><span className="active">Betslip</span><span>Cashout</span></div>{picks.length===0?<div className="empty-slip"><WalletCards size={34}/><h3>Your betslip is empty</h3><p>{notice || "Click on the odds to add selections and build your bet."}</p><Link href="/" className="ghost-button">Browse matches</Link></div>:<><div className="slip-header"><span>Singles</span><button onClick={()=>setPicks([])}>Clear all</button></div>{picks.map(p=><div className="slip-pick" key={`${p.id}-${p.selection}`}><div><b>{p.match}</b><small>{p.market} · {p.selection}</small></div><strong>{p.odd.toFixed(2)}</strong><button onClick={()=>setPicks(picks.filter(x=>x!==p))}><X size={14}/></button></div>)}<div className="slip-summary"><div><span>Potential return</span><b>GHS {(stake*total).toFixed(2)}</b></div><label>Stake<input value={stake} onChange={e=>{setStakeEdited(true);setStake(Number(e.target.value)||0)}} type="number" min={MIN_STAKE}/><small>Minimum GHS {MIN_STAKE}</small></label><button className={`gold-button full${stake < MIN_STAKE ? " stake-button-disabled" : ""}`} onClick={place} disabled={placing || stake < MIN_STAKE}>{placing ? "Placing…" : "Place bet"} <Zap size={15}/></button>{stakeEdited && stake < MIN_STAKE && <small className="stake-error" role="alert">Deposit an additional GHS {Math.max(0, MIN_STAKE - stake).toFixed(2)} to place this bet.</small>}{notice&&<small className="auth-notice" role="alert">{notice}</small>}</div></>}{placedInfo&&<div className="pb-success-overlay" onClick={()=>setPlacedInfo(null)}><div className="pb-success-card" onClick={e=>e.stopPropagation()}><div className="pb-success-badge"><CheckCircle2 size={34}/></div><h3>Bet placed successfully</h3><p>Your bet is in. Good luck!</p><div className="pb-success-rows"><div><span>Selections</span><b>{placedInfo.count}</b></div><div><span>Stake</span><b>GHS {placedInfo.stake.toFixed(2)}</b></div><div><span>Total odds</span><b>{placedInfo.total.toFixed(2)}</b></div><div className="ret"><span>Potential return</span><b>GHS {(placedInfo.stake*placedInfo.total).toFixed(2)}</b></div></div><Link href="/open-bets" className="gold-button full">View my bets</Link><button className="ghost-button full" onClick={()=>setPlacedInfo(null)}>Done</button></div></div>}</aside> }
 /**
- * Floating betslip shortcut — hidden until there's at least one selection,
- * then jumps straight to the betslip page. Kept deliberately simple: one
- * icon, one count badge, no label clutter.
+ * Floating betslip button — the 7up flow (owner, 2026-10-22). A circular
+ * green button with a white count pill, anchored bottom-right above the
+ * bottom nav. It appears once there's at least one selection, hides while
+ * the betslip itself is open, can be dragged to a new spot (the position
+ * persists across visits), and a tap opens the betslip. It reads the same
+ * picks state as the odds buttons and the bottom-nav badge.
  */
+const SLIP_FAB_POS_KEY = "pbSlipFabPos";
 function BetslipFAB({ count }: { count: number }) {
-  if (count <= 0) return null;
+  const [location, setLocation] = useLocation();
+  const [offset, setOffset] = useState<{ x: number; y: number }>(() => {
+    try {
+      const raw = window.localStorage.getItem(SLIP_FAB_POS_KEY);
+      if (raw) {
+        const p = JSON.parse(raw) as { x?: unknown; y?: unknown };
+        if (typeof p.x === "number" && typeof p.y === "number") return { x: p.x, y: p.y };
+      }
+    } catch { /* storage unavailable — stay at the anchor */ }
+    return { x: 0, y: 0 };
+  });
+  const [dragging, setDragging] = useState(false);
+  const dragRef = useRef<{ startX: number; startY: number; baseX: number; baseY: number; moved: boolean } | null>(null);
+
+  if (count <= 0 || location === "/betslip") return null;
+
+  const clampOffset = (x: number, y: number) => ({
+    x: Math.min(10, Math.max(-(window.innerWidth - 76), x)),
+    y: Math.min(10, Math.max(-(window.innerHeight - 176), y)),
+  });
+
+  const onPointerDown = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    dragRef.current = { startX: e.clientX, startY: e.clientY, baseX: offset.x, baseY: offset.y, moved: false };
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* older browsers */ }
+  };
+  const onPointerMove = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    const d = dragRef.current;
+    if (!d) return;
+    const dx = e.clientX - d.startX;
+    const dy = e.clientY - d.startY;
+    if (!d.moved && Math.hypot(dx, dy) < 7) return;
+    if (!d.moved) { d.moved = true; setDragging(true); }
+    setOffset(clampOffset(d.baseX + dx, d.baseY + dy));
+  };
+  const onPointerUp = () => {
+    const d = dragRef.current;
+    dragRef.current = null;
+    setDragging(false);
+    if (!d) return;
+    if (d.moved) {
+      try { window.localStorage.setItem(SLIP_FAB_POS_KEY, JSON.stringify(offset)); } catch { /* ignore */ }
+    } else {
+      setLocation("/betslip");
+    }
+  };
+  const onPointerCancel = () => { dragRef.current = null; setDragging(false); };
+
   return (
-    <Link
-      href="/betslip"
+    <button
+      type="button"
+      className={`pb-slip-fab${dragging ? " dragging" : ""}`}
       aria-label={`Open betslip, ${count} selection${count === 1 ? "" : "s"}`}
       style={{
-        position: "fixed",
-        bottom: "calc(64px + 16px)",
-        right: 18,
-        zIndex: 120,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: 54,
-        height: 54,
-        borderRadius: "50%",
-        background: "linear-gradient(135deg, var(--gold-hi, #1e6bff), #1246a8)",
-        boxShadow: "0 8px 22px rgba(30,107,255,0.4)",
-        color: "#fff",
-        textDecoration: "none",
-        transition: "transform 0.15s ease",
-        animation: "fab-pop .22s ease",
+        transform: `translate(${offset.x}px, ${offset.y}px)`,
+        animation: offset.x !== 0 || offset.y !== 0 ? "none" : undefined,
       }}
-      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1.08)"; }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
     >
-      <span
-        style={{
-          position: "absolute", top: -4, right: -4, minWidth: 20, height: 20, padding: "0 4px",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          background: "#141414", color: "#fff", fontSize: 10, fontWeight: 900,
-          border: "2px solid #fff", borderRadius: 999,
-        }}
-      >
-        {count > 99 ? "99+" : count}
-      </span>
-      <Ticket size={22} strokeWidth={2.2} />
-    </Link>
+      <Ticket size={26} strokeWidth={1.8} />
+      <span className="pb-slip-fab-n">{count > 99 ? "99+" : count}</span>
+    </button>
   );
 }
 
@@ -431,6 +461,6 @@ function BetsRoute({ tab, hideHeader = false }: { tab: "open" | "history"; hideH
 function TicketDetailsRoute({ id }: { id: string }){ return <TicketDetailsPage id={id}/> }
 
 function AdminRoute(){ return <AdminPanelPage/>; }
-function App(){ const [picks,setPicks]=useState<Pick[]>([]); const onPick=(p:Pick)=>setPicks(prev=>prev.some(x=>x.id===p.id&&x.selection===p.selection)?prev.filter(x=>!(x.id===p.id&&x.selection===p.selection)):[...prev,p]); const onPlace=async(stake:number)=>{ if(!window.localStorage.getItem("accessToken")){ window.location.href="/login"; return; } if(stake < 200){ throw new ApiError("You cannot stake below the minimum stake of GHS 200.",422); } if(picks.some((pick)=>!isBettableMatchId(pick.id))){ throw new ApiError("One selection is no longer available for betting. Remove it and choose a match with current odds.",422); } await api.bets.place({stake,currency:"GHS",selections:picks.map((pick)=>({matchId:pick.id,market:pick.market,selection:pick.selection,submittedOdds:pick.odd}))}); }; return <><WinCelebrationModal/><Suspense fallback={<div style={{ padding: "56px 20px", textAlign: "center", color: "#5b7186", fontWeight: 700 }}>Loading…</div>}><Switch><Route path="/admin-guide"><AdminEntryGuidePage/></Route><Route path="/admin"><AdminRoute/></Route><Route path="/super-admin"><SuperAdminPage/></Route><Route path="/casino"><Casino/></Route><Route path="/wallet"><WalletPage/></Route><Route path="/deposit"><DepositPage/></Route><Route path="/promos"><SimplePage title="Promotions" kicker="More value in every play"><section className="promo-card"><span className="eyebrow">Welcome offer</span><h2>Play the smart side of sport.</h2><p>Keep an eye on the latest boosts, free bets, and loyalty rewards.</p><Link href="/wallet" className="gold-button">View offers <ChevronRight size={15}/></Link></section></SimplePage></Route><Route path="/affiliate"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><AffiliatePage/><Footer/></></Route><Route path="/login"><AccountAuth mode="login" /></Route><Route path="/register"><AccountAuth mode="register" /></Route><Route path="/terms-and-conditions"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><TermsAndConditionsPage/><Footer/></></Route><Route path="/refund-policy"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><RefundPolicyPage/><Footer/></></Route><Route path="/support"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><main className="wrap support-page"><SupportCenter/></main><Footer/></></Route><Route path="/help"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><main className="wrap support-page"><SupportCenter/></main><Footer/></></Route><Route path="/bets"><BetsRoute tab="history" hideHeader/></Route><Route path="/betslip"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><BetslipPage picks={picks} setPicks={setPicks} onPlace={onPlace}/><Footer/></></Route><Route path="/account"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><AccountCenter/><Footer/></></Route><Route path="/profile"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><ProfileCenter/><Footer/></></Route><Route path="/sports"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><SportsPage picks={picks} onPick={onPick}/><Footer/></></Route><Route path="/match/:id">{(params)=><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><MatchDetailsRoute id={params.id ?? ""} picks={picks} onPick={onPick}/><Footer/></>}</Route><Route path="/transactions"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><TransactionsPage/><Footer/></></Route><Route path="/bets/:id">{(params)=><TicketDetailsRoute id={params.id ?? ""}/>}</Route><Route path="/open-bets"><BetsRoute tab="open"/></Route><Route path="/notifications"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><NotificationsPage/><Footer/></></Route><Route path="/favorites"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><FavoritesPage/><Footer/></></Route><Route path="/settings"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><SettingsPage/><Footer/></></Route><Route path="/security"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><SecurityPage/><Footer/></></Route><Route path="/responsible-gaming"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><ResponsibleGamingPage/><Footer/></></Route><Route path="/search"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><SearchPage/><Footer/></></Route><Route path="/booking-code"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><BookingCodePage picks={picks} setPicks={setPicks}/><Footer/></></Route><Route path="/live"><SimplePage title="Live betting" kicker="Follow the moment"><div className="main-column" style={{gridColumn:"1 / -1"}}><Sportsbook picks={picks} onPick={onPick} mode="live-only" /></div><div style={{gridColumn:"1 / -1"}}><BetSlip picks={picks} setPicks={setPicks} onPlace={onPlace}/></div></SimplePage></Route><Route path="/"><Home onPick={onPick} picks={picks} setPicks={setPicks} onPlace={onPlace}/></Route><Route><NotFound/></Route></Switch></Suspense><MobileBottomNav/><BetslipFAB count={picks.length}/></> }
+function App(){ const [picks,setPicks]=useState<Pick[]>([]); const onPick=(p:Pick)=>setPicks(prev=>prev.some(x=>x.id===p.id&&x.selection===p.selection)?prev.filter(x=>!(x.id===p.id&&x.selection===p.selection)):[...prev,p]); const onPlace=async(stake:number)=>{ if(!window.localStorage.getItem("accessToken")){ window.location.href="/login"; return; } if(stake < 200){ throw new ApiError("You cannot stake below the minimum stake of GHS 200.",422); } if(picks.some((pick)=>!isBettableMatchId(pick.id))){ throw new ApiError("One selection is no longer available for betting. Remove it and choose a match with current odds.",422); } await api.bets.place({stake,currency:"GHS",selections:picks.map((pick)=>({matchId:pick.id,market:pick.market,selection:pick.selection,submittedOdds:pick.odd}))}); }; return <><WinCelebrationModal/><Suspense fallback={<div style={{ padding: "56px 20px", textAlign: "center", color: "#5b7186", fontWeight: 700 }}>Loading…</div>}><Switch><Route path="/admin-guide"><AdminEntryGuidePage/></Route><Route path="/admin"><AdminRoute/></Route><Route path="/super-admin"><SuperAdminPage/></Route><Route path="/casino"><Casino/></Route><Route path="/wallet"><WalletPage/></Route><Route path="/deposit"><DepositPage/></Route><Route path="/promos"><SimplePage title="Promotions" kicker="More value in every play"><section className="promo-card"><span className="eyebrow">Welcome offer</span><h2>Play the smart side of sport.</h2><p>Keep an eye on the latest boosts, free bets, and loyalty rewards.</p><Link href="/wallet" className="gold-button">View offers <ChevronRight size={15}/></Link></section></SimplePage></Route><Route path="/affiliate"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><AffiliatePage/><Footer/></></Route><Route path="/login"><AccountAuth mode="login" /></Route><Route path="/register"><AccountAuth mode="register" /></Route><Route path="/terms-and-conditions"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><TermsAndConditionsPage/><Footer/></></Route><Route path="/refund-policy"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><RefundPolicyPage/><Footer/></></Route><Route path="/support"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><main className="wrap support-page"><SupportCenter/></main><Footer/></></Route><Route path="/help"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><main className="wrap support-page"><SupportCenter/></main><Footer/></></Route><Route path="/bets"><BetsRoute tab="history" hideHeader/></Route><Route path="/betslip"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><BetslipPage picks={picks} setPicks={setPicks} onPlace={onPlace}/><Footer/></></Route><Route path="/account"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><AccountCenter/><Footer/></></Route><Route path="/profile"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><ProfileCenter/><Footer/></></Route><Route path="/sports"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><SportsPage picks={picks} onPick={onPick}/><Footer/></></Route><Route path="/match/:id">{(params)=><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><MatchDetailsRoute id={params.id ?? ""} picks={picks} onPick={onPick}/><Footer/></>}</Route><Route path="/transactions"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><TransactionsPage/><Footer/></></Route><Route path="/bets/:id">{(params)=><TicketDetailsRoute id={params.id ?? ""}/>}</Route><Route path="/open-bets"><BetsRoute tab="open"/></Route><Route path="/notifications"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><NotificationsPage/><Footer/></></Route><Route path="/favorites"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><FavoritesPage/><Footer/></></Route><Route path="/settings"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><SettingsPage/><Footer/></></Route><Route path="/security"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><SecurityPage/><Footer/></></Route><Route path="/responsible-gaming"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><ResponsibleGamingPage/><Footer/></></Route><Route path="/search"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><SearchPage/><Footer/></></Route><Route path="/booking-code"><><Header onMenu={()=>document.body.classList.toggle("menu-open")}/><BookingCodePage picks={picks} setPicks={setPicks}/><Footer/></></Route><Route path="/live"><SimplePage title="Live betting" kicker="Follow the moment"><div className="main-column" style={{gridColumn:"1 / -1"}}><Sportsbook picks={picks} onPick={onPick} mode="live-only" /></div><div style={{gridColumn:"1 / -1"}}><BetSlip picks={picks} setPicks={setPicks} onPlace={onPlace}/></div></SimplePage></Route><Route path="/"><Home onPick={onPick} picks={picks} setPicks={setPicks} onPlace={onPlace}/></Route><Route><NotFound/></Route></Switch></Suspense><MobileBottomNav count={picks.length}/><BetslipFAB count={picks.length}/></> }
 
 export default function Root(){ return <SessionProvider><App/></SessionProvider> }

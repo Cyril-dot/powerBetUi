@@ -1,18 +1,22 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Ticket, ChevronRight, Search, ArrowLeft, Loader2, CircleCheck, CircleX } from "lucide-react";
-import api, { ApiError } from "../lib/api";
-import { buildMatchLabel, extractOdds, selectionToPick } from "../lib/bookingCode";
+import { Ticket, ChevronRight, Search, ArrowLeft, Loader2, CircleCheck, CircleX, Info } from "lucide-react";
+import api, { ApiError, type RedeemResponse } from "../lib/api";
+import { buildMatchLabel, extractOdds, selectionState, selectionToPick } from "../lib/bookingCode";
 import type { Pick } from "./Sportsbook";
 
+// Booking code loading page — the 7up flow in PlayBet's current system
+// (white, Roboto, PlayBet green): enter a code, Load fetches its selections
+// from POST /api/booking/redeem, the loadable ones go into the betslip and
+// the user lands on the slip. Selections the payload marks started or
+// unavailable are shown, flagged, and never silently loaded; selections the
+// code carried that the backend no longer returns are reported as missing.
 export default function BookingCodePage({ picks, setPicks }: { picks: Pick[]; setPicks: (p: Pick[]) => void }) {
   const [, setLocation] = useLocation();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [selections, setSelections] = useState<Record<string, unknown>[]>([]);
-  const [bookingCode, setBookingCode] = useState("");
-  const [totalOdd, setTotalOdd] = useState(0);
+  const [result, setResult] = useState<RedeemResponse | null>(null);
   const [added, setAdded] = useState(false);
 
   const handleLoad = async () => {
@@ -23,17 +27,20 @@ export default function BookingCodePage({ picks, setPicks }: { picks: Pick[]; se
     }
     setError("");
     setLoading(true);
-    setSelections([]);
+    setResult(null);
     setAdded(false);
     try {
-      const result = await api.booking.redeem({ code: trimmed });
-      const enriched = result.enrichedSelections ?? [];
+      const data = await api.booking.redeem({ code: trimmed });
+      const status = String(data.booking?.status ?? "").toUpperCase();
+      if (status && status !== "ACTIVE") {
+        setError(status === "EXPIRED" ? "That booking code has expired." : "That booking code is no longer active.");
+        return;
+      }
+      const enriched = data.enrichedSelections ?? [];
       if (enriched.length === 0) {
         setError("That code has no valid selections right now.");
       } else {
-        setSelections(enriched);
-        setBookingCode(String(result.booking?.code ?? trimmed));
-        setTotalOdd(result.currentTotalOdds ?? Number(result.booking?.totalOdds ?? 0) ?? enriched.reduce((a, s) => a * extractOdds(s), 1));
+        setResult(data);
       }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Booking code not found. Please check the code and try again.");
@@ -42,8 +49,20 @@ export default function BookingCodePage({ picks, setPicks }: { picks: Pick[]; se
     }
   };
 
+  const enriched = result?.enrichedSelections ?? [];
+  const rows = enriched.map((sel) => ({ sel, state: selectionState(sel) }));
+  const loadable = rows.filter((r) => !r.state.started && !r.state.unavailable);
+  const startedCount = rows.filter((r) => r.state.started && !r.state.unavailable).length;
+  const unavailableCount = rows.filter((r) => r.state.unavailable).length;
+  const totalInCode = Array.isArray(result?.booking?.selections) ? result.booking.selections.length : null;
+  const missingCount = totalInCode != null && totalInCode > enriched.length ? totalInCode - enriched.length : 0;
+  const bookingCode = String(result?.booking?.code ?? code.trim().toUpperCase());
+  const shownTotalOdds = loadable.length === enriched.length
+    ? (result?.currentTotalOdds ?? Number(result?.booking?.totalOdds ?? 0) ?? loadable.reduce((a, r) => a * extractOdds(r.sel), 1))
+    : loadable.reduce((a, r) => a * extractOdds(r.sel), 1);
+
   const handleAddToSlip = () => {
-    const mapped = selections.map(selectionToPick);
+    const mapped = loadable.map((r) => selectionToPick(r.sel));
     const existingKeys = new Set(picks.map((p) => `${p.id}-${p.market}-${p.selection}`));
     const fresh = mapped.filter((p) => !existingKeys.has(`${p.id}-${p.market}-${p.selection}`));
     if (fresh.length > 0) setPicks([...picks, ...fresh]);
@@ -56,216 +75,120 @@ export default function BookingCodePage({ picks, setPicks }: { picks: Pick[]; se
   };
 
   return (
-    <main className="wrap simple-page" style={{ maxWidth: 560, margin: "0 auto", paddingTop: 24 }}>
+    <main className="wrap simple-page bkp-page" style={{ maxWidth: 560, margin: "0 auto", paddingTop: 24 }}>
       {/* Back button */}
-      <button
-        type="button"
-        onClick={() => setLocation("/")}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          background: "none",
-          border: "none",
-          color: "var(--muted)",
-          fontSize: 13,
-          cursor: "pointer",
-          padding: "0 0 18px",
-        }}
-      >
+      <button type="button" className="bkp-back" onClick={() => setLocation("/")}>
         <ArrowLeft size={15} /> Back to home
       </button>
 
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
-        <span
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 10,
-            background: "#1e6bff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
+      <div className="bkp-head">
+        <span className="bkp-chip-icon">
           <Ticket size={20} color="#ffffff" />
         </span>
         <div>
-          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>Load booking code</h2>
-          <p style={{ margin: 0, fontSize: 13, color: "var(--muted)", marginTop: 2 }}>
-            Enter a code shared by another user to copy their bet slip.
-          </p>
+          <h2 className="bkp-title">Load booking code</h2>
+          <p className="bkp-sub">Enter a code shared by another user to copy their bet slip.</p>
         </div>
       </div>
 
       {/* Input card */}
-      <section
-        className="panel"
-        style={{
-          marginTop: 22,
-          padding: "20px 18px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 14,
-        }}
-      >
-        <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: "var(--muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-            Booking code
-          </span>
-          <div style={{ display: "flex", gap: 8 }}>
-            <input
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              onKeyDown={handleKeyDown}
-              placeholder="e.g. RBGH12345"
-              maxLength={20}
-              style={{
-                flex: 1,
-                padding: "10px 13px",
-                borderRadius: 8,
-                border: "1px solid var(--border)",
-                background: "var(--surface)",
-                color: "var(--text)",
-                fontSize: 15,
-                fontWeight: 700,
-                letterSpacing: "0.1em",
-                outline: "none",
-              }}
-              autoFocus
-              autoComplete="off"
-              spellCheck={false}
-            />
-            <button
-              type="button"
-              onClick={handleLoad}
-              disabled={loading}
-              className="gold-button"
-              style={{ minWidth: 52, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 16px" }}
-            >
-              {loading ? <Loader2 size={17} style={{ animation: "spin 0.8s linear infinite" }} /> : <Search size={17} />}
-            </button>
-          </div>
-        </label>
+      <section className="panel bkp-card">
+        <label className="bkp-label" htmlFor="bkp-input">Booking code</label>
+        <div className="bkp-input-row">
+          <input
+            id="bkp-input"
+            value={code}
+            onChange={(e) => { setCode(e.target.value.toUpperCase()); setResult(null); setError(""); }}
+            onKeyDown={handleKeyDown}
+            placeholder="e.g. RBGH12345"
+            maxLength={20}
+            autoFocus
+            autoComplete="off"
+            spellCheck={false}
+          />
+          <button type="button" className="bkp-load" onClick={handleLoad} disabled={loading}>
+            {loading ? <Loader2 size={17} className="bkp-spin" /> : <><Search size={16} /> Load</>}
+          </button>
+        </div>
 
         {error && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "10px 13px",
-              borderRadius: 8,
-              background: "rgba(220,60,60,0.08)",
-                      color: "#1246a8",
-              fontSize: 13,
-            }}
-          >
+          <div className="bkp-error" role="alert">
             <CircleX size={15} />
             {error}
           </div>
         )}
 
         {/* Loaded selections preview */}
-        {selections.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                color: "var(--nature, #4caf50)",
-                fontSize: 13,
-                fontWeight: 600,
-              }}
-            >
+        {result && enriched.length > 0 && (
+          <div className="bkp-result">
+            <div className="bkp-success">
               <CircleCheck size={15} />
-              Booking code {bookingCode} loaded — {selections.length} selection{selections.length !== 1 ? "s" : ""}
+              Booking code {bookingCode} loaded — {enriched.length} selection{enriched.length !== 1 ? "s" : ""}
             </div>
 
-            <div
-              style={{
-                border: "1px solid var(--border)",
-                borderRadius: 10,
-                overflow: "hidden",
-              }}
-            >
-              {selections.map((s, i) => (
-                <div
-                  key={i}
-                  style={{
-                    padding: "11px 14px",
-                    borderBottom: i < selections.length - 1 ? "1px solid var(--border)" : "none",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: 13, lineHeight: 1.4 }}>
-                      {buildMatchLabel(s)}
+            {missingCount > 0 && (
+              <div className="bkp-note">
+                <Info size={14} />
+                {missingCount} of the {totalInCode} selections in this code {missingCount !== 1 ? "are" : "is"} no longer available and {missingCount !== 1 ? "were" : "was"} not loaded.
+              </div>
+            )}
+
+            <div className="bkp-list">
+              {rows.map(({ sel, state }, i) => {
+                const blocked = state.started || state.unavailable;
+                return (
+                  <div key={i} className={`bkp-row${blocked ? " blocked" : ""}`}>
+                    <div className="bkp-row-main">
+                      <div className="bkp-row-match">{buildMatchLabel(sel)}</div>
+                      <div className="bkp-row-meta">
+                        {String(sel.market ?? "")} · <strong>{String(sel.selection ?? "")}</strong>
+                        {state.unavailable
+                          ? <span className="bkp-flag grey">Unavailable</span>
+                          : state.started
+                            ? <span className="bkp-flag red">Already started</span>
+                            : null}
+                      </div>
                     </div>
-                    <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>
-                      {String(s.market ?? "")} · <strong style={{ color: "var(--text)" }}>{String(s.selection ?? "")}</strong>
-                    </div>
+                    <span className="bkp-row-odd">{extractOdds(sel).toFixed(2)}</span>
                   </div>
-                  <span
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color: "#1246a8",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {extractOdds(s).toFixed(2)}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                padding: "10px 14px",
-                background: "var(--surface)",
-                borderRadius: 8,
-                fontSize: 13,
-              }}
-            >
-              <span style={{ color: "var(--muted)" }}>Total odds</span>
-              <strong style={{ color: "#1246a8", fontSize: 15 }}>
-                {totalOdd.toFixed(2)}
-              </strong>
+            <div className="bkp-total">
+              <span>Total odds{loadable.length !== enriched.length ? " (loadable selections)" : ""}</span>
+              <strong>{shownTotalOdds.toFixed(2)}</strong>
             </div>
 
-            <button
-              type="button"
-              className="gold-button full"
-              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
-              onClick={handleAddToSlip}
-              disabled={added}
-            >
-              {added ? <><CircleCheck size={15} /> Added — opening betslip…</> : <>Add to betslip <ChevronRight size={15} /></>}
-            </button>
+            {(startedCount > 0 || unavailableCount > 0) && (
+              <p className="bkp-excluded">
+                {[
+                  startedCount > 0 ? `${startedCount} already started` : "",
+                  unavailableCount > 0 ? `${unavailableCount} unavailable` : "",
+                ].filter(Boolean).join(" · ")} — these won't be added to your slip.
+              </p>
+            )}
+
+            {loadable.length > 0 ? (
+              <button type="button" className="bkp-add" onClick={handleAddToSlip} disabled={added}>
+                {added
+                  ? <><CircleCheck size={15} /> Added — opening betslip…</>
+                  : <>Add {loadable.length} selection{loadable.length !== 1 ? "s" : ""} to betslip <ChevronRight size={15} /></>}
+              </button>
+            ) : (
+              <div className="bkp-error" role="alert">
+                <CircleX size={15} />
+                All selections in this code have already started or are unavailable — nothing to add.
+              </div>
+            )}
           </div>
         )}
       </section>
 
       {/* Info tip */}
-      {selections.length === 0 && (
-        <p
-          style={{
-            fontSize: 12,
-            color: "var(--muted)",
-            textAlign: "center",
-            marginTop: 20,
-            lineHeight: 1.7,
-          }}
-        >
+      {!result && (
+        <p className="bkp-tip">
           Booking codes let you instantly load a pre-built bet shared by another user.
           <br />
           You can find them shared in chats or generated from your own betslip.
@@ -273,7 +196,43 @@ export default function BookingCodePage({ picks, setPicks }: { picks: Pick[]; se
       )}
 
       <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .bkp-page{ font-family:Roboto,Arial,sans-serif; }
+        .bkp-back{ display:flex; align-items:center; gap:6px; background:none; border:none; color:#5b7186; font-size:13px; font-weight:600; cursor:pointer; padding:0 0 18px; font-family:inherit; }
+        .bkp-head{ display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+        .bkp-chip-icon{ width:40px; height:40px; border-radius:10px; background:linear-gradient(135deg,#00A651,#076e37); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .bkp-title{ margin:0; font-size:20px; font-weight:800; color:#20242d; }
+        .bkp-sub{ margin:2px 0 0; font-size:13px; color:#71809a; }
+        .bkp-card{ margin-top:22px; padding:20px 0 0; overflow:hidden; }
+        .bkp-label{ display:block; padding:0 18px; font-size:12px; font-weight:700; color:#71809a; letter-spacing:.06em; text-transform:uppercase; }
+        .bkp-input-row{ display:flex; gap:8px; padding:8px 18px 18px; }
+        .bkp-input-row input{ flex:1; min-width:0; padding:11px 13px; border-radius:10px; border:1px solid #dfe5ec; background:#fff; color:#20242d; font-size:15px; font-weight:700; letter-spacing:.1em; outline:none; font-family:inherit; }
+        .bkp-input-row input:focus{ border-color:#00A651; box-shadow:0 0 0 3px rgba(0,166,81,.15); }
+        .bkp-load{ flex-shrink:0; display:flex; align-items:center; justify-content:center; gap:7px; padding:0 20px; min-width:86px; border:0; border-radius:10px; background:#00A651; color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
+        .bkp-load:disabled{ opacity:.6; cursor:not-allowed; }
+        .bkp-spin{ animation:bkpSpin .8s linear infinite; }
+        @keyframes bkpSpin{ to{ transform:rotate(360deg); } }
+        .bkp-error{ display:flex; align-items:center; gap:8px; margin:0 18px 16px; padding:10px 13px; border-radius:10px; background:#fdecec; border:1px solid #f3c2c2; color:#c62828; font-size:13px; font-weight:600; }
+        .bkp-result{ display:flex; flex-direction:column; }
+        .bkp-success{ display:flex; align-items:center; gap:8px; padding:0 18px; color:#00A651; font-size:13px; font-weight:700; }
+        .bkp-note{ display:flex; align-items:center; gap:8px; margin:12px 18px 0; padding:9px 12px; border-radius:10px; background:#fff6db; border:1px solid #eed88f; color:#7a5b00; font-size:12.5px; font-weight:600; }
+        .bkp-list{ margin-top:14px; border-top:1px solid #eef1f4; }
+        .bkp-row{ display:flex; justify-content:space-between; align-items:center; gap:8px; padding:11px 18px; border-bottom:1px solid #eef1f4; }
+        .bkp-row.blocked{ opacity:.55; }
+        .bkp-row-main{ min-width:0; }
+        .bkp-row-match{ font-weight:700; font-size:13px; line-height:1.4; color:#20242d; }
+        .bkp-row-meta{ display:flex; align-items:center; gap:7px; flex-wrap:wrap; font-size:11px; color:#71809a; margin-top:2px; }
+        .bkp-row-meta strong{ color:#20242d; }
+        .bkp-flag{ font-size:9px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; padding:2px 7px; border-radius:999px; }
+        .bkp-flag.red{ background:#fdecec; color:#c62828; }
+        .bkp-flag.grey{ background:#eef0f2; color:#6b7280; }
+        .bkp-row-odd{ font-size:13px; font-weight:800; color:#0b7a43; flex-shrink:0; }
+        .bkp-total{ display:flex; justify-content:space-between; align-items:center; padding:11px 18px; background:#f6fbf7; font-size:13px; color:#52647d; }
+        .bkp-total strong{ color:#0b7a43; font-size:15px; }
+        .bkp-excluded{ margin:12px 18px 0; font-size:12px; color:#71809a; line-height:1.5; }
+        .bkp-add{ display:flex; align-items:center; justify-content:center; gap:8px; width:calc(100% - 36px); margin:14px 18px 18px; min-height:46px; border:0; border-radius:10px; background:#00A651; color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
+        .bkp-add:disabled{ opacity:.65; cursor:not-allowed; }
+        .bkp-result .bkp-error{ margin-top:14px; }
+        .bkp-tip{ font-size:12px; color:#71809a; text-align:center; margin-top:20px; line-height:1.7; }
       `}</style>
     </main>
   );

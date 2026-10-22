@@ -377,16 +377,26 @@
   padding:12px 18px;border-radius:13px;border:1px solid rgba(0,232,95,.4);opacity:0;pointer-events:none;transition:.25s;max-width:88vw;text-align:center;box-shadow:0 16px 40px rgba(2,6,20,.5)}
 .pb-toast.pb-show{opacity:1;transform:translate(-50%,0)}
 
-/* ── PlayBet additions: app MobileBottomNav restyle (component untouched) ── */
-body .mobile-bottom-nav{background:linear-gradient(165deg,rgba(18,48,104,.97),rgba(7,16,42,.98));border-top:1px solid rgba(0,232,95,.3);box-shadow:0 -10px 30px rgba(2,6,20,.45);backdrop-filter:blur(16px)}
-.mobile-bottom-nav .mbn-booking .mbn-icon-wrap{background:linear-gradient(135deg,#19e36b,#06b44f)!important;color:#04140a!important;border-color:rgba(255,255,255,.85)!important;box-shadow:0 5px 16px rgba(0,232,95,.4)!important}
-.mbn-item{color:#8FA5CC!important;font-family:'Inter',system-ui,sans-serif}
-.mbn-item.active{color:var(--pb-green)!important}
-.mbn-item.active .mbn-icon-wrap{color:var(--pb-green)}
-.mbn-booking{color:var(--pb-green-ink)!important;background:linear-gradient(180deg,var(--pb-green-hi),var(--pb-green) 60%,var(--pb-green-deep))!important;border-color:transparent!important;box-shadow:0 6px 16px rgba(0,232,95,.4)!important}
-.mbn-booking .mbn-icon-wrap{color:var(--pb-green-ink)!important}
-.mbn-booking .mbn-label{color:var(--pb-green-ink)!important}
-.mbn-booking.active{color:var(--pb-green-ink)!important;background:linear-gradient(180deg,var(--pb-green-hi),var(--pb-green) 60%,var(--pb-green-deep))!important;border-color:transparent!important}
+/* ── PlayBet bottom nav — Option 1 "SportyBet mirror" (owner pick, 2026-10-22).
+   White bar, five items (Home · Sports · Betslip · My Bets · Account), grey
+   line icons, active tab in SportyBet green #00A651, Roboto labels, green
+   count badge on the betslip item. Replaces the earlier navy restyle and
+   overrides the legacy index.css nav treatments. ── */
+body .mobile-bottom-nav{background:#fff;border-top:1px solid #ddd;box-shadow:0 -2px 10px rgba(0,0,0,.06);backdrop-filter:none;-webkit-backdrop-filter:none;padding:7px 4px calc(7px + env(safe-area-inset-bottom,0px))}
+.mobile-bottom-nav .mbn-item{color:#8a8a8a!important;font-family:Roboto,Arial,sans-serif;font-size:10px;font-weight:500;gap:3px;padding:0 2px;min-height:46px}
+.mobile-bottom-nav .mbn-item.active{color:#00A651!important;font-weight:700}
+.mobile-bottom-nav .mbn-item .mbn-icon-wrap{color:inherit;display:flex;position:relative}
+.mobile-bottom-nav .mbn-item.active .mbn-icon-wrap{color:#00A651}
+.mobile-bottom-nav .mbn-label{letter-spacing:0}
+.mbn-count{position:absolute;top:-6px;right:-11px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#00A651;color:#fff;font-size:9px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+
+/* ── Floating betslip button — the 7up flow (owner, 2026-10-22): a circular
+   green button anchored bottom-right above the bottom nav with a white
+   count pill; it appears once there's a selection, can be dragged anywhere
+   (position persists), and a tap opens the betslip. ── */
+.pb-slip-fab{position:fixed;right:14px;bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:120;width:52px;height:52px;border-radius:50%;border:0;padding:0;background:linear-gradient(135deg,#00A651,#076e37);box-shadow:0 6px 16px rgba(0,166,81,.45);color:#fff;display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;animation:fab-pop .22s ease}
+.pb-slip-fab.dragging{cursor:grabbing;box-shadow:0 10px 24px rgba(0,166,81,.55)}
+.pb-slip-fab-n{position:absolute;top:-5px;right:-5px;min-width:22px;height:22px;border-radius:999px;background:#fff;color:#07823e;font-size:12px;font-weight:800;line-height:1;display:flex;align-items:center;justify-content:center;padding:0 6px;box-shadow:0 2px 6px rgba(0,0,0,.25);font-family:Roboto,Arial,sans-serif}
 
 /* header account cluster (logged-in state, sample skin) */
 .pb-root .pb-bal-pill{display:inline-flex;align-items:center;gap:7px;border:1.5px solid rgba(255,255,255,.45);background:rgba(255,255,255,.06);color:#fff;border-radius:999px;padding:6px 13px;font-size:12.5px;font-weight:700;white-space:nowrap}

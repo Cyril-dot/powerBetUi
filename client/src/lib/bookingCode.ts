@@ -37,6 +37,7 @@ export function selectionToPick(sel: Record<string, unknown>): Pick {
   const id = String(sel.matchId ?? sel.match_id ?? sel.fixtureId ?? sel.fixture_id ?? "");
   const homeTeam = (sel.homeTeam ?? sel.home_team) as string | undefined;
   const awayTeam = (sel.awayTeam ?? sel.away_team) as string | undefined;
+  const kickoffRaw = (sel.kickoffAt ?? sel.kickoff ?? sel.startTime ?? sel.startAt) as string | undefined;
   return {
     id,
     match: buildMatchLabel(sel),
@@ -45,5 +46,40 @@ export function selectionToPick(sel: Record<string, unknown>): Pick {
     odd: extractOdds(sel),
     homeTeam,
     awayTeam,
+    ...(kickoffRaw ? { kickoffAt: String(kickoffRaw) } : {}),
+    ...(selectionState(sel).started ? { isLive: true } : {}),
   };
+}
+
+// ---------------------------------------------------------------------------
+// Availability of a redeemed selection, read defensively like everything
+// else in this file (the redeem payload's exact field names aren't
+// documented). A selection is "started" when its match is live/finished or
+// its kickoff has passed; "unavailable" when the payload explicitly marks
+// it so. Started/unavailable selections must never be silently loaded into
+// a slip that then fails at placement — callers flag and exclude them.
+// ---------------------------------------------------------------------------
+
+const STARTED_STATES = new Set(["LIVE", "IN_PLAY", "INPLAY", "STARTED", "FINISHED", "FT", "ENDED"]);
+const UNAVAILABLE_STATES = new Set(["UNAVAILABLE", "REMOVED", "VOID", "VOIDED", "CANCELLED", "CANCELED", "SUSPENDED", "CLOSED"]);
+
+export interface SelectionState {
+  started: boolean;
+  unavailable: boolean;
+}
+
+export function selectionState(sel: Record<string, unknown>): SelectionState {
+  const status = String(sel.status ?? sel.matchStatus ?? sel.state ?? "").toUpperCase();
+  let started =
+    sel.live === true || sel.isLive === true || sel.started === true || STARTED_STATES.has(status);
+  if (!started) {
+    const ko = (sel.kickoffAt ?? sel.kickoff ?? sel.startTime ?? sel.startAt) as string | undefined;
+    if (ko) {
+      const t = Date.parse(String(ko));
+      if (!Number.isNaN(t) && t <= Date.now()) started = true;
+    }
+  }
+  const unavailable =
+    sel.available === false || sel.isAvailable === false || UNAVAILABLE_STATES.has(status);
+  return { started, unavailable };
 }
