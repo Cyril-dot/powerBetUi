@@ -204,15 +204,6 @@ const TICKER: [string, string, string][] = [
   ["Kofi B.", "GH₵ 21,600", "Correct Score"], ["Nana K.", "GH₵ 9,120", "vFootball"],
   ["Akosua T.", "GH₵ 5,480", "Plinko"], ["Kwabena O.", "GH₵ 17,205", "Premier League Multi"],
 ];
-const LEAGUE_CARDS: { key: string; img: string; country: string; name: string; sampleCount: number }[] = [
-  { key: "england.premier-league", img: "/playbet/league-epl.webp", country: "ENGLAND", name: "Premier League", sampleCount: 214 },
-  { key: "spain.la-liga", img: "/playbet/league-laliga.webp", country: "SPAIN", name: "LaLiga", sampleCount: 268 },
-  { key: "italy.serie-a", img: "/playbet/league-seriea.webp", country: "ITALY", name: "Serie A", sampleCount: 196 },
-  { key: "germany.bundesliga", img: "/playbet/league-bundesliga.webp", country: "GERMANY", name: "Bundesliga", sampleCount: 158 },
-  { key: "france.ligue-1", img: "/playbet/league-ligue1.webp", country: "FRANCE", name: "Ligue 1", sampleCount: 129 },
-  { key: "netherlands.eredivisie", img: "/playbet/league-eredivisie.webp", country: "NETHERLANDS", name: "Eredivisie", sampleCount: 136 },
-];
-
 /* ── odds button (same Pick contract as Sportsbook) ─────────────────── */
 function PbOdd({ match, sel, label, value, live, picks, onPick }: {
   match: EnrichedMatch; sel: "1" | "X" | "2"; label: string; value: number; live: boolean;
@@ -307,7 +298,7 @@ export default function PlayBetHome({ picks, onPick }: { picks: Pick[]; onPick: 
     return () => { active = false; window.clearInterval(poll); window.clearInterval(adminPoll); };
   }, []);
 
-  const { live, upcoming, leagueCounts } = useMemo(() => {
+  const { live, upcoming } = useMemo(() => {
     const feed = matches.filter((m) => !m.isAdmin && String(m.source ?? "").trim().toUpperCase() !== "ADMIN_CREATED");
     const cats: Record<"live" | "today" | "upcoming" | "ended", EnrichedMatch[]> = { live: [], today: [], upcoming: [], ended: [] };
     for (const m of feed) { const c = categorise(m); if (c) cats[c].push(m); }
@@ -323,11 +314,7 @@ export default function PlayBetHome({ picks, onPick }: { picks: Pick[]; onPick: 
       .sort((a, b) => (parseKickoff(a.kickoffAt).getTime() || 0) - (parseKickoff(b.kickoffAt).getTime() || 0))
       .slice(0, 8);
 
-    const counts: Record<string, number> = {};
-    for (const m of [...cats.live, ...cats.today, ...cats.upcoming]) {
-      if (m.competitionKey) counts[m.competitionKey] = (counts[m.competitionKey] ?? 0) + 1;
-    }
-    return { live: liveList, upcoming: up, leagueCounts: counts };
+    return { live: liveList, upcoming: up };
   }, [matches, adminMatches]);
 
   const podium = [WINNERS[1], WINNERS[0], WINNERS[2]];
@@ -385,31 +372,6 @@ export default function PlayBetHome({ picks, onPick }: { picks: Pick[]; onPick: 
               ))}
             </div>
           )}
-        </div>
-      </section>
-
-      {/* LEAGUES */}
-      <section className="pb-leagues" id="leagues">
-        <div className="pb-wrap">
-          <div className="pb-sec-head">
-            <div className="pb-grow"><p className="pb-kicker">Handpicked</p><h2 className="pb-sec-title">Top Leagues</h2></div>
-            <Link className="pb-sec-link" href="/sports">A–Z sports →</Link>
-          </div>
-          <div className="pb-league-rail">
-            {LEAGUE_CARDS.map((l) => (
-              <Link key={l.key} href="/sports" className="pb-league-card">
-                <img src={l.img} alt={l.name} loading="lazy" />
-                <div className="pb-lc-in">
-                  <span className="pb-lc-country">{l.country}</span>
-                  <h3 className="pb-lc-name">{l.name}</h3>
-                  <div className="pb-lc-meta">
-                    <span>{leagueCounts[l.key] ?? l.sampleCount} matches this week</span>
-                    <span className="pb-lc-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14m-6-6 6 6-6 6" /></svg></span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
         </div>
       </section>
 

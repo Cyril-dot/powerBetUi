@@ -77,9 +77,8 @@ function Header({ onMenu }: { onMenu: () => void }) {
         <div className="pb-hdr1-right">
           <button className="pb-hdr1-search" aria-label="Search" onClick={() => { window.location.href = "/search"; }}><Search size={19} /></button>
           {token ? <>
-            <Link href="/wallet" className="pb-bal-pill">Balance <b>{balance !== null ? `GHS ${balance.toLocaleString("en-GH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "GHS 0.00"}</b></Link>
-            <Link href="/deposit" className="pb-btn-signup-h">Deposit</Link>
-            <Link href="/account" className="pb-btn-login-h">My account</Link>
+            <Link href="/deposit" className="pb-bal-pill" aria-label="Wallet balance — tap to deposit"><span className="pb-bal-label">Balance</span> <b>{balance !== null ? `GHS ${balance.toLocaleString("en-GH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "GHS 0.00"}</b><span className="pb-bal-plus" aria-hidden="true"><Plus size={13} strokeWidth={3.2} /></span></Link>
+            <Link href="/account" className="pb-hdr1-account" aria-label="My account"><UserRound size={19} /></Link>
           </> : <>
             <Link href="/login" className="pb-btn-login-h">Login</Link>
             <Link href="/register" className="pb-btn-signup-h">Sign Up</Link>
