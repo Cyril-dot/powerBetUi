@@ -13,11 +13,24 @@
   -webkit-font-smoothing: antialiased;
 }
 /* Lists run full-bleed (owner: "the width should be 100%"): no side
-   borders, no rounded outer frame — the white ground goes edge to edge
-   and only the top/bottom hairlines separate the list from the page. */
-.sp-list { background: #fff; border-top: 1px solid #e3e3e3; border-bottom: 1px solid #e3e3e3; overflow: hidden; }
+   borders, no rounded outer frame — the list goes edge to edge.
+   The tab strip and group bands are list CHROME and stay contiguous
+   full-width bands at the top of the list; the matches themselves are
+   NOT part of that block — each one is its own card (see .sp-cards). */
+.sp-list { background: #fff; border-top: 1px solid #e3e3e3; overflow: hidden; }
 /* Rail slides are cards by design, so a slide's list keeps its frame. */
 .sp-slide .sp-list { border: 1px solid #e3e3e3; border-radius: 6px; }
+
+/* Individual match cards (owner: "they are not in card but side by
+   side" — the matches read as one flat continuous list): every fixture
+   sits in its OWN white card, stacked vertically in this container.
+   The container paints the page ground (#e6ecf3, darker than the white
+   cards) and spaces the cards 10px apart vertically, so the ground
+   shows as a clear gap between one card and the next — never two
+   matches merged into one block, never two side by side. Cards keep
+   the full-width win: no horizontal padding/margin, each card spans
+   100% edge to edge; separation is vertical gap + card border only. */
+.sp-list .sp-cards { display: flex; flex-direction: column; gap: 10px; padding: 10px 0; background: #e6ecf3; }
 .sp-list *, .sp-list .sp-match * { box-sizing: border-box; }
 .sp-list button, .sp-list .sp-match button { font-family: 'Roboto', Arial, sans-serif; }
 
@@ -29,7 +42,7 @@
 .sp-list .sp-tab.on::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: 0; height: 3px; background: #00a651; border-radius: 2px 2px 0 0; }
 
 /* date / group header */
-.sp-list .sp-ghead { display: flex; align-items: center; background: var(--sp-head); padding: 8px 12px; border-bottom: 1px solid #e3e3e3; }
+.sp-list .sp-ghead { display: flex; align-items: center; background: var(--sp-head); padding: 8px 12px; border-top: 1px solid #e3e3e3; border-bottom: 1px solid #e3e3e3; }
 .sp-list .sp-ghead .sp-dt { font-size: 13px; font-weight: 700; color: #333; display: inline-flex; align-items: center; min-width: 0; }
 .sp-list .sp-ghead .sp-cols { margin-left: auto; display: flex; flex: none; }
 .sp-list .sp-ghead .sp-cols span { width: 62px; text-align: center; font-size: 11px; color: #777; }
@@ -37,9 +50,13 @@
 .sp-list .sp-livedot { width: 7px; height: 7px; border-radius: 50%; background: #e02b20; display: inline-block; margin-right: 6px; flex: none; animation: sp-pl 1.6s infinite; }
 @keyframes sp-pl { 0%, 100% { box-shadow: 0 0 0 0 rgba(224, 43, 32, .45); } 55% { box-shadow: 0 0 0 5px rgba(224, 43, 32, 0); } }
 
-/* match card */
-.sp-list .sp-match { padding: 10px 12px 12px; border-bottom: 1px solid #e8e8e8; background: #fff; }
-.sp-list .sp-match:last-child { border-bottom: none; }
+/* match card — a distinct white surface per fixture: full border on
+   the exposed top/bottom edges (the card is full-width, so those are
+   the edges a reader sees) plus a soft shadow, standing off the
+   .sp-cards ground and the neighbouring cards. */
+.sp-list .sp-match { padding: 10px 12px 12px; border-top: 1px solid #c9d6e4; border-bottom: 1px solid #c9d6e4; background: #fff; box-shadow: 0 1px 4px rgba(5, 13, 36, .10); }
+/* Rail slide: the slide frame is the card — no second card inside it. */
+.sp-slide .sp-list .sp-match { border-top: none; border-bottom: none; box-shadow: none; }
 .sp-list .sp-meta { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: #777; white-space: nowrap; overflow: hidden; }
 .sp-list .sp-ribbon { display: inline-flex; align-items: center; gap: 3px; font-size: 9.5px; font-weight: 800; font-style: italic; color: #fff; padding: 2.5px 8px 2.5px 6px; transform: skewX(-12deg); border-radius: 2px; letter-spacing: .4px; flex: none; }
 .sp-list .sp-ribbon.sp-hot { background: linear-gradient(90deg, #f2491d, #ff7a1a); }

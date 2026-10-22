@@ -293,9 +293,11 @@ export default function PlayBetHome({ picks, onPick }: { picks: Pick[]; onPick: 
           <div className="sp-list">
             <SportyMarketTabs market={cardMarket} onChange={setCardMarket} />
             <SportyGroupHead label="Live · In-Play" live market={cardMarket} hasDraw />
-            {live.slice(0, 6).map((m) => (
-              <SportyMatchCard key={m.id} match={m} market={cardMarket} hasDraw picks={picks} onPick={onPick} />
-            ))}
+            <div className="sp-cards">
+              {live.slice(0, 6).map((m) => (
+                <SportyMatchCard key={m.id} match={m} market={cardMarket} hasDraw picks={picks} onPick={onPick} />
+              ))}
+            </div>
           </div>
         )}
       </section>
@@ -318,9 +320,11 @@ export default function PlayBetHome({ picks, onPick }: { picks: Pick[]; onPick: 
             {upcomingGroups.map(([day, ms]) => (
               <div key={day}>
                 <SportyGroupHead label={sportyDayLabel(ms[0].kickoffAt)} market={cardMarket} hasDraw />
-                {ms.map((m) => (
-                  <SportyMatchCard key={m.id} match={m} market={cardMarket} hasDraw picks={picks} onPick={onPick} />
-                ))}
+                <div className="sp-cards">
+                  {ms.map((m) => (
+                    <SportyMatchCard key={m.id} match={m} market={cardMarket} hasDraw picks={picks} onPick={onPick} />
+                  ))}
+                </div>
               </div>
             ))}
           </div>

@@ -177,7 +177,9 @@ function EndedMatchList({ list, hasDraw, picks, onPick }: { list: EnrichedMatch[
         {Array.from(byDay.entries()).map(([day, matches]) => (
           <div key={day}>
             <SportyGroupHead label={sportyDayLabel(matches[0].kickoffAt)} market="1X2" hasDraw={hasDraw} cols={false} />
-            {matches.map((m) => <MatchRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} ended />)}
+            <div className="sp-cards">
+              {matches.map((m) => <MatchRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} ended />)}
+            </div>
           </div>
         ))}
       </div>
@@ -322,9 +324,11 @@ function LiveMatchesSection({
             <div className="sp-list">
               <SportyMarketTabs market={market} onChange={onMarketChange} />
               <SportyGroupHead label="Live · In-Play" live market={market} hasDraw={hasDraw} />
-              {list.slice(0, visible).map((m) => (
-                <SportyMatchCard key={m.id} match={m} market={market} hasDraw={hasDraw} picks={picks} onPick={onPick} />
-              ))}
+              <div className="sp-cards">
+                {list.slice(0, visible).map((m) => (
+                  <SportyMatchCard key={m.id} match={m} market={market} hasDraw={hasDraw} picks={picks} onPick={onPick} />
+                ))}
+              </div>
             </div>
             {visible < list.length && (
               <button className="sb-load-more live-load-more" onClick={() => setVisible((v) => v + PAGE_SIZE)} type="button">
@@ -454,7 +458,9 @@ function PaginatedLeagueList({
         {Array.from(byDay.entries()).map(([day, matches]) => (
           <div key={day}>
             <SportyGroupHead label={sportyDayLabel(matches[0].kickoffAt)} market={market} hasDraw={hasDraw} />
-            {matches.map((m) => <MatchRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} market={market} />)}
+            <div className="sp-cards">
+              {matches.map((m) => <MatchRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} market={market} />)}
+            </div>
           </div>
         ))}
       </div>
