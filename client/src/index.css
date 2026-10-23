@@ -1782,9 +1782,9 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 
 /* /bets and /open-bets history workspace */
 .bc-page{min-height:70vh!important;background:#f7faff!important;color:#20242d!important;padding:0 0 44px!important}
-.bc-tabs{max-width:1180px!important;margin:0 auto!important;padding:18px 24px 0!important;background:#f7faff!important;gap:8px!important}
-.bc-tabs button{background:#fff!important;color:#71809a!important;border:1px solid #dfe7f3!important;border-radius:10px!important;box-shadow:none!important;transition:none!important}
-.bc-tabs button.active{background:#1e6bff!important;color:#fff!important;border-color:#1e6bff!important;box-shadow:none!important}
+.bc-tabs{max-width:1180px!important;margin:0 auto!important;padding:18px 24px 0!important;background:transparent!important;gap:8px!important}
+.bc-tabs button{background:transparent!important;color:#71809a!important;border:0!important;border-bottom:3px solid transparent!important;border-radius:0!important;box-shadow:none!important;transition:none!important}
+.bc-tabs button.active{background:transparent!important;color:#102a43!important;border-color:transparent!important;border-bottom:3px solid #00a651!important;box-shadow:none!important}
 .bc-toolbar{max-width:1180px!important;margin:16px auto 0!important;padding:12px 24px!important;background:#fff!important;border-top:1px solid #dfe7f3!important;border-bottom:1px solid #dfe7f3!important}
 .bh-filter{background:#f7faff!important;border-color:#cbd9ec!important;box-shadow:none!important}
 .bh-filter select{color:#20242d!important;background:transparent!important}
@@ -2479,9 +2479,9 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .header-wallet-group .header-balance{border:0!important;border-radius:0!important;background:transparent!important;padding:7px 9px!important;font-size:10px!important}
 .header-wallet-group .header-deposit{border:0!important;border-left:1px solid rgba(22,35,111,.18)!important;border-radius:0!important;box-shadow:none!important;padding:6px 9px!important;font-size:9px!important;gap:3px}
 .header-wallet-group .header-deposit span{font-size:9px!important}
-.bc-tabs{background:#fff!important;box-shadow:none!important;border:1px solid #dbe3ee!important}
+.bc-tabs{background:transparent!important;box-shadow:none!important;border:0!important;border-bottom:1px solid #dbe3ee!important}
 .bc-tabs button{box-shadow:none!important;text-shadow:none!important}
-.bc-tabs button.active{background:#1e6bff!important;box-shadow:none!important}
+.bc-tabs button.active{background:transparent!important;box-shadow:none!important}
 .bh-share{display:none!important}
 @media(max-width:820px){.header-inner{gap:8px!important}.header .brand img{width:166px!important;height:48px!important}.header-wallet-group{margin-left:auto}.header-actions{gap:6px!important}.header-wallet-group .header-balance{max-width:102px;overflow:hidden;text-overflow:ellipsis}.header-wallet-group .header-deposit{padding:6px 8px!important}}
 

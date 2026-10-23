@@ -1,9 +1,19 @@
-import { useMemo, useState } from "react";
-import { Flame, Search, Star, Trophy, X } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { ChevronRight, Flame, Search, Star, Trophy, X } from "lucide-react";
 import Sportsbook, { SPORT_TABS, type Pick } from "./Sportsbook";
 import type { SportKey } from "@/lib/sportsbook";
 import { useFavorites } from "@/lib/favorites";
 
+/**
+ * Sports page — 7up structure (owner, 2026-10-23): like the owner's 7UP
+ * BET sportsbook, the page is a search bar over an A–Z index — first the
+ * sports themselves (icon + name rows in one flat card, 7up's #azList),
+ * then the competitions A–Z with match counts as the league navigation
+ * (7up's sport page groups by league; here the index filters the board).
+ * The match lists below stay the settled SportyBet card system, and the
+ * page chrome is flat: no shadows, no gradient overlays (see the .spage
+ * block in sporty.css).
+ */
 export default function SportsPage({ picks, onPick }: { picks: Pick[]; onPick: (p: Pick) => void }) {
   const [sport, setSport] = useState<SportKey>("football");
   const [leagueFilter, setLeagueFilter] = useState<string | null>(null);
@@ -13,8 +23,17 @@ export default function SportsPage({ picks, onPick }: { picks: Pick[]; onPick: (
   const [query, setQuery] = useState("");
   const { favorites } = useFavorites();
   const favoriteMatches = favorites.filter((f) => f.kind === "match");
+  const boardRef = useRef<HTMLDivElement | null>(null);
 
   const activeTab = SPORT_TABS.find((t) => t.key === sport) ?? SPORT_TABS[0];
+
+  // 7up's A–Z list: sports in alphabetical order, live-filtered by the
+  // search bar exactly like 7up's sportSearch() filters its #azList rows.
+  const visibleSports = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const sorted = [...SPORT_TABS].sort((a, b) => a.label.localeCompare(b.label));
+    return q ? sorted.filter((t) => t.label.toLowerCase().includes(q)) : sorted;
+  }, [query]);
 
   const visibleLeagues = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -22,98 +41,130 @@ export default function SportsPage({ picks, onPick }: { picks: Pick[]; onPick: (
     return [...filtered].sort((a, b) => (leagueCounts[b] ?? 0) - (leagueCounts[a] ?? 0) || a.localeCompare(b));
   }, [leagues, leagueCounts, query]);
 
-  const changeSport = (s: SportKey) => { setSport(s); setLeagueFilter(null); setQuery(""); };
+  // One-page adaptation of 7up's tap-through: on phones the index sits
+  // above the board, so a tap also brings the board into view.
+  const scrollToBoard = () => {
+    if (window.innerWidth <= 960) boardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const changeSport = (s: SportKey) => { setSport(s); setLeagueFilter(null); setQuery(""); scrollToBoard(); };
+  const chooseLeague = (l: string | null) => { setLeagueFilter(l); scrollToBoard(); };
 
   return (
-    <main className="wrap sports-page-grid">
-      <aside className="side-nav panel sports-sidebar">
-        <div className="side-title"><Flame size={15} /> Sports</div>
-        <div className="sports-sport-list">
-          {SPORT_TABS.map((t) => {
-            const Icon = t.icon;
-            const isActive = sport === t.key;
-            return (
-              <button
-                key={t.key}
-                className={`sports-sidebar-item${isActive ? " active" : ""}`}
-                onClick={() => changeSport(t.key)}
-                type="button"
-              >
-                <span className="sports-sidebar-icon"><Icon size={14} /></span>
-                {t.label}
-                {isActive && counts.live > 0 && <i className="live-dot sports-sidebar-live" />}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="side-title spaced"><Star size={15} /> Competitions</div>
-        <div className="sports-comp-search">
-          <Search size={13} />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={`Search ${activeTab.label.toLowerCase()} competitions…`}
-            aria-label="Search competitions"
-          />
-          {query && (
-            <button type="button" onClick={() => setQuery("")} aria-label="Clear search"><X size={13} /></button>
-          )}
-        </div>
-
-        <div className="sports-comp-list">
-          <button
-            className={`sports-sidebar-item comp${leagueFilter === null ? " active" : ""}`}
-            onClick={() => setLeagueFilter(null)}
-            type="button"
-          >
-            <span>All competitions</span>
-            <b className="sports-comp-count">{counts.total}</b>
-          </button>
-          {leagues.length === 0 ? (
-            <p className="sports-sidebar-empty">No competitions loaded yet.</p>
-          ) : visibleLeagues.length === 0 ? (
-            <p className="sports-sidebar-empty">No competitions match "{query}".</p>
-          ) : (
-            visibleLeagues.map((l) => (
-              <button
-                key={l}
-                className={`sports-sidebar-item comp${leagueFilter === l ? " active" : ""}`}
-                onClick={() => setLeagueFilter(l)}
-                type="button"
-              >
-                <span>{l}</span>
-                <b className="sports-comp-count">{leagueCounts[l] ?? 0}</b>
-              </button>
-            ))
-          )}
-        </div>
-
-        {favoriteMatches.length > 0 && (
-          <>
-            <div className="side-title spaced"><Star size={15} /> Favorites</div>
-            <p className="sports-sidebar-empty" style={{ padding: "6px 16px 12px" }}>{favoriteMatches.length} favorite match{favoriteMatches.length === 1 ? "" : "es"} — view on the <a href="/favorites" style={{ color: "var(--gold-hi)", fontWeight: 800 }}>Favorites page</a>.</p>
-          </>
+    <main className="wrap spage">
+      <div className="spage-head">
+        <h1 className="spage-title">Sports</h1>
+        {counts.live > 0 && (
+          <span className="spage-live-chip"><i className="spage-livedot" aria-hidden="true" />{counts.live} live now</span>
         )}
-      </aside>
+      </div>
 
-      <div className="main-column">
-        {leagueFilter && (
-          <div className="sports-filter-chip">
-            <Trophy size={13} />
-            Filtering by <b>{leagueFilter}</b>
-            <button type="button" onClick={() => setLeagueFilter(null)} aria-label="Clear competition filter"><X size={13} /></button>
-          </div>
-        )}
-
-        <Sportsbook
-          picks={picks}
-          onPick={onPick}
-          sport={sport}
-          onSportChange={changeSport}
-          leagueFilter={leagueFilter}
-          onMeta={({ leagues: l, leagueCounts: lc, counts: c }) => { setLeagues(l); setLeagueCounts(lc); setCounts(c); }}
+      {/* 7up: the search bar sits at the very top of the sports page and
+          filters the A–Z index as you type. */}
+      <div className="spage-search">
+        <Search size={16} aria-hidden="true" />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search sports, leagues…"
+          aria-label="Search sports and leagues"
         />
+        {query && (
+          <button type="button" onClick={() => setQuery("")} aria-label="Clear search"><X size={15} /></button>
+        )}
+      </div>
+
+      <div className="sports-page-grid">
+        <aside className="spage-rail">
+          {/* A–Z sports index (7up #azList): one flat card, icon + name
+              rows. Per-sport match counts aren't loaded for unselected
+              sports, so rows carry no invented numbers — the live dot
+              shows on the active sport only, as before. */}
+          <section className="spage-card" aria-label="All sports A to Z">
+            <div className="spage-card-head"><Flame size={14} /> All Sports <span className="spage-card-head-note">A–Z</span></div>
+            <div className="spage-az-list">
+              {visibleSports.length === 0 ? (
+                <p className="spage-empty">No sports match "{query}".</p>
+              ) : visibleSports.map((t) => {
+                const Icon = t.icon;
+                const isActive = sport === t.key;
+                return (
+                  <button
+                    key={t.key}
+                    type="button"
+                    className={`spage-az-row${isActive ? " on" : ""}`}
+                    onClick={() => changeSport(t.key)}
+                    aria-current={isActive ? "true" : undefined}
+                  >
+                    <span className="spage-az-icon" style={{ background: `${t.swatch}1a`, color: t.swatch }}><Icon size={15} /></span>
+                    <span className="spage-az-label">{t.label}</span>
+                    {isActive && counts.live > 0 && <i className="spage-livedot" aria-hidden="true" />}
+                    <ChevronRight size={15} className="spage-az-chev" aria-hidden="true" />
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Competitions A–Z: the league navigation layer (7up groups
+              its sport page by league; here a tap filters the board). */}
+          <section className="spage-card" aria-label="Competitions">
+            <div className="spage-card-head"><Trophy size={14} /> Competitions <span className="spage-card-head-note">{activeTab.label}</span></div>
+            <div className="spage-comp-list">
+              <button
+                type="button"
+                className={`spage-comp-row${leagueFilter === null ? " on" : ""}`}
+                onClick={() => chooseLeague(null)}
+              >
+                <span className="spage-comp-label">All competitions</span>
+                <b className="spage-comp-count">{counts.total}</b>
+              </button>
+              {leagues.length === 0 ? (
+                <p className="spage-empty">No competitions loaded yet.</p>
+              ) : visibleLeagues.length === 0 ? (
+                <p className="spage-empty">No competitions match "{query}".</p>
+              ) : (
+                visibleLeagues.map((l) => (
+                  <button
+                    key={l}
+                    type="button"
+                    className={`spage-comp-row${leagueFilter === l ? " on" : ""}`}
+                    onClick={() => chooseLeague(l)}
+                  >
+                    <span className="spage-comp-label">{l}</span>
+                    <b className="spage-comp-count">{leagueCounts[l] ?? 0}</b>
+                  </button>
+                ))
+              )}
+            </div>
+          </section>
+
+          {favoriteMatches.length > 0 && (
+            <section className="spage-card" aria-label="Favorites">
+              <div className="spage-card-head"><Star size={14} /> Favorites</div>
+              <p className="spage-empty" style={{ padding: "10px 14px 12px" }}>{favoriteMatches.length} favorite match{favoriteMatches.length === 1 ? "" : "es"} — view on the <a href="/favorites" style={{ color: "var(--gold-hi)", fontWeight: 800 }}>Favorites page</a>.</p>
+            </section>
+          )}
+        </aside>
+
+        <div className="main-column" ref={boardRef}>
+          {leagueFilter && (
+            <div className="sports-filter-chip">
+              <Trophy size={13} />
+              Filtering by <b>{leagueFilter}</b>
+              <button type="button" onClick={() => setLeagueFilter(null)} aria-label="Clear competition filter"><X size={13} /></button>
+            </div>
+          )}
+
+          <Sportsbook
+            picks={picks}
+            onPick={onPick}
+            sport={sport}
+            onSportChange={changeSport}
+            leagueFilter={leagueFilter}
+            onMeta={({ leagues: l, leagueCounts: lc, counts: c }) => { setLeagues(l); setLeagueCounts(lc); setCounts(c); }}
+          />
+        </div>
       </div>
     </main>
   );

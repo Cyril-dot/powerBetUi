@@ -1,10 +1,13 @@
 import { Link, useLocation } from "wouter";
 
 // Option 1 "SportyBet mirror" bottom nav (owner pick, 2026-10-22): white bar,
-// five items — Home · Sports · Betslip · My Bets · Account — clean line icons,
-// active tab in SportyBet green (#00A651). The Betslip item is deliberately
-// static (owner spec update, 2026-10-23): NO selection-count badge here —
-// the count lives only on the floating icon. Icons are the exact stroke
+// clean line icons, active tab in SportyBet green (#00A651). Four items since
+// 2026-10-23 (owner): Betslip and My Bets were merged into ONE "Bets" item
+// pointing at /bets — both old items landed on the bets pages anyway. The
+// current slip itself stays reachable from the Account menu and from the
+// booking-code flow's landing on /betslip (the floating icon's flow is
+// unchanged). There is deliberately NO selection-count badge here — the
+// count lives only on the floating icon. Icons are the exact stroke
 // paths from the approved sample (~/workspace/.pb-verify/navsamples/nav1-sporty.html).
 
 function NavSvg({ children }: { children: React.ReactNode }) {
@@ -39,14 +42,7 @@ const SportsIcon = () => (
   </NavSvg>
 );
 
-const BetslipIcon = () => (
-  <NavSvg>
-    <path d="M4 8a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2a2 2 0 000-4z" />
-    <path d="M13 7v2M13 11v2M13 15v2" />
-  </NavSvg>
-);
-
-const MyBetsIcon = () => (
+const BetsIcon = () => (
   <NavSvg>
     <path d="M6 3h12v18l-3-2.2L12 21l-3-2.2L6 21z" />
     <path d="M9 8h6M9 12h6" />
@@ -65,8 +61,7 @@ export default function MobileBottomNav() {
   const items = [
     { key: "home", href: "/", label: "Home", Icon: HomeIcon, match: (l: string) => l === "/" },
     { key: "sports", href: "/sports", label: "Sports", Icon: SportsIcon, match: (l: string) => l === "/sports" || l === "/live" },
-    { key: "betslip", href: "/betslip", label: "Betslip", Icon: BetslipIcon, match: (l: string) => l === "/betslip" },
-    { key: "mybets", href: "/bets", label: "My Bets", Icon: MyBetsIcon, match: (l: string) => l === "/bets" || l === "/open-bets" || l.startsWith("/bets/") },
+    { key: "bets", href: "/bets", label: "Bets", Icon: BetsIcon, match: (l: string) => l === "/bets" || l === "/open-bets" || l.startsWith("/bets/") || l === "/betslip" },
     { key: "account", href: "/account", label: "Account", Icon: AccountIcon, match: (l: string) => l === "/account" || l === "/profile" },
   ];
   return (

@@ -385,15 +385,18 @@ function BetsCenterStyles() {
     <style>{`
       .bc-page{ background:#0A0A0A; min-height:70vh; padding-bottom:40px; }
 
+      /* Flat tabs (owner, 2026-10-23): the filled/pill background behind
+         the tab row and the active tab is removed — labels only, the
+         active tab marked by colour + a SportyBet-green underline. */
       .bc-tabs{
-        display:flex; gap:4px; background:#1a1c22; border-radius:14px; overflow:hidden;
-        margin:35px 16px 0; padding:4px;
+        display:flex; gap:4px; background:transparent; border-bottom:1px solid rgba(255,255,255,.14);
+        margin:35px 16px 0; padding:0;
       }
       .bc-tabs button{
-        flex:1; padding:12px 8px; font-size:.8rem; font-weight:800; color:rgba(255,255,255,.55); cursor:pointer;
-        border-radius:10px; transition:background .15s ease, color .15s ease;
+        flex:1; padding:12px 8px; font-family:'Roboto',Arial,sans-serif; font-size:.8rem; font-weight:800; color:rgba(255,255,255,.55); cursor:pointer;
+        background:transparent; border-bottom:3px solid transparent; border-radius:0; transition:color .15s ease, border-color .15s ease;
       }
-      .bc-tabs button.active{ background:#141414; color:#F4F1F0; box-shadow:0 4px 12px rgba(0,0,0,.18); }
+      .bc-tabs button.active{ background:transparent; color:#F4F1F0; box-shadow:none; border-bottom-color:#00A651; }
 
       .bc-toolbar{ display:flex; align-items:center; gap:8px; padding:12px 12px; flex-wrap:wrap; background:#141414; border-bottom:1px solid var(--line); }
       .bh-filter{ display:flex; align-items:center; gap:6px; padding:8px 12px; border-radius:999px; border:1px solid var(--line); background:#141414; }
@@ -519,9 +522,9 @@ function BetsCenterStyles() {
 
       /* History refresh: a richer visual treatment than the old flat white cards. */
       .bc-page{ max-width:1120px; margin:0 auto; padding:22px 16px 54px; }
-      .bc-tabs{ background:linear-gradient(135deg,#10241e,#152c3a); border:1px solid rgba(104,221,151,.25); box-shadow:0 12px 28px rgba(10,31,28,.16); }
+      .bc-tabs{ background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,.14); box-shadow:none; }
       .bc-tabs button{ color:#9bb3ae; }
-      .bc-tabs button.active{ color:#fff; background:linear-gradient(135deg,#2d9c5a,#176e49); box-shadow:0 5px 14px rgba(45,156,90,.3); }
+      .bc-tabs button.active{ color:#fff; background:transparent; box-shadow:none; border-bottom-color:#00A651; }
       .bc-toolbar{ background:#f5f8f7; border:1px solid #dfe9e4; border-radius:14px; margin:14px 10px 4px; padding:10px; }
       .bh-filter{ background:#fff; border-color:#d8e5df; color:#34564a; }
       .bh-filter select{ color:#34564a; }

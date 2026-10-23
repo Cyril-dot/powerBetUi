@@ -212,3 +212,72 @@
 .match-details-page .md-hc-row.sel .md-hc-team em { color: rgba(255,255,255,.8) !important; }
 .match-details-page .md-hc-row.sel b { color: #fff !important; }
 .match-details-page .md-hc-row.display-only { cursor: default !important; opacity: 1 !important; }
+
+/* ── Sports + Live pages: 7up structure, FLAT (owner, 2026-10-23) ────────
+   The sports page follows the owner's 7UP BET sportsbook structure:
+   a search bar at the very top, then an A–Z index — sports first
+   (7up's #azList: icon + name rows in one card), then the competitions
+   A–Z with counts as the league navigation — with the match board
+   below/beside it. The live page's header is 7up's #/live tab bar: a
+   "LIVE" title separated from the sport switcher tabs.
+   FLATTENING, scoped to these pages only: no box-shadows on buttons,
+   cards or controls, no gradient overlays or glass effects on
+   interactive elements — flat surfaces with borders. Shared classes
+   (.panel, .gold-button) are overridden only inside .spage .sb-wrap,
+   so the betslip and every other page keep their styling. */
+.spage { font-family: 'Roboto', Arial, sans-serif; padding-top: 14px; padding-bottom: 56px; }
+.spage .sports-page-grid { padding-top: 16px; }
+.spage-head { display: flex; align-items: center; gap: 10px; }
+.spage-title { font-size: 24px; font-weight: 800; color: #1d1d1d; letter-spacing: -.01em; }
+.spage-live-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 800; color: #0b7a43; background: #e1f3e7; border: 1px solid #d5eddd; padding: 4px 9px; border-radius: 999px; }
+.spage-livedot { width: 7px; height: 7px; border-radius: 50%; background: #e02b20; display: inline-block; flex: none; }
+
+/* search bar — 7up puts it at the very top, filtering the A–Z index */
+.spage-search { display: flex; align-items: center; gap: 8px; margin-top: 12px; background: #fff; border: 1px solid #d9dee3; border-radius: 8px; padding: 11px 12px; color: #8a8a8a; }
+.spage-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font-family: 'Roboto', Arial, sans-serif; font-size: 14px; font-weight: 500; color: #1d1d1d; }
+.spage-search input::placeholder { color: #9aa0a8; }
+.spage-search button { flex: none; display: grid; place-items: center; background: none; border: none; color: #8a8a8a; cursor: pointer; padding: 2px; }
+.spage-search:focus-within { border-color: #00a651; }
+
+/* A–Z index cards (sports + competitions) */
+.spage-rail { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+@media (min-width: 961px) { .spage-rail { position: sticky; top: 132px; } }
+.spage-card { background: #fff; border: 1px solid #e3e3e3; border-radius: 8px; overflow: hidden; }
+.spage-card-head { display: flex; align-items: center; gap: 7px; padding: 11px 14px; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #333; background: #f1f1f1; border-bottom: 1px solid #e3e3e3; }
+.spage-card-head-note { margin-left: auto; font-size: 11px; font-weight: 700; letter-spacing: 0; text-transform: none; color: #8a8a8a; }
+.spage-az-list, .spage-comp-list { display: flex; flex-direction: column; }
+@media (min-width: 961px) { .spage-comp-list { max-height: 342px; overflow-y: auto; } }
+.spage-az-row, .spage-comp-row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 14px; background: #fff; border: none; border-bottom: 1px solid #eee; font-family: 'Roboto', Arial, sans-serif; font-size: 14px; font-weight: 500; color: #26332b; text-align: left; cursor: pointer; }
+.spage-az-row:last-child, .spage-comp-row:last-child { border-bottom: none; }
+.spage-az-row:hover, .spage-comp-row:hover { background: #f6faf7; }
+.spage-az-row.on, .spage-comp-row.on { background: #e1f3e7; color: #0b7a43; font-weight: 700; }
+.spage-az-icon { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 7px; }
+.spage-az-label, .spage-comp-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.spage-az-chev { flex: none; color: #c3cbd2; }
+.spage-az-row.on .spage-az-chev { color: #0b7a43; }
+.spage-az-row .spage-livedot { margin-left: auto; }
+.spage-az-row .spage-livedot + .spage-az-chev { margin-left: 0; }
+.spage-comp-count { flex: none; min-width: 22px; padding: 2px 7px; border-radius: 999px; background: #f1f1f1; color: #666; font-size: 10.5px; font-weight: 800; text-align: center; }
+.spage-comp-row.on .spage-comp-count { background: #00a651; color: #fff; }
+.spage-empty { padding: 12px 14px; color: #8a8a8a; font-size: 12.5px; }
+
+/* league filter chip — flat SportyBet tint within this scope */
+.spage .sports-filter-chip { background: #e1f3e7; border: 1px solid #d5eddd; color: #0b7a43; box-shadow: none; }
+.spage .sports-filter-chip b { color: #14532d; }
+.spage .sports-filter-chip button { color: #0b7a43; }
+
+/* live tab bar — 7up #/live: LIVE title + sport switcher tabs */
+.spage-livetabs { display: flex; align-items: center; gap: 2px; overflow-x: auto; scrollbar-width: none; background: #fff; border: 1px solid #e3e3e3; border-radius: 8px; padding: 0 6px; }
+.spage-livetabs::-webkit-scrollbar { display: none; }
+.spage-live-title { display: inline-flex; align-items: center; gap: 7px; font-size: 15px; font-weight: 800; color: #1d1d1d; padding: 12px 12px 12px 8px; margin-right: 6px; border-right: 1px solid #e3e3e3; flex: none; }
+.spage-stab { position: relative; flex: none; padding: 13px 9px 11px; background: none; border: none; box-shadow: none; font-family: 'Roboto', Arial, sans-serif; font-size: 13px; font-weight: 600; color: #555; cursor: pointer; white-space: nowrap; }
+.spage-stab.on { color: #0b7a43; font-weight: 800; }
+.spage-stab.on::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: 0; height: 3px; background: #00a651; border-radius: 2px 2px 0 0; }
+.spage-live .sb-wrap { margin-top: 14px; }
+
+/* flattening, sports/live scope only (see block comment above) */
+.spage .sb-wrap .panel { box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+.spage .sb-wrap .panel::before, .spage .sb-wrap .panel:before { display: none !important; }
+.spage .sb-wrap button, .spage .sb-wrap .t10-chip, .spage .sb-wrap .sb-odd { box-shadow: none !important; }
+.spage .sb-wrap .t10-chip.active { background: #ffc531 !important; }
+.spage .sb-wrap .sb-odd.sel { background: #1e6bff !important; box-shadow: none !important; }
