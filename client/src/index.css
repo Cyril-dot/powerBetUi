@@ -1781,39 +1781,39 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 }
 
 /* /bets and /open-bets history workspace */
-.bc-page{min-height:70vh!important;background:#f7faff!important;color:#20242d!important;padding:0 0 44px!important}
+.bc-page{min-height:70vh!important;background:#f5f6f7!important;color:#20242d!important;padding:0 0 44px!important}
 .bc-tabs{max-width:1180px!important;margin:0 auto!important;padding:18px 24px 0!important;background:transparent!important;gap:8px!important}
 .bc-tabs button{background:transparent!important;color:#71809a!important;border:0!important;border-bottom:3px solid transparent!important;border-radius:0!important;box-shadow:none!important;transition:none!important}
 .bc-tabs button.active{background:transparent!important;color:#102a43!important;border-color:transparent!important;border-bottom:3px solid #00a651!important;box-shadow:none!important}
-.bc-toolbar{max-width:1180px!important;margin:16px auto 0!important;padding:12px 24px!important;background:#fff!important;border-top:1px solid #dfe7f3!important;border-bottom:1px solid #dfe7f3!important}
-.bh-filter{background:#f7faff!important;border-color:#cbd9ec!important;box-shadow:none!important}
+.bc-toolbar{max-width:1180px!important;margin:16px auto 0!important;padding:12px 24px!important;background:#fff!important;border-top:1px solid #e3e3ef!important;border-bottom:1px solid #e3e3ef!important}
+.bh-filter{background:#f5f6f7!important;border-color:#dfe3ea!important;box-shadow:none!important}
 .bh-filter select{color:#20242d!important;background:transparent!important}
-.bc-icon-btn{background:#fff!important;color:#1246a8!important;border:1px solid #cbd9ec!important;box-shadow:none!important}
-.bc-auto-banner{background:#eaf2ff!important;color:#1246a8!important;border:1px solid #cbd9ec!important;box-shadow:none!important}
-.bc-chip{background:#fff!important;color:#68768b!important;border:1px solid #cbd9ec!important;box-shadow:none!important}
-.bc-chip.active{background:#1e6bff!important;color:#fff!important;border-color:#1e6bff!important}
-.bc-body{max-width:1180px!important;margin:0 auto!important;background:#fff!important;border-left:1px solid #dfe7f3!important;border-right:1px solid #dfe7f3!important}
+.bc-icon-btn{background:#fff!important;color:#0b7a43!important;border:1px solid #dfe3ea!important;box-shadow:none!important}
+.bc-auto-banner{background:#e1f3e7!important;color:#0b7a43!important;border:1px solid #bfe3cd!important;box-shadow:none!important}
+.bc-chip{background:#fff!important;color:#68768b!important;border:1px solid #dfe3ea!important;box-shadow:none!important}
+.bc-chip.active{background:#00a651!important;color:#fff!important;border-color:#00a651!important}
+.bc-body{max-width:1180px!important;margin:0 auto!important;background:#fff!important;border-left:1px solid #e3e3ef!important;border-right:1px solid #e3e3ef!important}
 .bc-pad,.ob-empty{color:#71809a!important;background:#fff!important}
-.ob-empty svg{color:#1e6bff!important}
+.ob-empty svg{color:#00a651!important}
 .ob-empty h3{color:#20242d!important}
 .bc-days,.bc-flat-list{padding:22px 24px 0!important}
 .bh-day-label{color:#71809a!important}
-.bh-day-label b{color:#1246a8!important}
-.bh-card{background:#fff!important;border:1px solid #dfe7f3!important;box-shadow:none!important;transition:none!important}
+.bh-day-label b{color:#102a43!important}
+.bh-card{background:#fff!important;border:1px solid #e3e3ef!important;box-shadow:none!important;transition:none!important}
 .bh-card:hover{transform:none!important;box-shadow:none!important}
-.bh-card-head,.bh-card-head.bh-open-head{background:#eaf2ff!important;color:#1246a8!important;border-bottom:1px solid #cbd9ec!important}
+.bh-card-head,.bh-card-head.bh-open-head{background:#f1f1f1!important;color:#102a43!important;border-bottom:1px solid #e3e3ef!important}
 .bh-card-top .bh-type,.bh-type{color:#20242d!important}
 .bh-type em,.bh-totals span,.bh-more,.bh-card-foot small,.bh-leg-info small{color:#71809a!important}
-.bh-totals{border-color:#dfe7f3!important}
+.bh-totals{border-color:#e3e3ef!important}
 .bh-totals b,.bh-match,.bh-leg-info b{color:#20242d!important}
-.bh-card-foot{border-color:#dfe7f3!important;color:#1246a8!important}
-.bh-dot{background:#1e6bff!important}
-.bh-pill.bh-pending{background:#dbeafe!important;color:#1246a8!important}
+.bh-card-foot{border-color:#e3e3ef!important;color:#0b7a43!important}
+.bh-dot{background:#00a651!important}
+.bh-pill.bh-pending{background:#fdf3e0!important;color:#8a6100!important}
 .bh-pill.bh-won,.bh-pill.bh-cashed{background:#e4f7ed!important;color:#16854b!important}
 .bh-pill.bh-lost,.bh-pill.bh-void{background:#eef2f7!important;color:#52647d!important}
-.bh-share,.bh-toggle-details{color:#1246a8!important}
-.bh-leg-check{background:#1e6bff!important}
-.bh-cashout-btn{background:#eef4fc!important;color:#71809a!important;border:1px solid #cbd9ec!important}
+.bh-share,.bh-toggle-details{color:#0b7a43!important}
+.bh-leg-check{background:#00a651!important}
+.bh-cashout-btn{background:#00a651!important;color:#fff!important;border:1px solid #00a651!important;box-shadow:none!important}
 
 /* Consistent page structure for Booking Code and Betslip */
 .simple-page,.betslip-page{background:#f7faff!important}
@@ -2467,9 +2467,9 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .header-deposit{display:inline-flex;align-items:center;gap:4px;padding:7px 10px;border-radius:999px;background:#ffd84d;color:#16236f!important;border:1px solid #ffe993;font-size:11px;font-weight:900;text-decoration:none;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.14)}
 .header-deposit:hover{background:#ffe57c;transform:translateY(-1px)}
 @media(max-width:820px){.header .wrap{padding-left:12px;padding-right:12px}.header-inner{gap:8px!important}.header-actions{gap:6px!important}.header-actions .icon-button{display:none}.header-actions .login-link{display:none}.header-deposit{padding:7px 9px}.header-balance{max-width:128px;overflow:hidden;text-overflow:ellipsis}}
-.bh-cashout-btn{background:linear-gradient(135deg,#11a957,#07914b)!important;color:#fff!important;border:1px solid rgba(255,255,255,.22)!important;cursor:pointer!important;box-shadow:0 5px 14px rgba(11,155,79,.22)!important;transition:transform .16s ease,filter .16s ease!important}
-.bh-cashout-btn:hover{filter:brightness(1.08)!important;transform:translateY(-1px)}
-@media(max-width:560px){.bc-page{padding:10px 12px 80px!important}.bh-card{border-radius:14px!important;box-shadow:0 5px 16px rgba(15,23,42,.08)!important}.bh-card-head{padding:13px 14px!important}.bh-card-body{padding:12px 14px 14px!important}.bh-open-team-row{min-height:32px!important;font-size:12px!important}.bh-open-leg-head>b{font-size:11px!important}.bh-open-totals{padding-top:10px!important;margin-top:10px!important}.bh-open-totals b{font-size:13px!important}.bh-cashout-btn{padding:12px!important;border-radius:9px!important}}
+.bh-cashout-btn{background:#00a651!important;color:#fff!important;border:1px solid #00a651!important;cursor:pointer!important;box-shadow:none!important;transition:none!important}
+.bh-cashout-btn:hover{background:#0b7a43!important}
+@media(max-width:560px){.bc-page{padding:10px 12px 80px!important}.bh-card{border-radius:14px!important;box-shadow:none!important}.bh-card-head{padding:13px 14px!important}.bh-card-body{padding:12px 14px 14px!important}.bh-open-team-row{min-height:32px!important;font-size:12px!important}.bh-open-leg-head>b{font-size:11px!important}.bh-open-totals{padding-top:10px!important;margin-top:10px!important}.bh-open-totals b{font-size:13px!important}.bh-cashout-btn{padding:12px!important;border-radius:9px!important}}
 
 /* Final header and My Bets polish. */
 .header-inner{padding-left:12px!important;padding-right:12px!important;gap:18px!important}

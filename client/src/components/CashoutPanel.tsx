@@ -68,17 +68,17 @@ export default function CashoutPanel({ bet, onDone, onClose }: {
         .co-offer strong{ font-size:1.25rem; color:#22c55e; }
         .co-toggle{ display:flex; border:1px solid rgba(255,255,255,.14); border-radius:8px; overflow:hidden; }
         .co-toggle button{ background:none; border:none; color:#9aa3b2; font-size:.72rem; font-weight:700; padding:7px 12px; cursor:pointer; }
-        .co-toggle button.on{ background:#1e6bff; color:#fff; }
+        .co-toggle button.on{ background:#00A651; color:#fff; }
         .co-slider{ display:flex; align-items:center; gap:10px; margin:10px 0; }
-        .co-slider input{ flex:1; accent-color:#1e6bff; }
+        .co-slider input{ flex:1; accent-color:#00A651; }
         .co-slider b{ font-size:.8rem; min-width:38px; text-align:right; }
-        .co-confirm{ width:100%; padding:12px; border:none; border-radius:10px; background:#16a34a; color:#fff; font-size:.85rem; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
+        .co-confirm{ width:100%; padding:12px; border:none; border-radius:10px; background:#00A651; color:#fff; font-size:.85rem; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
         .co-confirm:disabled{ opacity:.55; cursor:not-allowed; }
         .co-error{ color:#f87171; font-size:.72rem; margin:8px 0 0; }
         .co-done{ text-align:center; padding:8px 0; }
         .co-done strong{ display:block; font-size:1.3rem; color:#22c55e; margin:6px 0; }
         .co-done p{ color:#9aa3b2; font-size:.75rem; margin:0 0 10px; }
-        .co-done button{ padding:10px 22px; border:none; border-radius:10px; background:#1e6bff; color:#fff; font-weight:800; font-size:.8rem; cursor:pointer; }
+        .co-done button{ padding:10px 22px; border:none; border-radius:10px; background:#00A651; color:#fff; font-weight:800; font-size:.8rem; cursor:pointer; }
         .op-spin{ animation:opspin 1s linear infinite; }
         @keyframes opspin{ to{ transform:rotate(360deg); } }
       `}</style>

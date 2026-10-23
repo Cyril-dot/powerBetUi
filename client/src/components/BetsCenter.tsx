@@ -441,8 +441,8 @@ function BetsCenterStyles() {
 	      .bh-type{ font-size:.8rem; font-weight:800; color:#F4F1F0; }
 	      .bh-type em{ font-style:normal; font-weight:600; color:#a8a8a8; font-size:.72rem; }
 	      .bh-card-actions{ display:flex; align-items:center; justify-content:flex-end; gap:6px; min-width:0; }
-	      .bh-ticket-link{ display:inline-flex; align-items:center; gap:2px; padding:5px 7px; border:1px solid #cbd9ec; border-radius:7px; background:#fff; color:#1246a8; font-size:.62rem; font-weight:900; white-space:nowrap; cursor:pointer; }
-	      .bh-ticket-link:hover{ background:#eef5ff; border-color:#8bb5f4; }
+	      .bh-ticket-link{ display:inline-flex; align-items:center; gap:2px; padding:5px 7px; border:1px solid #dfe3ea; border-radius:7px; background:#fff; color:#0B7A43; font-size:.62rem; font-weight:900; white-space:nowrap; cursor:pointer; }
+	      .bh-ticket-link:hover{ background:#e1f3e7; border-color:#bfe3cd; }
       .bh-pill{
         display:flex; align-items:center; gap:4px; padding:5px 11px; border-radius:999px; font-size:.66rem;
         font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:#fff; background:#9a9a9a; flex-shrink:0;
@@ -501,7 +501,7 @@ function BetsCenterStyles() {
       .bh-leg-info .bh-open-kickoff{ margin-top:4px; color:#c9962c; font-size:.68rem; font-weight:800; letter-spacing:.01em; }
       .bh-leg-teams{ margin-top:1px; }
       .bh-toggle-details{ color:var(--nature); font-size:.72rem; font-weight:800; cursor:pointer; }
-      .bh-cashout-btn{ width:100%; padding:13px; border:none; border-radius:10px; background:#1e6bff; color:#fff; font-size:.8rem; font-weight:800; cursor:pointer; }
+      .bh-cashout-btn{ width:100%; padding:13px; border:none; border-radius:10px; background:#00A651; color:#fff; font-size:.8rem; font-weight:800; cursor:pointer; }
 
       .bc-placement-success{ display:flex; align-items:center; gap:11px; margin:14px 10px 0; padding:13px 14px; border:1px solid #8ed9ad; border-radius:14px; background:linear-gradient(135deg,#eafff1,#f5fff8); color:#174b32; box-shadow:0 8px 22px rgba(26,130,75,.12); }
       .bc-placement-success .bc-success-icon{ width:32px; height:32px; border-radius:50%; display:grid; place-items:center; flex-shrink:0; color:#fff; background:linear-gradient(135deg,#1eaf61,#087b43); }
