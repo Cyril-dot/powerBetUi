@@ -3590,3 +3590,7 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .casino-hero img{display:none!important}
 .casino-hero .hero-shapes{display:none!important}
 .casino-hero:before,.casino-hero:after{display:none!important}
+.simple-card svg{color:#0B7A43!important}
+.activity-icon svg{color:#0B7A43!important}
+.bp-empty svg{color:#0B7A43!important}
+.bp-page a{color:#0B7A43}
