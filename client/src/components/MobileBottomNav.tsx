@@ -2,9 +2,10 @@ import { Link, useLocation } from "wouter";
 
 // Option 1 "SportyBet mirror" bottom nav (owner pick, 2026-10-22): white bar,
 // five items — Home · Sports · Betslip · My Bets · Account — clean line icons,
-// active tab in SportyBet green (#00A651), and the betslip item carries the
-// live selection-count badge. Icons are the exact stroke paths from the
-// approved sample (~/workspace/.pb-verify/navsamples/nav1-sporty.html).
+// active tab in SportyBet green (#00A651). The Betslip item is deliberately
+// static (owner spec update, 2026-10-23): NO selection-count badge here —
+// the count lives only on the floating icon. Icons are the exact stroke
+// paths from the approved sample (~/workspace/.pb-verify/navsamples/nav1-sporty.html).
 
 function NavSvg({ children }: { children: React.ReactNode }) {
   return (
@@ -59,7 +60,7 @@ const AccountIcon = () => (
   </NavSvg>
 );
 
-export default function MobileBottomNav({ count = 0 }: { count?: number }) {
+export default function MobileBottomNav() {
   const [location] = useLocation();
   const items = [
     { key: "home", href: "/", label: "Home", Icon: HomeIcon, match: (l: string) => l === "/" },
@@ -81,11 +82,6 @@ export default function MobileBottomNav({ count = 0 }: { count?: number }) {
           >
             <span className="mbn-icon-wrap">
               <item.Icon />
-              {item.key === "betslip" && count > 0 && (
-                <span className="mbn-count" aria-label={`${count} selection${count === 1 ? "" : "s"} in betslip`}>
-                  {count > 99 ? "99+" : count}
-                </span>
-              )}
             </span>
             <span className="mbn-label">{item.label}</span>
           </Link>
