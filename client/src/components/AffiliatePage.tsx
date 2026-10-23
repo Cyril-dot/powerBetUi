@@ -85,7 +85,7 @@ export default function AffiliatePage() {
 
   if (!signedIn) {
     return <main className="wrap aff-page">
-      <div className="aff-head"><span className="eyebrow">Grow with Super Bet</span><h1>Affiliate centre</h1></div>
+      <div className="aff-head"><span className="eyebrow">Grow with PlayBet</span><h1>Affiliate centre</h1></div>
       <section className="panel simple-card">
         <Users size={30} />
         <h3>Sign in to get your referral link</h3>
@@ -97,7 +97,7 @@ export default function AffiliatePage() {
 
   return <main className="wrap aff-page">
     <div className="aff-head">
-      <div><span className="eyebrow">Grow with Super Bet</span><h1>Affiliate centre</h1></div>
+      <div><span className="eyebrow">Grow with PlayBet</span><h1>Affiliate centre</h1></div>
       <button className="ghost-button" onClick={load} disabled={loading}><RefreshCw size={14} className={loading ? "adm-spin" : ""} /> Refresh</button>
     </div>
     {error && <small className="auth-notice" role="alert" style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }}><AlertTriangle size={14} /> {error}</small>}

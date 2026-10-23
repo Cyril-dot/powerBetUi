@@ -57,7 +57,7 @@ export default function SettingsPage() {
             </select>
           </label>
           {themeNotice && <small className="auth-notice" style={{ marginTop: 8, display: "block" }}>{themeNotice}</small>}
-          <p className="muted" style={{ marginTop: 10, fontSize: 11 }}>Saved to your Super Bet account.</p>
+          <p className="muted" style={{ marginTop: 10, fontSize: 11 }}>Saved to your PlayBet account.</p>
         </section>
 
         <section className="panel simple-card">

@@ -3350,3 +3350,242 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
   .deposit-summary-line b{font-size:12px}
   .deposit-upload-preview{flex-direction:column}
 }
+
+/* ============================================================================
+   FINAL REVAMP LAYER — PlayBet standard, every legacy page (owner order
+   2026-10-23: "every page, full ui revamp"). Flat surfaces, no shadows, no
+   gradient overlays, Roboto, navy #0A1B3D / ink #102A43 / pale #E1F3E7 /
+   solid green #00A651 / dark green #0B7A43 / hairlines #E3E3EF. This layer
+   sits after every earlier theme layer and re-skins ONLY the legacy shared
+   primitives and page families — the settled pb-/sporty/bc-/td- systems do
+   not use these selectors.
+   ============================================================================ */
+
+/* ——— Page scopes: Roboto + flat ground ——— */
+.support-page,.betslip-page,.simple-page,.search-page,.casino-page,.legal-policy-page,.aff-page,.auth-page{font-family:Roboto,Arial,sans-serif!important}
+.simple-page{background:transparent!important}
+
+/* ——— Shared primitives ——— */
+.eyebrow{color:#0B7A43!important;font-family:Roboto,Arial,sans-serif!important}
+.panel{box-shadow:none!important}
+.panel:before{display:none!important}
+.simple-card{box-shadow:none!important}
+.gold-button{background:#00A651!important;background-image:none!important;box-shadow:none!important;color:#fff!important;border-radius:10px!important;font-family:Roboto,Arial,sans-serif!important;transform:none!important}
+.gold-button:hover{background:#0B7A43!important;box-shadow:none!important;transform:none!important}
+.ghost-button{background:#E1F3E7!important;background-image:none!important;color:#0B7A43!important;border:1px solid #BFE6CF!important;box-shadow:none!important;border-radius:10px!important;font-family:Roboto,Arial,sans-serif!important;transform:none!important}
+.ghost-button:hover{background:#D2EDDD!important;box-shadow:none!important;transform:none!important}
+.text-action{color:#0B7A43!important;font-family:Roboto,Arial,sans-serif!important}
+.muted{color:#71809A!important}
+.casino-tabs button{background:#fff!important;color:#3A4450!important;border:1px solid #E3E3EF!important;border-radius:10px!important;box-shadow:none!important;font-family:Roboto,Arial,sans-serif!important}
+.casino-tabs button.active{background:#00A651!important;color:#fff!important;border-color:#00A651!important}
+.activity-row{border-top:1px solid #E3E3EF!important}
+.activity-icon{background:#E1F3E7!important;color:#0B7A43!important;border-radius:10px!important;box-shadow:none!important}
+.activity-row b{color:#102A43!important}
+.activity-row small{color:#71809A!important}
+.module-title h3{font:800 17px Roboto,Arial,sans-serif!important;color:#102A43!important}
+.module-title svg{color:#0B7A43!important}
+.status-grid>div{background:#fff!important;border:1px solid #E3E3EF!important;border-radius:10px!important}
+.status-grid span{color:#71809A!important}
+.status-grid b{color:#102A43!important;font-family:Roboto,Arial,sans-serif!important}
+.status-grid b.status-good{color:#0B7A43!important}
+.deposit-note{color:#71809A!important}
+.deposit-note svg{color:#0B7A43!important}
+
+/* ——— Forms on legacy pages ——— */
+.auth-field>span{color:#3A4450!important;font-family:Roboto,Arial,sans-serif!important}
+.auth-field input,.auth-field select{background:#fff!important;border:1px solid #E3E3EF!important;color:#20242D!important;box-shadow:none!important;font-family:Roboto,Arial,sans-serif!important;border-radius:10px!important}
+.auth-field input:focus,.auth-field select:focus{border-color:#00A651!important;box-shadow:0 0 0 3px rgba(0,166,81,.15)!important;outline:none!important}
+.check-row{color:#3A4450!important}
+.check-row input{accent-color:#00A651!important}
+.auth-notice{background:#FDECEC!important;border:1px solid #F3C2C2!important;color:#C62828!important;border-radius:10px!important;box-shadow:none!important}
+.auth-notice.bp-success,.bp-success{background:#E1F3E7!important;border:1px solid #BFE6CF!important;color:#0B7A43!important}
+
+/* ——— bp- family headers + betslip ——— */
+.bp-header h1{font:800 26px/1.1 Roboto,Arial,sans-serif!important;color:#102A43!important;text-transform:none!important;letter-spacing:-.01em!important}
+.bp-count{background:#00A651!important;box-shadow:none!important}
+.notice-dot{background:#00A651!important}
+.bp-card,.bp-summary,.bp-empty{background:#fff!important;border:1px solid #E3E3EF!important;box-shadow:none!important;border-radius:14px!important}
+.betslip-page .bp-card{border-left:1px solid #E3E3EF!important}
+.bp-teams{font-family:Roboto,Arial,sans-serif!important;color:#102A43!important}
+.bp-league{color:#71809A!important}
+.bp-selection-row{border-top-color:#E3E3EF!important}
+.bp-selection-row small{color:#71809A!important}
+.bp-selection-row b{color:#102A43!important}
+.bp-selection-row strong{color:#0B7A43!important}
+.bp-summary-row{color:#71809A!important}
+.bp-summary-row b{color:#102A43!important}
+.bp-summary-row.highlight b{color:#0B7A43!important}
+.bp-stake-field>span{color:#3A4450!important}
+.bp-stake-field input{background:#fff!important;border:1px solid #E3E3EF!important;color:#20242D!important;box-shadow:none!important;border-radius:10px!important;font-family:Roboto,Arial,sans-serif!important}
+.bp-stake-field input:focus{border-color:#00A651!important;box-shadow:0 0 0 3px rgba(0,166,81,.15)!important;outline:none!important}
+.bp-stake-hint{color:#71809A!important}
+.bp-stake-error{color:#C62828!important}
+.bp-empty svg{color:#00A651!important}
+.bp-empty h3{font:800 22px Roboto,Arial,sans-serif!important;color:#102A43!important}
+.bp-empty p{color:#71809A!important}
+.bp-remove{color:#71809A!important;background:transparent!important;box-shadow:none!important}
+.tx-pagination button{background:#fff!important;border:1px solid #E3E3EF!important;color:#0B7A43!important;box-shadow:none!important;border-radius:10px!important;font-family:Roboto,Arial,sans-serif!important}
+.tx-pagination button:disabled{color:#B6BEC9!important}
+
+/* ——— Support centre / FAQ / search ——— */
+.support-search-card>svg,.support-search-card svg{color:#0B7A43!important}
+.faq-q{color:#102A43!important;font-family:Roboto,Arial,sans-serif!important}
+.faq-chevron{color:#0B7A43!important}
+.faq-a{color:#5A6B82!important}
+.faq-item{border-top-color:#E3E3EF!important}
+.search-box{background:#fff!important;border:1px solid #E3E3EF!important;color:#3A4450!important;box-shadow:none!important;border-radius:10px!important}
+.search-box input{color:#20242D!important;font-family:Roboto,Arial,sans-serif!important}
+.search-box input::placeholder{color:#9AA5B5!important;opacity:1!important}
+.search-page-bar{background:#fff!important;border:1px solid #E3E3EF!important;box-shadow:none!important;border-radius:12px!important}
+.search-page-bar input{color:#20242D!important;font-family:Roboto,Arial,sans-serif!important;background:transparent!important}
+.search-page-bar input::placeholder{color:#9AA5B5!important;opacity:1!important}
+.search-page-bar svg{color:#0B7A43!important}
+.search-recent-chip{background:#E1F3E7!important;color:#0B7A43!important;border:0!important;box-shadow:none!important}
+.search-result-row{border-color:#E3E3EF!important}
+
+/* ——— Affiliate centre ——— */
+.aff-head h1{font:800 30px/1.1 Roboto,Arial,sans-serif!important;text-transform:none!important;color:#102A43!important;letter-spacing:-.01em!important}
+.aff-stat{color:#0B7A43!important}
+.aff-stat small{color:#71809A!important}
+.aff-stat strong{color:#102A43!important;font-family:Roboto,Arial,sans-serif!important}
+.aff-panel h2{font:800 19px Roboto,Arial,sans-serif!important;color:#102A43!important}
+.aff-sub{color:#71809A!important}
+.aff-input{background:#fff!important;border:1px solid #E3E3EF!important;color:#20242D!important;border-radius:10px!important;box-shadow:none!important;font-family:Roboto,Arial,sans-serif!important}
+.aff-input:focus{border-color:#00A651!important;box-shadow:0 0 0 3px rgba(0,166,81,.15)!important;outline:none!important}
+.aff-link-row code{background:#F5F6F7!important;border-color:#E3E3EF!important;color:#102A43!important}
+.aff-table th{color:#71809A!important;border-bottom-color:#E3E3EF!important}
+.aff-table td{border-bottom-color:#E3E3EF!important;color:#20242D!important}
+.aff-form label{color:#3A4450!important}
+
+/* ——— Legal policy pages: dark slabs → light standard, navy hero ——— */
+.legal-policy-page{color:#20242D!important;font-family:Roboto,Arial,sans-serif!important}
+.legal-policy-hero{background:#0A1B3D!important;background-image:none!important;border:0!important;border-radius:16px!important;box-shadow:none!important}
+.legal-policy-hero:before,.legal-policy-hero:after{display:none!important}
+.legal-policy-hero .eyebrow{color:#7BD8A4!important}
+.legal-policy-hero h1{color:#fff!important;font-family:Roboto,Arial,sans-serif!important}
+.legal-policy-hero p{color:rgba(255,255,255,.78)!important}
+.legal-policy-section{background:#fff!important;background-image:none!important;border:1px solid #E3E3EF!important;border-radius:14px!important;box-shadow:none!important}
+.legal-policy-section h2{color:#102A43!important;font-family:Roboto,Arial,sans-serif!important}
+.legal-policy-section p,.legal-policy-section li{color:#3A4450!important}
+.legal-policy-index{background:#E1F3E7!important;border:1px solid #BFE6CF!important;color:#0B7A43!important}
+.legal-policy-section li::marker{color:#0B7A43!important}
+.legal-policy-contact{background:#E1F3E7!important;border:1px solid #BFE6CF!important;color:#3A4450!important;box-shadow:none!important}
+.legal-policy-contact strong{color:#102A43!important}
+.legal-policy-contact a{color:#0B7A43!important}
+
+/* ——— Simple hero (Promos) + hero decorations off ——— */
+.simple-hero:before{display:none!important}
+.simple-hero:after{background:#00A651!important;background-image:none!important}
+.simple-hero .eyebrow:before{background:#00A651!important}
+.simple-page .simple-hero h1,.simple-hero h1{font-family:Roboto,Arial,sans-serif!important;color:#102A43!important}
+.acct-hero:before,.dep-hero:before,.pf-hero:before,.wal-hero:before{display:none!important}
+.acct-hero:after,.dep-hero:after,.pf-hero:after,.wal-hero:after{display:none!important}
+
+/* ——— Promos + Casino ——— */
+.promo-card{background:#0A1B3D!important;background-image:none!important;border:0!important;border-radius:16px!important;box-shadow:none!important;color:#fff!important}
+.promo-card h2{font:800 34px/1.05 Roboto,Arial,sans-serif!important;text-transform:none!important;color:#fff!important;letter-spacing:-.01em!important}
+.promo-card p{color:rgba(255,255,255,.78)!important}
+.promo-card .eyebrow{color:#7BD8A4!important}
+.casino-hero{background:#0A1B3D!important;background-image:none!important;border:0!important;border-radius:16px!important;box-shadow:none!important}
+.casino-hero:after{display:none!important}
+.casino-hero h1{font:800 42px/1.02 Roboto,Arial,sans-serif!important;text-transform:none!important;color:#fff!important;letter-spacing:-.01em!important}
+.casino-hero h1 em{color:#35D07F!important}
+.casino-hero p{color:rgba(255,255,255,.78)!important}
+.casino-hero .eyebrow{color:#7BD8A4!important}
+.casino-page .simple-card svg{color:#0B7A43!important}
+
+/* ——— Auth (login / register) ——— */
+.auth-intro h1{font:800 clamp(44px,6vw,72px)/.95 Roboto,Arial,sans-serif!important;text-transform:none!important;color:#102A43!important;letter-spacing:-.02em!important}
+.auth-intro h1 em{color:#0B7A43!important}
+.auth-intro p{color:#5A6B82!important}
+.auth-benefits span{background:#fff!important;border:1px solid #E3E3EF!important;color:#3A4450!important;box-shadow:none!important}
+.auth-benefits svg{color:#0B7A43!important}
+.auth-card-premium{background:#fff!important;border:1px solid #E3E3EF!important;box-shadow:none!important;border-radius:16px!important}
+.auth-card-head h2{font:800 24px/1.05 Roboto,Arial,sans-serif!important;text-transform:none!important;color:#102A43!important}
+.auth-crown{background:#0A1B3D!important;background-image:none!important;box-shadow:none!important;border-radius:12px!important;color:#fff!important}
+.auth-card .eyebrow{color:#0B7A43!important}
+.auth-steps span{color:#9AA5B5!important}
+.auth-steps span.active,.auth-steps span.done{color:#0B7A43!important}
+.auth-steps i{background:#E3E3EF!important}
+.auth-steps i.active{background:#00A651!important}
+.auth-row a,.auth-switch a,.terms-row a{color:#0B7A43!important}
+.auth-switch{color:#71809A!important}
+.auth-back{color:#0B7A43!important}
+.auth-safe{color:#71809A!important}
+.auth-safe svg{color:#0B7A43!important}
+
+/* ——— Deposit page (ShinobiPay rail; presentation only) ——— */
+.deposit-page{background:#F5F6F7!important;color:#20242D!important;font-family:Roboto,Arial,sans-serif!important}
+.deposit-hero{background:#0A1B3D!important;background-image:none!important;color:#fff!important;box-shadow:none!important}
+.deposit-hero h1{color:#fff!important;font-family:Roboto,Arial,sans-serif!important}
+.deposit-hero p{color:rgba(255,255,255,.78)!important}
+.deposit-eyebrow{color:#7BD8A4!important}
+.deposit-hero-icon{background:rgba(255,255,255,.12)!important;color:#fff!important;box-shadow:none!important}
+.deposit-hero-trust{background:rgba(255,255,255,.12)!important;color:#fff!important;border:0!important}
+.deposit-rail{color:#71809A!important}
+.deposit-rail-live{color:#0B7A43!important}
+.deposit-panel{background:#fff!important;border:1px solid #E3E3EF!important;border-radius:14px!important;box-shadow:none!important;color:#20242D!important}
+.deposit-panel h2,.deposit-panel-heading{color:#102A43!important}
+.deposit-panel-heading svg{color:#0B7A43!important}
+.deposit-steps>*{background:#fff!important;border:1px solid #E3E3EF!important;color:#71809A!important;box-shadow:none!important}
+.deposit-steps>*.active,.deposit-steps>*.now{background:#00A651!important;border-color:#00A651!important;color:#fff!important}
+.deposit-field>span,.deposit-field label{color:#3A4450!important}
+.deposit-field input,.deposit-field select{background:#fff!important;border:1px solid #E3E3EF!important;color:#20242D!important;box-shadow:none!important;border-radius:10px!important;font-family:Roboto,Arial,sans-serif!important}
+.deposit-field input:focus,.deposit-field select:focus{border-color:#00A651!important;box-shadow:0 0 0 3px rgba(0,166,81,.15)!important;outline:none!important}
+.deposit-field input::placeholder{color:#9AA5B5!important}
+.deposit-amount-wrap{background:#fff!important;border-color:#E3E3EF!important;color:#0B7A43!important}
+.deposit-quick-row button,.deposit-quick-amounts button{background:#fff!important;border:1px solid #E3E3EF!important;color:#3A4450!important;box-shadow:none!important;font-family:Roboto,Arial,sans-serif!important}
+.deposit-quick-row button.active,.deposit-quick-amounts button.active{background:#00A651!important;border-color:#00A651!important;color:#fff!important}
+.deposit-submit{background:#00A651!important;background-image:none!important;color:#fff!important;box-shadow:none!important;border-radius:10px!important;font-family:Roboto,Arial,sans-serif!important}
+.deposit-submit:hover{background:#0B7A43!important}
+.deposit-secondary{background:#E1F3E7!important;color:#0B7A43!important;border:1px solid #BFE6CF!important;box-shadow:none!important}
+.deposit-fee-summary{background:#F5F6F7!important;border:1px solid #E3E3EF!important;color:#3A4450!important}
+.deposit-fee-summary strong{color:#102A43!important}
+.deposit-fee-summary .deposit-fee-total{border-top-color:#E3E3EF!important;color:#0B7A43!important}
+.deposit-fee-summary .deposit-fee-total strong{color:#0B7A43!important}
+.deposit-summary-card{background:#F5F6F7!important;border:1px solid #E3E3EF!important}
+.deposit-summary-line{color:#71809A!important;border-bottom-color:#E3E3EF!important}
+.deposit-summary-line b{color:#102A43!important}
+.deposit-summary-line b.gold{color:#0B7A43!important}
+.deposit-copy-row button{background:#E1F3E7!important;border:1px solid #BFE6CF!important;color:#0B7A43!important}
+.deposit-copy-row button.copied{background:#00A651!important;border-color:#00A651!important;color:#fff!important}
+.deposit-panel label.deposit-upload{background:#F5F6F7!important;border:1.5px dashed #C9D4C5!important;color:#3A4450!important}
+.deposit-panel label.deposit-upload:hover{border-color:#00A651!important}
+.deposit-panel .deposit-upload svg{color:#0B7A43!important}
+.deposit-upload-preview button{background:#fff!important;border:1px solid #E3E3EF!important;color:#C62828!important}
+.deposit-requests h2{color:#102A43!important}
+.deposit-request-row{border-bottom-color:#E3E3EF!important}
+.deposit-request-row b{color:#102A43!important}
+.deposit-request-row small{color:#71809A!important}
+.deposit-request-row small.rej{color:#C62828!important}
+.deposit-request-row a.proof-link{color:#0B7A43!important}
+.deposit-chip.wait{background:#FFF3D6!important;color:#8A6100!important}
+.deposit-chip.ok{background:#E1F3E7!important;color:#0B7A43!important}
+.deposit-chip.bad{background:#FDECEC!important;color:#C62828!important}
+.deposit-error{color:#C62828!important}
+.deposit-field-error{color:#C62828!important}
+.deposit-footnote,.deposit-phone-hint{color:#71809A!important}
+.deposit-status-icon{color:#0B7A43!important}
+.deposit-status-label{color:#102A43!important}
+.deposit-status-copy{color:#71809A!important}
+
+/* ——— Revamp layer, specificity counters: the white-and-blue layer scoped
+   its blues per page (.betslip-page/.support-page/.simple-page), so the
+   standard is restated at the same scope. ——— */
+.betslip-page .bp-header .eyebrow,.support-page .bp-header .eyebrow{color:#0B7A43!important}
+.betslip-page .gold-button,.support-page .gold-button,.simple-page .gold-button{background:#00A651!important;background-image:none!important;border:1px solid #00A651!important;color:#fff!important;box-shadow:none!important}
+.betslip-page .gold-button:hover,.support-page .gold-button:hover,.simple-page .gold-button:hover{background:#0B7A43!important;border-color:#0B7A43!important}
+.betslip-page .text-action,.support-page .text-action,.simple-page .text-action{color:#0B7A43!important}
+.support-page .activity-row strong{color:#102A43!important}
+.bc-load-btn{background:#00A651!important}
+.bc-load-btn:hover{background:#0B7A43!important}
+
+/* ——— Revamp residuals: deposit selected chips use .selected, amount-wrap
+   inner input is borderless, auth eye toggle, simple-hero title block ——— */
+.deposit-quick-row button.selected,.deposit-quick-amounts button.selected{background:#00A651!important;border-color:#00A651!important;color:#fff!important}
+.deposit-amount-wrap b{color:#0B7A43!important}
+.deposit-amount-wrap input{border:0!important;box-shadow:none!important;background:transparent!important;color:#20242D!important}
+.auth-input-wrap button{color:#0B7A43!important}
+.simple-hero h1{display:block!important}
+.casino-hero img{display:none!important}
+.casino-hero .hero-shapes{display:none!important}
