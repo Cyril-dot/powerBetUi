@@ -286,7 +286,7 @@ export default function WalletCenter() {
               <span className="wal-card-label">Card holder</span>
               <span className="wal-card-name">{holderName}</span>
             </div>
-            <span className="wal-card-brand">super bet</span>
+            <span className="wal-card-brand">PlayBet</span>
           </div>
         </div>
 
@@ -716,6 +716,67 @@ function WalStyles() {
       .wal-hero svg,.wal-card svg{color:#fff}
       .wal-action svg,.wal-refresh svg{color:currentColor}
       @media(max-width:560px){.wal-body{padding-left:12px;padding-right:12px}.wal-card{padding:18px}}
+      /* ── PlayBet standard pass (revamp 2026-10-23): flat navy + green ── */
+      .wal-page{background:#F5F6F7;color:#20242D;font-family:Roboto,Arial,sans-serif}
+      .wal-hero{background:#0A1B3D;background-image:none;border-radius:0 0 16px 16px;box-shadow:none}
+      .wal-hero h1{font-family:Roboto,Arial,sans-serif}
+      .wal-hero p{color:rgba(255,255,255,.78)}
+      .wal-card{background:#0A1B3D;background-image:none;border:1px solid #0A1B3D;box-shadow:none;color:#fff;border-radius:18px}
+      .wal-card:hover{box-shadow:none}
+      .wal-card-sheen{display:none}
+      .wal-card-ring{border-color:rgba(255,255,255,.22)}
+      .wal-card-balance{font-family:Roboto,Arial,sans-serif}
+      .wal-card-number{font-family:Roboto,Arial,sans-serif}
+      .wal-card-brand{color:#fff;font-family:Roboto,Arial,sans-serif}
+      .wal-error{color:#C62828}
+      .wal-action-solid{background:#00A651;border-color:#00A651;box-shadow:none}
+      .wal-action-solid:hover{background:#0B7A43}
+      .wal-action-ghost{background:#fff;color:#102A43;border:1px solid #E3E3EF;box-shadow:none}
+      .wal-action-ghost:hover{background:#E1F3E7;color:#0B7A43}
+      .wal-action-active{background:#E1F3E7!important;border-color:#00A651!important;color:#0B7A43!important}
+      .wal-action-locked{background:#F5F6F7;color:#71809A;border-color:#E3E3EF}
+      .wal-action-icon{background:#fff;color:#0B7A43;border:1px solid #E3E3EF;box-shadow:none}
+      .wal-action-icon:hover{background:#E1F3E7;color:#0B7A43}
+      .wal-panel{background:#fff;border:1px solid #E3E3EF;box-shadow:none;border-radius:14px;color:#20242D}
+      .wal-panel h3{color:#102A43;font-family:Roboto,Arial,sans-serif}
+      .wal-refresh{color:#0B7A43}
+      .wal-field{color:#3A4450}
+      .wal-field input,.wal-field select{color:#20242D;background:#fff;border-color:#E3E3EF;font-family:Roboto,Arial,sans-serif}
+      .wal-field input::placeholder{color:#9AA5B5}
+      .wal-field input:focus,.wal-field select:focus{border-color:#00A651;box-shadow:0 0 0 3px rgba(0,166,81,.15)}
+      .wal-submit{background:#00A651}
+      .wal-submit:hover{background:#0B7A43}
+      .wal-notice,.wal-muted{color:#71809A}
+      .wal-activity-row{border-color:#E3E3EF}
+      .wal-activity-icon{background:#E1F3E7;color:#0B7A43}
+      .wal-activity-icon.is-credit{background:#E1F3E7;color:#0B7A43}
+      .wal-activity-text b{color:#102A43}
+      .wal-activity-text small{color:#71809A}
+      .wal-activity-row strong{color:#102A43}
+      .wal-activity-row strong.is-credit{color:#0B7A43}
+      .wal-gate-icon{color:#0B7A43;background:#E1F3E7;border-color:#BFE6CF}
+      .wal-gate-modal{border-color:#E3E3EF}
+      .wal-gate-modal h3{color:#102A43;font-family:Roboto,Arial,sans-serif}
+      .wal-gate-modal p{color:#5A6B82}
+      .wal-gate-modal .wal-submit{background:#00A651}
+      .wal-success-modal{background:#fff;border-color:#BFE6CF;color:#20242D}
+      .wal-success-modal h3{color:#102A43}
+      .wal-success-modal p{color:#71809A}
+      .wal-success-close{background:#fff;border-color:#E3E3EF;color:#3A4450}
+      .wal-success-icon{color:#0B7A43;background:#E1F3E7;border-color:#BFE6CF}
+      .wal-success-modal.wal-complete-modal{background:#fff;background-image:none;border-color:#BFE6CF;box-shadow:none}
+      .wal-withdrawal-amount{background:#F5F6F7;background-image:none;border-color:#E3E3EF}
+      .wal-withdrawal-amount span{color:#71809A}
+      .wal-withdrawal-amount strong{color:#102A43}
+      .wal-withdrawal-amount.is-complete{border-color:#BFE6CF;background:#E1F3E7}
+      .wal-withdrawal-amount.is-complete strong{color:#0B7A43}
+      .wal-payment-modal{border-color:#E3E3EF}
+      .wal-modal-close{border-color:#E3E3EF;color:#3A4450}
+      .wal-inline-gate a{color:#0B7A43}
+      .wal-inline-notice{border-color:#BFE6CF;background:#E1F3E7;color:#3A4450}
+      .wal-inline-notice strong{color:#0B7A43}
+      .wal-inline-error{border-color:#F3C2C2;background:#FDECEC;color:#8A3F2F}
+      .wal-inline-error strong{color:#7D3023}
     `}</style>
   );
 }

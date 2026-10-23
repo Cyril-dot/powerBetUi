@@ -135,7 +135,7 @@ export default function AccountCenter() {
     { icon: <Bell size={ICON} />, label: "Notifications", href: "/notifications" },
     { icon: <SlidersHorizontal size={ICON} />, label: "Settings", href: "/settings" },
     ...(isAdmin ? [{ icon: <ShieldCheck size={ICON} />, label: "Admin Centre", href: "/admin-guide?target=admin", hint: "Restricted operations" }] : []),
-    ...(isSuperAdmin ? [{ icon: <ShieldCheck size={ICON} />, label: "Super Bet Super Admin", href: "/admin-guide?target=super", hint: "SUPER_ADMIN only" }] : []),
+    ...(isSuperAdmin ? [{ icon: <ShieldCheck size={ICON} />, label: "PlayBet Super Admin", href: "/admin-guide?target=super", hint: "SUPER_ADMIN only" }] : []),
   ];
 
   const safetyMenu: MenuRow[] = [
@@ -394,6 +394,44 @@ function AcctStyles() {
       .acct-row-chevron{ color:#7a91a8; }
       .acct-logout{ background:#fff; color:#1246a8; border-color:#b7d0ff; }
       .acct-footnote{ color:#5f7489; }
+
+      /* PlayBet standard pass (revamp 2026-10-23): flat navy + green, Roboto. */
+      body:has(.acct-page){ background:#F5F6F7 !important; }
+      .acct-page{ background:#F5F6F7 !important; color:#20242D; font-family:Roboto,Arial,sans-serif; }
+      .acct-topbar{ border-bottom-color:#E3E3EF; }
+      .acct-avatar{ background:#E1F3E7 !important; border-color:#00A651; }
+      .acct-name{ font-family:Roboto,Arial,sans-serif; }
+      .acct-email{ color:#71809A !important; }
+      .acct-admin-pill{ background:#E1F3E7; color:#0B7A43; border-color:#BFE6CF; }
+      .acct-edit-link{ color:#3A4450; background:#fff; border-color:#E3E3EF; }
+      .acct-edit-link:hover{ color:#0B7A43; background:#E1F3E7; }
+      .acct-balance-card{ background:#0A1B3D !important; background-image:none !important; border:1px solid #0A1B3D !important; box-shadow:none; border-radius:18px; }
+      .acct-balance-card:before,.acct-balance-card:after{ display:none !important; }
+      .acct-balance-amount{ font-family:Roboto,Arial,sans-serif; }
+      .acct-balance-btn-solid{ background:#00A651; color:#fff; box-shadow:none; }
+      .acct-balance-btn-solid:hover{ background:#0B7A43; }
+      .acct-balance-btn-ghost{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.35); color:#fff; }
+      .acct-balance-btn-ghost:hover{ background:rgba(255,255,255,.2); }
+      .acct-bento-title,.acct-group-title{ color:#71809A !important; }
+      .acct-bento-tile{ border-color:#E3E3EF; box-shadow:none; }
+      .acct-bento-tile:hover{ background:#fff; border-color:#00A651; transform:none; }
+      .acct-bento-icon,.acct-bento-blue .acct-bento-icon,.acct-bento-green .acct-bento-icon,.acct-bento-gold .acct-bento-icon{ background:#E1F3E7; color:#0B7A43; }
+      .acct-group-card{ border-color:#E3E3EF; box-shadow:none; }
+      .acct-row{ border-bottom-color:#E3E3EF; }
+      .acct-row:hover{ background:#F5F6F7; }
+      .acct-row-icon{ background:#E1F3E7; color:#0B7A43; }
+      .acct-row:hover .acct-row-icon{ background:#00A651; color:#fff; }
+      .acct-row-hint{ color:#71809A; }
+      .acct-row-chevron{ color:#9AA5B5; }
+      .acct-chip-blue,.acct-chip-green{ background:#E1F3E7; color:#0B7A43; }
+      .acct-chip-gold{ background:#EEF0F2; color:#5A6B82; }
+      .acct-logout{ background:#fff; color:#102A43; border-color:#E3E3EF; }
+      .acct-logout:hover{ background:#F5F6F7; border-color:#E3E3EF; }
+      .acct-footnote{ color:#71809A; }
+      .acct-signedout{ background:#fff; border-color:#E3E3EF; box-shadow:none; }
+      .acct-signedout-icon{ background:#E1F3E7; color:#0B7A43; }
+      .acct-signedout h1{ color:#102A43; font-family:Roboto,Arial,sans-serif; }
+      .acct-signedout p{ color:#71809A; }
     `}</style>
   );
 }

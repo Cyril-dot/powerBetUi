@@ -3589,3 +3589,4 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .simple-hero h1{display:block!important}
 .casino-hero img{display:none!important}
 .casino-hero .hero-shapes{display:none!important}
+.casino-hero:before,.casino-hero:after{display:none!important}

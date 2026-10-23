@@ -224,6 +224,27 @@ function PfStyles() {
       .pf-signedout-icon{ background:#eaf2ff; color:#1e6bff; }
       .pf-signedout h1{ color:#102a43; }
       .pf-signedout p,.pf-loading{ color:#5f7489; }
+
+      /* PlayBet standard pass (revamp 2026-10-23): flat navy + green, Roboto. */
+      body:has(.pf-page){ background:#F5F6F7 !important; }
+      .pf-page{ background:#F5F6F7 !important; color:#20242D; font-family:Roboto,Arial,sans-serif; }
+      .pf-hero{ background:#0A1B3D; background-image:none; border-bottom:0; box-shadow:none; }
+      .pf-avatar{ background:#E1F3E7; border-color:#fff; color:#0B7A43; }
+      .pf-sub{ color:rgba(255,255,255,.82); }
+      .pf-card{ border-color:#E3E3EF; box-shadow:none; border-radius:14px; }
+      .pf-card-title{ color:#102A43; }
+      .pf-info-row{ color:#71809A; border-bottom-color:#E3E3EF; }
+      .pf-info-row b{ color:#102A43; }
+      .pf-field{ color:#3A4450; }
+      .pf-field input,.pf-field select{ color:#20242D; background:#fff; border-color:#E3E3EF; font-family:Roboto,Arial,sans-serif; }
+      .pf-field input:disabled{ color:#71809A; background:#F5F6F7; }
+      .pf-field input:focus,.pf-field select:focus{ border-color:#00A651; box-shadow:0 0 0 3px rgba(0,166,81,.15); }
+      .pf-notice{ color:#71809A; }
+      .pf-link-row{ color:#102A43; }
+      .pf-link-row:hover{ color:#0B7A43; }
+      .pf-signedout{ border-color:#E3E3EF; box-shadow:none; }
+      .pf-signedout-icon{ background:#E1F3E7; color:#0B7A43; }
+      .pf-signedout p,.pf-loading{ color:#71809A; }
     `}</style>
   );
 }
