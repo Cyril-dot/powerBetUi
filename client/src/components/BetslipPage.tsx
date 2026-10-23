@@ -232,6 +232,31 @@ function BookingCodeStyles() {
       .bc-add-btn{ margin:12px; width:calc(100% - 24px); display:flex; align-items:center; justify-content:center; gap:7px; }
       .gold-button.bc-add-btn{ background:#00A651; }
       @media(max-width:960px){ .bc-panel{ margin-top:12px; } }
+
+      /* Betslip FULL NAVY (owner, 2026-10-23): the embedded booking-code
+         panel goes dark with the rest of the slip page — inset surfaces
+         take the slab's deep tone #0A1B3D, text goes light, greens stay
+         green. The index.css "Betslip FULL NAVY" block at EOF restates
+         these values with !important — both layers agree. */
+      .bc-sub{ color:rgba(255,255,255,.6); }
+      .bc-input-row{ background:#0A1B3D; border-color:rgba(255,255,255,.2); }
+      .bc-input-row:focus-within{ border-color:#00A651; box-shadow:0 0 0 3px rgba(0,166,81,.22); }
+      .bc-input-row.has-error{ border-color:rgba(248,113,113,.6); }
+      .bc-input{ color:#fff; }
+      .bc-input::placeholder{ color:rgba(255,255,255,.38); }
+      .bc-error{ background:rgba(248,113,113,.12); border-color:rgba(248,113,113,.35); color:#FF9AA2; }
+      .bc-note{ background:rgba(255,176,32,.12); border-color:rgba(255,176,32,.35); color:#FFCF6B; }
+      .bc-preview{ background:#0A1B3D; border-color:rgba(255,255,255,.14); }
+      .bc-preview-head{ border-bottom-color:rgba(255,255,255,.12); }
+      .bc-preview-code{ color:#00E85F; }
+      .bc-preview-meta{ color:rgba(255,255,255,.55); }
+      .bc-preview-row{ border-top-color:rgba(255,255,255,.1); }
+      .bc-preview-row small{ color:rgba(255,255,255,.55); }
+      .bc-preview-row b{ color:#fff; }
+      .bc-preview-row span{ color:#00E85F; }
+      .bc-flag.red{ background:rgba(248,113,113,.15); color:#FF9AA2; }
+      .bc-flag.grey{ background:rgba(255,255,255,.1); color:rgba(255,255,255,.65); }
+      .bc-excluded{ color:rgba(255,255,255,.55); }
     `}</style>
   );
 }

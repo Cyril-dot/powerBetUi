@@ -3673,3 +3673,79 @@ html,body{background:#f5f6f7!important}
 .pb-pay{color:#71809a!important;background:#f5f6f7!important;border-color:#e3e3ef!important}
 .bp-summary-row.highlight{border-top-color:#e3e3ef!important}
 .betslip-page .bp-summary{border-left-color:#00a651!important}
+
+/* Betslip FULL NAVY (owner, 2026-10-23): the slip page — not the whole
+   site — goes dark like the ticket-details slab. The page ground is the
+   slab gradient (#10234a → #0a1b3d → #060f24); every white surface on
+   the page (selection cards, summary panel, empty panel, the embedded
+   booking-code panel and its preview, the bet-placed success card)
+   becomes a dark panel lifted from the ground (#0e2148) with a light
+   hairline; text goes light, labels muted-light, greens stay green
+   (bright #00e85f where text sits on navy). Flat — no shadows, no panel
+   texture. The booking-code restatement at the end of BookingCodeStyles
+   in BetslipPage.tsx carries the same values — both layers agree.
+   History (65345e3) and the open-bets tab are untouched by this block. */
+.betslip-page{background:linear-gradient(165deg,#10234a 0%,#0a1b3d 55%,#060f24 100%)!important;color:#f2f5fa!important;min-height:74vh!important}
+.betslip-page .bp-header h1{color:#fff!important}
+.betslip-page .bp-header .eyebrow{color:#00e85f!important}
+.betslip-page .text-action{color:#ff858b!important}
+.betslip-page .panel{background:#0e2148!important;color:#f2f5fa!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:none!important}
+.betslip-page .panel::before{display:none!important}
+.betslip-page .bp-card{background:#0e2148!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:none!important;color:#f2f5fa!important}
+.betslip-page .bp-summary{border-left:3px solid #00a651!important}
+.betslip-page .bp-league{color:rgba(255,255,255,.5)!important}
+.betslip-page .bp-teams{color:#fff!important}
+.betslip-page .bp-vs{color:rgba(255,255,255,.4)!important}
+.betslip-page .bp-live{color:#00e85f!important;background:transparent!important}
+.betslip-page .bp-countdown{color:rgba(255,255,255,.55)!important}
+.betslip-page .bp-selection-row{border-top-color:rgba(255,255,255,.12)!important}
+.betslip-page .bp-selection-row small{color:rgba(255,255,255,.55)!important}
+.betslip-page .bp-selection-row b{color:#fff!important}
+.betslip-page .bp-selection-row strong{color:#00e85f!important}
+.betslip-page .bp-remove{background:rgba(255,255,255,.08)!important;color:#ff858b!important;border:1px solid rgba(255,255,255,.14)!important}
+.betslip-page .bp-empty svg{color:#00e85f!important}
+.betslip-page .bp-empty h3{color:#fff!important}
+.betslip-page .bp-empty p{color:rgba(255,255,255,.62)!important}
+.betslip-page .bp-summary-row{color:rgba(255,255,255,.62)!important}
+.betslip-page .bp-summary-row b{color:#fff!important}
+.betslip-page .bp-summary-row.highlight{border-top-color:rgba(255,255,255,.16)!important}
+.betslip-page .bp-summary-row.highlight b{color:#00e85f!important}
+.betslip-page .bp-stake-field span{color:rgba(255,255,255,.6)!important}
+.betslip-page .bp-stake-field input{background:#0a1b3d!important;border-color:rgba(255,255,255,.18)!important;color:#fff!important}
+.betslip-page .bp-stake-hint{color:rgba(255,255,255,.45)!important}
+.betslip-page .bp-stake-error{color:#ff9aa2!important}
+.betslip-page .gold-button{background:#00a651!important;color:#fff!important;box-shadow:none!important}
+.betslip-page .ghost-button{background:rgba(255,255,255,.06)!important;color:#fff!important;border:1px solid rgba(255,255,255,.2)!important;box-shadow:none!important}
+.betslip-page .auth-notice{background:rgba(248,113,113,.12)!important;border:1px solid rgba(248,113,113,.35)!important;color:#ff9aa2!important;box-shadow:none!important}
+.betslip-page .auth-notice.bp-success,.betslip-page .bp-success{background:rgba(0,166,81,.16)!important;border:1px solid rgba(0,166,81,.4)!important;color:#00e85f!important}
+.betslip-page .bc-sub{color:rgba(255,255,255,.6)!important}
+.betslip-page .bc-title h3{color:#fff!important}
+.betslip-page .bc-title svg{color:#00e85f!important}
+.betslip-page .bc-input-row{background:#0a1b3d!important;border-color:rgba(255,255,255,.2)!important;box-shadow:none!important}
+.betslip-page .bc-input-row:focus-within{border-color:#00a651!important;box-shadow:0 0 0 3px rgba(0,166,81,.22)!important}
+.betslip-page .bc-input-row.has-error{border-color:rgba(248,113,113,.6)!important}
+.betslip-page .bc-input{color:#fff!important}
+.betslip-page .bc-input::placeholder{color:rgba(255,255,255,.38)!important}
+.betslip-page .bc-load-btn{background:#00a651!important;color:#fff!important}
+.betslip-page .bc-error{background:rgba(248,113,113,.12)!important;border-color:rgba(248,113,113,.35)!important;color:#ff9aa2!important}
+.betslip-page .bc-note{background:rgba(255,176,32,.12)!important;border-color:rgba(255,176,32,.35)!important;color:#ffcf6b!important}
+.betslip-page .bc-preview{background:#0a1b3d!important;border-color:rgba(255,255,255,.14)!important;box-shadow:none!important}
+.betslip-page .bc-preview-head{border-bottom-color:rgba(255,255,255,.12)!important}
+.betslip-page .bc-preview-code{color:#00e85f!important}
+.betslip-page .bc-preview-meta{color:rgba(255,255,255,.55)!important}
+.betslip-page .bc-preview-row{border-top-color:rgba(255,255,255,.1)!important}
+.betslip-page .bc-preview-row small{color:rgba(255,255,255,.55)!important}
+.betslip-page .bc-preview-row b{color:#fff!important}
+.betslip-page .bc-preview-row span{color:#00e85f!important}
+.betslip-page .bc-flag.red{background:rgba(248,113,113,.15)!important;color:#ff9aa2!important}
+.betslip-page .bc-flag.grey{background:rgba(255,255,255,.1)!important;color:rgba(255,255,255,.65)!important}
+.betslip-page .bc-excluded{color:rgba(255,255,255,.55)!important}
+.betslip-page .pb-success-card{background:#0e2148!important;color:#f2f5fa!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:none!important}
+.betslip-page .pb-success-badge{background:rgba(0,166,81,.16)!important;color:#00e85f!important}
+.betslip-page .pb-success-card h3{color:#fff!important}
+.betslip-page .pb-success-card p{color:rgba(255,255,255,.62)!important}
+.betslip-page .pb-success-rows{border-color:rgba(255,255,255,.14)!important}
+.betslip-page .pb-success-rows>div{border-bottom-color:rgba(255,255,255,.1)!important}
+.betslip-page .pb-success-rows span{color:rgba(255,255,255,.6)!important}
+.betslip-page .pb-success-rows b{color:#fff!important}
+.betslip-page .pb-success-rows .ret b{color:#00e85f!important}
