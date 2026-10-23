@@ -214,12 +214,12 @@ function BookingCodeStyles() {
       @keyframes bcSpin{ to{ transform:rotate(360deg); } }
       .bc-error{ display:flex; align-items:center; gap:6px; margin-top:9px; padding:8px 11px; border-radius:8px; background:#fdecec; border:1px solid #f3c2c2; color:#c62828; font-size:.72rem; font-weight:600; }
       .bc-note{ margin:10px 12px 0; padding:8px 11px; border-radius:8px; background:#fff6db; border:1px solid #eed88f; color:#7a5b00; font-size:.72rem; font-weight:600; line-height:1.45; }
-      .bc-preview{ margin-top:14px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#fff; }
-      .bc-preview-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 14px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+      .bc-preview{ margin-top:14px; border:1px solid #e3e3ef; border-radius:12px; overflow:hidden; background:#fff; }
+      .bc-preview-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 14px; border-bottom:1px solid #e3e3ef; flex-wrap:wrap; }
       .bc-preview-code{ font:800 13px Roboto,Arial,sans-serif; letter-spacing:.1em; color:#00A651; }
       .bc-preview-meta{ font-size:.7rem; color:#71809a; }
       .bc-preview-list{ max-height:180px; overflow-y:auto; }
-      .bc-preview-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 14px; border-top:1px solid var(--line); }
+      .bc-preview-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 14px; border-top:1px solid #e3e3ef; }
       .bc-preview-row:first-child{ border-top:none; }
       .bc-preview-row.blocked{ opacity:.55; }
       .bc-preview-row small{ display:block; color:#71809a; font-size:.68rem; }

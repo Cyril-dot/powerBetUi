@@ -1694,39 +1694,40 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 /* Booking Code page */
 .simple-page{color:#20242d!important}
 .simple-page h1,.simple-page h2,.simple-page h3{color:#20242d!important}
-.simple-page .panel{background:#fff!important;border-color:#dfe7f3!important;box-shadow:0 8px 22px rgba(34,74,128,.07)!important}
-.simple-page .panel input{background:#f7faff!important;color:#20242d!important;border-color:#cbd9ec!important}
-.bc-panel{background:#fff!important;border:1px solid #dfe7f3!important;box-shadow:0 8px 22px rgba(34,74,128,.07)!important}
-.bc-title h3{color:#1246a8!important}
-.bc-title svg{color:#1e6bff!important}
+.simple-page .panel{background:#fff!important;border-color:#e3e3ef!important;box-shadow:none!important}
+.simple-page .panel input{background:#fff!important;color:#20242d!important;border-color:#e3e3ef!important}
+.bc-panel{background:#fff!important;border:1px solid #e3e3ef!important;box-shadow:none!important}
+.bc-title h3{color:#102a43!important}
+.bc-title svg{color:#0b7a43!important}
 .bc-sub{color:#68768b!important}
-.bc-input-row{background:#f7faff!important;border-color:#cbd9ec!important;box-shadow:none!important}
-.bc-input-row:focus-within{border-color:#1e6bff!important}
+.bc-input-row{background:#fff!important;border-color:#e3e3ef!important;box-shadow:none!important}
+.bc-input-row:focus-within{border-color:#00a651!important}
 .bc-input{color:#20242d!important}
-.bc-input::placeholder{color:#8a98ab!important}
-.bc-load-btn{background:#1e6bff!important;color:#fff!important;box-shadow:none!important}
+.bc-input::placeholder{color:#9aa5b5!important}
+.bc-load-btn{background:#00a651!important;color:#fff!important;box-shadow:none!important}
 .bc-error{background:#fff2f2!important;border-color:#f0c7c7!important;color:#c23b3b!important}
-.bc-preview{background:#fff!important;border-color:#dfe7f3!important;box-shadow:none!important}
-.bc-preview-code,.bc-preview-row span{color:#1246a8!important}
+.bc-preview{background:#fff!important;border-color:#e3e3ef!important;box-shadow:none!important}
+.bc-preview-code{color:#00a651!important}
+.bc-preview-row span{color:#0b7a43!important}
 .bc-preview-meta,.bc-preview-row small{color:#71809a!important}
 .bc-preview-row b{color:#20242d!important}
 
 /* Betslip page */
-.betslip-page{background:#f7faff!important}
+.betslip-page{background:#f5f6f7!important}
 .betslip-page .bp-header h1{color:#20242d!important}
-.betslip-page .bp-header .eyebrow{color:#1e6bff!important}
-.bp-card,.bp-summary,.bp-empty{background:#fff!important;border:1px solid #dfe7f3!important;box-shadow:0 8px 22px rgba(34,74,128,.07)!important}
+.betslip-page .bp-header .eyebrow{color:#0b7a43!important}
+.bp-card,.bp-summary,.bp-empty{background:#fff!important;border:1px solid #e3e3ef!important;box-shadow:none!important}
 .bp-card *,.bp-summary *,.bp-empty *{text-shadow:none!important}
 .bp-league{color:#71809a!important}
 .bp-teams,.bp-selection-row b,.bp-summary-row b,.bp-empty h3{color:#20242d!important}
 .bp-vs,.bp-selection-row small,.bp-stake-hint{color:#71809a!important}
-.bp-live{color:#1246a8!important;background:#eaf2ff!important;border-color:#bdd4f5!important;box-shadow:none!important}
+.bp-live{color:#0b7a43!important;background:#e1f3e7!important;border-color:#bfe6cf!important;box-shadow:none!important}
 .bp-countdown{color:#68768b!important}
-.bp-selection-row{border-top-color:#e1e9f4!important}
-.bp-selection-row strong,.bp-summary-row.highlight b{color:#1246a8!important}
+.bp-selection-row{border-top-color:#e3e3ef!important}
+.bp-selection-row strong,.bp-summary-row.highlight b{color:#0b7a43!important}
 .bp-remove{color:#71809a!important;background:transparent!important;box-shadow:none!important}
 .bp-summary{background:#fff!important}
-.bp-stake-field input{background:#f7faff!important;color:#20242d!important;border-color:#cbd9ec!important;box-shadow:none!important}
+.bp-stake-field input{background:#fff!important;color:#20242d!important;border-color:#e3e3ef!important;box-shadow:none!important}
 .bp-success{color:#16854b!important}
 
 /* Open Bets page */
@@ -1816,13 +1817,13 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .bh-cashout-btn{background:#00a651!important;color:#fff!important;border:1px solid #00a651!important;box-shadow:none!important}
 
 /* Consistent page structure for Booking Code and Betslip */
-.simple-page,.betslip-page{background:#f7faff!important}
+.simple-page,.betslip-page{background:#f5f6f7!important}
 .simple-page .simple-hero,.betslip-page .bp-header{max-width:1180px!important;margin-left:auto!important;margin-right:auto!important}
 .simple-page .simple-grid{max-width:1180px!important;margin-left:auto!important;margin-right:auto!important}
 .betslip-page .bp-grid{gap:18px!important}
 .betslip-page .bp-card,.betslip-page .bp-summary,.betslip-page .bp-empty,.simple-page .panel{box-shadow:none!important}
-.betslip-page .bp-summary{border-left:3px solid #1e6bff!important}
-.betslip-page .bp-card{border-left:3px solid #1e6bff!important}
+.betslip-page .bp-summary{border-left:3px solid #00a651!important}
+.betslip-page .bp-card{border-left:1px solid #e3e3ef!important}
 @media(max-width:560px){
   .bc-tabs{padding:14px 12px 0!important}
   .bc-toolbar{padding:10px 12px!important}
@@ -3623,3 +3624,22 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .deposit-status-panel.failed .deposit-status-icon{background:#FDECEC!important;color:#C62828!important}
 .deposit-status-panel h2{font-family:Roboto,Arial,sans-serif!important;color:#102A43!important}
 .deposit-status-label{letter-spacing:.12em!important}
+
+/* ——— Final blue sweep (owner, 2026-10-23): booking code + betslip. The
+   white-and-blue layer grouped .betslip-page .panel with the sportsbook and
+   support pages; restate the standard at the same scope for these two
+   surfaces only. Sources in the booking/betslip blocks above are swept too. ——— */
+.betslip-page .panel{border-color:#e3e3ef!important;box-shadow:none!important}
+.bkp-page .panel{border-color:#e3e3ef!important;box-shadow:none!important}
+/* Page ground + shared footer chrome as rendered on these two pages: the
+   white-and-blue layer's pale-blue ground (#f4f8ff + gradient) becomes the
+   standard neutral ground, and the footer's blue-tinted top border, washed
+   social icons and blue-grey pay/legal text take the standard values. */
+html,body{background:#f5f6f7!important}
+.pb-ftr{border-top-color:#e3e3ef!important}
+.pb-ftr-social a{color:#0b7a43!important}
+.pb-ftr-pay>span,.pb-ftr-legal{color:#71809a!important}
+.pb-success-card,.pb-success-rows{border-color:#e3e3ef!important}
+.pb-pay{color:#71809a!important;background:#f5f6f7!important;border-color:#e3e3ef!important}
+.bp-summary-row.highlight{border-top-color:#e3e3ef!important}
+.betslip-page .bp-summary{border-left-color:#00a651!important}
