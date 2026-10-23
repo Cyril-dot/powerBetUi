@@ -1,10 +1,10 @@
 // =============================================================================
 // api.ts — Super Bet full backend integration layer
-// Canonical backend (hardcoded): https://futballbackend-production-15ee.up.railway.app
+// Canonical backend (hardcoded): https://futballbackend-production-904b.up.railway.app
 // Browser-safe calls only. Never place provider secrets in this file.
 // =============================================================================
 
-export const BASE_URL = "https://futballbackend-production-15ee.up.railway.app";
+export const BASE_URL = "https://futballbackend-production-904b.up.railway.app";
 
 // ---------------------------------------------------------------------------
 // Shared types

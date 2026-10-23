@@ -8,7 +8,7 @@ set -Eeuo pipefail
 # The script does not mutate the backend. It saves every raw response, then
 # prints endpoint status/counts and a normalized detail dump for every item.
 
-BASE_URL="${API_BASE_URL:-${VITE_API_BASE_URL:-https://futballbackend-production-15ee.up.railway.app}}"
+BASE_URL="${API_BASE_URL:-${VITE_API_BASE_URL:-https://futballbackend-production-904b.up.railway.app}}"
 BASE_URL="${BASE_URL%/}"
 OUT_DIR="${1:-./fetch-report-$(date -u +%Y%m%dT%H%M%SZ)}"
 mkdir -p "$OUT_DIR/raw"
