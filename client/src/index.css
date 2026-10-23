@@ -3749,3 +3749,81 @@ html,body{background:#f5f6f7!important}
 .betslip-page .pb-success-rows span{color:rgba(255,255,255,.6)!important}
 .betslip-page .pb-success-rows b{color:#fff!important}
 .betslip-page .pb-success-rows .ret b{color:#00e85f!important}
+
+/* Bets page FULL NAVY (owner, 2026-10-23): the whole BetsCenter page —
+   BOTH tabs — goes dark on the ticket-slab material, superseding the
+   light workspace rules above and extending the history navy band
+   (65345e3) until there is no seam and no white stuff left in the page
+   body. Ground = the slab gradient on .bc-page itself, body/toolbars
+   transparent over it; cards are dark panels (#0e2148, light hairlines);
+   the status frames survive verbatim (WON 2px #00a651, CASHED_OUT 2px
+   #16854b, LOST 1px #efb0b4); the payout row is a deep-green translucent
+   panel with bright-green text; the CashoutPanel surface goes deep navy
+   too. BetsCenter's FULL NAVY layer restates these values — both layers
+   agree. Global chrome (header/nav/footer) is not touched. */
+.bc-page{background:linear-gradient(165deg,#10234a 0%,#0a1b3d 55%,#060f24 100%)!important;color:#f2f5fa!important}
+.bc-page .bc-tabs{border-bottom:1px solid rgba(255,255,255,.14)!important}
+.bc-page .bc-tabs button{color:rgba(255,255,255,.55)!important}
+.bc-page .bc-tabs button.active{color:#fff!important;border-bottom:3px solid #00a651!important}
+.bc-page .bc-toolbar{background:transparent!important;border:0!important}
+.bc-page.bc-history .bc-toolbar{background:transparent!important}
+.bc-page .bh-filter{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.22)!important;color:rgba(255,255,255,.75)!important;box-shadow:none!important}
+.bc-page .bh-filter select{color:#fff!important}
+.bc-page .bc-icon-btn{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.18)!important;color:rgba(255,255,255,.78)!important;box-shadow:none!important}
+.bc-page.bc-history .bh-filter{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.22)!important;color:rgba(255,255,255,.75)!important}
+.bc-page.bc-history .bc-icon-btn{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.18)!important;color:rgba(255,255,255,.78)!important}
+.bc-page .bc-auto-banner{background:rgba(0,166,81,.14)!important;border:1px solid rgba(0,166,81,.35)!important;color:#7bdca8!important;box-shadow:none!important}
+.bc-page .bc-chip{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.18)!important;color:rgba(255,255,255,.72)!important;box-shadow:none!important}
+.bc-page .bc-chip.active{background:#00a651!important;border-color:#00a651!important;color:#fff!important}
+.bc-page .bc-placement-success{background:rgba(0,166,81,.14)!important;border-color:rgba(0,166,81,.4)!important;color:#eaf7ee!important;box-shadow:none!important}
+.bc-page .bc-body{background:transparent!important;border-left:0!important;border-right:0!important}
+.bc-page.bc-history .bc-body{background:transparent!important}
+.bc-page .bc-pad,.bc-page .ob-empty{background:transparent!important;color:rgba(255,255,255,.62)!important}
+.bc-page .ob-empty svg{color:rgba(255,255,255,.45)!important}
+.bc-page .ob-empty h3{color:#fff!important}
+.bc-page .bc-body .muted{color:rgba(255,255,255,.62)!important}
+.bc-page.bc-history .bc-body .muted{color:rgba(255,255,255,.62)!important}
+.bc-page .gold-button{background:#00a651!important;color:#fff!important;box-shadow:none!important}
+.bc-page .bh-day-label{color:rgba(255,255,255,.62)!important}
+.bc-page .bh-day-label b{color:#fff!important}
+.bc-page .bh-card{background:#0e2148!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:none!important;color:#f2f5fa!important}
+.bc-page .bh-card-head,.bc-page .bh-card-head.bh-open-head{background:#12284e!important;color:#fff!important;border-bottom:1px solid rgba(255,255,255,.1)!important}
+.bc-page .bh-card-top .bh-type,.bc-page .bh-type{color:#fff!important}
+.bc-page .bh-type em{color:rgba(255,255,255,.55)!important}
+.bc-page .bh-ticket-link{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.22)!important;color:#00e85f!important}
+.bc-page .bh-totals{border-color:rgba(255,255,255,.14)!important}
+.bc-page .bh-totals span{color:rgba(255,255,255,.55)!important}
+.bc-page .bh-totals b{color:#fff!important}
+.bc-page .bh-return-won{color:#00e85f!important}
+.bc-page .bh-card .bh-totals .bh-payout-row{background:rgba(0,166,81,.16)!important;border-color:rgba(0,166,81,.4)!important;box-shadow:none!important}
+.bc-page .bh-card .bh-totals .bh-payout-row span{color:#7bdca8!important}
+.bc-page .bh-card .bh-totals .bh-payout-row b{color:#00e85f!important;text-shadow:none!important}
+.bc-page .bh-card.bh-won .bh-totals .bh-payout-row span{color:#7bdca8!important}
+.bc-page .bh-card.bh-won .bh-totals .bh-payout-row b{color:#00e85f!important;text-shadow:none!important}
+.bc-page .bh-match{color:#fff!important}
+.bc-page .bh-more{color:rgba(255,255,255,.55)!important}
+.bc-page .bh-card-foot{border-color:rgba(255,255,255,.14)!important;color:#00e85f!important}
+.bc-page .bh-dot{background:#00a651!important}
+.bc-page .bh-pill.bh-won{background:rgba(0,166,81,.2)!important;color:#00e85f!important}
+.bc-page .bh-pill.bh-cashed{background:rgba(22,133,75,.22)!important;color:#7bdca8!important}
+.bc-page .bh-pill.bh-lost,.bc-page .bh-pill.bh-void{background:rgba(255,255,255,.08)!important;color:rgba(255,255,255,.6)!important}
+.bc-page .bh-pill.bh-pending{background:rgba(255,176,32,.16)!important;color:#ffb020!important}
+.bc-page .bh-card.bh-won{border:2px solid #00a651!important}
+.bc-page .bh-card.bh-cashed{border:2px solid #16854b!important}
+.bc-page .bh-card.bh-lost{border:1px solid #efb0b4!important}
+.bc-page .bh-share,.bc-page .bh-toggle-details{color:#00e85f!important}
+.bc-page .bh-leg-check{background:#00a651!important}
+.bc-page .bh-leg-info b{color:#fff!important}
+.bc-page .bh-leg-info small{color:rgba(255,255,255,.55)!important}
+.bc-page .bh-leg-info .bh-open-kickoff{color:#e8b34b!important}
+.bc-page .bh-open-totals{border-color:rgba(255,255,255,.14)!important}
+.bc-page .bh-cashout-btn{background:#00a651!important;color:#fff!important;border:1px solid #00a651!important;box-shadow:none!important}
+.bc-page .bh-open-leg-head>b{color:#fff!important;text-shadow:none!important}
+.bc-page .bh-open-team-row{background:rgba(255,255,255,.045)!important;border:1px solid rgba(255,255,255,.09)!important;color:#fff!important;box-shadow:none!important}
+.bc-page .bh-open-team-row>span:not(.sb-crest){color:#fff!important;text-shadow:none!important}
+.bc-page .bh-open-team-row strong{background:transparent!important;border:0!important;color:#fff!important;box-shadow:none!important}
+.bc-page .bh-open-mapped-leg .bh-live-match{color:#ff858b!important}
+.bc-page .bh-open-mapped-leg .bh-live-match small{color:#ff858b!important}
+.bc-page .bh-open-mapped-leg .bh-live-match b{color:#fff!important}
+.bc-page .bh-open-mapped-leg .bh-live-match i{background:#ef4e5f!important;box-shadow:0 0 0 2px rgba(239,78,95,.12)!important}
+.bc-page .co-panel{background:#081226!important;border-color:rgba(255,255,255,.14)!important;color:#e8eef7!important}

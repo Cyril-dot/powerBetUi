@@ -625,6 +625,82 @@ function BetsCenterStyles() {
 	      .bc-page.bc-history .ob-empty svg{ color:rgba(255,255,255,.45); }
 	      .bc-page.bc-history .bc-pad{ background:transparent; }
 	      .bc-page.bc-history .bc-body .muted{ color:rgba(255,255,255,.62); }
+
+	      /* FULL NAVY bets page (owner, 2026-10-23): the navy leaves the
+	         history band and takes the WHOLE bets page — both tabs, one
+	         continuous slab-gradient ground, no seam, and no white stuff
+	         left in the page body. Cards become dark panels (#0E2148,
+	         light hairlines) with light text; the status system is
+	         preserved on dark — WON keeps its 2px #00A651 frame, CASHED_OUT
+	         2px #16854B, LOST its pale-red 1px — and the payout row becomes
+	         a deep-green translucent panel with bright-green text. The
+	         index.css workspace layer restates these values with
+	         !important — both layers agree. CashoutPanel surfaces are
+	         restated there too (.co-panel). */
+	      .bc-page{ background:linear-gradient(165deg,#10234A 0%,#0A1B3D 55%,#060F24 100%); color:#F2F5FA; }
+	      .bc-tabs{ border-bottom:1px solid rgba(255,255,255,.14); }
+	      .bc-tabs button{ color:rgba(255,255,255,.55); }
+	      .bc-tabs button.active{ color:#fff; border-bottom-color:#00A651; }
+	      .bc-toolbar{ background:transparent; border:0; }
+	      .bc-page.bc-history .bc-toolbar{ background:transparent; }
+	      .bh-filter{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.22); color:rgba(255,255,255,.75); }
+	      .bh-filter select{ color:#fff; }
+	      .bc-icon-btn{ background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); color:rgba(255,255,255,.78); }
+	      .bc-page.bc-history .bh-filter{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.22); color:rgba(255,255,255,.75); }
+	      .bc-page.bc-history .bc-icon-btn{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.18); color:rgba(255,255,255,.78); }
+	      .bc-auto-banner{ background:rgba(0,166,81,.14); border:1px solid rgba(0,166,81,.35); color:#7BDCA8; box-shadow:none; }
+	      .bc-auto-banner button{ color:rgba(255,255,255,.55); }
+	      .bc-chip{ background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); color:rgba(255,255,255,.72); }
+	      .bc-chip.active{ background:#00A651; border-color:#00A651; color:#fff; }
+	      .bc-placement-success{ background:rgba(0,166,81,.14); border-color:rgba(0,166,81,.4); color:#EAF7EE; box-shadow:none; }
+	      .bc-placement-success strong{ color:#fff; }
+	      .bc-placement-success div span{ color:rgba(255,255,255,.65); }
+	      .bc-placement-success button{ color:rgba(255,255,255,.65); }
+	      .bc-body{ background:transparent; }
+	      .bc-page.bc-history .bc-body{ background:transparent; }
+	      .bc-pad{ background:transparent; color:rgba(255,255,255,.62); }
+	      .bc-body .muted{ color:rgba(255,255,255,.62); }
+	      .ob-empty{ background:transparent; color:rgba(255,255,255,.62); }
+	      .ob-empty p{ color:rgba(255,255,255,.62); }
+	      .ob-empty svg{ color:rgba(255,255,255,.45); }
+	      .bh-day-label{ color:rgba(255,255,255,.62); }
+	      .bh-day-label b{ color:#fff; }
+	      .bh-card{ background:#0E2148; border:1px solid rgba(255,255,255,.14); box-shadow:none; color:#F2F5FA; }
+	      .bh-card:hover{ box-shadow:none; }
+	      .bh-card-head, .bh-card-head.bh-open-head{ background:#12284E; color:#fff; border-bottom:1px solid rgba(255,255,255,.1); }
+	      .bh-type{ color:#fff; }
+	      .bh-type em{ color:rgba(255,255,255,.55); }
+	      .bh-ticket-link{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.22); color:#00E85F; }
+	      .bh-ticket-link:hover{ background:rgba(0,166,81,.18); border-color:rgba(0,166,81,.45); }
+	      .bh-pill.bh-won{ background:rgba(0,166,81,.2); color:#00E85F; box-shadow:none; }
+	      .bh-pill.bh-cashed{ background:rgba(22,133,75,.22); color:#7BDCA8; box-shadow:none; }
+	      .bh-pill.bh-lost{ background:rgba(255,255,255,.08); color:rgba(255,255,255,.6); border:0; }
+	      .bh-pill.bh-void{ background:rgba(255,255,255,.08); color:rgba(255,255,255,.6); }
+	      .bh-pill.bh-pending{ background:rgba(255,176,32,.16); color:#FFB020; }
+	      .bh-totals{ border-bottom-color:rgba(255,255,255,.14); }
+	      .bh-totals span{ color:rgba(255,255,255,.55); }
+	      .bh-totals b{ color:#fff; }
+	      .bh-return-won{ color:#00E85F; }
+	      .bh-card .bh-totals .bh-payout-row,
+	      .bh-card.bh-won .bh-totals .bh-payout-row{
+	        background:rgba(0,166,81,.16)!important;
+	        border-color:rgba(0,166,81,.4)!important;
+	        box-shadow:none!important;
+	      }
+	      .bh-card .bh-totals .bh-payout-row span,
+	      .bh-card.bh-won .bh-totals .bh-payout-row span{ color:#7BDCA8!important; }
+	      .bh-card .bh-totals .bh-payout-row b,
+	      .bh-card.bh-won .bh-totals .bh-payout-row b,
+	      .bh-card.bh-won .bh-return-won{ color:#00E85F!important; text-shadow:none!important; }
+	      .bh-match{ color:#fff; }
+	      .bh-dot{ background:#00A651; box-shadow:none; }
+	      .bh-more{ color:rgba(255,255,255,.55); }
+	      .bh-card-foot{ border-top-color:rgba(255,255,255,.14); color:#00E85F; }
+	      .bh-open-totals{ border-top-color:rgba(255,255,255,.14); }
+	      .bh-leg-info b{ color:#fff; }
+	      .bh-leg-info small{ color:rgba(255,255,255,.55); }
+	      .bh-leg-info .bh-open-kickoff{ color:#E8B34B; }
+	      .bh-toggle-details{ color:#00E85F; }
     `}</style>
   );
 }
