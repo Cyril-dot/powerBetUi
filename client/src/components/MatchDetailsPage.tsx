@@ -19,9 +19,14 @@ function Countdown({ kickoffAt }: { kickoffAt?: string }) {
   return <span className="md-countdown">Starts in {days > 0 ? `${days}d ${hours}h` : `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`}</span>;
 }
 
+/** Readable market heading from the backend's market key
+ * ("half_time_result" → "Half Time Result"). */
+const marketTitle = (m: string) =>
+  m.replace(/_/g, " ").replace(/\s+/g, " ").trim().replace(/\b\w/g, (c) => c.toUpperCase());
+
 /** Generic simple-options grid — used for Half Time and any other market
  * that's just a flat list of selections (not the paired-line handicap shape
- * or the score-grid shape). */
+ * or the score-grid shape). Rendered as a SportyBet-style odds card. */
 function MarketGroup({
   group, market, matchId, picks, onPick, clickable, homeTeam, awayTeam,
 }: {
@@ -33,22 +38,25 @@ function MarketGroup({
     if (!clickable || !odd || odd <= 0) return;
     onPick({ id: matchId, match: `${homeTeam ?? ""} vs ${awayTeam ?? ""}`, market, selection: sel, odd, homeTeam, awayTeam });
   };
+  const wrap = group.options.length > 3;
   return (
-    <div className="md-market-section">
-      <div className="md-market-title">{group.market.replace(/_/g, " ")}</div>
-      <div className={`md-odds-row${group.options.length > 3 ? " md-odds-wrap" : ""}`}>
-        {group.options.map((opt) => (
-          <button
-            key={opt.label}
-            className={`sb-odd md-odd${isSel(opt.label) ? " sel" : ""}${!clickable ? " display-only" : ""}${opt.odd <= 0 ? " empty" : ""}`}
-            onClick={() => pick(opt.label, opt.odd)}
-            disabled={!clickable || opt.odd <= 0}
-            type="button"
-          >
-            <span>{opt.label}</span>
-            <b>{opt.odd > 0 ? opt.odd.toFixed(2) : "—"}</b>
-          </button>
-        ))}
+    <div className="md-card">
+      <div className="md-card-head">{marketTitle(group.market)}</div>
+      <div className="md-card-body">
+        <div className={`md-odds-row${wrap ? " md-odds-wrap" : ""}`}>
+          {group.options.map((opt) => (
+            <button
+              key={opt.label}
+              className={`sb-odd md-odd${isSel(opt.label) ? " sel" : ""}${!clickable ? " display-only" : ""}${opt.odd <= 0 ? " empty" : ""}`}
+              onClick={() => pick(opt.label, opt.odd)}
+              disabled={!clickable || opt.odd <= 0}
+              type="button"
+            >
+              <span>{opt.label}</span>
+              <b>{opt.odd > 0 ? opt.odd.toFixed(2) : "—"}</b>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -118,12 +126,14 @@ function CorrectScoreSection({
 
   if (!scores.length) return null;
   return (
-    <div className="md-market-section">
-      <div className="md-market-title">Correct Score</div>
-      <Group title={`${homeTeam ?? "Home"} win`} items={homeWins} />
-      <Group title="Draw" items={draws} />
-      <Group title={`${awayTeam ?? "Away"} win`} items={awayWins} />
-      <Group title="Other" items={other} />
+    <div className="md-card">
+      <div className="md-card-head">Correct Score</div>
+      <div className="md-card-body">
+        <Group title={`${homeTeam ?? "Home"} win`} items={homeWins} />
+        <Group title="Draw" items={draws} />
+        <Group title={`${awayTeam ?? "Away"} win`} items={awayWins} />
+        <Group title="Other" items={other} />
+      </div>
     </div>
   );
 }
@@ -143,8 +153,9 @@ function HandicapSection({
     onPick({ id: matchId, match: `${homeTeam ?? ""} vs ${awayTeam ?? ""}`, market, selection: sel, odd, homeTeam, awayTeam });
   };
   return (
-    <div className="md-market-section">
-      <div className="md-market-title">Handicap</div>
+    <div className="md-card">
+      <div className="md-card-head">Handicap</div>
+      <div className="md-card-body">
       {groups.map((group, gi) => (
         <div key={gi} className="md-hc-group">
           <div className="md-hc-line-label">{group.market}</div>
@@ -168,6 +179,7 @@ function HandicapSection({
           })}
         </div>
       ))}
+      </div>
     </div>
   );
 }
@@ -328,44 +340,46 @@ export default function MatchDetailsPage({ id, picks, onPick, sportHint, adminHi
         {!isBettableMatchId(match.id) && <p className="md-synth-note">This fixture is not currently available for betting. Please choose a match with current backend odds.</p>}
       </section>
 
-      <section className="panel simple-card md-markets">
-        <div className="module-title"><h3>Match Result</h3></div>
-        <div className="md-odds-row">
-          {slots.map(([label, name, val]) => (
-            <button
-              key={label as string}
-              className={`sb-odd md-odd${isSel(label as string) ? " sel" : ""}${!clickable ? " display-only" : ""}${!val || (val as number) <= 0 ? " empty" : ""}`}
-              onClick={() => clickable && pick(label as string, val as number)}
-              disabled={!clickable || !val || (val as number) <= 0}
-              type="button"
-            >
-              <span>{name}</span>
-              <b>{val && (val as number) > 0 ? (val as number).toFixed(2) : "—"}</b>
-            </button>
-          ))}
-        </div>
-
-        {oddsLoading ? (
-          <p className="muted" style={{ marginTop: 16, fontSize: 12 }}>Loading more markets…</p>
-        ) : (
-          <>
-            {allOdds?.oddsHalfTime && allOdds.oddsHalfTime.length > 0 && allOdds.oddsHalfTime.map((g, i) => (
-              <MarketGroup key={`ht-${i}`} group={g} market={g.market} matchId={match.id} picks={picks} onPick={onPick} clickable={clickable} homeTeam={match.homeTeam} awayTeam={match.awayTeam} />
+      <section className="md-card">
+        <div className="md-card-head">Match Result{hasDraw ? " · 1X2" : ""}</div>
+        <div className="md-card-body">
+          <div className="md-odds-row">
+            {slots.map(([label, name, val]) => (
+              <button
+                key={label as string}
+                className={`sb-odd md-odd${isSel(label as string) ? " sel" : ""}${!clickable ? " display-only" : ""}${!val || (val as number) <= 0 ? " empty" : ""}`}
+                onClick={() => clickable && pick(label as string, val as number)}
+                disabled={!clickable || !val || (val as number) <= 0}
+                type="button"
+              >
+                <span>{name}</span>
+                <b>{val && (val as number) > 0 ? (val as number).toFixed(2) : "—"}</b>
+              </button>
             ))}
-            {allOdds?.oddsCorrectScore && allOdds.oddsCorrectScore.length > 0 && (
-              <CorrectScoreSection groups={allOdds.oddsCorrectScore} matchId={match.id} picks={picks} onPick={onPick} clickable={clickable} homeTeam={match.homeTeam} awayTeam={match.awayTeam} />
-            )}
-            {allOdds?.oddsHandicap && allOdds.oddsHandicap.length > 0 && (
-              <HandicapSection groups={allOdds.oddsHandicap} matchId={match.id} picks={picks} onPick={onPick} clickable={clickable} homeTeam={match.homeTeam} awayTeam={match.awayTeam} />
-            )}
-            {(!allOdds || (allOdds.oddsHalfTime.length === 0 && allOdds.oddsCorrectScore.length === 0 && allOdds.oddsHandicap.length === 0)) && (
-              <p className="muted" style={{ marginTop: 14, fontSize: 12 }}>
-                No additional markets (half time, correct score, handicap) are available for this match yet — Match Result is the only market currently priced.
-              </p>
-            )}
-          </>
-        )}
+          </div>
+        </div>
       </section>
+
+      {oddsLoading ? (
+        <p className="muted" style={{ marginTop: 16, fontSize: 12 }}>Loading more markets…</p>
+      ) : (
+        <>
+          {allOdds?.oddsHalfTime && allOdds.oddsHalfTime.length > 0 && allOdds.oddsHalfTime.map((g, i) => (
+            <MarketGroup key={`ht-${i}`} group={g} market={g.market} matchId={match.id} picks={picks} onPick={onPick} clickable={clickable} homeTeam={match.homeTeam} awayTeam={match.awayTeam} />
+          ))}
+          {allOdds?.oddsCorrectScore && allOdds.oddsCorrectScore.length > 0 && (
+            <CorrectScoreSection groups={allOdds.oddsCorrectScore} matchId={match.id} picks={picks} onPick={onPick} clickable={clickable} homeTeam={match.homeTeam} awayTeam={match.awayTeam} />
+          )}
+          {allOdds?.oddsHandicap && allOdds.oddsHandicap.length > 0 && (
+            <HandicapSection groups={allOdds.oddsHandicap} matchId={match.id} picks={picks} onPick={onPick} clickable={clickable} homeTeam={match.homeTeam} awayTeam={match.awayTeam} />
+          )}
+          {(!allOdds || (allOdds.oddsHalfTime.length === 0 && allOdds.oddsCorrectScore.length === 0 && allOdds.oddsHandicap.length === 0)) && (
+            <p className="muted" style={{ marginTop: 14, fontSize: 12 }}>
+              No additional markets (half time, correct score, handicap) are available for this match yet — Match Result is the only market currently priced.
+            </p>
+          )}
+        </>
+      )}
 
     </main>
   );

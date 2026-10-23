@@ -112,3 +112,103 @@
   .sp-list .sp-compact .sp-obox { width: 52px; }
   .sp-list .sp-team { font-size: 14px; }
 }
+
+/* ── Match details page: SportyBet odds cards (owner, 2026-10-23) ────────
+   The match page's markets speak the same card language as the lists:
+   white cards with a grey header band (like .sp-ghead), pale-green odds
+   boxes (#E1F3E7) with bold dark-green prices, solid-green (#00A651)
+   selected state, Roboto throughout. NO blue in the odds UI.
+   NOTE on the !important flags: index.css carries several legacy
+   "white-and-blue theme" layers that pin .sb-odd / .md-odd / .md-cs-btn /
+   .md-hc-row to blue (#1e6bff selected, #eef5ff boxes) with !important, so
+   these scoped rules need !important + the .match-details-page prefix to
+   win on this page only — the same pattern the full-bleed breakout above
+   already uses. Other pages' .sb-odd surfaces are untouched. */
+.match-details-page .md-card {
+  --sp-green: #0B7A43; --sp-box: #E1F3E7; --sp-sel: #00A651;
+  background: #fff; border: 1px solid #e3e3e3; border-radius: 8px; overflow: hidden;
+  font-family: 'Roboto', Arial, sans-serif; color: #1d1d1d;
+  margin-top: 12px; -webkit-font-smoothing: antialiased;
+}
+.match-details-page .md-card button { font-family: 'Roboto', Arial, sans-serif; }
+.match-details-page .md-card-head {
+  background: #f1f1f1; border-bottom: 1px solid #e3e3e3;
+  padding: 9px 12px; font-size: 13px; font-weight: 700; color: #333;
+  display: flex; align-items: center; gap: 8px;
+}
+.match-details-page .md-card-body { padding: 10px 12px 12px; }
+/* flex row (not the legacy !important 3-col grid) so 2- and 3-option
+   markets split evenly and >3-option groups wrap into a grid */
+.match-details-page .md-card .md-odds-row {
+  display: flex !important; flex-wrap: wrap; gap: 8px !important; margin-top: 0 !important;
+}
+
+/* odds boxes — Match Result + the generic MarketGroup markets */
+.match-details-page .md-odd {
+  flex: 1 1 0; min-width: 0;
+  min-height: 54px !important; background: var(--sp-box) !important; border: none !important; border-radius: 4px !important;
+  flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 2px !important;
+  padding: 6px 4px !important; cursor: pointer; transform: none !important; opacity: 1 !important;
+  transition: background .14s ease;
+}
+.match-details-page .md-odds-wrap .md-odd { flex: 1 1 28%; }
+.match-details-page .md-odd span {
+  display: block !important; font-size: 10.5px !important; font-weight: 600 !important; color: #5f7267 !important;
+  text-align: center !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+.match-details-page .md-odd b { font-size: 16px !important; font-weight: 800 !important; color: var(--sp-green) !important; text-align: center !important; }
+.match-details-page .md-odd:hover:not(.display-only):not(.empty) { background: #cfedd9 !important; transform: none !important; }
+.match-details-page .md-odd.sel { background: var(--sp-sel) !important; border-color: var(--sp-sel) !important; box-shadow: none !important; }
+.match-details-page .md-odd.sel span { color: rgba(255,255,255,.85) !important; }
+.match-details-page .md-odd.sel b { color: #fff !important; }
+.match-details-page .md-odd.display-only { cursor: default !important; opacity: 1 !important; }
+.match-details-page .md-odd.empty { opacity: 1 !important; background: #edf3ef !important; cursor: default !important; }
+.match-details-page .md-odd.empty span { color: #a7b5ab !important; }
+.match-details-page .md-odd.empty b { color: #9db8a6 !important; }
+
+/* correct score grid */
+.match-details-page .md-cs-group { margin-bottom: 12px; }
+.match-details-page .md-cs-group:last-child { margin-bottom: 0; }
+.match-details-page .md-cs-head {
+  font-family: 'Roboto', Arial, sans-serif; font-size: 11px !important; font-weight: 700;
+  color: #777 !important; text-transform: none; letter-spacing: 0; margin: 2px 0 6px;
+}
+.match-details-page .md-cs-btn {
+  min-height: 46px; background: var(--sp-box) !important; border: none !important; border-radius: 4px !important;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  padding: 7px 4px; cursor: pointer; opacity: 1 !important; transition: background .14s ease;
+}
+.match-details-page .md-cs-btn span { font-family: 'Roboto', Arial, sans-serif; font-size: 12px; font-weight: 700; color: #26332b !important; }
+.match-details-page .md-cs-btn b { font-size: 12.5px; font-weight: 800; color: var(--sp-green) !important; }
+.match-details-page .md-cs-btn:hover:not(.display-only) { background: #cfedd9 !important; }
+.match-details-page .md-cs-btn.sel { background: var(--sp-sel) !important; }
+.match-details-page .md-cs-btn.sel span, .match-details-page .md-cs-btn.sel b { color: #fff !important; }
+.match-details-page .md-cs-btn.display-only { cursor: default !important; opacity: 1 !important; }
+
+/* handicap rows */
+.match-details-page .md-hc-group { margin-bottom: 10px; }
+.match-details-page .md-hc-group:last-child { margin-bottom: 0; }
+.match-details-page .md-hc-line-label {
+  font-family: 'Roboto', Arial, sans-serif; font-size: 11px !important; font-weight: 700;
+  color: #777 !important; text-transform: none; letter-spacing: 0; margin-bottom: 6px;
+}
+.match-details-page .md-hc-row {
+  min-height: 48px; background: var(--sp-box) !important; border: none !important; border-radius: 4px !important;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; padding: 10px 12px; margin-bottom: 6px; cursor: pointer; opacity: 1 !important;
+  transition: background .14s ease;
+}
+.match-details-page .md-hc-row:last-child { margin-bottom: 0; }
+.match-details-page .md-hc-team {
+  display: flex; flex-direction: row; align-items: baseline; gap: 6px;
+  font-family: 'Roboto', Arial, sans-serif; font-size: 13px; font-weight: 600; color: #26332b !important;
+  text-align: left; min-width: 0;
+}
+.match-details-page .md-hc-team em { font-style: normal; font-size: 11.5px; font-weight: 600; color: #5f7267 !important; }
+.match-details-page .md-hc-row b { font-family: 'Roboto', Arial, sans-serif; font-size: 15px !important; font-weight: 800; color: var(--sp-green) !important; flex: none; }
+.match-details-page .md-hc-row:hover:not(.display-only) { background: #cfedd9 !important; }
+.match-details-page .md-hc-row.sel { background: var(--sp-sel) !important; }
+.match-details-page .md-hc-row.sel .md-hc-team { color: #fff !important; }
+.match-details-page .md-hc-row.sel .md-hc-team em { color: rgba(255,255,255,.8) !important; }
+.match-details-page .md-hc-row.sel b { color: #fff !important; }
+.match-details-page .md-hc-row.display-only { cursor: default !important; opacity: 1 !important; }
