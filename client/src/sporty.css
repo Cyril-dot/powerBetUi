@@ -62,6 +62,8 @@
    generated initials crest when the image is missing or fails to load. */
 .sp-list .sp-crest { width: 20px; height: 20px; flex: none; display: inline-flex; align-items: center; justify-content: center; }
 .sp-list .sp-crest img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.sp-list .sp-crest-disc { border-radius: 50%; }
+.sp-list .sp-crest-initials { color: #fff; font-weight: 800; font-size: 8.5px; letter-spacing: -0.3px; line-height: 1; }
 .sp-list .sp-score-col { width: 22px; text-align: right; font-size: 14.5px; font-weight: 800; color: #111; line-height: 1.45; padding-right: 8px; flex: none; }
 .sp-list .sp-odds { display: flex; gap: 3px; flex: none; }
 .sp-list .sp-obox { width: 62px; height: 44px; background: var(--sp-box); display: flex; align-items: center; justify-content: center; gap: 4px; border: none; border-radius: 2px; cursor: pointer; padding: 0; }

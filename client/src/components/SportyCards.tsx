@@ -137,13 +137,34 @@ function SportyLiveClock({ match }: { match: EnrichedMatch }) {
  * If the image fails to load, fall back to the generated initials crest;
  * if even that fails, an initials disc.
  */
+/** Same palette as lib/sportsbook's generated crests, for the inline disc. */
+const CREST_DISC_PALETTE: [string, string][] = [
+  ["#2f6fd6", "#123b78"], ["#0B6E4F", "#043A2C"], ["#1D4ED8", "#0F2A6B"], ["#B4820F", "#6B4C08"],
+  ["#7C3AED", "#3F1D75"], ["#0F766E", "#08403C"], ["#2f6fd6", "#123b78"], ["#334155", "#1A2230"],
+];
+
 function TeamMark({ logo, name }: { logo?: string; name: string }) {
   const [failed, setFailed] = useState(false);
   const [crestFailed, setCrestFailed] = useState(false);
   useEffect(() => { setFailed(false); setCrestFailed(false); }, [logo]);
   if (!logo || failed) {
     // No feed logo, or it failed to load → the generated initials crest.
-    if (crestFailed) return <span className="sp-crest" aria-hidden="true" />;
+    if (crestFailed) {
+      // Enforcement net (owner, 2026-10-23): a card NEVER renders without a
+      // crest — if even the generated crest image somehow failed, draw the
+      // same initials disc inline (a DOM node cannot fail to load).
+      const words = name.trim().split(/\s+/).filter(Boolean);
+      const initials = words.length === 0 ? "?" : words.length === 1 ? words[0].slice(0, 2).toUpperCase() : (words[0][0] + words[words.length - 1][0]).toUpperCase();
+      let h = 0;
+      const lower = name.trim().toLowerCase();
+      for (let i = 0; i < lower.length; i++) h = (h * 31 + lower.charCodeAt(i)) >>> 0;
+      const [from, to] = CREST_DISC_PALETTE[h % CREST_DISC_PALETTE.length];
+      return (
+        <span className="sp-crest sp-crest-disc" aria-hidden="true" style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}>
+          <span className="sp-crest-initials">{initials}</span>
+        </span>
+      );
+    }
     return (
       <span className="sp-crest" aria-hidden="true">
         <img src={generateCrest(name)} alt="" loading="lazy" decoding="async" draggable={false} referrerPolicy="no-referrer" onError={() => setCrestFailed(true)} />
