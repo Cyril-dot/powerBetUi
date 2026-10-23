@@ -21,27 +21,35 @@
 .sp-list *, .sp-list .sp-match * { box-sizing: border-box; }
 .sp-list button, .sp-list .sp-match button { font-family: 'Roboto', Arial, sans-serif; }
 
+/* ── Card type scale (owner, 2026-10-23: "team name sizing is too big
+   on mobile — impress me"). Mobile-first, SportyBet-modest: team names
+   14px/500 on a tight 1.35 rhythm shared with the score column, prices
+   14.5px/800 in 40px boxes (still the boldest element on the card),
+   meta 11px, group band 12.5px, column heads 10.5px, tabs 12px.
+   Desktop (≥961px) gets a presence bump at the end of this section so
+   the shared system doesn't shrink there. ─────────────────────────── */
+
 /* market tab strip */
 .sp-list .sp-tabs { display: flex; padding: 0 6px; border-bottom: 1px solid #e6e6e6; background: #fff; overflow-x: auto; scrollbar-width: none; }
 .sp-list .sp-tabs::-webkit-scrollbar { display: none; }
-.sp-list .sp-tab { font-size: 12.5px; font-weight: 600; color: #555; padding: 10px 9px 9px; position: relative; white-space: nowrap; background: none; border: none; cursor: pointer; flex: none; }
+.sp-list .sp-tab { font-size: 12px; font-weight: 600; color: #555; padding: 10px 9px 9px; position: relative; white-space: nowrap; background: none; border: none; cursor: pointer; flex: none; }
 .sp-list .sp-tab.on { color: #111; font-weight: 700; }
 .sp-list .sp-tab.on::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: 0; height: 3px; background: #00a651; border-radius: 2px 2px 0 0; }
 
 /* date / group header */
 .sp-list .sp-ghead { display: flex; align-items: center; background: var(--sp-head); padding: 8px 12px; border-bottom: 1px solid #e3e3e3; }
-.sp-list .sp-ghead .sp-dt { font-size: 13px; font-weight: 700; color: #333; display: inline-flex; align-items: center; min-width: 0; }
+.sp-list .sp-ghead .sp-dt { font-size: 12.5px; font-weight: 700; color: #333; display: inline-flex; align-items: center; min-width: 0; }
 .sp-list .sp-ghead .sp-cols { margin-left: auto; display: flex; flex: none; }
-.sp-list .sp-ghead .sp-cols span { width: 62px; text-align: center; font-size: 11px; color: #777; }
+.sp-list .sp-ghead .sp-cols span { width: 62px; text-align: center; font-size: 10.5px; letter-spacing: .03em; color: #777; }
 .sp-list .sp-ghead .sp-cols span + span { margin-left: 3px; }
 .sp-list .sp-livedot { width: 7px; height: 7px; border-radius: 50%; background: #e02b20; display: inline-block; margin-right: 6px; flex: none; animation: sp-pl 1.6s infinite; }
 @keyframes sp-pl { 0%, 100% { box-shadow: 0 0 0 0 rgba(224, 43, 32, .45); } 55% { box-shadow: 0 0 0 5px rgba(224, 43, 32, 0); } }
 
 /* match card */
-.sp-list .sp-match { padding: 10px 12px 12px; border-bottom: 1px solid #e8e8e8; background: #fff; }
+.sp-list .sp-match { padding: 9px 12px 11px; border-bottom: 1px solid #e8e8e8; background: #fff; }
 .sp-list .sp-match:last-child { border-bottom: none; }
-.sp-list .sp-meta { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: #777; white-space: nowrap; overflow: hidden; }
-.sp-list .sp-ribbon { display: inline-flex; align-items: center; gap: 3px; font-size: 9.5px; font-weight: 800; font-style: italic; color: #fff; padding: 2.5px 8px 2.5px 6px; transform: skewX(-12deg); border-radius: 2px; letter-spacing: .4px; flex: none; }
+.sp-list .sp-meta { display: flex; align-items: center; gap: 7px; font-size: 11px; color: #777; white-space: nowrap; overflow: hidden; }
+.sp-list .sp-ribbon { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 800; font-style: italic; color: #fff; padding: 2px 7px 2px 5px; transform: skewX(-12deg); border-radius: 2px; letter-spacing: .4px; flex: none; }
 .sp-list .sp-ribbon.sp-hot { background: linear-gradient(90deg, #f2491d, #ff7a1a); }
 .sp-list .sp-ribbon.sp-special { background: linear-gradient(90deg, #7c3aed, #a855f7); }
 .sp-list .sp-meta .sp-tm { font-weight: 700; color: #444; flex: none; }
@@ -53,23 +61,23 @@
 .sp-list .sp-fav { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin: -4px -6px -4px 0; background: none; border: none; cursor: pointer; color: #c3cbd2; padding: 0; }
 .sp-list .sp-fav.active { color: #f5a623; }
 
-.sp-list .sp-teams-row { display: flex; align-items: flex-start; margin-top: 8px; }
+.sp-list .sp-teams-row { display: flex; align-items: flex-start; margin-top: 7px; }
 .sp-list .sp-teams { flex: 1; min-width: 0; text-decoration: none; color: inherit; display: block; }
-.sp-list .sp-team { font-size: 14.5px; font-weight: 500; color: #3a4450; line-height: 1.45; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.sp-list .sp-team { font-size: 14px; font-weight: 500; color: #3a4450; line-height: 1.35; display: flex; align-items: center; gap: 7px; min-width: 0; }
 .sp-list .sp-team-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 /* Team crest on Today/Upcoming cards (owner, 2026-10-22): the real logo
    URL the feed carries (displayHomeLogo/displayAwayLogo), swapped for the
    generated initials crest when the image is missing or fails to load. */
-.sp-list .sp-crest { width: 20px; height: 20px; flex: none; display: inline-flex; align-items: center; justify-content: center; }
+.sp-list .sp-crest { width: 18px; height: 18px; flex: none; display: inline-flex; align-items: center; justify-content: center; }
 .sp-list .sp-crest img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .sp-list .sp-crest-disc { border-radius: 50%; }
-.sp-list .sp-crest-initials { color: #fff; font-weight: 800; font-size: 8.5px; letter-spacing: -0.3px; line-height: 1; }
-.sp-list .sp-score-col { width: 22px; text-align: right; font-size: 14.5px; font-weight: 800; color: #111; line-height: 1.45; padding-right: 8px; flex: none; }
+.sp-list .sp-crest-initials { color: #fff; font-weight: 800; font-size: 8px; letter-spacing: -0.3px; line-height: 1; }
+.sp-list .sp-score-col { width: 20px; text-align: right; font-size: 13.5px; font-weight: 700; color: #111; line-height: 1.35; padding-right: 7px; flex: none; }
 .sp-list .sp-odds { display: flex; gap: 3px; flex: none; }
-.sp-list .sp-obox { width: 62px; height: 44px; background: var(--sp-box); display: flex; align-items: center; justify-content: center; gap: 4px; border: none; border-radius: 2px; cursor: pointer; padding: 0; }
+.sp-list .sp-obox { width: 62px; height: 40px; background: var(--sp-box); display: flex; align-items: center; justify-content: center; gap: 4px; border: none; border-radius: 2px; cursor: pointer; padding: 0; }
 .sp-list .sp-obox.sp-line { background: var(--sp-box-line); cursor: default; }
-.sp-list .sp-obox .sp-pr { font-size: 15px; font-weight: 800; color: var(--sp-green); display: inline-flex; align-items: center; gap: 3px; }
-.sp-list .sp-obox .sp-ln { font-size: 14px; font-weight: 800; color: #333; }
+.sp-list .sp-obox .sp-pr { font-size: 14.5px; font-weight: 800; color: var(--sp-green); display: inline-flex; align-items: center; gap: 3px; }
+.sp-list .sp-obox .sp-ln { font-size: 13px; font-weight: 700; color: #333; }
 .sp-list .sp-obox:disabled { cursor: default; }
 .sp-list .sp-obox:disabled .sp-pr { color: #9db8a6; }
 .sp-list .sp-obox.sel { background: var(--sp-sel); }
@@ -78,13 +86,14 @@
 .sp-list .sp-move.up { color: #00a651; }
 .sp-list .sp-move.down { color: #e02b20; }
 .sp-list .sp-obox.sel .sp-move { color: #fff; }
-.sp-list .sp-ended-note { display: inline-flex; align-items: center; gap: 3px; margin-top: 8px; font-size: 12px; font-weight: 600; color: var(--sp-green); text-decoration: none; }
+.sp-list .sp-ended-note { display: inline-flex; align-items: center; gap: 3px; margin-top: 8px; font-size: 11.5px; font-weight: 600; color: var(--sp-green); text-decoration: none; }
 
 /* rail slide variant (Top-10 rail): narrower boxes so the card fits a slide */
 .sp-slide { flex: 0 0 86%; max-width: 330px; scroll-snap-align: start; min-width: 0; }
-.sp-list .sp-compact .sp-obox { width: 54px; }
-.sp-list .sp-compact .sp-team { font-size: 13.5px; }
-.sp-list .sp-compact .sp-meta { font-size: 11px; }
+.sp-list .sp-compact .sp-obox { width: 54px; height: 38px; }
+.sp-list .sp-compact .sp-obox .sp-pr { font-size: 14px; }
+.sp-list .sp-compact .sp-team { font-size: 13px; }
+.sp-list .sp-compact .sp-meta { font-size: 10.5px; }
 
 /* Sportsbook sections full-bleed on the single-column layout: the
    sections break out of the .wrap page padding and shed the floating-
@@ -110,7 +119,21 @@
   .sp-list .sp-obox { width: 58px; }
   .sp-list .sp-ghead .sp-cols span { width: 58px; }
   .sp-list .sp-compact .sp-obox { width: 52px; }
-  .sp-list .sp-team { font-size: 14px; }
+}
+
+/* desktop presence: the scale above is mobile-first, so wider viewports
+   step everything up a touch instead of inheriting the mobile sizes */
+@media (min-width: 961px) {
+  .sp-list .sp-team { font-size: 15px; }
+  .sp-list .sp-crest { width: 20px; height: 20px; }
+  .sp-list .sp-crest-initials { font-size: 8.5px; }
+  .sp-list .sp-score-col { font-size: 14.5px; }
+  .sp-list .sp-obox { width: 64px; height: 44px; }
+  .sp-list .sp-obox .sp-pr { font-size: 15.5px; }
+  .sp-list .sp-meta { font-size: 11.5px; }
+  .sp-list .sp-compact .sp-team { font-size: 14px; }
+  .sp-list .sp-compact .sp-obox { width: 56px; height: 40px; }
+  .sp-list .sp-compact .sp-obox .sp-pr { font-size: 14.5px; }
 }
 
 /* ── Match details page: SportyBet odds cards (owner, 2026-10-23) ────────
