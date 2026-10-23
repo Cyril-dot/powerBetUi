@@ -279,5 +279,72 @@
 .spage .sb-wrap .panel { box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 .spage .sb-wrap .panel::before, .spage .sb-wrap .panel:before { display: none !important; }
 .spage .sb-wrap button, .spage .sb-wrap .t10-chip, .spage .sb-wrap .sb-odd { box-shadow: none !important; }
-.spage .sb-wrap .t10-chip.active { background: #ffc531 !important; }
-.spage .sb-wrap .sb-odd.sel { background: #1e6bff !important; box-shadow: none !important; }
+.spage .sb-wrap .t10-chip.active { background: #00a651 !important; }
+.spage .sb-wrap .sb-odd.sel { background: #00a651 !important; box-shadow: none !important; }
+
+/* colour coherence, sports/live scope only (owner, 2026-10-23): the
+   board chrome around the SportyBet lists still carried the old themes —
+   a black live slab, blue date/icon pills, gold Top-10 chips, rainbow
+   A–Z icon chips and near-white section titles on white panels. All of
+   it now uses the one PlayBet system the rest of the page already has:
+   white/#f1f1f1 surfaces, #e3e3e3 hairlines, #1d1d1d/#555 text, and the
+   SportyBet greens (#e1f3e7 / #0b7a43 / #00a651). No layout changes. */
+.spage .sb-wrap .panel { border-color: #e3e3e3 !important; }
+.spage .sp-slide .sp-list { border-radius: 8px; }
+
+/* section heads (Upcoming / Ended / Special shells) match the A–Z card head */
+.spage .sb-section-head { background: #f1f1f1 !important; border-bottom: 1px solid #e3e3e3 !important; }
+.spage .sb-section-title { color: #1d1d1d !important; font-family: 'Roboto', Arial, sans-serif !important; font-size: 13px !important; letter-spacing: .02em; }
+.spage .sb-section-title b { color: #8a8a8a !important; }
+.spage .sb-section-title svg { color: #0b7a43 !important; }
+.spage .sb-special-tag { background: #e1f3e7; color: #0b7a43; }
+
+/* live section: light shell like the homepage, no black slab */
+.spage .sb-live-section.sb-live-dark { background: #fff !important; background-color: #fff !important; border: 1px solid #e3e3e3 !important; border-radius: 8px !important; color: #1d1d1d !important; }
+.spage .sb-live-dark .sb-section-head.live-head { background: #f1f1f1 !important; border-bottom: 1px solid #e3e3e3 !important; }
+.spage .live-head-title { color: #1d1d1d !important; font-family: 'Roboto', Arial, sans-serif; text-transform: none; letter-spacing: 0; font-size: 15px; }
+.spage .live-head-title svg { color: #0b7a43; }
+.spage .live-head-title b { color: #8a8a8a !important; }
+.spage .live-head-pill { background: #e1f3e7; border: 1px solid #d5eddd; color: #0b7a43; }
+.spage .sb-live-dark .sb-section-body.live-body { background: #fff !important; padding: 0 !important; }
+.spage .sb-live-section .sb-section-title { color: #1d1d1d !important; }
+.spage .sb-live-section .live-pulse { background: #e1f3e7 !important; color: #0b7a43 !important; border: 1px solid #d5eddd !important; box-shadow: none !important; }
+.spage .live-empty { color: #555 !important; padding: 16px 14px; }
+.spage .live-load-more { background: #fff; border: 1px solid #e3e3e3; color: #0b7a43; border-radius: 8px; }
+.spage .live-load-more:hover { background: #f6faf7; }
+.spage .sb-live-dark .sb-skel-block { background: #eef1f3 !important; }
+
+/* Today head: blue disc/pill and condensed type join the system */
+.spage .fm-head { border-bottom-color: #e3e3e3; }
+.spage .fm-ball-icon { background: #e1f3e7; color: #0b7a43; }
+.spage .fm-title { font-family: 'Roboto', Arial, sans-serif; font-size: 16px; letter-spacing: 0; text-transform: none; color: #1d1d1d; }
+.spage .fm-sub { color: #8a8a8a; }
+.spage .fm-tag { background: #e1f3e7; color: #0b7a43; }
+
+/* Top-10 chips: gold out, green system in */
+.spage .t10-chip { background: #fff; border-color: #e3e3e3; color: #3a4450; }
+.spage .t10-chip b { background: #f1f1f1; color: #666; }
+.spage .t10-chip.active { border-color: #00a651; color: #fff; }
+.spage .t10-chip.active b { background: rgba(255, 255, 255, .25); color: #fff; }
+
+/* featured carousel: dark header bar and dark odds buttons join the system */
+.spage .featured-carousel-hdr { background: #f1f1f1; border: 1px solid #e3e3e3; border-radius: 8px; }
+.spage .featured-carousel-hdr-icon { color: #0b7a43; }
+.spage .featured-carousel-hdr-text { color: #333; font-family: 'Roboto', Arial, sans-serif; letter-spacing: .02em; }
+.spage .featured-carousel-hdr-count { background: #00a651; color: #fff; border-radius: 999px; }
+.spage .featured-card { background: #fff; border: 1px solid #e3e3e3; border-radius: 8px; }
+.spage .sb-wrap .sb-odd { background: #e1f3e7 !important; border-color: #d5eddd !important; }
+.spage .sb-wrap .sb-odd span { color: #6f8b7a !important; }
+.spage .sb-wrap .sb-odd b { color: #0b7a43 !important; }
+.spage .sb-wrap .sb-odd.sel { border-color: #00a651 !important; }
+.spage .sb-wrap .sb-odd.sel span, .spage .sb-wrap .sb-odd.sel b { color: #fff !important; }
+
+/* load-more + error banner: dark/blue legacy out */
+.spage .sb-load-more { background: #fff; border: 1px solid #e3e3e3; color: #0b7a43; border-radius: 8px; }
+.spage .sb-error-banner { background: #fdf3f3 !important; border: 1px solid #eccaca !important; color: #6e2b2b; }
+.spage .sb-error-banner svg { color: #b3261e; }
+.spage .sb-error-banner span { color: #8a5555; }
+.spage .sb-error-banner button { background: #b3261e; }
+
+/* A–Z chevrons: a touch darker so they read on white */
+.spage-az-chev { color: #9aa0a8; }

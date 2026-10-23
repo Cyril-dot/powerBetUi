@@ -96,7 +96,7 @@ export default function SportsPage({ picks, onPick }: { picks: Pick[]; onPick: (
                     onClick={() => changeSport(t.key)}
                     aria-current={isActive ? "true" : undefined}
                   >
-                    <span className="spage-az-icon" style={{ background: `${t.swatch}1a`, color: t.swatch }}><Icon size={15} /></span>
+                    <span className="spage-az-icon" style={{ background: "#e1f3e7", color: "#0b7a43" }}><Icon size={15} /></span>
                     <span className="spage-az-label">{t.label}</span>
                     {isActive && counts.live > 0 && <i className="spage-livedot" aria-hidden="true" />}
                     <ChevronRight size={15} className="spage-az-chev" aria-hidden="true" />
@@ -142,7 +142,7 @@ export default function SportsPage({ picks, onPick }: { picks: Pick[]; onPick: (
           {favoriteMatches.length > 0 && (
             <section className="spage-card" aria-label="Favorites">
               <div className="spage-card-head"><Star size={14} /> Favorites</div>
-              <p className="spage-empty" style={{ padding: "10px 14px 12px" }}>{favoriteMatches.length} favorite match{favoriteMatches.length === 1 ? "" : "es"} — view on the <a href="/favorites" style={{ color: "var(--gold-hi)", fontWeight: 800 }}>Favorites page</a>.</p>
+              <p className="spage-empty" style={{ padding: "10px 14px 12px" }}>{favoriteMatches.length} favorite match{favoriteMatches.length === 1 ? "" : "es"} — view on the <a href="/favorites" style={{ color: "#0b7a43", fontWeight: 800 }}>Favorites page</a>.</p>
             </section>
           )}
         </aside>
