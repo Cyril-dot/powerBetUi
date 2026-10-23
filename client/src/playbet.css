@@ -24,7 +24,7 @@
 .pb-hdr1-in{max-width:1180px;margin:0 auto;padding:0 16px;height:50px;display:flex;align-items:center;gap:18px}
 .pb-hdr1-logo{display:flex;align-items:center;flex:none}
 .pb-hdr1-logo img{height:27px;width:auto}
-.pb-ftr .pb-logo-img{height:40px;width:auto}
+.pb-ftr .pb-logo-img{height:26px;width:auto}
 .pb-hdr1-nav{display:flex;gap:16px;margin-left:6px}
 .pb-hdr1-nav a{color:#fff;font-size:13.5px;font-weight:500;opacity:.95;padding:6px 2px;position:relative;white-space:nowrap}
 .pb-hdr1-nav a.pb-on{font-weight:700}
@@ -252,22 +252,26 @@
 .pb-winner-amt{font-family:var(--pb-disp);font-weight:800;font-size:14px;color:var(--pb-navy-850);white-space:nowrap}
 
 /* ── FOOTER ───────────────────────────────────────────── */
-.pb-ftr{background:var(--pb-navy-950);color:#A9BBDD;padding:21px 0 92px;border-top:3px solid var(--pb-green)}
-.pb-ftr-in{max-width:1180px;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:1.2fr 2fr;gap:18px}
-.pb-ftr-tag{font-size:13px;line-height:1.5;margin:8px 0 10px;max-width:32ch}
-.pb-ftr-social{display:flex;gap:9px}
-.pb-ftr-social a{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#C9D6EE}
-.pb-ftr-social svg{width:16px;height:16px}
-.pb-ftr-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.pb-ftr-cols h4{font-family:var(--pb-disp);color:#fff;font-size:13px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:7px}
-.pb-ftr-cols a{display:block;font-size:13px;padding:3px 0}
+.pb-ftr{background:var(--pb-navy-950);color:#A9BBDD;padding:10px 0 calc(69px + env(safe-area-inset-bottom,0px));border-top:3px solid var(--pb-green)}
+.pb-ftr-in{max-width:1180px;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:1.2fr 2fr;gap:12px}
+.pb-ftr-tag{font-size:12.5px;line-height:1.4;margin:0;grid-area:tag}
+.pb-ftr-brand{display:grid;grid-template-columns:1fr auto;grid-template-areas:"logo social" "tag tag";align-items:center;row-gap:6px}
+.pb-ftr-brand .pb-logo-img{grid-area:logo;justify-self:start}
+.pb-ftr-social{display:flex;gap:7px;grid-area:social}
+.pb-ftr-social a{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#C9D6EE}
+.pb-ftr-social svg{width:13px;height:13px}
+.pb-ftr-cols{display:grid;grid-template-columns:.9fr .95fr 1.15fr;gap:10px}
+.pb-ftr-cols h4{font-family:var(--pb-disp);color:#fff;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:4px;line-height:1.3}
+.pb-ftr-cols a{display:block;font-size:12.5px;line-height:1.3;padding:1px 0}
 .pb-ftr-cols a:hover{color:var(--pb-green)}
-.pb-ftr-pay{max-width:1180px;margin:14px auto 0;padding:10px 16px 0;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pb-ftr-pay{max-width:1180px;margin:8px auto 0;padding:7px 16px 0;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .pb-ftr-pay>span{font:700 10.5px var(--pb-mono);letter-spacing:1.6px;text-transform:uppercase;color:#7188AF}
-.pb-pay-grid{display:flex;gap:8px;flex-wrap:wrap}
-.pb-pay{font-size:11.5px;font-weight:700;color:#D7E2F4;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);border-radius:9px;padding:6px 11px}
-.pb-ftr-legal{max-width:1180px;margin:0 auto;padding:10px 16px 0;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;font-size:11.5px;color:#7188AF;line-height:1.5}
-.pb-ftr-18{flex:none;width:38px;height:38px;border-radius:50%;border:2px solid var(--pb-green);color:var(--pb-green);display:grid;place-items:center;font-weight:800;font-size:12px}
+.pb-pay-grid{display:flex;gap:6px;flex-wrap:wrap}
+.pb-pay{font-size:11px;font-weight:700;color:#D7E2F4;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);border-radius:8px;padding:4px 8px}
+.pb-ftr-legal{max-width:1180px;margin:0 auto;padding:7px 16px 0;display:flex;gap:6px 10px;align-items:flex-start;flex-wrap:wrap;font-size:11px;color:#7188AF;line-height:1.4}
+.pb-ftr-legal p{margin:0}
+.pb-ftr-legal p:first-of-type{flex:1 1 0;min-width:0}
+.pb-ftr-18{flex:none;width:32px;height:32px;border-radius:50%;border:2px solid var(--pb-green);color:var(--pb-green);display:grid;place-items:center;font-weight:800;font-size:11px}
 @media(max-width:760px){.pb-ftr-in{grid-template-columns:1fr}}
 
 /* ── floating mobile nav ──────────────────────────────── */
@@ -340,12 +344,13 @@ body .mobile-bottom-nav{background:#fff;border-top:1px solid #ddd;box-shadow:0 -
 .mobile-bottom-nav .mbn-item .mbn-icon-wrap{color:inherit;display:flex;position:relative}
 .mobile-bottom-nav .mbn-item.active .mbn-icon-wrap{color:#00A651}
 .mobile-bottom-nav .mbn-label{letter-spacing:0}
-.mbn-count{position:absolute;top:-6px;right:-11px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#00A651;color:#fff;font-size:9px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
 
-/* ── Floating betslip button — the 7up flow (owner, 2026-10-22): a circular
-   green button anchored bottom-right above the bottom nav with a white
-   count pill; it appears once there's a selection, can be dragged anywhere
-   (position persists), and a tap opens the betslip. ── */
+/* ── Floating betslip button — the 7up flow (owner, 2026-10-22; spec update
+   2026-10-23): a circular green button anchored bottom-right above the
+   bottom nav, ALWAYS visible; the white count pill shows only when there
+   is at least one selection. It can be dragged anywhere (position persists,
+   clamped into the viewport on load/resize), and a tap opens the
+   booking-code page. ── */
 .pb-slip-fab{position:fixed;right:14px;bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:120;width:52px;height:52px;border-radius:50%;border:0;padding:0;background:linear-gradient(135deg,#00A651,#076e37);box-shadow:0 6px 16px rgba(0,166,81,.45);color:#fff;display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;animation:fab-pop .22s ease}
 .pb-slip-fab.dragging{cursor:grabbing;box-shadow:0 10px 24px rgba(0,166,81,.55)}
 .pb-slip-fab-n{position:absolute;top:-5px;right:-5px;min-width:22px;height:22px;border-radius:999px;background:#fff;color:#07823e;font-size:12px;font-weight:800;line-height:1;display:flex;align-items:center;justify-content:center;padding:0 6px;box-shadow:0 2px 6px rgba(0,0,0,.25);font-family:Roboto,Arial,sans-serif}
