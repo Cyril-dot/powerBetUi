@@ -1825,6 +1825,27 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .bh-leg-check{background:#00a651!important}
 .bh-cashout-btn{background:#00a651!important;color:#fff!important;border:1px solid #00a651!important;box-shadow:none!important}
 
+/* History navy band (owner, 2026-10-23): the Bet History section —
+   toolbar + days list — takes the ticket-details slab's deep-navy
+   material: the toolbar sits flat in the slab gradient's top tone
+   (#10234a) and the body carries the gradient itself
+   (#10234a → #0a1b3d → #060f24), so the two read as one continuous
+   band. Text and controls outside the cards go light-on-navy; the
+   white history cards and their WON/CASHED/LOST borders above are
+   untouched. The same rules are restated in BetsCenter's own final
+   layer — both layers agree. Scoped to .bc-history (history tab
+   only); the open/live bets list keeps the light ground. */
+.bc-page.bc-history .bc-toolbar{background:#10234a!important;border-top:0!important;border-bottom:0!important;margin-top:0!important;border-radius:0!important}
+.bc-page.bc-history .bc-body{background:linear-gradient(165deg,#10234a 0%,#0a1b3d 55%,#060f24 100%)!important;border-left:0!important;border-right:0!important}
+.bc-page.bc-history .bh-filter{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.22)!important;color:rgba(255,255,255,.75)!important}
+.bc-page.bc-history .bh-filter select{color:#fff!important}
+.bc-page.bc-history .bc-icon-btn{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.18)!important;color:rgba(255,255,255,.78)!important}
+.bc-page.bc-history .bh-day-label{color:rgba(255,255,255,.62)!important}
+.bc-page.bc-history .bh-day-label b{color:#fff!important}
+.bc-page.bc-history .ob-empty,.bc-page.bc-history .bc-pad{background:transparent!important;color:rgba(255,255,255,.62)!important}
+.bc-page.bc-history .ob-empty svg{color:rgba(255,255,255,.45)!important}
+.bc-page.bc-history .bc-body .muted{color:rgba(255,255,255,.62)!important}
+
 /* Consistent page structure for Booking Code and Betslip */
 .simple-page,.betslip-page{background:#f5f6f7!important}
 .simple-page .simple-hero,.betslip-page .bp-header{max-width:1180px!important;margin-left:auto!important;margin-right:auto!important}

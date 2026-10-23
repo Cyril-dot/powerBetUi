@@ -284,7 +284,7 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
   const clearFilters = () => { setStatusFilter("ALL"); setResultFilter("ALL"); };
 
   return (
-    <div className="bc-page">
+    <div className={tab === "history" ? "bc-page bc-history" : "bc-page"}>
       <BetsCenterStyles />
 
       <div className="bc-tabs">
@@ -603,6 +603,28 @@ function BetsCenterStyles() {
 	      .bh-card .bh-totals .bh-payout-row b{ font-size:1rem!important; font-weight:900!important; }
 
 	      @media(max-width:560px){ .bh-card-head{ padding:8px 13px; } .bh-card-body{ padding:8px 13px 10px; } .bh-totals .bh-payout-row{ padding:8px 10px; } .bh-totals .bh-payout-row b{ max-width:64%; font-size:.94rem; } }
+
+	      /* History navy band (owner, 2026-10-23): the whole history
+	         section — toolbar + days list — sits on the same deep-navy
+	         material as the ticket-details slab. The toolbar takes the
+	         slab gradient's top tone (#10234A) flat and the body carries
+	         the gradient itself (#10234A → #0A1B3D → #060F24), so the
+	         two read as one continuous band; the white history cards
+	         and their status borders ride on it unchanged. The
+	         index.css workspace layer restates these rules with
+	         !important — both layers must stay in agreement. */
+	      .bc-page.bc-history .bc-toolbar{ background:#10234A; border-top:0; border-bottom:0; margin-top:0; border-radius:0; }
+	      .bc-page.bc-history .bh-filter{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.22); color:rgba(255,255,255,.75); }
+	      .bc-page.bc-history .bh-filter select{ color:#fff; }
+	      .bc-page.bc-history .bc-icon-btn{ background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); color:rgba(255,255,255,.78); }
+	      .bc-page.bc-history .bc-body{ background:linear-gradient(165deg,#10234A 0%,#0A1B3D 55%,#060F24 100%); border-left:0; border-right:0; }
+	      .bc-page.bc-history .bh-day-label{ color:rgba(255,255,255,.62); }
+	      .bc-page.bc-history .bh-day-label b{ color:#fff; }
+	      .bc-page.bc-history .ob-empty{ background:transparent; color:rgba(255,255,255,.62); }
+	      .bc-page.bc-history .ob-empty p{ color:rgba(255,255,255,.62); }
+	      .bc-page.bc-history .ob-empty svg{ color:rgba(255,255,255,.45); }
+	      .bc-page.bc-history .bc-pad{ background:transparent; }
+	      .bc-page.bc-history .bc-body .muted{ color:rgba(255,255,255,.62); }
     `}</style>
   );
 }
