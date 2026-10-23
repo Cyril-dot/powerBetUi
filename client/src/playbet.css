@@ -151,26 +151,6 @@
   .pb-spot-stat b{font-size:27px}
 }
 
-/* ── 2 · INSTANT GAMES — light arcade rail ────────────── */
-.pb-games{background:var(--pb-paper);padding:38px 0 44px;margin-top:-30px;padding-top:64px;
-  background-image:radial-gradient(rgba(11,21,38,.06) 1.2px,transparent 1.3px);background-size:22px 22px}
-.pb-games .pb-kicker{color:var(--pb-green-deep)}
-.pb-games .pb-sec-title{color:var(--pb-ink)}
-.pb-games .pb-sec-link{color:var(--pb-green-deep)}
-.pb-rail{display:flex;gap:14px;overflow-x:auto;padding:6px 2px 14px;scroll-snap-type:x mandatory;scrollbar-width:none}
-.pb-rail::-webkit-scrollbar{display:none}
-.pb-game-tile{flex:none;width:136px;scroll-snap-align:start;background:#fff;border-radius:20px 20px 20px 8px;overflow:hidden;
-  box-shadow:var(--pb-sh-card);border:1px solid #E2E9F2;transition:transform .2s}
-.pb-game-tile:hover{transform:translateY(-4px)}
-.pb-game-tile img{width:100%;height:104px;object-fit:cover}
-.pb-game-tile .pb-gt-body{padding:10px 12px 12px;position:relative}
-.pb-game-tile h3{font-family:var(--pb-disp);font-weight:800;font-size:14.5px;color:var(--pb-ink)}
-.pb-game-tile p{font-size:11px;color:var(--pb-ink-3);font-weight:600;margin-top:2px}
-.pb-gt-play{position:absolute;right:10px;top:-17px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--pb-green-ink);
-  background:linear-gradient(180deg,var(--pb-green-hi),var(--pb-green));box-shadow:0 8px 18px rgba(0,232,95,.45);border:2.5px solid #fff}
-.pb-gt-tag{position:absolute;margin:9px;padding:3px 8px;border-radius:7px;font:700 9.5px var(--pb-mono);letter-spacing:1px;background:rgba(5,13,36,.75);color:var(--pb-green);backdrop-filter:blur(3px)}
-.pb-gt-wrap{position:relative}
-
 /* ── 3 · LIVE — night arena, dark glass ───────────────── */
 .pb-live{position:relative;color:#fff;padding:46px 0 52px;background:
     radial-gradient(700px 300px at 50% -80px,rgba(0,232,95,.14),transparent 65%),
@@ -211,14 +191,18 @@
    2026-10-22): the white sp-list panel needs the section on paper, not
    the night-arena navy. Section head colours follow the Coming Up
    section; the green top beam stays as the brand seam. */
-.pb-live.pb-live-sporty{background:var(--pb-paper);color:var(--pb-ink)}
+/* Tight In-Play → Coming Up rhythm (owner, 2026-10-22): the stock
+   46/52px section paddings stacked into a ~96px void between the two
+   lists — worst when no games are live and the empty note sat in the
+   middle of it. The sporty live section now hugs its content. */
+.pb-live.pb-live-sporty{background:var(--pb-paper);color:var(--pb-ink);padding:24px 0 4px}
 .pb-live.pb-live-sporty .pb-kicker{color:var(--pb-green-deep)}
 .pb-live.pb-live-sporty .pb-kicker .pb-dot{background:var(--pb-green-deep)}
 .pb-live.pb-live-sporty .pb-sec-title{color:var(--pb-ink)}
 .pb-live.pb-live-sporty .pb-sec-link{color:var(--pb-green-deep)}
 
 /* ── 5 · UPCOMING — clean light timeline ──────────────── */
-.pb-upcoming{background:var(--pb-paper);padding:44px 0 52px;border-top:1px solid var(--pb-paper-2)}
+.pb-upcoming{background:var(--pb-paper);padding:14px 0 40px;border-top:1px solid var(--pb-paper-2)}
 .pb-upcoming .pb-kicker{color:var(--pb-green-deep)}
 .pb-upcoming .pb-sec-title{color:var(--pb-ink)}
 .pb-date-seg{display:inline-flex;gap:3px;background:#fff;border:1.5px solid #D8E1ED;border-radius:999px;padding:3px}
@@ -246,58 +230,18 @@
 .pb-tl-odds .pb-odd.pb-sel small{color:var(--pb-green-ink)}
 @media(max-width:520px){.pb-timeline::before{left:51px}.pb-tl-time{width:38px}.pb-tl-time b{font-size:14px}}
 
-/* ── 6 · CASINO — dark asymmetric grid ────────────────── */
-.pb-casino{color:#fff;padding:46px 0 54px;background:
-    radial-gradient(560px 300px at 100% 0,rgba(0,232,95,.13),transparent 60%),
-    linear-gradient(180deg,var(--pb-navy-900),var(--pb-navy-950))}
-.pb-casino .pb-kicker{color:var(--pb-green)}
-.pb-casino .pb-sec-title{color:#fff}
-.pb-casino .pb-sec-link{color:var(--pb-green)}
-.pb-cas-filters{display:flex;gap:8px;margin-bottom:18px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
-.pb-cas-filters::-webkit-scrollbar{display:none}
-.pb-cas-filters button{flex:none;color:#B9C8E4;font-weight:700;font-size:12.5px;padding:8px 17px;border-radius:999px;
-  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14)}
-.pb-cas-filters button.pb-on{background:#fff;color:var(--pb-navy-900);border-color:#fff}
-.pb-cas-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:96px;gap:11px;grid-auto-flow:dense}
-.pb-cas-tile img.pb-zoom{transform:scale(1.85);object-position:center 6%}
-.pb-cas-tile:hover img.pb-zoom{transform:scale(1.95)}
-.pb-cas-tile{position:relative;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.1)}
-.pb-cas-tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .35s}
-.pb-cas-tile:hover img{transform:scale(1.06)}
-.pb-cas-tile::after{content:"";position:absolute;inset:0;background:linear-gradient(190deg,transparent 42%,rgba(4,9,24,.88))}
-.pb-cas-tile .pb-ct-in{position:absolute;inset:auto 0 0 0;z-index:2;padding:11px 13px}
-.pb-cas-tile h3{font-family:var(--pb-disp);font-weight:800;font-size:15px;line-height:1.1}
-.pb-cas-tile p{font-size:10.5px;font-weight:600;color:#B9C8E4;margin-top:2px}
-.pb-cas-tile p b{color:var(--pb-green)}
-.pb-ct-tag{position:absolute;top:10px;left:10px;z-index:2;font:700 9.5px var(--pb-mono);letter-spacing:1px;padding:4px 8px;border-radius:6px;
-  background:var(--pb-green);color:var(--pb-green-ink);transform:rotate(-4deg)}
-.pb-ct-tag.pb-hot{background:#FF4D5E;color:#fff}
-.pb-span2{grid-row:span 2}.pb-span3{grid-row:span 3}.pb-wide{grid-column:span 2}
-@media(max-width:700px){.pb-cas-grid{grid-template-columns:repeat(3,1fr);grid-auto-rows:82px}}
-
-/* ── 7 · WINNERS — green ticker + podium ──────────────── */
-.pb-ticker{background:linear-gradient(90deg,var(--pb-green-deep),var(--pb-green) 60%,var(--pb-green-hi));color:var(--pb-green-ink);overflow:hidden;padding:10px 0}
-.pb-ticker-track{display:flex;gap:0;width:max-content;animation:pb-tick 30s linear infinite}
-.pb-ticker span{font:700 12.5px var(--pb-mono);white-space:nowrap;padding:0 14px}
-.pb-ticker b{font-weight:700}
-@keyframes pb-tick{to{transform:translateX(-50%)}}
-.pb-winners{background:var(--pb-paper);padding:40px 0 52px}
+/* ── 7 · WINNERS — plain static list (owner, 2026-10-22): the auto-
+   scrolling ticker and the trophy podium are gone. One row per winner:
+   a Material Symbols icon, the name, the amount. Nothing animates. */
+.pb-winners{background:var(--pb-paper);padding:30px 0 40px}
 .pb-winners .pb-kicker{color:var(--pb-green-deep)}
 .pb-winners .pb-sec-title{color:var(--pb-ink)}
-.pb-podium{display:grid;grid-template-columns:1fr 1.22fr 1fr;gap:13px;align-items:end}
-.pb-pod{background:#fff;border:1px solid #DFE7F0;border-radius:20px;padding:18px 15px;text-align:center;box-shadow:var(--pb-sh-card);position:relative}
-.pb-pod.pb-first{padding-top:26px;border:2px solid var(--pb-green);box-shadow:0 18px 38px rgba(0,179,74,.18)}
-.pb-pod .pb-pod-rank{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--pb-navy-850);color:#fff;
-  font:700 10.5px var(--pb-mono);letter-spacing:1.2px;padding:5px 12px;border-radius:999px;white-space:nowrap}
-.pb-pod.pb-first .pb-pod-rank{background:var(--pb-green);color:var(--pb-green-ink)}
-.pb-pod img{width:56px;height:56px;object-fit:contain;margin:2px auto 8px;background:var(--pb-navy-900);border-radius:16px;padding:7px}
-.pb-pod.pb-first img{width:74px;height:74px}
-.pb-pod h3{font-size:13.5px;font-weight:700;color:var(--pb-ink-2)}
-.pb-pod .pb-amt{font-family:var(--pb-disp);font-weight:900;font-size:clamp(15px,3.9vw,28px);letter-spacing:-.3px;white-space:nowrap;color:var(--pb-navy-850);margin:3px 0}
-.pb-pod .pb-amt .pb-cur{font-size:.6em;font-weight:800;vertical-align:.22em;margin-right:3px}
-.pb-pod.pb-first .pb-amt{color:var(--pb-green-deep)}
-.pb-pod p{font-size:11px;font-weight:600;color:var(--pb-ink-3)}
-@media(max-width:520px){.pb-podium{gap:9px}.pb-pod{padding:14px 8px}.pb-pod.pb-first{padding-top:20px}}
+.pb-winner-list{list-style:none;background:#fff;border:1px solid #DFE7F0;border-radius:16px;overflow:hidden}
+.pb-winner-row{display:flex;align-items:center;gap:12px;padding:13px 16px}
+.pb-winner-row + .pb-winner-row{border-top:1px solid #EDF1F6}
+.pb-winner-ic{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24;color:var(--pb-green-deep);flex:none}
+.pb-winner-name{font-weight:700;font-size:14px;color:var(--pb-ink);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb-winner-amt{font-family:var(--pb-disp);font-weight:900;font-size:16px;color:var(--pb-navy-850);white-space:nowrap}
 
 /* ── FOOTER ───────────────────────────────────────────── */
 .pb-ftr{background:var(--pb-navy-950);color:#A9BBDD;padding:42px 0 118px;border-top:3px solid var(--pb-green)}
@@ -404,5 +348,8 @@ body .mobile-bottom-nav{background:#fff;border-top:1px solid #ddd;box-shadow:0 -
 .pb-bal-plus{flex:none;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;color:var(--pb-green-ink);background:linear-gradient(180deg,var(--pb-green-hi),var(--pb-green) 60%,var(--pb-green-deep))}
 .pb-root .pb-hdr1-account{color:#fff;padding:6px;display:flex;flex:none;align-items:center}
 .pb-empty-note{color:#A9BBDD;font-size:13.5px;line-height:1.6;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:20px}
+/* Slim one-line empty state (owner, 2026-10-22): "no live games" is a
+   line, not a tall block. */
+.pb-root .pb-empty-note.pb-empty-slim{padding:9px 14px;font-size:12.5px;line-height:1.45;border-radius:10px}
 .pb-odd:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:760px){.pb-root .pb-bal-pill{padding:5px 10px;font-size:11.5px}}

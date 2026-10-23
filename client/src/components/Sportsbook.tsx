@@ -177,9 +177,7 @@ function EndedMatchList({ list, hasDraw, picks, onPick }: { list: EnrichedMatch[
         {Array.from(byDay.entries()).map(([day, matches]) => (
           <div key={day}>
             <SportyGroupHead label={sportyDayLabel(matches[0].kickoffAt)} market="1X2" hasDraw={hasDraw} cols={false} />
-            <div className="sp-cards">
-              {matches.map((m) => <MatchRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} ended />)}
-            </div>
+            {matches.map((m) => <MatchRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} ended />)}
           </div>
         ))}
       </div>
@@ -324,11 +322,9 @@ function LiveMatchesSection({
             <div className="sp-list">
               <SportyMarketTabs market={market} onChange={onMarketChange} />
               <SportyGroupHead label="Live · In-Play" live market={market} hasDraw={hasDraw} />
-              <div className="sp-cards">
-                {list.slice(0, visible).map((m) => (
-                  <SportyMatchCard key={m.id} match={m} market={market} hasDraw={hasDraw} picks={picks} onPick={onPick} />
-                ))}
-              </div>
+              {list.slice(0, visible).map((m) => (
+                <SportyMatchCard key={m.id} match={m} market={market} hasDraw={hasDraw} picks={picks} onPick={onPick} />
+              ))}
             </div>
             {visible < list.length && (
               <button className="sb-load-more live-load-more" onClick={() => setVisible((v) => v + PAGE_SIZE)} type="button">
@@ -417,55 +413,36 @@ function SectionShell({
 /**
  * Today / Upcoming lists in the SportyBet-mirror system: white panel,
  * market tab strip, matches grouped under SportyBet-style date bands
- * ("22/10 Thursday") with the active market's column headers. Pagination
- * behaviour is unchanged — the visible window grows through the same
- * scroll sentinel as before; grouping only re-buckets the visible slice
- * by calendar day, preserving the board's sort order within each day.
+ * ("22/10 Thursday") with the active market's column headers. EVERY
+ * fixture in the list renders, grouped by calendar day (owner,
+ * 2026-10-22: fixtures beyond today were being hidden — first by the
+ * homepage's top-8 slice, here by the old scroll-window; both are gone).
  */
 function PaginatedLeagueList({
-  list, hasDraw, picks, onPick, emptyLabel, pageSize = PAGE_SIZE, market, onMarketChange,
+  list, hasDraw, picks, onPick, emptyLabel, market, onMarketChange,
 }: {
   list: EnrichedMatch[]; hasDraw: boolean; picks: Pick[]; onPick: (p: Pick) => void; emptyLabel: string; pageSize?: number;
   market: CardMarket; onMarketChange: (m: CardMarket) => void;
 }) {
-  const [visible, setVisible] = useState(pageSize);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => { setVisible(pageSize); }, [list.length, pageSize]);
-  useEffect(() => {
-    const node = sentinelRef.current;
-    if (!node || visible >= list.length) return;
-    const observer = new IntersectionObserver(
-      (entries) => { if (entries[0]?.isIntersecting) setVisible((v) => Math.min(v + pageSize, list.length)); },
-      { rootMargin: "240px 0px" },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [list.length, visible, pageSize]);
-
   if (list.length === 0) return <p className="sb-empty">{emptyLabel}</p>;
 
   const byDay = new Map<string, EnrichedMatch[]>();
-  for (const m of list.slice(0, visible)) {
+  for (const m of list) {
     const key = sportyDayKey(m.kickoffAt);
     if (!byDay.has(key)) byDay.set(key, []);
     byDay.get(key)!.push(m);
   }
 
   return (
-    <>
-      <div className="sp-list">
-        <SportyMarketTabs market={market} onChange={onMarketChange} />
-        {Array.from(byDay.entries()).map(([day, matches]) => (
-          <div key={day}>
-            <SportyGroupHead label={sportyDayLabel(matches[0].kickoffAt)} market={market} hasDraw={hasDraw} />
-            <div className="sp-cards">
-              {matches.map((m) => <MatchRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} market={market} />)}
-            </div>
-          </div>
-        ))}
-      </div>
-      {visible < list.length && <div ref={sentinelRef} className="sb-load-sentinel" aria-hidden="true" />}
-    </>
+    <div className="sp-list">
+      <SportyMarketTabs market={market} onChange={onMarketChange} />
+      {Array.from(byDay.entries()).map(([day, matches]) => (
+        <div key={day}>
+          <SportyGroupHead label={sportyDayLabel(matches[0].kickoffAt)} market={market} hasDraw={hasDraw} />
+          {matches.map((m) => <MatchRow key={m.id} match={m} hasDraw={hasDraw} picks={picks} onPick={onPick} market={market} />)}
+        </div>
+      ))}
+    </div>
   );
 }
 

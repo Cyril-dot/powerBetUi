@@ -20,7 +20,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { ChevronRight, Star } from "lucide-react";
 import {
-  formatKickoff, isMatchLive, liveClock, parseKickoff,
+  formatKickoff, generateCrest, isMatchLive, liveClock, parseKickoff,
   type EnrichedMatch,
 } from "@/lib/sportsbook";
 import { useFavorites } from "@/lib/favorites";
@@ -126,6 +126,34 @@ function SportyLiveClock({ match }: { match: EnrichedMatch }) {
     return () => clearInterval(t);
   }, [match.id]);
   return <>{liveClock(match)}</>;
+}
+
+/**
+ * Team crest for Today/Upcoming cards (owner, 2026-10-22). The feed's real
+ * logo URL reaches the card as displayHomeLogo/displayAwayLogo (already
+ * resolved in lib/sportsbook: real feed logo, else the generated initials
+ * crest). If the image fails to load, fall back to the generated initials
+ * crest; if even that fails, an initials disc. Live cards don't render
+ * this — they're left exactly as they were.
+ */
+function TeamMark({ logo, name }: { logo?: string; name: string }) {
+  const [failed, setFailed] = useState(false);
+  const [crestFailed, setCrestFailed] = useState(false);
+  useEffect(() => { setFailed(false); setCrestFailed(false); }, [logo]);
+  if (!logo || failed) {
+    // No feed logo, or it failed to load → the generated initials crest.
+    if (crestFailed) return <span className="sp-crest" aria-hidden="true" />;
+    return (
+      <span className="sp-crest" aria-hidden="true">
+        <img src={generateCrest(name)} alt="" loading="lazy" decoding="async" draggable={false} referrerPolicy="no-referrer" onError={() => setCrestFailed(true)} />
+      </span>
+    );
+  }
+  return (
+    <span className="sp-crest" aria-hidden="true">
+      <img src={logo} alt="" loading="lazy" decoding="async" draggable={false} referrerPolicy="no-referrer" onError={() => setFailed(true)} />
+    </span>
+  );
 }
 
 function OddsBox({
@@ -243,8 +271,14 @@ export function SportyMatchCard({
       </div>
       <div className="sp-teams-row">
         <Link href={href} className="sp-teams">
-          <div className="sp-team">{match.homeTeam}</div>
-          <div className="sp-team">{match.awayTeam}</div>
+          <div className="sp-team">
+            {!live && <TeamMark logo={match.displayHomeLogo} name={match.homeTeam ?? ""} />}
+            <span className="sp-team-name">{match.homeTeam}</span>
+          </div>
+          <div className="sp-team">
+            {!live && <TeamMark logo={match.displayAwayLogo} name={match.awayTeam ?? ""} />}
+            <span className="sp-team-name">{match.awayTeam}</span>
+          </div>
         </Link>
         {showScore && (
           <div className="sp-score-col" aria-label="Score">{match.scoreHome ?? 0}<br />{match.scoreAway ?? 0}</div>

@@ -4,9 +4,9 @@
  * Sections are fed by the same football feeds the old homepage loaded
  * through Sportsbook (fetchSport / fetchAdminMatches); picks flow through
  * the app's existing Pick/onPick contract, so betslip behaviour is
- * unchanged. Presentational blocks with no real data source behind them
- * (instant-game tiles, casino floor, winners podium) render exactly as in
- * the approved sample and link to the real pages.
+ * unchanged. (The sample's instant-game rail, casino floor and winners
+ * podium/ticker were removed on the owner's order, 2026-10-22; Recent
+ * Winners is now a plain static list fed by the same WINNERS data.)
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
@@ -146,37 +146,10 @@ function HeroCarousel() {
 }
 
 /* ── presentational data (verbatim from the approved sample) ────────── */
-const GAMES = [
-  { img: "/playbet/aviator.png", name: "Aviator", tag: "HOT", players: "12,408 playing" },
-  { img: "/playbet/vfootball.webp", name: "vFootball", tag: "LIVE", players: "8,930 playing" },
-  { img: "/playbet/mines.png", name: "Mines", tag: "", players: "6,214 playing" },
-  { img: "/playbet/roulette.png", name: "Roulette", tag: "NEW", players: "986 playing" },
-  { img: "/playbet/plinko.png", name: "Plinko", tag: "", players: "3,902 playing" },
-  { img: "/playbet/dice.png", name: "Dice", tag: "", players: "2,517 playing" },
-  { img: "/playbet/keno.png", name: "Keno", tag: "", players: "1,133 playing" },
-  { img: "/playbet/goal.png", name: "Goal Rush", tag: "", players: "764 playing" },
-];
-const CASINO = [
-  { img: "/playbet/aviator.png", name: "Aviator", players: "12,408", cls: "pb-span3", tag: "HOT", hot: true, zoom: false },
-  { img: "/playbet/mines.png", name: "Mines", players: "6,214", cls: "pb-wide pb-span2", tag: "", hot: false, zoom: false },
-  { img: "/playbet/lucky-numbers.png", name: "Lucky Numbers", players: "4,377", cls: "pb-span2", tag: "NEW", hot: false, zoom: true },
-  { img: "/playbet/plinko.png", name: "Plinko", players: "3,902", cls: "pb-span2", tag: "", hot: false, zoom: false },
-  { img: "/playbet/dice.png", name: "Dice", players: "2,517", cls: "pb-span2", tag: "", hot: false, zoom: false },
-  { img: "/playbet/roulette.png", name: "Roulette", players: "986", cls: "pb-span2", tag: "", hot: false, zoom: false },
-  { img: "/playbet/keno.png", name: "Keno", players: "1,133", cls: "pb-span2", tag: "", hot: false, zoom: false },
-  { img: "/playbet/vfootball.webp", name: "vFootball", players: "8,930", cls: "pb-wide pb-span2", tag: "LIVE", hot: false, zoom: false },
-  { img: "/playbet/goal.png", name: "Goal Rush", players: "764", cls: "pb-span2", tag: "", hot: false, zoom: false },
-];
 const WINNERS = [
   { name: "Kwame M.", amt: "48,250.00", game: "Football Multi · 8 legs", when: "12 min ago", rank: "TOP WINNER" },
   { name: "Ama S.", amt: "6,940.50", game: "Aviator", when: "26 min ago", rank: "2ND BIGGEST" },
   { name: "Yaw D.", amt: "12,300.00", game: "Live Betting · Serie A", when: "41 min ago", rank: "3RD BIGGEST" },
-];
-const TICKER: [string, string, string][] = [
-  ["Kwame M.", "GH₵ 48,250", "Football Multi"], ["Ama S.", "GH₵ 6,940", "Aviator"],
-  ["Yaw D.", "GH₵ 12,300", "Live Betting"], ["Efua A.", "GH₵ 3,875", "Mines"],
-  ["Kofi B.", "GH₵ 21,600", "Correct Score"], ["Nana K.", "GH₵ 9,120", "vFootball"],
-  ["Akosua T.", "GH₵ 5,480", "Plinko"], ["Kwabena O.", "GH₵ 17,205", "Premier League Multi"],
 ];
 /* Match cards render through the shared SportyBet-mirror system
    (SportyCards.tsx) — same Pick contract as the sportsbook, so betslip
@@ -227,10 +200,12 @@ export default function PlayBetHome({ picks, onPick }: { picks: Pick[]; onPick: 
     const liveList = Array.from(liveById.values());
 
     const now = Date.now();
+    // EVERY upcoming fixture shows (owner, 2026-10-22): the old top-8
+    // slice here meant the list filled up with today's games and fixtures
+    // on later dates never rendered at all.
     const up = [...cats.today, ...cats.upcoming]
       .filter((m) => { const t = m.kickoffAt ? parseKickoff(m.kickoffAt).getTime() : 0; return t > now; })
-      .sort((a, b) => (parseKickoff(a.kickoffAt).getTime() || 0) - (parseKickoff(b.kickoffAt).getTime() || 0))
-      .slice(0, 8);
+      .sort((a, b) => (parseKickoff(a.kickoffAt).getTime() || 0) - (parseKickoff(b.kickoffAt).getTime() || 0));
 
     return { live: liveList, upcoming: up };
   }, [matches, adminMatches]);
@@ -246,35 +221,9 @@ export default function PlayBetHome({ picks, onPick }: { picks: Pick[]; onPick: 
     return Array.from(byDay.entries());
   }, [upcoming]);
 
-  const podium = [WINNERS[1], WINNERS[0], WINNERS[2]];
-
   return (
     <div className="pb-root">
       <HeroCarousel />
-
-      {/* INSTANT GAMES */}
-      <section className="pb-games" id="games">
-        <div className="pb-wrap">
-          <div className="pb-sec-head">
-            <div className="pb-grow"><p className="pb-kicker">Play Instantly</p><h2 className="pb-sec-title">Jump straight in</h2></div>
-            <Link className="pb-sec-link" href="/casino">All games →</Link>
-          </div>
-          <div className="pb-rail">
-            {GAMES.map((g) => (
-              <Link key={g.name} href="/casino" className="pb-game-tile">
-                <div className="pb-gt-wrap">
-                  {g.tag ? <span className="pb-gt-tag">{g.tag}</span> : null}
-                  <img src={g.img} alt={g.name} loading="lazy" />
-                  <div className="pb-gt-body">
-                    <h3>{g.name}</h3><p>{g.players}</p>
-                    <span className="pb-gt-play"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg></span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* LIVE — SportyBet-mirror list on a light ground. The list itself
           sits OUTSIDE .pb-wrap: full-bleed, edge to edge (owner: "the
@@ -286,18 +235,16 @@ export default function PlayBetHome({ picks, onPick }: { picks: Pick[]; onPick: 
             <Link className="pb-sec-link" href="/live">All live →</Link>
           </div>
           {live.length === 0 && (
-            <p className="pb-empty-note" style={{ color: "var(--pb-ink-2)", background: "#fff", borderColor: "#DFE7F0" }}>{loading ? "Loading live matches…" : "No matches are live right now — games appear here the moment they kick off, with live odds you can bet on straight away."}</p>
+            <p className="pb-empty-note pb-empty-slim" style={{ color: "var(--pb-ink-2)", background: "#fff", borderColor: "#DFE7F0" }}>{loading ? "Loading live matches…" : "No matches are live right now."}</p>
           )}
         </div>
         {live.length > 0 && (
           <div className="sp-list">
             <SportyMarketTabs market={cardMarket} onChange={setCardMarket} />
             <SportyGroupHead label="Live · In-Play" live market={cardMarket} hasDraw />
-            <div className="sp-cards">
-              {live.slice(0, 6).map((m) => (
-                <SportyMatchCard key={m.id} match={m} market={cardMarket} hasDraw picks={picks} onPick={onPick} />
-              ))}
-            </div>
+            {live.slice(0, 6).map((m) => (
+              <SportyMatchCard key={m.id} match={m} market={cardMarket} hasDraw picks={picks} onPick={onPick} />
+            ))}
           </div>
         )}
       </section>
@@ -320,60 +267,34 @@ export default function PlayBetHome({ picks, onPick }: { picks: Pick[]; onPick: 
             {upcomingGroups.map(([day, ms]) => (
               <div key={day}>
                 <SportyGroupHead label={sportyDayLabel(ms[0].kickoffAt)} market={cardMarket} hasDraw />
-                <div className="sp-cards">
-                  {ms.map((m) => (
-                    <SportyMatchCard key={m.id} match={m} market={cardMarket} hasDraw picks={picks} onPick={onPick} />
-                  ))}
-                </div>
+                {ms.map((m) => (
+                  <SportyMatchCard key={m.id} match={m} market={cardMarket} hasDraw picks={picks} onPick={onPick} />
+                ))}
               </div>
             ))}
           </div>
         )}
       </section>
 
-      {/* CASINO */}
-      <section className="pb-casino" id="casino">
-        <div className="pb-wrap">
-          <div className="pb-sec-head">
-            <div className="pb-grow"><p className="pb-kicker">Casino</p><h2 className="pb-sec-title">The Floor</h2></div>
-            <Link className="pb-sec-link" href="/casino">All 240+ games →</Link>
-          </div>
-          <div className="pb-cas-filters"><button type="button" className="pb-on">All</button><button type="button">Crash</button><button type="button">Slots</button><button type="button">Table</button><button type="button">Numbers</button><button type="button">Virtual</button></div>
-          <div className="pb-cas-grid">
-            {CASINO.map((c) => (
-              <Link key={c.name} href="/casino" className={`pb-cas-tile ${c.cls}`}>
-                <img src={c.img} alt={c.name} loading="lazy" className={c.zoom ? "pb-zoom" : undefined} />
-                {c.tag ? <span className={`pb-ct-tag${c.hot ? " pb-hot" : ""}`}>{c.tag}</span> : null}
-                <div className="pb-ct-in"><h3>{c.name}</h3><p><b>●</b> {c.players} playing now</p></div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* WINNERS */}
-      <div className="pb-ticker"><div className="pb-ticker-track">
-        {[...TICKER, ...TICKER].map((t, i) => (
-          <span key={i}>🏆 <b>{t[0]}</b> won <b>{t[1]}</b> · {t[2]}</span>
-        ))}
-      </div></div>
+      {/* WINNERS — static list (owner, 2026-10-22): the scrolling ticker
+          and the trophy podium are gone. Each winner is one plain row:
+          a Material Symbols icon, the winner's name and the amount.
+          Nothing moves, nothing auto-scrolls. */}
       <section className="pb-winners" id="winners">
         <div className="pb-wrap">
           <div className="pb-sec-head">
             <div className="pb-grow"><p className="pb-kicker">Hall of fame</p><h2 className="pb-sec-title">Recent Winners</h2></div>
             <Link className="pb-sec-link" href="/promos">Full board →</Link>
           </div>
-          <div className="pb-podium">
-            {podium.map((w, i) => (
-              <article key={w.rank} className={`pb-pod${i === 1 ? " pb-first" : ""}`}>
-                <span className="pb-pod-rank">{w.rank}</span>
-                <img src="/playbet/trophy.png" alt="Trophy" loading="lazy" />
-                <h3>{w.name}</h3>
-                <div className="pb-amt"><span className="pb-cur">GH₵</span>{w.amt}</div>
-                <p>{w.game} · {w.when}</p>
-              </article>
+          <ul className="pb-winner-list">
+            {WINNERS.map((w) => (
+              <li key={w.name} className="pb-winner-row">
+                <span className="material-symbols-rounded pb-winner-ic" aria-hidden="true">payments</span>
+                <span className="pb-winner-name">{w.name}</span>
+                <span className="pb-winner-amt">GH₵ {w.amt}</span>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
     </div>
