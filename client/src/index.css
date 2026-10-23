@@ -1812,6 +1812,15 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .bh-pill.bh-pending{background:#fdf3e0!important;color:#8a6100!important}
 .bh-pill.bh-won,.bh-pill.bh-cashed{background:#e4f7ed!important;color:#16854b!important}
 .bh-pill.bh-lost,.bh-pill.bh-void{background:#eef2f7!important;color:#52647d!important}
+/* WON history cards read as wins from the border alone (owner, 2026-10-23):
+   a full 2px success-green frame around the whole card; CASHED_OUT gets
+   the same 2px frame in the deeper mid-green of its pill family;
+   LOST/VOID/PENDING keep the neutral hairline from the base .bh-card
+   rule. Flat standard — no shadows, no glows. (The same two rules are
+   restated in BetsCenter's final cleanup layer, which is the layer that
+   historically wins this cascade.) */
+.bh-card.bh-won{border:2px solid #00a651!important}
+.bh-card.bh-cashed{border:2px solid #16854b!important}
 .bh-share,.bh-toggle-details{color:#0b7a43!important}
 .bh-leg-check{background:#00a651!important}
 .bh-cashout-btn{background:#00a651!important;color:#fff!important;border:1px solid #00a651!important;box-shadow:none!important}

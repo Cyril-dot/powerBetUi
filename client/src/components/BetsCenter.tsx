@@ -574,7 +574,8 @@ function BetsCenterStyles() {
 
 	      /* Final history-card cleanup: action in header, no side stripe, clear win/loss surfaces. */
 	      .bh-card::before{ display:none!important; }
-	      .bh-card.bh-won{ border:1px solid #9bd8ad!important; }
+	      .bh-card.bh-won{ border:2px solid #00a651!important; }
+	      .bh-card.bh-cashed{ border:2px solid #16854b!important; }
 	      .bh-card.bh-lost{ border:1px solid #efb0b4!important; }
 	      .bh-card.bh-won .bh-card-top{ padding-right:16px!important; }
 	      .bh-card.bh-won .bh-won-badge{ display:none; }
