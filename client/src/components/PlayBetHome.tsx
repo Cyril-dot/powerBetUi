@@ -6,12 +6,13 @@
  * the app's existing Pick/onPick contract, so betslip behaviour is
  * unchanged. (The sample's instant-game rail, casino floor and winners
  * podium/ticker were removed on the owner's order, 2026-10-22; Recent
- * Winners is now a plain static list fed by the same WINNERS data.)
+ * Winners is a compact looping scroller fed by the WINNERS data —
+ * owner's revised word, 2026-10-23.)
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
 import {
-  categorise, fetchAdminMatches, fetchSport, isMatchLive, parseKickoff,
+  categorise, fetchAdminMatches, fetchSport, isMatchLive, mergeMatchLists, parseKickoff,
   type EnrichedMatch,
 } from "@/lib/sportsbook";
 import { type Pick } from "./Sportsbook";
@@ -150,6 +151,23 @@ const WINNERS = [
   { name: "Kwame M.", amt: "48,250.00", game: "Football Multi · 8 legs", when: "12 min ago", rank: "TOP WINNER" },
   { name: "Ama S.", amt: "6,940.50", game: "Aviator", when: "26 min ago", rank: "2ND BIGGEST" },
   { name: "Yaw D.", amt: "12,300.00", game: "Live Betting · Serie A", when: "41 min ago", rank: "3RD BIGGEST" },
+  { name: "Kofi A.", amt: "3,875.25", game: "Football Multi · 5 legs", when: "1 hr ago", rank: "" },
+  { name: "Akosua F.", amt: "21,460.00", game: "Correct Score", when: "1 hr ago", rank: "" },
+  { name: "Kojo B.", amt: "1,240.00", game: "Aviator", when: "2 hrs ago", rank: "" },
+  { name: "Efua O.", amt: "9,615.75", game: "Live Betting · Premier League", when: "2 hrs ago", rank: "" },
+  { name: "Kwabena T.", amt: "52,300.00", game: "Football Multi · 10 legs", when: "3 hrs ago", rank: "" },
+  { name: "Abena K.", amt: "2,480.50", game: "Mines", when: "3 hrs ago", rank: "" },
+  { name: "Fiifi N.", amt: "15,720.00", game: "Football Multi · 6 legs", when: "4 hrs ago", rank: "" },
+  { name: "Esi P.", amt: "860.00", game: "Virtual Football", when: "4 hrs ago", rank: "" },
+  { name: "Kwaku D.", amt: "7,305.25", game: "Live Betting · LaLiga", when: "5 hrs ago", rank: "" },
+  { name: "Adjoa R.", amt: "18,940.00", game: "Football Multi · 7 legs", when: "5 hrs ago", rank: "" },
+  { name: "Nana Y.", amt: "4,150.00", game: "Aviator", when: "6 hrs ago", rank: "" },
+  { name: "Selasi G.", amt: "26,580.50", game: "Both Teams To Score", when: "7 hrs ago", rank: "" },
+  { name: "Maame A.", amt: "1,975.00", game: "Over/Under 2.5", when: "8 hrs ago", rank: "" },
+  { name: "Elikem V.", amt: "11,260.75", game: "Live Betting · Bundesliga", when: "9 hrs ago", rank: "" },
+  { name: "Araba H.", amt: "5,540.00", game: "Football Multi · 4 legs", when: "10 hrs ago", rank: "" },
+  { name: "Dela S.", amt: "33,815.00", game: "Football Multi · 9 legs", when: "11 hrs ago", rank: "" },
+  { name: "Kweku L.", amt: "2,065.50", game: "Draw No Bet", when: "12 hrs ago", rank: "" },
 ];
 /* Match cards render through the shared SportyBet-mirror system
    (SportyCards.tsx) — same Pick contract as the sportsbook, so betslip
@@ -165,26 +183,38 @@ export default function PlayBetHome({ picks, onPick }: { picks: Pick[]; onPick: 
 
   useEffect(() => {
     let active = true;
-    const load = async () => {
+    // Background polls merge into the existing list in place (mergeMatchLists):
+    // unchanged matches keep their object identity, so nothing remounts,
+    // no spinner shows, and scroll/selection survive the cycle — the refresh
+    // is invisible (owner, 2026-10-23). Only the first load paints
+    // progressively and drives the loading state.
+    const load = async (background = false) => {
       try {
         const [sportResult, admin] = await Promise.all([
-          fetchSport("football", (batch) => { if (active) { setMatches(batch); setLoading(false); } }),
+          background
+            ? fetchSport("football")
+            : fetchSport("football", (batch) => { if (active) { setMatches(batch); setLoading(false); } }),
           fetchAdminMatches().catch(() => [] as EnrichedMatch[]),
         ]);
         if (!active) return;
-        setMatches(sportResult);
-        setAdminMatches(admin);
+        if (background) {
+          setMatches((prev) => mergeMatchLists(prev, sportResult));
+          setAdminMatches((prev) => mergeMatchLists(prev, admin));
+        } else {
+          setMatches(sportResult);
+          setAdminMatches(admin);
+        }
       } catch {
         /* feeds unreachable — sections render their empty states */
       } finally {
-        if (active) setLoading(false);
+        if (active && !background) setLoading(false);
       }
     };
     load();
-    const poll = window.setInterval(() => { if (document.visibilityState === "visible") load(); }, 30_000);
+    const poll = window.setInterval(() => { if (document.visibilityState === "visible") load(true); }, 30_000);
     const adminPoll = window.setInterval(() => {
       if (document.visibilityState !== "visible") return;
-      fetchAdminMatches().then((rows) => { if (active) setAdminMatches(rows); }).catch(() => undefined);
+      fetchAdminMatches().then((rows) => { if (active) setAdminMatches((prev) => mergeMatchLists(prev, rows)); }).catch(() => undefined);
     }, 5_000);
     return () => { active = false; window.clearInterval(poll); window.clearInterval(adminPoll); };
   }, []);
@@ -276,25 +306,29 @@ export default function PlayBetHome({ picks, onPick }: { picks: Pick[]; onPick: 
         )}
       </section>
 
-      {/* WINNERS — static list (owner, 2026-10-22): the scrolling ticker
-          and the trophy podium are gone. Each winner is one plain row:
-          a Material Symbols icon, the winner's name and the amount.
-          Nothing moves, nothing auto-scrolls. */}
+      {/* WINNERS — the homepage's last section, directly above the footer
+          (owner, 2026-10-23): compact rows (Material payments icon + name
+          + amount) in a short viewport that scrolls top-to-bottom in a
+          seamless, never-ending loop — the list is duplicated so the wrap
+          is invisible. Pauses on hover/touch; static under
+          prefers-reduced-motion. */}
       <section className="pb-winners" id="winners">
         <div className="pb-wrap">
           <div className="pb-sec-head">
             <div className="pb-grow"><p className="pb-kicker">Hall of fame</p><h2 className="pb-sec-title">Recent Winners</h2></div>
             <Link className="pb-sec-link" href="/promos">Full board →</Link>
           </div>
-          <ul className="pb-winner-list">
-            {WINNERS.map((w) => (
-              <li key={w.name} className="pb-winner-row">
-                <span className="material-symbols-rounded pb-winner-ic" aria-hidden="true">payments</span>
-                <span className="pb-winner-name">{w.name}</span>
-                <span className="pb-winner-amt">GH₵ {w.amt}</span>
-              </li>
-            ))}
-          </ul>
+          <div className="pb-winner-loop">
+            <ul className="pb-winner-track">
+              {[...WINNERS, ...WINNERS].map((w, i) => (
+                <li key={`${w.name}-${i}`} className="pb-winner-row" aria-hidden={i >= WINNERS.length || undefined}>
+                  <span className="material-symbols-rounded pb-winner-ic" aria-hidden="true">payments</span>
+                  <span className="pb-winner-name">{w.name}</span>
+                  <span className="pb-winner-amt">GH₵ {w.amt}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
     </div>

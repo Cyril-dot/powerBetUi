@@ -129,12 +129,13 @@ function SportyLiveClock({ match }: { match: EnrichedMatch }) {
 }
 
 /**
- * Team crest for Today/Upcoming cards (owner, 2026-10-22). The feed's real
- * logo URL reaches the card as displayHomeLogo/displayAwayLogo (already
- * resolved in lib/sportsbook: real feed logo, else the generated initials
- * crest). If the image fails to load, fall back to the generated initials
- * crest; if even that fails, an initials disc. Live cards don't render
- * this — they're left exactly as they were.
+ * Team crest for every card — live, today and upcoming (owner, 2026-10-23:
+ * the actual logos must show wherever the feed provides them). The feed's
+ * real logo URL reaches the card as displayHomeLogo/displayAwayLogo
+ * (resolved in lib/sportsbook: logos unioned across duplicate feed copies,
+ * real logo first, generated initials crest only when the feed has none).
+ * If the image fails to load, fall back to the generated initials crest;
+ * if even that fails, an initials disc.
  */
 function TeamMark({ logo, name }: { logo?: string; name: string }) {
   const [failed, setFailed] = useState(false);
@@ -272,11 +273,11 @@ export function SportyMatchCard({
       <div className="sp-teams-row">
         <Link href={href} className="sp-teams">
           <div className="sp-team">
-            {!live && <TeamMark logo={match.displayHomeLogo} name={match.homeTeam ?? ""} />}
+            <TeamMark logo={match.displayHomeLogo} name={match.homeTeam ?? ""} />
             <span className="sp-team-name">{match.homeTeam}</span>
           </div>
           <div className="sp-team">
-            {!live && <TeamMark logo={match.displayAwayLogo} name={match.awayTeam ?? ""} />}
+            <TeamMark logo={match.displayAwayLogo} name={match.awayTeam ?? ""} />
             <span className="sp-team-name">{match.awayTeam}</span>
           </div>
         </Link>

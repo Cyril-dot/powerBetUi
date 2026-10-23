@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { Bike, CalendarDays, CircleDot, Dumbbell, Flame, Radio, RefreshCw, Sparkles, Star, Trophy, TriangleAlert, Zap } from "lucide-react";
 import {
   categorise, fetchAdminMatches, fetchSport, formatKickoff, formatKickoffDate, getLastFetchStatus, liveClock,
-  isMatchLive, parseKickoff, TWO_WAY_SPORTS,
+  isMatchLive, mergeMatchLists, parseKickoff, TWO_WAY_SPORTS,
   type EnrichedMatch, type SportKey,
 } from "@/lib/sportsbook";
 import {
@@ -506,34 +506,42 @@ export default function Sportsbook({
   const [liveLeagueTab, setLiveLeagueTab] = useState<string | null>(null);
   const loaded = useRef<Set<SportKey>>(new Set());
 
-  const load = async (s: SportKey) => {
-    setLoading(true);
-    setRestLoading(true);
+  // background=true is the poll path (owner, 2026-10-23): no loading flags,
+  // no progressive re-paints — results merge into the current list in place
+  // via mergeMatchLists, so scores/odds update silently with no remount,
+  // no spinner and no scroll jump.
+  const load = async (s: SportKey, background = false) => {
+    if (!background) {
+      setLoading(true);
+      setRestLoading(true);
+    }
     try {
       let firstBatch = true;
       const progress = s === "football"
         ? (batch: EnrichedMatch[]) => {
-            setMatches((prev) => ({ ...prev, football: batch }));
+            setMatches((prev) => ({ ...prev, football: mergeMatchLists(prev.football, batch) }));
             // The first football batch is the live feed — the board's main
             // loading state ends there, not after the heavy feeds finish.
             if (firstBatch) { firstBatch = false; setLoading(false); setLivePainted(true); }
           }
         : undefined;
-      const adminPromise = s === "football" ? fetchAdminMatches().then((admin) => { setAdminMatches(admin); return admin; }) : Promise.resolve(adminMatches);
+      const adminPromise = s === "football" ? fetchAdminMatches().then((admin) => { setAdminMatches((prev) => mergeMatchLists(prev, admin)); return admin; }) : Promise.resolve(adminMatches);
       const opts = s !== "football" ? undefined
         : mode === "live-only" ? { liveOnly: true }
         : unlockedRef.current ? undefined
         : { restGate: gateRef.current?.promise ?? makeGate() };
       const sportPromise = fetchSport(s, progress, opts);
       const [sportResult] = await Promise.all([sportPromise, adminPromise]);
-      setMatches((prev) => ({ ...prev, [s]: sportResult }));
+      setMatches((prev) => ({ ...prev, [s]: background ? mergeMatchLists(prev[s], sportResult) : sportResult }));
       loaded.current.add(s);
       setApiUnreachable(getLastFetchStatus().allFailed);
     } catch {
       setApiUnreachable(true);
     } finally {
-      setLoading(false);
-      setRestLoading(false);
+      if (!background) {
+        setLoading(false);
+        setRestLoading(false);
+      }
       if (s === "football") setLivePainted(true);
     }
   };
@@ -542,7 +550,7 @@ export default function Sportsbook({
   useEffect(() => { setLiveLeagueTab(null); }, [sport]);
 
   useEffect(() => {
-    const interval = setInterval(() => { if (document.visibilityState === "visible") load(sport); }, 30_000);
+    const interval = setInterval(() => { if (document.visibilityState === "visible") load(sport, true); }, 30_000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sport]);
@@ -551,7 +559,7 @@ export default function Sportsbook({
     if (sport !== "football") return;
     const interval = setInterval(() => {
       if (document.visibilityState !== "visible") return;
-      fetchAdminMatches().then(setAdminMatches).catch(() => undefined);
+      fetchAdminMatches().then((rows) => setAdminMatches((prev) => mergeMatchLists(prev, rows))).catch(() => undefined);
     }, 5_000);
     return () => clearInterval(interval);
   }, [sport]);

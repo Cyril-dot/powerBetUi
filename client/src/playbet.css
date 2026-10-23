@@ -230,35 +230,43 @@
 .pb-tl-odds .pb-odd.pb-sel small{color:var(--pb-green-ink)}
 @media(max-width:520px){.pb-timeline::before{left:51px}.pb-tl-time{width:38px}.pb-tl-time b{font-size:14px}}
 
-/* ── 7 · WINNERS — plain static list (owner, 2026-10-22): the auto-
-   scrolling ticker and the trophy podium are gone. One row per winner:
-   a Material Symbols icon, the name, the amount. Nothing animates. */
-.pb-winners{background:var(--pb-paper);padding:30px 0 40px}
-.pb-winners .pb-kicker{color:var(--pb-green-deep)}
-.pb-winners .pb-sec-title{color:var(--pb-ink)}
-.pb-winner-list{list-style:none;background:#fff;border:1px solid #DFE7F0;border-radius:16px;overflow:hidden}
-.pb-winner-row{display:flex;align-items:center;gap:12px;padding:13px 16px}
+/* ── 7 · WINNERS — compact endless scroller (owner, 2026-10-23): the
+   homepage's last section, directly above the footer. Small heading,
+   compact rows (Material Symbols icon + name + amount) scrolling
+   top-to-bottom in a seamless loop — the track holds the list twice and
+   wraps at -50%, so it never ends and never jumps. Pauses on hover /
+   press-and-hold; static under prefers-reduced-motion. */
+.pb-winners{background:var(--pb-paper);padding:20px 0 26px}
+.pb-winners .pb-kicker{color:var(--pb-green-deep);font-size:11px}
+.pb-winners .pb-sec-title{color:var(--pb-ink);font-size:22px}
+.pb-winner-loop{background:#fff;border:1px solid #DFE7F0;border-radius:14px;overflow:hidden;height:120px;
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(180deg,transparent,#000 14%,#000 86%,transparent)}
+.pb-winner-track{list-style:none;animation:pb-winner-scroll 48s linear infinite;will-change:transform}
+.pb-winner-loop:hover .pb-winner-track,.pb-winner-loop:active .pb-winner-track{animation-play-state:paused}
+@keyframes pb-winner-scroll{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+@media (prefers-reduced-motion: reduce){.pb-winner-track{animation:none}}
+.pb-winner-row{display:flex;align-items:center;gap:10px;height:40px;padding:0 14px}
 .pb-winner-row + .pb-winner-row{border-top:1px solid #EDF1F6}
-.pb-winner-ic{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24;color:var(--pb-green-deep);flex:none}
-.pb-winner-name{font-weight:700;font-size:14px;color:var(--pb-ink);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pb-winner-amt{font-family:var(--pb-disp);font-weight:900;font-size:16px;color:var(--pb-navy-850);white-space:nowrap}
+.pb-winner-ic{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:20px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 20;color:var(--pb-green-deep);flex:none}
+.pb-winner-name{font-weight:600;font-size:13px;color:var(--pb-ink);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb-winner-amt{font-family:var(--pb-disp);font-weight:800;font-size:14px;color:var(--pb-navy-850);white-space:nowrap}
 
 /* ── FOOTER ───────────────────────────────────────────── */
-.pb-ftr{background:var(--pb-navy-950);color:#A9BBDD;padding:42px 0 118px;border-top:3px solid var(--pb-green)}
-.pb-ftr-in{max-width:1180px;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:1.2fr 2fr;gap:30px}
-.pb-ftr-tag{font-size:13px;line-height:1.55;margin:13px 0 16px;max-width:32ch}
+.pb-ftr{background:var(--pb-navy-950);color:#A9BBDD;padding:21px 0 92px;border-top:3px solid var(--pb-green)}
+.pb-ftr-in{max-width:1180px;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:1.2fr 2fr;gap:18px}
+.pb-ftr-tag{font-size:13px;line-height:1.5;margin:8px 0 10px;max-width:32ch}
 .pb-ftr-social{display:flex;gap:9px}
 .pb-ftr-social a{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#C9D6EE}
 .pb-ftr-social svg{width:16px;height:16px}
-.pb-ftr-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.pb-ftr-cols h4{font-family:var(--pb-disp);color:#fff;font-size:13px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:12px}
-.pb-ftr-cols a{display:block;font-size:13px;padding:4.5px 0}
+.pb-ftr-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.pb-ftr-cols h4{font-family:var(--pb-disp);color:#fff;font-size:13px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:7px}
+.pb-ftr-cols a{display:block;font-size:13px;padding:3px 0}
 .pb-ftr-cols a:hover{color:var(--pb-green)}
-.pb-ftr-pay{max-width:1180px;margin:28px auto 0;padding:18px 16px 0;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pb-ftr-pay{max-width:1180px;margin:14px auto 0;padding:10px 16px 0;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .pb-ftr-pay>span{font:700 10.5px var(--pb-mono);letter-spacing:1.6px;text-transform:uppercase;color:#7188AF}
 .pb-pay-grid{display:flex;gap:8px;flex-wrap:wrap}
 .pb-pay{font-size:11.5px;font-weight:700;color:#D7E2F4;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);border-radius:9px;padding:6px 11px}
-.pb-ftr-legal{max-width:1180px;margin:0 auto;padding:20px 16px 0;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;font-size:11.5px;color:#7188AF;line-height:1.5}
+.pb-ftr-legal{max-width:1180px;margin:0 auto;padding:10px 16px 0;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;font-size:11.5px;color:#7188AF;line-height:1.5}
 .pb-ftr-18{flex:none;width:38px;height:38px;border-radius:50%;border:2px solid var(--pb-green);color:var(--pb-green);display:grid;place-items:center;font-weight:800;font-size:12px}
 @media(max-width:760px){.pb-ftr-in{grid-template-columns:1fr}}
 

@@ -341,6 +341,50 @@ function resolveDisplayLogos(matches: EnrichedMatch[]): EnrichedMatch[] {
   });
 }
 
+/**
+ * Silent background-refresh merge (owner, 2026-10-23): polling used to swap
+ * the whole match array for brand-new objects on every cycle, so the lists
+ * visibly re-rendered/flickered and images reloaded. This merge keeps the
+ * PREVIOUS object reference for every match whose rendered fields are
+ * unchanged, so React re-renders only the cards whose score/minute/odds
+ * actually moved — and when nothing changed at all it returns the previous
+ * array itself, so the state update bails out with zero re-render.
+ */
+function oddsMapEqual(a?: OddsMap, b?: OddsMap): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return a.home === b.home && a.draw === b.draw && a.away === b.away;
+}
+
+function sameRenderedMatch(a: EnrichedMatch, b: EnrichedMatch): boolean {
+  return a.status === b.status
+    && a.scoreHome === b.scoreHome && a.scoreAway === b.scoreAway
+    && a.minutePlayed === b.minutePlayed
+    && a.kickoffAt === b.kickoffAt && a.league === b.league
+    && a.homeTeam === b.homeTeam && a.awayTeam === b.awayTeam
+    && a.featured === b.featured && a.externalId === b.externalId
+    && a.homeLogo === b.homeLogo && a.awayLogo === b.awayLogo
+    && a.displayHomeLogo === b.displayHomeLogo && a.displayAwayLogo === b.displayAwayLogo
+    && a.isAdmin === b.isAdmin && a.source === b.source
+    && oddsMapEqual(a.oddsMap, b.oddsMap);
+}
+
+export function mergeMatchLists(prev: EnrichedMatch[], next: EnrichedMatch[]): EnrichedMatch[] {
+  if (prev.length === 0) return next;
+  const prevById = new Map(prev.map((m) => [m.id, m]));
+  let identical = prev.length === next.length;
+  const merged = next.map((m, i) => {
+    const p = prevById.get(m.id);
+    if (p && sameRenderedMatch(p, m)) {
+      if (prev[i] !== p) identical = false;
+      return p;
+    }
+    identical = false;
+    return m;
+  });
+  return identical ? prev : merged;
+}
+
 function extractOddsMap(oddsArray: unknown[], homeTeam: string, awayTeam: string): OddsMap | undefined {
   if (!Array.isArray(oddsArray) || oddsArray.length === 0) return undefined;
   const pool = oddsArray as Array<Record<string, unknown>>;
@@ -506,6 +550,23 @@ function unwrapWithOdds(raw: unknown, sport: SportKey): Array<{ match: EnrichedM
  * prevents live matches from silently reverting to "upcoming"/"today" just
  * because of endpoint response order.
  */
+/**
+ * The same fixture arrives from several endpoints, and the copies are NOT
+ * equal: some carry the real crest URLs (today/upcoming/live), others —
+ * notably the bare catalog feed — carry none. The dedup passes below pick
+ * ONE surviving copy by live/score/odds priority and used to keep it
+ * wholesale, so when the survivor was a logo-less copy the real logos were
+ * silently dropped and every card fell back to generated initials crests
+ * (owner report, 2026-10-23). Logos are therefore UNIONED across copies:
+ * whichever copy survives a merge keeps any crest another copy provided.
+ */
+function backfillLogos(winner: EnrichedMatch, loser: EnrichedMatch): EnrichedMatch {
+  const homeLogo = winner.homeLogo || loser.homeLogo;
+  const awayLogo = winner.awayLogo || loser.awayLogo;
+  if (homeLogo === winner.homeLogo && awayLogo === winner.awayLogo) return winner;
+  return { ...winner, homeLogo, awayLogo };
+}
+
 function dedupById(matches: EnrichedMatch[]): EnrichedMatch[] {
   const byId = new Map<string, EnrichedMatch>();
   for (const m of matches) {
@@ -514,11 +575,12 @@ function dedupById(matches: EnrichedMatch[]): EnrichedMatch[] {
     if (!existing) { byId.set(m.id, m); continue; }
     const existingLive = isLiveStatus(existing.status ?? "");
     const currentLive = isLiveStatus(m.status ?? "");
-    if (currentLive && !existingLive) { byId.set(m.id, m); continue; }
-    if (existingLive && !currentLive) continue;
+    if (currentLive && !existingLive) { byId.set(m.id, backfillLogos(m, existing)); continue; }
+    if (existingLive && !currentLive) { byId.set(m.id, backfillLogos(existing, m)); continue; }
     const existingHasScore = existing.scoreHome != null || existing.scoreAway != null;
     const currentHasScore = m.scoreHome != null || m.scoreAway != null;
-    if (currentHasScore && !existingHasScore) byId.set(m.id, m);
+    if (currentHasScore && !existingHasScore) { byId.set(m.id, backfillLogos(m, existing)); continue; }
+    byId.set(m.id, backfillLogos(existing, m));
   }
   return Array.from(byId.values());
 }
@@ -552,19 +614,20 @@ function dedupByFingerprint(matches: EnrichedMatch[]): EnrichedMatch[] {
     // so detail, market, and bet endpoints receive the ID they understand.
     const existingBackendId = isBettableMatchId(existing.id);
     const currentBackendId = isBettableMatchId(m.id);
-    if (currentBackendId && !existingBackendId) { byFp.set(fp, m); continue; }
-    if (existingBackendId && !currentBackendId) continue;
+    if (currentBackendId && !existingBackendId) { byFp.set(fp, backfillLogos(m, existing)); continue; }
+    if (existingBackendId && !currentBackendId) { byFp.set(fp, backfillLogos(existing, m)); continue; }
     const existingLive = isLiveStatus(existing.status ?? "");
     const currentLive = isLiveStatus(m.status ?? "");
-    if (currentLive && !existingLive) { byFp.set(fp, m); continue; }
-    if (existingLive && !currentLive) continue;
+    if (currentLive && !existingLive) { byFp.set(fp, backfillLogos(m, existing)); continue; }
+    if (existingLive && !currentLive) { byFp.set(fp, backfillLogos(existing, m)); continue; }
     const existingHasScore = existing.scoreHome != null || existing.scoreAway != null;
     const currentHasScore = m.scoreHome != null || m.scoreAway != null;
-    if (currentHasScore && !existingHasScore) { byFp.set(fp, m); continue; }
-    if (existingHasScore && !currentHasScore) continue;
+    if (currentHasScore && !existingHasScore) { byFp.set(fp, backfillLogos(m, existing)); continue; }
+    if (existingHasScore && !currentHasScore) { byFp.set(fp, backfillLogos(existing, m)); continue; }
     const existingHasOdds = !!existing.oddsMap && (existing.oddsMap.home > 0 || existing.oddsMap.away > 0);
     const currentHasOdds = !!m.oddsMap && (m.oddsMap.home > 0 || m.oddsMap.away > 0);
-    if (currentHasOdds && !existingHasOdds) byFp.set(fp, m);
+    if (currentHasOdds && !existingHasOdds) { byFp.set(fp, backfillLogos(m, existing)); continue; }
+    byFp.set(fp, backfillLogos(existing, m));
   }
   return Array.from(byFp.values());
 }
@@ -827,7 +890,12 @@ function reconcileFootballBackendIds(matches: EnrichedMatch[]): EnrichedMatch[] 
     const teamMatch = byTeams.get(teamKey(m));
     const canonical = alias ?? teamMatch;
     if (!canonical) return m;
-    return { ...canonical, ...m, id: canonical.id, externalId: m.externalId ?? canonical.externalId };
+    const merged = { ...canonical, ...m, id: canonical.id, externalId: m.externalId ?? canonical.externalId };
+    // The provider copy spreads OVER the canonical record — never let its
+    // empty logo fields clobber the canonical record's real crest URLs.
+    if (!merged.homeLogo && canonical.homeLogo) merged.homeLogo = canonical.homeLogo;
+    if (!merged.awayLogo && canonical.awayLogo) merged.awayLogo = canonical.awayLogo;
+    return merged;
   });
 }
 
