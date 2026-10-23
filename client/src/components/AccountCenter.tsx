@@ -14,10 +14,8 @@ import {
   WalletCards, Zap, ShieldCheck,
 } from "lucide-react";
 import { useSession, pickUserField, isAdminUser, isSuperAdminUser, userRole } from "@/lib/session";
-import { emojiForSeed } from "@/lib/avatars";
 
 interface MenuRow { icon: ReactNode; label: string; href: string; hint?: string; badge?: { text: string; tone: "blue" | "green" | "gold" } }
-interface BentoItem { icon: ReactNode; label: string; href: string; tone: "blue" | "blue" | "green" | "gold" | "plain" }
 
 function numeric(value: unknown): number | null {
   const n = typeof value === "number" ? value : typeof value === "string" ? Number(value) : null;
@@ -42,19 +40,6 @@ function MenuGroup({ title, rows }: { title: string; rows: MenuRow[] }) {
         ))}
       </div>
     </section>
-  );
-}
-
-function BentoGrid({ items }: { items: BentoItem[] }) {
-  return (
-    <div className="acct-bento">
-      {items.map((it) => (
-        <Link key={it.href + it.label} href={it.href} className={`acct-bento-tile acct-bento-${it.tone}`}>
-          <span className="acct-bento-icon">{it.icon}</span>
-          <span className="acct-bento-label">{it.label}</span>
-        </Link>
-      ))}
-    </div>
   );
 }
 
@@ -108,9 +93,10 @@ export default function AccountCenter() {
   const first = pickUserField(user, "firstName", "first_name", "givenName");
   const last = pickUserField(user, "lastName", "last_name", "familyName");
   const email = pickUserField(user, "email", "emailAddress", "username");
-  const userId = pickUserField(user, "id", "userId", "accountId");
+  const phone = pickUserField(user, "phone", "phoneNumber", "msisdn", "mobileNumber");
   const fullName = [first, last].filter(Boolean).join(" ") || (email ? email.split("@")[0] : "");
-  const avatarEmoji = emojiForSeed(userId || email || "guest");
+  const avatarInitial = (fullName || "A").trim().charAt(0).toUpperCase();
+  const contact = phone || email;
   const verified = String(user.kycStatus ?? "").toLowerCase() === "verified" || user.emailVerified === true;
   const isAdmin = isAdminUser(user);
   const isSuperAdmin = isSuperAdminUser(user);
@@ -120,13 +106,13 @@ export default function AccountCenter() {
 
   const doLogout = () => { logout(); window.location.href = "/"; };
 
-  const bentoItems: BentoItem[] = [
-    { icon: <Ticket size={20} />, label: "Betslip", href: "/betslip", tone: "blue" },
-    { icon: <History size={20} />, label: "Bet History", href: "/bets", tone: "blue" },
-    { icon: <ClipboardList size={20} />, label: "Open Bets", href: "/open-bets", tone: "gold" },
-    { icon: <Heart size={20} />, label: "Favorites", href: "/favorites", tone: "green" },
-    { icon: <Gift size={20} />, label: "Promotions", href: "/promos", tone: "blue" },
-    { icon: <Receipt size={20} />, label: "Transactions", href: "/transactions", tone: "plain" },
+  const quickRows: MenuRow[] = [
+    { icon: <Ticket size={ICON} />, label: "Betslip", href: "/betslip" },
+    { icon: <History size={ICON} />, label: "Bet History", href: "/bets" },
+    { icon: <ClipboardList size={ICON} />, label: "Open Bets", href: "/open-bets" },
+    { icon: <Heart size={ICON} />, label: "Favorites", href: "/favorites" },
+    { icon: <Gift size={ICON} />, label: "Promotions", href: "/promos" },
+    { icon: <Receipt size={ICON} />, label: "Transactions", href: "/transactions" },
   ];
 
   const accountMenu: MenuRow[] = [
@@ -149,19 +135,19 @@ export default function AccountCenter() {
 
       <div className="acct-topbar">
         <div className="acct-avatar">
-          <span className="acct-avatar-emoji">{avatarEmoji}</span>
+          <span className="acct-avatar-initial">{avatarInitial}</span>
           {verified && <span className="acct-avatar-tick"><BadgeCheck size={13} /></span>}
         </div>
         <div className="acct-id">
           <p className="acct-name">{fullName || "Account holder"}</p>
-          <p className="acct-email">{email}</p>
+          <p className="acct-email">{contact}</p>
         </div>
         {isAdmin && <span className="acct-admin-pill"><Zap size={13} /> Admin</span>}
         <Link href="/profile" className="acct-edit-link" aria-label="Edit profile"><ChevronRight size={17} /></Link>
       </div>
 
       <div className="acct-body">
-        <section className="acct-balance-card">
+        <section className="acct-balance">
           <div className="acct-balance-top">
             <span className="acct-balance-label">
               Wallet balance
@@ -176,13 +162,11 @@ export default function AccountCenter() {
           <p className="acct-balance-value">{money(balance)}</p>
           <div className="acct-balance-actions">
             <Link href="/deposit" className="acct-balance-btn acct-balance-btn-solid"><Plus size={17} /> Deposit</Link>
-            <Link href="/wallet" className="acct-balance-btn acct-balance-btn-ghost"><WalletCards size={16} /> Withdraw</Link>
+            <Link href="/wallet" className="acct-balance-btn acct-balance-btn-outline"><WalletCards size={16} /> Withdraw</Link>
           </div>
         </section>
 
-        <h2 className="acct-group-title acct-bento-title">Quick access</h2>
-        <BentoGrid items={bentoItems} />
-
+        <MenuGroup title="Quick access" rows={quickRows} />
         <MenuGroup title="Account" rows={accountMenu} />
         <MenuGroup title="Safety & support" rows={safetyMenu} />
 
@@ -432,6 +416,52 @@ function AcctStyles() {
       .acct-signedout-icon{ background:#E1F3E7; color:#0B7A43; }
       .acct-signedout h1{ color:#102A43; font-family:Roboto,Arial,sans-serif; }
       .acct-signedout p{ color:#71809A; }
+
+      /* Account new UI (owner, 2026-10-23): compact profile header, balance
+         presented plainly (no slab), every menu a clean flat list. */
+      body:has(.acct-page){ background:#fff !important; }
+      .acct-page{ background:#fff !important; color:#20242D; }
+      .acct-page-empty{ background:#fff; }
+      .acct-loading{ color:#71809A; font-family:Roboto,Arial,sans-serif; }
+      .acct-topbar{ padding:14px 16px; background:#fff; border-bottom:1px solid #E3E3EF; }
+      .acct-avatar{ width:44px; height:44px; background:#E1F3E7 !important; border:none; box-shadow:none; }
+      .acct-avatar-initial{ font:800 18px Roboto,Arial,sans-serif; color:#0B7A43; line-height:1; }
+      .acct-avatar-tick{ background:#00A651; border:2px solid #fff; }
+      .acct-name{ font-size:.95rem; font-weight:700; color:#102A43 !important; }
+      .acct-email{ font-size:.76rem; color:#71809A !important; }
+      .acct-edit-link{ background:transparent; border:none; color:#9AA5B5; padding:4px; }
+      .acct-edit-link:hover{ color:#0B7A43; background:transparent; }
+      .acct-body{ padding:4px 16px 44px; }
+      .acct-balance{ padding:18px 2px 20px; border-bottom:1px solid #E3E3EF; margin-bottom:6px; }
+      .acct-balance-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+      .acct-balance-label{ display:flex; align-items:center; gap:7px; font-size:.68rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#71809A; }
+      .acct-eye{ color:#9AA5B5; padding:2px; }
+      .acct-eye:hover{ color:#0B7A43; }
+      .acct-balance-value{ margin:8px 0 0; font:800 30px Roboto,Arial,sans-serif; color:#102A43; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+      .acct-bonus-pill{ background:#E1F3E7; border:1px solid #BFE6CF; color:#0B7A43; }
+      .acct-balance-actions{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; }
+      .acct-balance-btn{ display:flex; align-items:center; justify-content:center; gap:7px; min-height:46px; border-radius:12px; font-size:.88rem; font-weight:800; text-decoration:none; }
+      .acct-balance-btn-solid{ background:#00A651; color:#fff; box-shadow:none; }
+      .acct-balance-btn-solid:hover{ background:#0B7A43; }
+      .acct-balance-btn-outline{ background:#fff; border:1.5px solid #0B7A43; color:#0B7A43; }
+      .acct-balance-btn-outline:hover{ background:#E1F3E7; }
+      .acct-group{ margin-bottom:4px; }
+      .acct-group-title{ margin:22px 2px 2px !important; font-size:.68rem; letter-spacing:.09em; color:#71809A !important; }
+      .acct-group-card{ background:transparent; border:none; border-radius:0; box-shadow:none; overflow:visible; }
+      .acct-row{ padding:13px 2px; border-bottom:1px solid #E3E3EF; gap:12px; }
+      .acct-row:last-child{ border-bottom:1px solid #E3E3EF; }
+      .acct-group:last-of-type .acct-row:last-child{ border-bottom:none; }
+      .acct-row:hover{ background:#F8FAF8; }
+      .acct-row-icon{ width:36px; height:36px; border-radius:10px; background:#E1F3E7; color:#0B7A43; }
+      .acct-row:hover .acct-row-icon{ background:#E1F3E7; color:#0B7A43; }
+      .acct-row-label{ font-size:.9rem; font-weight:600; color:#102A43; }
+      .acct-row-hint{ color:#71809A; }
+      .acct-row-chevron{ color:#9AA5B5; }
+      .acct-logout{ margin-top:24px; background:#fff; color:#C62828; border:1px solid #E3E3EF; border-radius:12px; box-shadow:none; }
+      .acct-logout:hover{ background:#FDECEC; border-color:#F3C2C2; color:#C62828; }
+      .acct-footnote{ color:#71809A; }
+      .acct-signedout{ border-radius:14px; }
+      .acct-signedout .gold-button{ background:#00A651 !important; background-image:none !important; border:1px solid #00A651 !important; color:#fff !important; box-shadow:none !important; }
     `}</style>
   );
 }
