@@ -52,13 +52,13 @@ export default function SecurityPage() {
         <section className="panel simple-card" style={{ gridColumn: "1 / -1" }}>
           <AlertTriangle size={22} />
           <h3>Two-factor authentication</h3>
-          <p>Two-factor authentication isn't available to manage from this app yet — we didn't want to show a toggle that doesn't actually do anything. If you'd like 2FA enabled sooner, reach out via the <a href="/support" style={{ color: "var(--gold-hi)", fontWeight: 800 }}>Support Centre</a>.</p>
+          <p>Two-factor authentication isn't available to manage from this app yet — we didn't want to show a toggle that doesn't actually do anything. If you'd like 2FA enabled sooner, reach out via the <a href="/support" style={{ color: "#0B7A43", fontWeight: 800 }}>Support Centre</a>.</p>
         </section>
 
         <section className="panel simple-card" style={{ gridColumn: "1 / -1" }}>
           <ShieldCheck size={22} />
           <h3>Account verification</h3>
-          <p>Keeping your email and phone number verified helps us secure withdrawals and recover your account if needed. Manage these from your <a href="/profile" style={{ color: "var(--gold-hi)", fontWeight: 800 }}>Profile page</a>.</p>
+          <p>Keeping your email and phone number verified helps us secure withdrawals and recover your account if needed. Manage these from your <a href="/profile" style={{ color: "#0B7A43", fontWeight: 800 }}>Profile page</a>.</p>
         </section>
       </div>
     </main>

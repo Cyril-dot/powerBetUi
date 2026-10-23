@@ -20,7 +20,7 @@ export default function ResponsibleGamingPage() {
 
       <div className="deposit-note" style={{ marginBottom: 18 }}>
         <Info size={13} />
-        These limits are saved as reminders on this device only — they are not yet enforced by our systems. For a limit that's actually applied to your account, contact <a href="/support" style={{ color: "var(--gold-hi)", fontWeight: 800 }}>Support</a> directly.
+        These limits are saved as reminders on this device only — they are not yet enforced by our systems. For a limit that's actually applied to your account, contact <a href="/support" style={{ color: "#0B7A43", fontWeight: 800 }}>Support</a> directly.
       </div>
 
       <div className="simple-grid">
@@ -40,7 +40,7 @@ export default function ResponsibleGamingPage() {
           <ShieldAlert size={22} />
           <h3>Take a break</h3>
           <p>Need time away? A cooling-off period temporarily pauses betting on your account.</p>
-          <p className="muted" style={{ marginTop: 8 }}>To apply a real cooling-off period or self-exclusion to your account, please contact our <a href="/support" style={{ color: "var(--gold-hi)", fontWeight: 800 }}>Support team</a> — this requires account-level action we can't take from a device setting alone.</p>
+          <p className="muted" style={{ marginTop: 8 }}>To apply a real cooling-off period or self-exclusion to your account, please contact our <a href="/support" style={{ color: "#0B7A43", fontWeight: 800 }}>Support team</a> — this requires account-level action we can't take from a device setting alone.</p>
         </section>
 
         <section className="panel simple-card" style={{ gridColumn: "1 / -1" }}>
