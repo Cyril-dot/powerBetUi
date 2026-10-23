@@ -180,13 +180,14 @@ export default function TicketDetailsPage({ id }: { id: string }) {
             <div className="td-stat"><span>Total Stake</span><b>GHS {bet.stake.toFixed(2)}</b></div>
             <div className="td-stat"><span>Total Odds</span><b>{bet.totalOdds.toFixed(2)}</b></div>
             <div className="td-verify-strip">Verify Code: <b>{verifyCode(bet)}</b></div>
-            {bet.status === "WON" && (
-              <div className="td-win-banner">
-                <div className="td-win-message"><Trophy size={18} /><span>Congratulations! You are<br /><b>Amazing!</b></span></div>
-                <button type="button" className="td-trophy-btn" onClick={() => setShowTrophy(true)} aria-label="View winning trophy">Show Off</button>
-              </div>
-            )}
           </section>
+
+          {bet.status === "WON" && (
+            <div className="td-win-banner">
+              <div className="td-win-message"><Trophy size={18} /><span>Congratulations! You are <b>Amazing!</b></span></div>
+              <button type="button" className="td-trophy-btn" onClick={() => setShowTrophy(true)} aria-label="View winning trophy">Show Off</button>
+            </div>
+          )}
 
           <section className="td-legs">
             {bet.selections.map((s, i) => {
@@ -228,66 +229,78 @@ export default function TicketDetailsPage({ id }: { id: string }) {
 function TicketDetailsStyles() {
   return (
     <style>{`
-      :root{ --td-line:#e3e3e3; --td-muted:#71809a; --td-green:#0b7a43; --td-green-solid:#00a651; --td-pale:#e1f3e7; }
-      .td-page{ min-height:100vh; background:#f5f6f7; padding-bottom:40px; }
+      :root{ --td-line:#e3e3e3; --td-muted:#71809a; --td-green:#0b7a43; --td-pale:#e1f3e7; }
+      .td-page{ min-height:100vh; background:#f5f6f7; padding-bottom:40px; font-family:'Roboto',sans-serif; }
       .td-pad{ padding:24px 18px; color:#555; }
       .td-header{
         display:flex; align-items:center; justify-content:space-between; padding:16px 12px;
         background:#0A1B3D; color:#fff;
       }
-      .td-header h1{ font:800 16px 'DM Sans',sans-serif; margin:0; }
+      .td-header h1{ font:800 16px 'Roboto',sans-serif; margin:0; }
       .td-header-right{ display:flex; gap:6px; }
       .td-header-btn{
         width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
         background:rgba(255,255,255,.16); color:#fff; cursor:pointer; border:none;
       }
 
-      .td-summary{ margin:14px 12px; border:1px solid var(--td-line); border-radius:14px; background:#fff; color:#20242d; overflow:hidden; box-shadow:none; }
-      .td-summary-top{ display:flex; justify-content:space-between; font-size:.7rem; color:var(--td-muted); padding:12px 16px 8px; }
-      .td-summary-row{ display:flex; align-items:center; justify-content:space-between; padding:0 16px 10px; }
-      .td-kind{ font:800 17px 'DM Sans',sans-serif; }
-      .td-status{ display:inline-flex; align-items:center; gap:4px; font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; padding:5px 10px; border-radius:999px; background:#f1f1f1; color:#555; }
-      .td-status.td-won{ background:var(--td-green-solid); color:#fff; }.td-status.td-cashed{ background:var(--td-pale); color:var(--td-green); }.td-status.td-lost,.td-status.td-void{ background:#f1f1f1; color:#747681; }.td-status.td-pending{ background:#fdf3e0; color:#8a6100; }
+      /* Reference layout (owner, 2026-10-23): the summary is a FULL-BLEED
+         deep-navy slab — edge to edge, no card, no side margins — with the
+         verify-code strip inside its foot; a black congratulations strip
+         sits directly beneath it; leg cards follow on the light ground. */
+      .td-summary{
+        margin:0; border:0; border-radius:0; overflow:hidden; box-shadow:none;
+        background:linear-gradient(165deg,#10234A 0%,#0A1B3D 55%,#060F24 100%);
+        color:#fff; padding:16px 18px 0;
+      }
+      .td-summary-top{ display:flex; justify-content:space-between; gap:10px; font-size:.72rem; color:rgba(255,255,255,.72); padding:0 0 10px; }
+      .td-ticket-id{ letter-spacing:.02em; }
+      .td-date{ color:rgba(255,255,255,.55); white-space:nowrap; }
+      .td-summary-row{ display:flex; align-items:center; justify-content:space-between; padding:0 0 12px; }
+      .td-kind{ font:800 18px 'Roboto',sans-serif; color:#fff; }
+      .td-status{ display:inline-flex; align-items:center; gap:5px; font-size:.78rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; background:none; padding:0; }
+      .td-status.td-won{ color:#fff; }
+      .td-status.td-won svg{ color:#00E85F; }
+      .td-status.td-cashed{ color:#7BDCA8; }
+      .td-status.td-lost,.td-status.td-void{ color:rgba(255,255,255,.5); }
+      .td-status.td-pending{ color:#FFB020; }
 
-      .td-stat{ display:flex; align-items:center; justify-content:space-between; padding:6px 16px; font-size:.82rem; color:var(--td-muted); }.td-stat b{ color:#20242d; font-size:.94rem; }.td-return-won{ color:var(--td-green) !important; font-size:1.2rem !important; font-weight:800; }
+      .td-stat{ display:flex; align-items:center; justify-content:space-between; padding:7px 0; font-size:.82rem; color:rgba(255,255,255,.62); }
+      .td-stat b{ color:#fff; font-size:.95rem; font-weight:700; }
+      .td-return-won{ color:#00E85F !important; font-size:1.35rem !important; font-weight:800; }
       .td-verify-strip{
-        margin-top:8px; padding:12px 16px; font-size:.76rem; color:var(--td-muted); background:#f5f6f7; border-top:1px solid var(--td-line);
+        margin-top:10px; padding:12px 0 16px; font-size:.76rem; color:rgba(255,255,255,.62);
+        background:transparent; border-top:1px solid rgba(255,255,255,.14);
       }
-      .td-verify-strip b{ color:#20242d; letter-spacing:.03em; }
+      .td-verify-strip b{ color:#fff; letter-spacing:.03em; }
+
+      .td-win-banner{
+        display:flex; align-items:center; justify-content:space-between; gap:12px;
+        margin:0; padding:12px 18px; background:#050505; color:#fff;
+      }
+      .td-win-message{ display:flex; align-items:center; gap:9px; font-size:.8rem; line-height:1.3; }
+      .td-win-message svg{ color:#00E85F; flex:none; }
+      .td-win-message b{ color:#fff; font-weight:800; }
       .td-trophy-btn{
-        display:flex; align-items:center; justify-content:center; gap:7px; width:calc(100% - 32px); margin:12px 16px 16px;
-        padding:12px 10px; border-radius:10px; background:var(--td-pale); border:1px solid #d5eddd; color:var(--td-green); font-size:.8rem; font-weight:800; cursor:pointer;
+        display:flex; align-items:center; justify-content:center; gap:7px; flex:none;
+        min-width:84px; margin:0; padding:10px 16px; border:0; border-radius:8px;
+        background:#00A651; color:#fff; font:800 .78rem 'Roboto',sans-serif; white-space:nowrap; cursor:pointer;
       }
+      .td-trophy-btn:hover{ background:#00B85C; }
 
-      .td-legs{ display:flex; flex-direction:column; gap:10px; margin:0 12px; }
-      .td-leg-card{ border-radius:12px; background:#fff; padding:14px 16px; color:#20242d; box-shadow:none; border:1px solid var(--td-line); }
+      .td-legs{ display:flex; flex-direction:column; gap:10px; margin:14px 12px 0; }
+      .td-leg-card{ border-radius:12px; background:#fff; padding:14px; color:#20242d; box-shadow:none; border:1px solid var(--td-line); }
       .td-leg-top{ display:flex; align-items:flex-start; gap:8px; margin-bottom:10px; }
-      .td-leg-check{ color:#26a968; flex-shrink:0; margin-top:2px; }
-      .td-leg-teams{ font:700 14px 'DM Sans',sans-serif; margin-bottom:2px; }
-      .td-leg-teams span{ color:var(--td-muted); font-weight:500; margin:0 4px; }.td-leg-game-id{ font-size:.68rem; color:var(--td-muted); }.td-leg-kickoff{ margin-top:4px; color:var(--td-muted); font-size:.7rem; font-weight:700; }.td-leg-pick{ background:#f8f9fa; border:1px solid var(--td-line); border-radius:10px; padding:10px 12px; }.td-leg-pick.td-pick-won{ background:var(--td-pale); }.td-leg-row{ display:flex; align-items:center; justify-content:space-between; padding:4px 0; font-size:.76rem; color:var(--td-muted); }.td-leg-row b{ color:#20242d; font-weight:700; }.td-pick-won .td-leg-row:first-child b{ color:var(--td-green); }
-
-      /* Win language (owner, 2026-10-23): white summary card, success-green
-         status/amounts/banner — the same greens as the bet-history won
-         cards. No legacy blue, no gold, no black celebration strip. */
-      .td-summary{ margin:14px 12px; border:1px solid var(--td-line); border-radius:14px; background:#fff; color:#20242d; box-shadow:none; }
-      .td-summary-top{ color:var(--td-muted); padding:12px 16px 8px; }
-      .td-summary-row{ padding:0 16px 10px; }
-      .td-kind{ color:#20242d; font-size:17px; }
-      .td-stat{ padding:6px 16px; color:var(--td-muted); border-top:0; font-size:.82rem; }
-      .td-stat b{ color:#20242d; font-size:.94rem; }
-      .td-return-won{ color:var(--td-green)!important; font-size:1.2rem!important; font-weight:800; }
-      .td-verify-strip{ margin-top:8px; padding:12px 16px; color:var(--td-muted); background:#f5f6f7; border-top:1px solid var(--td-line); }
-      .td-verify-strip b{ color:#20242d; }
-      .td-win-banner{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:0; padding:10px 14px; background:linear-gradient(145deg,#19a957,#08743c); color:#fff; }
-      .td-win-message{ display:flex; align-items:center; gap:9px; font-size:.72rem; line-height:1.25; }
-      .td-win-message svg{ color:#fff; flex:none; }
-      .td-win-message b{ color:#fff; }
-      .td-win-banner .td-trophy-btn{ width:auto; min-width:78px; margin:0; padding:9px 12px; border:0; border-radius:8px; background:#fff; color:var(--td-green); font-size:.72rem; font-weight:900; }
-      .td-win-banner .td-trophy-btn:hover{ background:var(--td-pale); transform:none; }
-      .td-leg-card{ border-radius:12px; background:#fff; padding:14px 14px; border:1px solid var(--td-line); box-shadow:none; }
-      .td-leg-check{ color:#26a968; }
+      .td-leg-check{ color:#00A651; flex-shrink:0; margin-top:2px; }
+      .td-leg-teams{ font:700 14px 'Roboto',sans-serif; margin-bottom:2px; }
+      .td-leg-teams span{ color:var(--td-muted); font-weight:500; margin:0 4px; }
+      .td-leg-game-id{ font-size:.68rem; color:var(--td-muted); }
+      .td-leg-kickoff{ margin-top:4px; color:var(--td-muted); font-size:.7rem; font-weight:700; }
+      .td-leg-pick{ background:#f8f9fa; border:1px solid var(--td-line); border-radius:10px; padding:10px 12px; }
+      .td-leg-pick.td-pick-won{ background:var(--td-pale); }
+      .td-leg-row{ display:flex; align-items:center; justify-content:space-between; padding:4px 0; font-size:.76rem; color:var(--td-muted); }
+      .td-leg-row b{ color:#20242d; font-weight:700; }
       .td-pick-won .td-leg-row:first-child b{ color:var(--td-green); }
-      @media(max-width:520px){.td-summary-top{font-size:.66rem}.td-stat{font-size:.76rem}.td-stat b{font-size:.82rem}.td-win-message{font-size:.7rem}.td-win-banner .td-trophy-btn{min-width:76px;padding:9px 10px}}
+      @media(max-width:520px){.td-summary-top{font-size:.66rem}.td-stat{font-size:.78rem}.td-stat b{font-size:.86rem}.td-return-won{font-size:1.22rem !important}.td-win-message{font-size:.76rem}.td-trophy-btn{min-width:80px;padding:9px 13px}}
 
       .td-delete{
         display:block; width:calc(100% - 24px); margin:20px 12px 0; padding:13px; border-radius:10px;
