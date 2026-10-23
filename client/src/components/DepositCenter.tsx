@@ -7,9 +7,9 @@ import {
   Loader2,
   ShieldCheck,
   Smartphone,
-  WalletCards,
 } from "lucide-react";
 import api, { ApiError } from "@/lib/api";
+import { useSession } from "@/lib/session";
 
 /* Deposit centre — ShinobiPay, GHANA ONLY (owner direction
    2026-10-16: ShinobiPay in, Flutterwave out. PowerBet deposits are
@@ -129,28 +129,23 @@ function GhanaDeposit() {
   </StatusPanel>;
 
   return <form className="deposit-panel" onSubmit={start}>
-    <div className="deposit-panel-heading">
-      <div><h2>Deposit with Mobile Money</h2><p>A prompt is sent straight to your phone — approve it with your PIN and your wallet is credited at once.</p></div>
-      <Smartphone size={22} />
-    </div>
-    <div className="deposit-steps" aria-hidden><span className="now">1 · Enter amount</span><span>2 · Approve on phone</span><span>3 · Credited</span></div>
     {error && <div className="deposit-error" role="alert"><AlertCircle size={15} />{error}</div>}
-    <div className="deposit-field">
+    <div className="deposit-field deposit-field-first">
       <label htmlFor="gh-amount">Amount to deposit</label>
       <div className="deposit-amount-wrap"><b>GH₵</b><input id="gh-amount" value={amount} onChange={(ev) => setAmount(ev.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" placeholder="50.00" /></div>
-      <small className="deposit-phone-hint">Minimum deposit GH₵{MIN_GHS} · Maximum GH₵{MAX_GHS.toLocaleString()}</small>
     </div>
     <div className="deposit-quick-row">{GH_QUICK.map((v) => <button type="button" key={v} className={amount === String(v) ? "selected" : ""} onClick={() => setAmount(String(v))}>GH₵{v.toLocaleString()}</button>)}</div>
     <label className="deposit-field"><span>MoMo number</span><input value={phone} onChange={(ev) => { setPhone(ev.target.value.replace(/[^0-9+]/g, "")); const d = detectNetwork(ev.target.value); if (d) setNetwork(d); }} inputMode="tel" placeholder="024 123 4567" /></label>
     <div className="deposit-quick-row">{(["MTN", "TELECEL", "AIRTELTIGO"] as const).map((n) => <button type="button" key={n} className={network === n ? "selected" : ""} onClick={() => setNetwork(n)}>{n === "AIRTELTIGO" ? "AirtelTigo" : n === "MTN" ? "MTN" : "Telecel"}</button>)}</div>
-    <button className="deposit-submit" type="submit" disabled={busy || !Number.isFinite(value) || value < MIN_GHS}>{busy ? <><Loader2 size={17} className="deposit-spin" /> Starting…</> : <><Smartphone size={17} /> Continue</>}</button>
-    <p className="deposit-footnote"><ShieldCheck size={14} /> Payments by ShinobiPay · credited automatically</p>
+    <button className="deposit-submit" type="submit" disabled={busy || !Number.isFinite(value) || value < MIN_GHS}>{busy ? <><Loader2 size={18} className="deposit-spin" /> Starting…</> : <><Smartphone size={18} /> Deposit</>}</button>
+    <p className="deposit-facts"><ShieldCheck size={13} /> Instant deposits · ShinobiPay · Min GH₵{MIN_GHS} · Max GH₵{MAX_GHS.toLocaleString()}</p>
   </form>;
 }
 
 /* ─── Page shell ──────────────────────────────────────────────────── */
 export default function DepositCenter() {
   const signedIn = typeof window !== "undefined" && !!window.localStorage.getItem("accessToken");
+  const { balance } = useSession();
   const [history, setHistory] = useState<Row[]>([]);
 
   useEffect(() => {
@@ -166,21 +161,12 @@ export default function DepositCenter() {
 
   return (
     <main className="deposit-page">
-      <section className="deposit-hero">
-        <div className="deposit-hero-icon"><WalletCards size={24} /></div>
-        <div>
-          <span className="deposit-eyebrow">INSTANT WALLET FUNDING</span>
-          <h1>Deposit funds</h1>
-          <p>Mobile Money in Ghana. Your wallet is credited automatically — no proof uploads, no waiting for reviews.</p>
-        </div>
-        <div className="deposit-hero-trust"><ShieldCheck size={16} /> Credited automatically</div>
-      </section>
-
       <div className="deposit-shell">
-        <div className="deposit-rail">
-          <span className="deposit-rail-dot" />
-          <span>Instant deposits · ShinobiPay</span>
-          <span className="deposit-rail-live"><Smartphone size={11} /> GH₵</span>
+        <div className="deposit-title-row">
+          <h1>Deposit</h1>
+          {signedIn && balance !== null && (
+            <span className="deposit-title-balance">Balance <b>{ghs(balance)}</b></span>
+          )}
         </div>
 
         {!signedIn ? (
