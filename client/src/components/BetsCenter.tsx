@@ -426,6 +426,11 @@ function BetsCenterStyles() {
       .bh-day-label b{ color:#F4F1F0; font-size:.82rem; }
       .bh-day-cards{ display:flex; flex-direction:column; gap:10px; }
 
+      /* Compact ticket cards (owner, 2026-10-23): internal padding and
+         section gaps tightened ~a third — card-top 10px, body 8/10px,
+         totals margins 8/0, payout row 9px. The mobile !important
+         mirrors in index.css (.bh-card-body/.bh-card-head/.bh-open-totals)
+         must stay in step with these values. */
       .bh-card{
         display:block; width:100%; border-radius:18px; overflow:hidden; background:#141414; cursor:pointer;
         box-shadow:0 2px 10px rgba(20,24,33,.06); border:1px solid var(--line); text-decoration:none; color:inherit;
@@ -433,11 +438,11 @@ function BetsCenterStyles() {
       }
       .bh-card:hover{ transform:translateY(-2px); box-shadow:0 10px 26px rgba(20,24,33,.12); }
 
-      .bh-card-head{ display:flex; align-items:center; justify-content:space-between; padding:11px 16px; font-size:.76rem; font-weight:800; color:#F4F1F0; }
+      .bh-card-head{ display:flex; align-items:center; justify-content:space-between; padding:9px 16px; font-size:.76rem; font-weight:800; color:#F4F1F0; }
       .bh-card-head.bh-open-head{ background:#1B1B1B; color:#F4F1F0; }
       .bh-share{ color:#9a9a9a; }
 
-	      .bh-card-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 16px 0; }
+	      .bh-card-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 16px 0; }
 	      .bh-type{ font-size:.8rem; font-weight:800; color:#F4F1F0; }
 	      .bh-type em{ font-style:normal; font-weight:600; color:#a8a8a8; font-size:.72rem; }
 	      .bh-card-actions{ display:flex; align-items:center; justify-content:flex-end; gap:6px; min-width:0; }
@@ -453,9 +458,9 @@ function BetsCenterStyles() {
       .bh-pill.bh-void{ background:#8b8b8b; }
       .bh-pill.bh-cashed{ background:#0da653; }
 
-	      .bh-card-body{ padding:12px 16px 14px; }
-	      .bh-totals{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; padding-bottom:12px; margin-top:12px; margin-bottom:12px; border-bottom:1px dashed var(--line); }
-	      .bh-totals div{ display:flex; flex-direction:column; gap:3px; }
+	      .bh-card-body{ padding:8px 16px 10px; }
+	      .bh-totals{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px; padding-bottom:6px; margin-top:8px; margin-bottom:0; border-bottom:1px dashed var(--line); }
+	      .bh-totals div{ display:flex; flex-direction:column; gap:2px; }
 	      .bh-totals span{ font-size:.62rem; color:#8b8b8b; text-transform:uppercase; letter-spacing:.04em; }
 	      .bh-totals b{ font-size:.86rem; color:#F4F1F0; }
 	      .bh-return-won{ color:var(--nature); }
@@ -467,8 +472,8 @@ function BetsCenterStyles() {
 	        justify-content:space-between;
 	        gap:12px;
 	        min-width:0;
-	        margin-top:4px;
-	        padding:11px 13px;
+	        margin-top:3px;
+	        padding:9px 12px;
 	        border:1px solid #d97706;
 	        border-radius:10px;
 	        background:linear-gradient(135deg,#f59e0b 0%,#ffb703 100%);
@@ -482,7 +487,7 @@ function BetsCenterStyles() {
 	      .bh-totals .bh-payout-row span{ font-weight:900; }
 	      .bh-totals .bh-payout-row b{ max-width:70%; overflow-wrap:anywhere; text-align:right; font-size:1rem; font-weight:900; font-variant-numeric:tabular-nums; }
 
-      .bh-matches{ display:flex; flex-direction:column; gap:6px; }
+      .bh-matches{ display:flex; flex-direction:column; gap:4px; }
       .bh-match{ display:flex; align-items:center; gap:8px; font-size:.8rem; color:#F4F1F0; font-weight:600; }
       .bh-dot{ width:5px; height:5px; border-radius:50%; background:var(--gold-hi); flex-shrink:0; }
       .bh-more{ font-size:.72rem; color:#8b8b8b; padding-left:13px; }
@@ -492,8 +497,8 @@ function BetsCenterStyles() {
         border-top:1px solid var(--line); color:var(--gold-hi); font-size:.72rem; font-weight:800;
       }
 
-      .bh-open-totals{ border-top:1px dashed var(--line); border-bottom:none; margin-top:12px; padding-top:12px; margin-bottom:12px; }
-      .bh-legs{ display:flex; flex-direction:column; gap:10px; margin-bottom:6px; }
+      .bh-open-totals{ border-top:1px dashed var(--line); border-bottom:none; margin-top:8px; padding-top:8px; margin-bottom:8px; }
+      .bh-legs{ display:flex; flex-direction:column; gap:8px; margin-bottom:4px; }
       .bh-leg{ display:flex; gap:10px; align-items:flex-start; }
       .bh-leg-check{ width:18px; height:18px; border-radius:50%; background:var(--nature); color:#fff; font-size:.62rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
       .bh-leg-info b{ display:block; font-size:.82rem; color:#F4F1F0; }
@@ -563,7 +568,7 @@ function BetsCenterStyles() {
       .bh-won-badge small{ font-size:8px; font-weight:900; letter-spacing:.1em; line-height:1; }
       .bh-card.bh-won .bh-card-top{ padding-right:78px; }
       .bh-card.bh-won .bh-return-won{ color:#d78317!important; font-size:1rem; font-weight:900; text-shadow:0 1px 0 rgba(255,255,255,.7); }
-	      .bh-card.bh-won .bh-totals .bh-payout-row{ padding:11px 13px; margin-top:4px; background:linear-gradient(135deg,#f59e0b 0%,#ffb703 100%); border-color:#d97706; }
+	      .bh-card.bh-won .bh-totals .bh-payout-row{ padding:9px 12px; margin-top:3px; background:linear-gradient(135deg,#f59e0b 0%,#ffb703 100%); border-color:#d97706; }
 	      .bh-card.bh-won .bh-totals .bh-payout-row span{ color:#2b1600!important; }
       .bh-card.bh-won .bh-dot{ background:#c9962c; box-shadow:0 0 0 3px rgba(201,150,44,.13); }
       .bh-card.bh-lost .bh-pill{ background:#eeeef1; color:#656774; border:1px solid #d8d8df; }
@@ -597,7 +602,7 @@ function BetsCenterStyles() {
 	      .bh-card .bh-totals .bh-payout-row span{ font-weight:900!important; }
 	      .bh-card .bh-totals .bh-payout-row b{ font-size:1rem!important; font-weight:900!important; }
 
-	      @media(max-width:560px){ .bh-card-head{ padding:10px 13px; } .bh-card-body{ padding:12px 13px 14px; } .bh-totals .bh-payout-row{ padding:10px 11px; } .bh-totals .bh-payout-row b{ max-width:64%; font-size:.94rem; } }
+	      @media(max-width:560px){ .bh-card-head{ padding:8px 13px; } .bh-card-body{ padding:8px 13px 10px; } .bh-totals .bh-payout-row{ padding:8px 10px; } .bh-totals .bh-payout-row b{ max-width:64%; font-size:.94rem; } }
     `}</style>
   );
 }
