@@ -335,6 +335,7 @@ function CommissionAnalytics() {
   const [success, setSuccess] = useState("");
   const [updatedAt, setUpdatedAt] = useState("");
   const [payDate, setPayDate] = useState(today);
+  const [mobileTab, setMobileTab] = useState<"overview" | "bydate" | "byadmin" | "payclear">("overview");
   const [payRows, setPayRows] = useState<Row[]>([]);
   const [payLoading, setPayLoading] = useState(false);
   const [actingAdmin, setActingAdmin] = useState("");
@@ -473,7 +474,7 @@ function CommissionAnalytics() {
     ? applied.start === applied.end ? fmtDayLong(applied.start) : `${fmtDayLong(applied.start)} → ${fmtDayLong(applied.end)}`
     : "Pick a range and press Load";
 
-  return <div className="sa-stack">
+  return <div className="sa-stack sa-ca-root" data-mobile-tab={mobileTab}>
     <Intro title="Commission analytics" text="Per-admin commission and deposits for any day or range, straight from the daily commission report." onRefresh={() => { if (applied) void loadRange(applied.start, applied.end); void loadPayDay(payDate); }} />
     <Notice text={error} error /><Notice text={success} />
     {showGuide && <div className="sa-analytics-guide"><strong>How to read this report</strong><button type="button" onClick={() => setShowGuide(false)} aria-label="Close analytics explanation"><X size={14} /></button><p><b>Pick a preset</b> (Today, Yesterday, Last 7 days, Last 30 days) or a <b>Custom range</b> of up to 31 days, then press Load. <b>Commission earned</b> is what each administrator is owed for the range; <b>Total deposits</b> is the deposit value attributed to them. Figures are grouped per currency — cedis and naira are never added together. <b>Pay &amp; clear</b> below settles one single day.</p><small>Values are reported by the backend and change when you load a different range.</small></div>}
@@ -481,8 +482,8 @@ function CommissionAnalytics() {
     <section className="sa-datebar" aria-label="Date range">
       <div className="sa-datebar-row">
         <div className="sa-chips" role="group" aria-label="Date presets">
-          {(["today", "yesterday", "7d", "30d"] as const).map((p) => <button key={p} type="button" disabled={rangeLoading} className={preset === p ? "active" : ""} onClick={() => applyPreset(p)}>{p === "today" ? "Today" : p === "yesterday" ? "Yesterday" : p === "7d" ? "Last 7 days" : "Last 30 days"}</button>)}
-          <button type="button" disabled={rangeLoading} className={preset === "custom" ? "active" : ""} onClick={() => setPreset("custom")}>Custom</button>
+          {(["today", "yesterday", "7d", "30d"] as const).map((p) => <button key={p} type="button" disabled={rangeLoading} className={`${preset === p ? "active" : ""} sa-chip-${p}`} onClick={() => applyPreset(p)}>{p === "today" ? "Today" : p === "yesterday" ? "Yesterday" : p === "7d" ? "Last 7 days" : "Last 30 days"}</button>)}
+          <button type="button" disabled={rangeLoading} className={`${preset === "custom" ? "active" : ""} sa-chip-custom`} onClick={() => setPreset("custom")}>Custom</button>
         </div>
         <div className="sa-range">
           <label>From<input type="date" value={startDate} disabled={rangeLoading} onChange={(e) => { setPreset("custom"); setStartDate(e.target.value); }} /></label>
@@ -499,35 +500,39 @@ function CommissionAnalytics() {
       </div>
     </section>
 
-    <div className="sa-admin-filter">
+    <nav className="sa-ca-tabs" role="tablist" aria-label="Commission sections">
+      {(["overview", "bydate", "byadmin", "payclear"] as const).map((t) => <button key={t} type="button" role="tab" aria-selected={mobileTab === t} className={mobileTab === t ? "active" : ""} onClick={() => setMobileTab(t)}>{t === "overview" ? "Overview" : t === "bydate" ? "By date" : t === "byadmin" ? "By admin" : "Pay & clear"}</button>)}
+    </nav>
+
+    <div className="sa-admin-filter sa-ca-sec-filter">
       <div className="sa-admin-search"><Search size={14} /><input value={adminSearch} onChange={(e) => setAdminSearch(e.target.value)} placeholder="Search admin email" aria-label="Search administrators by email" />{adminSearch && <button type="button" onClick={() => setAdminSearch("")} aria-label="Clear administrator search">×</button>}</div>
       <select value={selectedAdmin} onChange={(e) => setSelectedAdmin(e.target.value)} aria-label="Filter by administrator"><option value="">All administrators</option>{perAdmin.map((item) => <option key={item.id} value={item.id}>{item.email}</option>)}</select>
-      <button type="button" className="sa-analytics-help" onClick={() => setShowGuide((current) => !current)}><Info size={14} /> What do these amounts mean?</button>
+      <button type="button" className="sa-analytics-help" onClick={() => setShowGuide((current) => !current)}><Info size={14} /><span className="sa-ca-help-label">What do these amounts mean?</span></button>
     </div>
 
     {rangeLoading ? <>
-      <SkelCards />
-      <Panel title="Loading range…"><SkelTable cols={4} /></Panel>
+      <div className="sa-ca-sec-overview"><SkelCards /></div>
+      <div className="sa-ca-sec-table"><Panel title="Loading range…"><SkelTable cols={4} /></Panel></div>
     </> : applied ? <>
-      <div className="sa-analytics-stat-grid">
+      <div className="sa-ca-sec-overview"><div className="sa-analytics-stat-grid">
         <div className="sa-analytics-stat"><small>Total commission</small><strong>{totals.commission}</strong><span>{rangeLabel}</span></div>
         <div className="sa-analytics-stat"><small>Total deposits</small><strong>{totals.deposits}</strong><span>{rangeLabel}</span></div>
         <div className="sa-analytics-stat"><small>Deposit entries</small><strong>{totals.entries.toLocaleString()}</strong><span>Across the loaded days</span></div>
         <div className="sa-analytics-stat"><small>Active admins</small><strong>{totals.active}</strong><span>{selectedAdmin || q ? "Matching the filter" : "With deposits or commission"}</span></div>
-      </div>
-      {dayRows.length === 0 ? <Panel title="No activity in this range"><div className="sa-empty">No commission activity in this range. Try widening the range or picking different dates.</div></Panel> : <>
-        <Panel title="By date"><div className="sa-table-wrap"><table className="sa-table"><thead><tr><th>Date</th><th>Commission</th><th>Deposits</th><th>Entries</th></tr></thead><tbody>{perDate.map((row) => <tr key={row.day}><td className="sa-nowrap">{fmtDay(row.day)} · {row.day}</td><td>{row.commission}</td><td>{row.deposits}</td><td>{row.entries.toLocaleString()}</td></tr>)}</tbody></table></div></Panel>
-        <Panel title="By administrator"><div className="sa-table-wrap"><table className="sa-table"><thead><tr><th>Admin</th><th>Rate</th><th>Commission</th><th>Deposits</th><th>Entries</th></tr></thead><tbody>{visibleAdmins.length === 0 ? <tr><td colSpan={5} className="sa-empty">No administrators match this filter.</td></tr> : visibleAdmins.map((item) => <tr key={item.id}><td>{item.email}</td><td>{rateDisplay(item.rate)}</td><td>{item.commission}</td><td>{item.deposits}</td><td>{item.entries.toLocaleString()}</td></tr>)}</tbody></table></div></Panel>
+      </div></div>
+      {dayRows.length === 0 ? <div className="sa-ca-sec-overview"><Panel title="No activity in this range"><div className="sa-empty">No commission activity in this range. Try widening the range or picking different dates.</div></Panel></div> : <>
+        <div className="sa-ca-sec-bydate"><Panel title="By date"><div className="sa-table-wrap"><table className="sa-table"><thead><tr><th>Date</th><th>Commission</th><th>Deposits</th><th>Entries</th></tr></thead><tbody>{perDate.map((row) => <tr key={row.day}><td className="sa-nowrap">{fmtDay(row.day)} · {row.day}</td><td>{row.commission}</td><td>{row.deposits}</td><td>{row.entries.toLocaleString()}</td></tr>)}</tbody></table></div></Panel></div>
+        <div className="sa-ca-sec-byadmin"><Panel title="By administrator"><div className="sa-table-wrap"><table className="sa-table"><thead><tr><th>Admin</th><th>Rate</th><th>Commission</th><th>Deposits</th><th>Entries</th></tr></thead><tbody>{visibleAdmins.length === 0 ? <tr><td colSpan={5} className="sa-empty">No administrators match this filter.</td></tr> : visibleAdmins.map((item) => <tr key={item.id}><td>{item.email}</td><td>{rateDisplay(item.rate)}</td><td>{item.commission}</td><td>{item.deposits}</td><td>{item.entries.toLocaleString()}</td></tr>)}</tbody></table></div></Panel></div>
       </>}
     </> : null}
 
-    <Panel title={`Pay & clear · ${fmtDayLong(payDate)}`} action={<div className="sa-pay-date"><button type="button" className={payDate === today ? "sa-primary" : "sa-secondary"} disabled={payLoading} onClick={() => setPayDate(today)}>Today</button><input type="date" value={payDate} disabled={payLoading} onChange={(e) => setPayDate(e.target.value)} aria-label="Settlement day" /></div>}>
+    <div className="sa-ca-sec-payclear"><Panel title={`Pay & clear · ${fmtDayLong(payDate)}`} action={<div className="sa-pay-date"><button type="button" className={payDate === today ? "sa-primary" : "sa-secondary"} disabled={payLoading} onClick={() => setPayDate(today)}>Today</button><input type="date" value={payDate} disabled={payLoading} onChange={(e) => setPayDate(e.target.value)} aria-label="Settlement day" /></div>}>
       {payLoading ? <SkelTable cols={5} /> : <div className="sa-table-wrap"><table className="sa-table"><thead><tr><th>Admin</th><th>Commission rate</th><th>Commission</th><th>Status</th><th>Action</th></tr></thead><tbody>{activePayRows.length === 0 ? <tr><td colSpan={5} className="sa-empty">No unpaid commission for this day.</td></tr> : activePayRows.map((row) => <tr key={text(row.adminId)}><td>{text(row.adminEmail)}</td><td>{text(row.commissionPercent)}%</td><td>{money(row.commissionEarned, row.commissionCurrency)}</td><td>{numberValue(row.commissionEarned) > 0 ? "Unpaid" : "Paid / cleared"}</td><td><button className="sa-link" onClick={() => payAdmin(text(row.adminId))} disabled={actingAdmin !== "" || numberValue(row.commissionEarned) <= 0}>{actingAdmin === text(row.adminId) ? "Paying…" : "Mark paid"}</button></td></tr>)}</tbody></table></div>}
       <div className="sa-pay-footer">
         <p>Pay &amp; clear marks every unpaid commission for {fmtDayLong(payDate)} as paid. It only touches that one day — it cannot be undone for that day.</p>
         <button type="button" className="sa-danger" disabled={payLoading || actingAdmin !== ""} onClick={clearAll}>{actingAdmin === "all" ? "Clearing…" : `Pay & clear ${payDate}`}</button>
       </div>
-    </Panel>
+    </Panel></div>
   </div>;
 }
 function UpgradeChats() { const [rows, setRows] = useState<Row[]>([]); const [selected, setSelected] = useState<Row | null>(null); const [messages, setMessages] = useState<Row[]>([]); const [content, setContent] = useState(""); const [error, setError] = useState(""); const load = async () => { try { setRows(list(await api.superAdminUpgradeChats.getAll())); } catch (e) { setError(e instanceof Error ? e.message : "Could not load upgrade chats"); } }; useEffect(() => { load(); }, []); const open = async (row: Row) => { try { setSelected(row); setMessages(list(await api.superAdminUpgradeChats.getMessages(idOf(row)))); } catch (e) { setError(e instanceof Error ? e.message : "Could not load chat messages"); } }; const send = async () => { if (!selected || !content.trim()) return; try { await api.superAdminUpgradeChats.sendMessage(idOf(selected), { content: content.trim() }); setContent(""); await open(selected); } catch (e) { setError(e instanceof Error ? e.message : "Could not send message"); } }; return <div className="sa-stack"><Intro title="Upgrade chats" text="Review administrator upgrade conversations and set commission rates." onRefresh={load} /><Notice text={error} error /><Panel title="Chat requests"><Table rows={rows} columns={["id", "adminId", "status", "subject", "createdAt"]} onRow={row => <button className="sa-link" onClick={() => open(row)}>Open chat</button>} /></Panel>{selected && <Panel title={`Conversation · ${idOf(selected)}`}><div className="sa-messages">{messages.map((m, i) => <div key={i}><b>{text(m.sender ?? m.senderRole, "Participant")}</b><p>{text(m.content)}</p></div>)}</div><div className="sa-form-grid"><input placeholder="Message" value={content} onChange={e => setContent(e.target.value)} /><button className="sa-primary" onClick={send}>Send message</button><button className="sa-secondary" onClick={async () => { const rate = window.prompt("Commission rate (%)"); if (rate !== null) await api.superAdminUpgradeChats.setCommission(idOf(selected), { commissionRate: Number(rate) }); }}>Set commission</button></div></Panel>}</div>; }
@@ -645,5 +650,25 @@ const superAdminStyles = `
 .sa-pay-date{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .sa-pay-date input[type="date"]{background:#0B1B3D;border:1px solid rgba(255,255,255,.14);color:#EAF0F7;border-radius:8px;padding:8px 10px;font:inherit;font-size:12px;color-scheme:dark}
 @media(max-width:760px){.sa-analytics-stat-grid{grid-template-columns:repeat(2,1fr)}.sa-datebar-row{flex-direction:column;align-items:stretch}.sa-range{width:100%}.sa-range label{flex:1}.sa-range input[type="date"]{width:100%}}
+/* Commission analytics mobile simplification (2026-10-24): tab-based, Today/Yesterday only. Desktop untouched. */
+.sa-ca-tabs{display:none}
+@media(max-width:650px){
+.sa-ca-tabs{display:flex;gap:6px;overflow-x:auto;padding:2px}
+.sa-ca-tabs button{flex:1 0 auto;min-height:44px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:#C6D4E4;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap}
+.sa-ca-tabs button.active{background:#00A651;border-color:#00A651;color:#fff}
+.sa-ca-root .sa-chip-7d,.sa-ca-root .sa-chip-30d,.sa-ca-root .sa-chip-custom,.sa-ca-root .sa-range{display:none}
+.sa-ca-root .sa-chips button{flex:1;min-height:44px}
+.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-filter,.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-bydate,.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-byadmin,.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-payclear,.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-table{display:none}
+.sa-ca-root[data-mobile-tab="bydate"] .sa-ca-sec-filter,.sa-ca-root[data-mobile-tab="bydate"] .sa-ca-sec-overview,.sa-ca-root[data-mobile-tab="bydate"] .sa-ca-sec-byadmin,.sa-ca-root[data-mobile-tab="bydate"] .sa-ca-sec-payclear{display:none}
+.sa-ca-root[data-mobile-tab="byadmin"] .sa-ca-sec-overview,.sa-ca-root[data-mobile-tab="byadmin"] .sa-ca-sec-bydate,.sa-ca-root[data-mobile-tab="byadmin"] .sa-ca-sec-payclear,.sa-ca-root[data-mobile-tab="byadmin"] .sa-ca-sec-table{display:none}
+.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-filter,.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-overview,.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-bydate,.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-byadmin,.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-table{display:none}
+.sa-ca-root .sa-ca-help-label{display:none}
+.sa-ca-root .sa-ca-tabs,.sa-ca-root .sa-datebar,.sa-ca-root .sa-ca-sec-overview,.sa-ca-root .sa-ca-sec-bydate,.sa-ca-root .sa-ca-sec-byadmin,.sa-ca-root .sa-ca-sec-payclear,.sa-ca-root .sa-ca-sec-filter,.sa-ca-root .sa-ca-sec-table,.sa-ca-root .sa-panel{min-width:0}
+.sa-ca-root .sa-panel-head{flex-wrap:wrap;gap:10px}
+.sa-ca-root .sa-analytics-stat{padding:14px}
+.sa-ca-root .sa-panel-head{padding:13px 14px}
+.sa-ca-root .sa-table td{padding:13px 12px}
+.sa-ca-root .sa-pay-footer{padding:14px}
+}
 `;
 if (typeof document !== "undefined" && !document.getElementById("super-admin-styles")) { const style = document.createElement("style"); style.id = "super-admin-styles"; style.textContent = superAdminStyles; document.head.appendChild(style); }
