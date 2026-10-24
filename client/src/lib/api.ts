@@ -261,6 +261,9 @@ async function patch<T>(path: string, body?: unknown): Promise<T> { return unwra
 export interface AuthResult {
   accessToken: string;
   user?: Record<string, unknown>;
+  // Register-only: true/false when a referral code was supplied, undefined
+  // otherwise. False = code unrecognised/expired/deactivated or self-referral.
+  refValid?: boolean;
 }
 
 function extractAuthResult(raw: unknown): AuthResult {
@@ -280,7 +283,8 @@ function extractAuthResult(raw: unknown): AuthResult {
     throw new ApiError("Signed in, but the server didn't return a session token. Please contact support.", 200);
   }
   const user = (r.user ?? r.account ?? r.profile) as Record<string, unknown> | undefined;
-  return { accessToken, user };
+  const refValid = (r.refValid ?? (r.data as Record<string, unknown> | undefined)?.refValid) as boolean | undefined;
+  return { accessToken, user, refValid };
 }
 
 export const auth = {
