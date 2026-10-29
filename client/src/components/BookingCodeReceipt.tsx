@@ -95,7 +95,7 @@ export default function BookingCodeReceipt({ code, codeState, stake, totalOdds, 
       </div>
 
       <style>{`
-        .bcr-receipt{ text-align:left; font-family:Roboto,Arial,sans-serif; }
+        .bcr-receipt{ text-align:left; font-family:Roboto,Arial,sans-serif; flex:1; display:flex; flex-direction:column; justify-content:space-between; }
         .bcr-code-block{ padding:6px 2px 14px; }
         .bcr-code-label{ display:block; font-size:.78rem; font-weight:700; color:rgba(255,255,255,.65); letter-spacing:.02em; }
         .bcr-code-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:2px; }
@@ -122,8 +122,13 @@ export default function BookingCodeReceipt({ code, codeState, stake, totalOdds, 
         /* Full-screen receipt sheet (owner, 2026-10-29): like the
            SportyBet/KingzBet cards — navy top to bottom, full width,
            nothing of the underlying page showing around it. */
-        .pb-receipt-overlay{ position:fixed; inset:0; z-index:200; overflow-y:auto; background:linear-gradient(165deg,#10234A 0%,#0A1B3D 55%,#060F24 100%); padding:14px 14px 28px; }
-        .pb-receipt-close{ display:flex; margin:0 0 4px auto; background:transparent; border:0; color:#fff; cursor:pointer; padding:8px; }
+        .pb-receipt-overlay{ position:fixed; inset:0; z-index:200; overflow-y:auto; background:linear-gradient(165deg,#10234A 0%,#0A1B3D 55%,#060F24 100%); padding:14px 14px 28px; display:flex; flex-direction:column; }
+        /* Brand row on top of the card (owner, 2026-10-29): like
+           SportyBet's own card — the PlayBet logo text label sits on top,
+           same site logo the header uses, X kept on the right. */
+        .pb-receipt-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+        .pb-receipt-brand{ height:30px; width:auto; display:block; }
+        .pb-receipt-close{ display:flex; margin:0; background:transparent; border:0; color:#fff; cursor:pointer; padding:8px; }
       `}</style>
     </div>
   );
