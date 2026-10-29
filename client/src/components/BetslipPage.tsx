@@ -405,32 +405,32 @@ export default function BetslipPage({
         <BookingCodePanel picks={picks} onAdd={addFromBookingCode} />
         </>
       )}
-      {placedInfo && (
+      {placedInfo && (placedInfo.isAdmin ? (
+        /* Full-screen admin receipt (owner, 2026-10-29): matches his
+           SportyBet/KingzBet cards — full height, full width, no extra
+           labels, no buttons. X closes back to the slip; My Bets is one
+           tap away on the bottom nav. */
+        <div className="pb-receipt-overlay">
+          <button type="button" className="pb-receipt-close" onClick={() => setPlacedInfo(null)} aria-label="Close receipt"><X size={22} /></button>
+          <BookingCodeReceipt code={placedInfo.bookingCode} codeState={placedInfo.codeState} stake={placedInfo.stake} totalOdds={placedInfo.totalOdds} picks={placedInfo.selections} />
+        </div>
+      ) : (
         <div className="pb-success-overlay" onClick={() => setPlacedInfo(null)}>
           <div className="pb-success-card" onClick={(e) => e.stopPropagation()}>
-            {placedInfo.isAdmin ? (
-              <>
-                <p style={{ fontSize: ".82rem", fontWeight: 800, color: "#7BDCA8", margin: "0 0 12px" }}>Bet placed successfully</p>
-                <BookingCodeReceipt code={placedInfo.bookingCode} codeState={placedInfo.codeState} stake={placedInfo.stake} totalOdds={placedInfo.totalOdds} picks={placedInfo.selections} />
-              </>
-            ) : (
-              <>
-                <div className="pb-success-badge"><CheckCircle2 size={34} /></div>
-                <h3>Bet placed successfully</h3>
-                <p>Your bet is in. Good luck!</p>
-                <div className="pb-success-rows">
-                  <div><span>Selections</span><b>{placedInfo.count}</b></div>
-                  <div><span>Stake</span><b>GHS {placedInfo.stake.toFixed(2)}</b></div>
-                  <div><span>Total odds</span><b>{placedInfo.totalOdds.toFixed(2)}</b></div>
-                  <div className="ret"><span>Potential return</span><b>GHS {placedInfo.potentialReturn.toFixed(2)}</b></div>
-                </div>
-              </>
-            )}
+            <div className="pb-success-badge"><CheckCircle2 size={34} /></div>
+            <h3>Bet placed successfully</h3>
+            <p>Your bet is in. Good luck!</p>
+            <div className="pb-success-rows">
+              <div><span>Selections</span><b>{placedInfo.count}</b></div>
+              <div><span>Stake</span><b>GHS {placedInfo.stake.toFixed(2)}</b></div>
+              <div><span>Total odds</span><b>{placedInfo.totalOdds.toFixed(2)}</b></div>
+              <div className="ret"><span>Potential return</span><b>GHS {placedInfo.potentialReturn.toFixed(2)}</b></div>
+            </div>
             <button className="gold-button full" onClick={() => setLocation("/open-bets")}>View my bets</button>
             <button className="ghost-button full" onClick={() => setPlacedInfo(null)}>Done</button>
           </div>
         </div>
-      )}
+      ))}
     </main>
   );
 }

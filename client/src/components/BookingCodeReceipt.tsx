@@ -94,14 +94,12 @@ export default function BookingCodeReceipt({ code, codeState, stake, totalOdds, 
         ))}
       </div>
 
-      {code && <p className="bcr-foot">Share this code — it loads this exact slip from the Booking Code page.</p>}
-
       <style>{`
         .bcr-receipt{ text-align:left; font-family:Roboto,Arial,sans-serif; }
         .bcr-code-block{ padding:6px 2px 14px; }
         .bcr-code-label{ display:block; font-size:.78rem; font-weight:700; color:rgba(255,255,255,.65); letter-spacing:.02em; }
         .bcr-code-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:2px; }
-        .bcr-code{ font-size:1.9rem; font-weight:900; letter-spacing:.04em; color:#00E85F; line-height:1.15; overflow-wrap:anywhere; }
+        .bcr-code{ font-size:2.3rem; font-weight:900; letter-spacing:.04em; color:#00E85F; line-height:1.15; overflow-wrap:anywhere; }
         .bcr-code-pending{ display:block; margin-top:6px; font-size:.9rem; font-weight:700; color:rgba(255,255,255,.65); }
         .bcr-code-missing{ display:block; margin-top:6px; font-size:.82rem; font-weight:700; color:#FFCF6B; line-height:1.45; }
         .bcr-copy{ flex-shrink:0; display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px; border:1px solid rgba(0,232,95,.5); background:transparent; color:#00E85F; font-size:.74rem; font-weight:800; cursor:pointer; }
@@ -121,7 +119,11 @@ export default function BookingCodeReceipt({ code, codeState, stake, totalOdds, 
         .bcr-sel b{ display:block; font-size:.86rem; color:#fff; }
         .bcr-sel small{ display:block; margin-top:2px; font-size:.74rem; color:rgba(255,255,255,.6); line-height:1.4; }
         .bcr-sel > strong{ flex-shrink:0; font-size:.9rem; color:#00E85F; }
-        .bcr-foot{ margin:12px 2px 0; font-size:.72rem; color:rgba(255,255,255,.55); line-height:1.5; }
+        /* Full-screen receipt sheet (owner, 2026-10-29): like the
+           SportyBet/KingzBet cards — navy top to bottom, full width,
+           nothing of the underlying page showing around it. */
+        .pb-receipt-overlay{ position:fixed; inset:0; z-index:200; overflow-y:auto; background:linear-gradient(165deg,#10234A 0%,#0A1B3D 55%,#060F24 100%); padding:14px 14px 28px; }
+        .pb-receipt-close{ display:flex; margin:0 0 4px auto; background:transparent; border:0; color:#fff; cursor:pointer; padding:8px; }
       `}</style>
     </div>
   );
