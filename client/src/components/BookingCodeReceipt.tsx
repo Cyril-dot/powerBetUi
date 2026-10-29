@@ -97,38 +97,38 @@ export default function BookingCodeReceipt({ code, codeState, stake, totalOdds, 
       <style>{`
         .bcr-receipt{ text-align:left; font-family:Roboto,Arial,sans-serif; }
         .bcr-code-block{ padding:6px 2px 10px; }
-        .bcr-code-label{ display:block; font-size:.78rem; font-weight:700; color:#71809a; letter-spacing:.02em; }
+        .bcr-code-label{ display:block; font-size:.78rem; font-weight:700; color:rgba(255,255,255,.65); letter-spacing:.02em; }
         .bcr-code-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:2px; }
-        .bcr-code{ font-size:2rem; font-weight:900; letter-spacing:.04em; color:#00A651; line-height:1.15; overflow-wrap:anywhere; }
-        .bcr-code-pending{ display:block; margin-top:6px; font-size:.9rem; font-weight:700; color:#71809a; }
-        .bcr-code-missing{ display:block; margin-top:6px; font-size:.82rem; font-weight:700; color:#7a5b00; line-height:1.45; }
-        .bcr-copy{ flex-shrink:0; display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px; border:1px solid rgba(0,166,81,.5); background:transparent; color:#00A651; font-size:.74rem; font-weight:800; cursor:pointer; }
-        .bcr-odds-panel{ background:#F5F8F7; border:1px solid #e3e3ef; border-radius:10px; padding:12px 14px; }
+        .bcr-code{ font-size:2rem; font-weight:900; letter-spacing:.04em; color:#00E85F; line-height:1.15; overflow-wrap:anywhere; }
+        .bcr-code-pending{ display:block; margin-top:6px; font-size:.9rem; font-weight:700; color:rgba(255,255,255,.65); }
+        .bcr-code-missing{ display:block; margin-top:6px; font-size:.82rem; font-weight:700; color:#FFCF6B; line-height:1.45; }
+        .bcr-copy{ flex-shrink:0; display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px; border:1px solid rgba(0,232,95,.5); background:transparent; color:#00E85F; font-size:.74rem; font-weight:800; cursor:pointer; }
+        .bcr-odds-panel{ background:#12284E; border:1px solid rgba(255,255,255,.12); border-radius:10px; padding:12px 14px; }
         .bcr-odds-panel div{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-        .bcr-odds-panel span{ font-size:.82rem; color:#71809a; }
-        .bcr-odds-panel b{ font-size:1.05rem; color:#20242d; }
-        .bcr-section-title{ margin:10px 0 0; padding:8px 12px; background:#E1F3E7; border:1px solid #bfe3cd; border-bottom:0; border-radius:10px 10px 0 0; font-size:.78rem; font-weight:800; color:#0B7A43; }
-        .bcr-example{ border:1px solid #e3e3ef; border-top:0; border-radius:0 0 10px 10px; padding:4px 12px 10px; }
-        .bcr-example div{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 0; border-top:1px solid #eef1f4; }
+        .bcr-odds-panel span{ font-size:.82rem; color:rgba(255,255,255,.7); }
+        .bcr-odds-panel b{ font-size:1.05rem; color:#fff; }
+        .bcr-section-title{ margin:10px 0 0; padding:8px 12px; background:rgba(0,166,81,.16); border:1px solid rgba(0,166,81,.3); border-bottom:0; border-radius:10px 10px 0 0; font-size:.78rem; font-weight:800; color:#7BDCA8; }
+        .bcr-example{ border:1px solid rgba(255,255,255,.12); border-top:0; border-radius:0 0 10px 10px; padding:4px 12px 10px; }
+        .bcr-example div{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 0; border-top:1px solid rgba(255,255,255,.08); }
         .bcr-example div:first-child{ border-top:0; }
-        .bcr-example span{ font-size:.82rem; color:#71809a; }
-        .bcr-example b{ font-size:.92rem; color:#20242d; }
-        .bcr-selections{ border:1px solid #e3e3ef; border-top:0; border-radius:0 0 10px 10px; max-height:260px; overflow-y:auto; }
-        .bcr-sel{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding:9px 12px; border-top:1px solid #eef1f4; }
+        .bcr-example span{ font-size:.82rem; color:rgba(255,255,255,.7); }
+        .bcr-example b{ font-size:.92rem; color:#fff; }
+        .bcr-selections{ border:1px solid rgba(255,255,255,.12); border-top:0; border-radius:0 0 10px 10px; max-height:260px; overflow-y:auto; }
+        .bcr-sel{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding:9px 12px; border-top:1px solid rgba(255,255,255,.08); }
         .bcr-sel:first-child{ border-top:0; }
-        .bcr-sel b{ display:block; font-size:.86rem; color:#20242d; }
-        .bcr-sel small{ display:block; margin-top:2px; font-size:.74rem; color:#71809a; line-height:1.4; }
-        .bcr-sel > strong{ flex-shrink:0; font-size:.9rem; color:#00A651; }
+        .bcr-sel b{ display:block; font-size:.86rem; color:#fff; }
+        .bcr-sel small{ display:block; margin-top:2px; font-size:.74rem; color:rgba(255,255,255,.6); line-height:1.4; }
+        .bcr-sel > strong{ flex-shrink:0; font-size:.9rem; color:#00E85F; }
         /* Bottom-sheet receipt (owner, 2026-10-29): NOT a full-screen
            sheet — a compact card pushed to the bottom, about a third of
            the screen height, full width. Nothing else is covered: the
            slip page stays visible above it. */
         .pb-receipt-overlay{ position:fixed; left:0; right:0; bottom:0; z-index:200; }
-        .pb-receipt-sheet{ background:#ffffff; border-radius:18px 18px 0 0; padding:12px 14px 22px; box-shadow:0 -8px 30px rgba(0,0,0,.45); max-height:72vh; overflow-y:auto; }
+        .pb-receipt-sheet{ background:linear-gradient(165deg,#10234A 0%,#0A1B3D 55%,#060F24 100%); border-radius:18px 18px 0 0; padding:12px 14px 22px; box-shadow:0 -8px 30px rgba(0,0,0,.45); max-height:72vh; overflow-y:auto; }
         /* Brand row on top of the card (owner, 2026-10-29): like
            SportyBet's own card — the PlayBet logo text label sits on top,
            same site logo the header uses, X kept on the right. */
-        .pb-receipt-top{ display:flex; align-items:center; justify-content:space-between; margin:-12px -14px 10px; padding:10px 14px; background:linear-gradient(165deg,#10234A 0%,#0A1B3D 100%); border-radius:18px 18px 0 0; }
+        .pb-receipt-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
         .pb-receipt-brand{ height:30px; width:auto; display:block; }
         .pb-receipt-close{ display:flex; margin:0; background:transparent; border:0; color:#fff; cursor:pointer; padding:8px; }
       `}</style>
