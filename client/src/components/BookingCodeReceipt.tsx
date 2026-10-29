@@ -95,7 +95,7 @@ export default function BookingCodeReceipt({ code, codeState, stake, totalOdds, 
       </div>
 
       <style>{`
-        .bcr-receipt{ text-align:left; font-family:Roboto,Arial,sans-serif; flex:1; display:flex; flex-direction:column; justify-content:space-between; }
+        .bcr-receipt{ text-align:left; font-family:Roboto,Arial,sans-serif; flex:1; display:flex; flex-direction:column; justify-content:center; }
         .bcr-code-block{ padding:6px 2px 14px; }
         .bcr-code-label{ display:block; font-size:.78rem; font-weight:700; color:rgba(255,255,255,.65); letter-spacing:.02em; }
         .bcr-code-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:2px; }
