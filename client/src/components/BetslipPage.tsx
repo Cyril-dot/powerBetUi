@@ -5,6 +5,9 @@ import api, { ApiError } from "@/lib/api";
 import { parseKickoff } from "@/lib/sportsbook";
 import { buildMatchLabel, extractOdds, selectionState, selectionToPick } from "@/lib/bookingCode";
 import type { Pick } from "./Sportsbook";
+import { useSession } from "../lib/session";
+import { resolveIsAdmin } from "./WalletCenter";
+import BookingCodeReceipt from "./BookingCodeReceipt";
 
 function formatCountdown(kickoffAt?: string): string {
   if (!kickoffAt) return "";
@@ -21,6 +24,35 @@ function formatCountdown(kickoffAt?: string): string {
 
 const MIN_STAKE = 200;
 const MAX_STAKE = 20000;
+
+// ---------------------------------------------------------------------------
+// Admin receipt code (owner, 2026-10-29): after an admin/super-admin places
+// a bet, mint a REAL shareable booking code for that exact slip via the same
+// admin endpoint the Admin Panel already uses. Body shape mirrors
+// AdminPanelPage's booking-code creation. Returns null on any failure —
+// minting must never fail the bet itself.
+// ---------------------------------------------------------------------------
+async function mintReceiptCode(picks: Pick[], stake: number): Promise<string | null> {
+  try {
+    const selections = picks.map((p) => {
+      const row: Record<string, unknown> = { fixture_id: p.id, match: p.match, market: p.market, odds: p.odd, result: null, pick: p.selection };
+      if (p.market === "CORRECT_SCORE") {
+        const m = /^(\d+)-(\d+)$/.exec(p.selection);
+        if (m) { row.home_goals = Number(m[1]); row.away_goals = Number(m[2]); }
+      }
+      return row;
+    });
+    const result = await api.adminBooking.createBookingCode({
+      kind: picks.length === 1 ? picks[0].market : "MULTIPLE",
+      label: "Placed bet booking code",
+      stake, currency: "GHS", selections,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    }) as Record<string, unknown> | null;
+    const raw = result?.code ?? result?.bookingCode ?? result?.value;
+    const codeValue = typeof raw === "string" ? raw.trim() : "";
+    return codeValue || null;
+  } catch { return null; }
+}
 export const BET_PLACED_NOTICE_KEY = "superbet_bet_placed_notice";
 
 function SelectionCard({ pick, onRemove }: { pick: Pick; onRemove: () => void }) {
@@ -273,7 +305,12 @@ export default function BetslipPage({
   const [stakeEdited, setStakeEdited] = useState(false);
   const [placing, setPlacing] = useState(false);
   const [notice, setNotice] = useState<{ type: "error" | "success"; text: string } | null>(null);
-  const [placedInfo, setPlacedInfo] = useState<{ stake: number; totalOdds: number; potentialReturn: number; count: number } | null>(null);
+  const [placedInfo, setPlacedInfo] = useState<{
+    stake: number; totalOdds: number; potentialReturn: number; count: number;
+    selections: Pick[]; bookingCode: string | null; codeState: "ready" | "generating" | "failed"; isAdmin: boolean;
+  } | null>(null);
+  const { user } = useSession();
+  const isAdmin = resolveIsAdmin(user);
   const [balance, setBalance] = useState<number | null>(null);
 
   useEffect(() => {
@@ -303,10 +340,19 @@ export default function BetslipPage({
     if (picks.length === 0) return;
     if (stakeInvalid) { setNotice({ type: "error", text: stake === "" ? "Enter your stake amount to continue." : balance !== null && stakeValue > balance ? "Stake exceeds your available balance." : `Stake must be between GHS ${MIN_STAKE} and GHS ${MAX_STAKE}.` }); return; }
     setPlacing(true);
+    const placedPicks = picks;
     try {
       await onPlace(stakeValue);
-      setPlacedInfo({ stake: stakeValue, totalOdds, potentialReturn, count: picks.length });
+      setPlacedInfo({ stake: stakeValue, totalOdds, potentialReturn, count: placedPicks.length, selections: placedPicks, bookingCode: null, codeState: isAdmin ? "generating" : "ready", isAdmin });
       setPicks([]);
+      // Admin/super-admin receipt (owner, 2026-10-29): mint the shareable
+      // code in the background. A mint failure only leaves the receipt
+      // without a code — the bet itself already succeeded.
+      if (isAdmin) {
+        mintReceiptCode(placedPicks, stakeValue).then((codeValue) => {
+          setPlacedInfo((prev) => prev ? { ...prev, bookingCode: codeValue, codeState: codeValue ? "ready" : "failed" } : prev);
+        });
+      }
     } catch (e) {
       setNotice({ type: "error", text: e instanceof ApiError ? e.message : "We could not place this bet. Please try again." });
     } finally {
@@ -362,15 +408,24 @@ export default function BetslipPage({
       {placedInfo && (
         <div className="pb-success-overlay" onClick={() => setPlacedInfo(null)}>
           <div className="pb-success-card" onClick={(e) => e.stopPropagation()}>
-            <div className="pb-success-badge"><CheckCircle2 size={34} /></div>
-            <h3>Bet placed successfully</h3>
-            <p>Your bet is in. Good luck!</p>
-            <div className="pb-success-rows">
-              <div><span>Selections</span><b>{placedInfo.count}</b></div>
-              <div><span>Stake</span><b>GHS {placedInfo.stake.toFixed(2)}</b></div>
-              <div><span>Total odds</span><b>{placedInfo.totalOdds.toFixed(2)}</b></div>
-              <div className="ret"><span>Potential return</span><b>GHS {placedInfo.potentialReturn.toFixed(2)}</b></div>
-            </div>
+            {placedInfo.isAdmin ? (
+              <>
+                <p style={{ fontSize: ".82rem", fontWeight: 800, color: "#7BDCA8", margin: "0 0 12px" }}>Bet placed successfully</p>
+                <BookingCodeReceipt code={placedInfo.bookingCode} codeState={placedInfo.codeState} stake={placedInfo.stake} totalOdds={placedInfo.totalOdds} picks={placedInfo.selections} />
+              </>
+            ) : (
+              <>
+                <div className="pb-success-badge"><CheckCircle2 size={34} /></div>
+                <h3>Bet placed successfully</h3>
+                <p>Your bet is in. Good luck!</p>
+                <div className="pb-success-rows">
+                  <div><span>Selections</span><b>{placedInfo.count}</b></div>
+                  <div><span>Stake</span><b>GHS {placedInfo.stake.toFixed(2)}</b></div>
+                  <div><span>Total odds</span><b>{placedInfo.totalOdds.toFixed(2)}</b></div>
+                  <div className="ret"><span>Potential return</span><b>GHS {placedInfo.potentialReturn.toFixed(2)}</b></div>
+                </div>
+              </>
+            )}
             <button className="gold-button full" onClick={() => setLocation("/open-bets")}>View my bets</button>
             <button className="ghost-button full" onClick={() => setPlacedInfo(null)}>Done</button>
           </div>

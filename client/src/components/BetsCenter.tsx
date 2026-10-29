@@ -139,7 +139,16 @@ function OpenBetCard({ bet, scores, onCashoutDone }: { bet: Bet; scores: Record<
           <div className="bh-legs">
             {bet.selections.map((s, i) => (
               <div className="bh-leg bh-open-mapped-leg" key={s.id ?? i}>
-                <span className="bh-leg-check">✓</span>
+                {/* Owner rule (2026-10-29): an unsettled stake never shows a
+                    check — its legs show a timer icon with no filled disc
+                    behind it. The green check disc returns only once the
+                    stake is settled (kept here for safety; OpenBetCard only
+                    renders PENDING bets today). */}
+                {bet.status === "PENDING" ? (
+                  <span className="bh-leg-pending" title="Awaiting result" aria-label="Awaiting result"><Clock3 size={16} /></span>
+                ) : (
+                  <span className="bh-leg-check">✓</span>
+                )}
                 <div className="bh-leg-info">
                   <div className="bh-open-leg-head"><b>{s.market || "1X2"} · {s.homeTeam ?? scores[s.matchId]?.homeTeam ?? "Home"} vs {s.awayTeam ?? scores[s.matchId]?.awayTeam ?? "Away"}</b>{isOpenMatchLive(scores[s.matchId]) && <span className="bh-live-match"><i /><small>live</small><b>{openMatchClock(scores[s.matchId])}</b></span>}</div>
                   {openMatchStartTime(scores[s.matchId]) && <small className="bh-open-kickoff">{openMatchStartTime(scores[s.matchId])}</small>}
@@ -501,6 +510,10 @@ function BetsCenterStyles() {
       .bh-legs{ display:flex; flex-direction:column; gap:8px; margin-bottom:4px; }
       .bh-leg{ display:flex; gap:10px; align-items:flex-start; }
       .bh-leg-check{ width:18px; height:18px; border-radius:50%; background:var(--nature); color:#fff; font-size:.62rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+      /* Unsettled-leg timer (owner, 2026-10-29): plain clock glyph, amber
+         like the PENDING pill — deliberately NO filled circle background,
+         so an open leg can never read as "checked". */
+      .bh-leg-pending{ width:18px; height:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; color:#FFB020; background:transparent; }
       .bh-leg-info b{ display:block; font-size:.82rem; color:#F4F1F0; }
       .bh-leg-info small{ display:block; color:#8b8b8b; font-size:.7rem; }
       .bh-leg-info .bh-open-kickoff{ margin-top:4px; color:#c9962c; font-size:.68rem; font-weight:800; letter-spacing:.01em; }
