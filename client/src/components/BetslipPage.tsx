@@ -411,11 +411,13 @@ export default function BetslipPage({
            labels, no buttons. X closes back to the slip; My Bets is one
            tap away on the bottom nav. */
         <div className="pb-receipt-overlay">
-          <div className="pb-receipt-top">
-            <img className="pb-receipt-brand" src="/playbet/logo.png" alt="PlayBet" />
-            <button type="button" className="pb-receipt-close" onClick={() => setPlacedInfo(null)} aria-label="Close receipt"><X size={22} /></button>
+          <div className="pb-receipt-sheet">
+            <div className="pb-receipt-top">
+              <img className="pb-receipt-brand" src="/playbet/logo.png" alt="PlayBet" />
+              <button type="button" className="pb-receipt-close" onClick={() => setPlacedInfo(null)} aria-label="Close receipt"><X size={22} /></button>
+            </div>
+            <BookingCodeReceipt code={placedInfo.bookingCode} codeState={placedInfo.codeState} stake={placedInfo.stake} totalOdds={placedInfo.totalOdds} picks={placedInfo.selections} />
           </div>
-          <BookingCodeReceipt code={placedInfo.bookingCode} codeState={placedInfo.codeState} stake={placedInfo.stake} totalOdds={placedInfo.totalOdds} picks={placedInfo.selections} />
         </div>
       ) : (
         <div className="pb-success-overlay" onClick={() => setPlacedInfo(null)}>

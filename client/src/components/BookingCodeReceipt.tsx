@@ -95,11 +95,11 @@ export default function BookingCodeReceipt({ code, codeState, stake, totalOdds, 
       </div>
 
       <style>{`
-        .bcr-receipt{ text-align:left; font-family:Roboto,Arial,sans-serif; flex:1; display:flex; flex-direction:column; justify-content:center; }
-        .bcr-code-block{ padding:6px 2px 14px; }
+        .bcr-receipt{ text-align:left; font-family:Roboto,Arial,sans-serif; }
+        .bcr-code-block{ padding:6px 2px 10px; }
         .bcr-code-label{ display:block; font-size:.78rem; font-weight:700; color:rgba(255,255,255,.65); letter-spacing:.02em; }
         .bcr-code-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:2px; }
-        .bcr-code{ font-size:2.3rem; font-weight:900; letter-spacing:.04em; color:#00E85F; line-height:1.15; overflow-wrap:anywhere; }
+        .bcr-code{ font-size:2rem; font-weight:900; letter-spacing:.04em; color:#00E85F; line-height:1.15; overflow-wrap:anywhere; }
         .bcr-code-pending{ display:block; margin-top:6px; font-size:.9rem; font-weight:700; color:rgba(255,255,255,.65); }
         .bcr-code-missing{ display:block; margin-top:6px; font-size:.82rem; font-weight:700; color:#FFCF6B; line-height:1.45; }
         .bcr-copy{ flex-shrink:0; display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px; border:1px solid rgba(0,232,95,.5); background:transparent; color:#00E85F; font-size:.74rem; font-weight:800; cursor:pointer; }
@@ -107,7 +107,7 @@ export default function BookingCodeReceipt({ code, codeState, stake, totalOdds, 
         .bcr-odds-panel div{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
         .bcr-odds-panel span{ font-size:.82rem; color:rgba(255,255,255,.7); }
         .bcr-odds-panel b{ font-size:1.05rem; color:#fff; }
-        .bcr-section-title{ margin:14px 0 0; padding:8px 12px; background:rgba(0,166,81,.16); border:1px solid rgba(0,166,81,.3); border-bottom:0; border-radius:10px 10px 0 0; font-size:.78rem; font-weight:800; color:#7BDCA8; }
+        .bcr-section-title{ margin:10px 0 0; padding:8px 12px; background:rgba(0,166,81,.16); border:1px solid rgba(0,166,81,.3); border-bottom:0; border-radius:10px 10px 0 0; font-size:.78rem; font-weight:800; color:#7BDCA8; }
         .bcr-example{ border:1px solid rgba(255,255,255,.12); border-top:0; border-radius:0 0 10px 10px; padding:4px 12px 10px; }
         .bcr-example div{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 0; border-top:1px solid rgba(255,255,255,.08); }
         .bcr-example div:first-child{ border-top:0; }
@@ -119,10 +119,12 @@ export default function BookingCodeReceipt({ code, codeState, stake, totalOdds, 
         .bcr-sel b{ display:block; font-size:.86rem; color:#fff; }
         .bcr-sel small{ display:block; margin-top:2px; font-size:.74rem; color:rgba(255,255,255,.6); line-height:1.4; }
         .bcr-sel > strong{ flex-shrink:0; font-size:.9rem; color:#00E85F; }
-        /* Full-screen receipt sheet (owner, 2026-10-29): like the
-           SportyBet/KingzBet cards — navy top to bottom, full width,
-           nothing of the underlying page showing around it. */
-        .pb-receipt-overlay{ position:fixed; inset:0; z-index:200; overflow-y:auto; background:linear-gradient(165deg,#10234A 0%,#0A1B3D 55%,#060F24 100%); padding:14px 14px 28px; display:flex; flex-direction:column; }
+        /* Bottom-sheet receipt (owner, 2026-10-29): NOT a full-screen
+           sheet — a compact card pushed to the bottom, about a third of
+           the screen height, full width. Nothing else is covered: the
+           slip page stays visible above it. */
+        .pb-receipt-overlay{ position:fixed; left:0; right:0; bottom:0; z-index:200; }
+        .pb-receipt-sheet{ background:linear-gradient(165deg,#10234A 0%,#0A1B3D 55%,#060F24 100%); border-radius:18px 18px 0 0; padding:12px 14px 22px; box-shadow:0 -8px 30px rgba(0,0,0,.45); max-height:72vh; overflow-y:auto; }
         /* Brand row on top of the card (owner, 2026-10-29): like
            SportyBet's own card — the PlayBet logo text label sits on top,
            same site logo the header uses, X kept on the right. */
