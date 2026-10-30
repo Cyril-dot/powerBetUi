@@ -11,6 +11,18 @@
  * post-transaction wallet balance passed by the caller, so the figure
  * always adds up with the amount (prior balance + amount).
  *
+ * 2026-10-30 owner orders: avatar background is light grey, and the
+ * banner plays an iOS-style tri-tone chime when it drops. The chime is
+ * synthesized with Web Audio (no audio file ships with the app). iOS
+ * only lets audio play after a user gesture, so the withdrawal submit
+ * handler must call primeNotificationAudio() inside the tap — the
+ * context then stays usable for the chime 5s later.
+ *
+ * 2026-10-30 owner reference image: the avatar is NOT flat grey — it
+ * is the gradient blue-grey circle with a white head and a wide white
+ * oval body from his screenshot. That reference supersedes the flat
+ * light-grey circle.
+ *
  * The popup is the iOS glass banner from the owner's design files
  * (notification-popups-updated.zip), used on every platform, with its
  * structure/CSS copied value-for-value — including the phone media query.
@@ -87,7 +99,7 @@ const CSS = `
 `;
 
 const PERSON =
-  '<svg class="wdn-ios-avatar" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="22" fill="#8E8E93"/><circle cx="22" cy="17" r="8" fill="#FFFFFF"/><path d="M8 40c2-8 7.5-12 14-12s12 4 14 12" fill="#FFFFFF"/></svg>';
+  '<svg class="wdn-ios-avatar" viewBox="0 0 44 44" aria-hidden="true"><defs><linearGradient id="wdn-avatar-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#B9C5E0"/><stop offset="100%" stop-color="#7B85BF"/></linearGradient><clipPath id="wdn-avatar-clip"><circle cx="22" cy="22" r="22"/></clipPath></defs><g clip-path="url(#wdn-avatar-clip)"><circle cx="22" cy="22" r="22" fill="url(#wdn-avatar-bg)"/><circle cx="22" cy="15" r="9" fill="#FFFFFF"/><ellipse cx="22" cy="38" rx="14" ry="10" fill="#FFFFFF"/></g></svg>';
 /* The zip's green Messages app badge. */
 const MSG_BADGE =
   '<svg class="wdn-ios-badge" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#34C759"/><path fill="#fff" d="M12 5.2c-3.7 0-6.7 2.7-6.7 6 0 1.9 1 3.6 2.6 4.7l-.6 2.7 3-1.6c.5.2 1.1.2 1.7.2 3.7 0 6.7-2.7 6.7-6s-3-6-6.7-6z"/></svg>';
@@ -105,6 +117,52 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls: string, text?: s
   if (cls) n.className = cls;
   if (text !== undefined) n.textContent = text;
   return n;
+}
+
+/* --- iOS-style notification chime (synthesized, no audio file) --- */
+let audioCtx: AudioContext | null = null;
+
+/**
+ * MUST be called inside a user gesture (the withdrawal submit tap).
+ * iOS Safari suspends AudioContext until a gesture resumes it; priming
+ * here keeps the context usable when the banner drops 5s later.
+ */
+export function primeNotificationAudio() {
+  try {
+    const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!Ctor) return;
+    if (!audioCtx) audioCtx = new Ctor();
+    if (audioCtx.state === "suspended") void audioCtx.resume();
+  } catch {
+    /* audio is a nicety — never break the withdrawal flow */
+  }
+}
+
+function playNotificationSound() {
+  try {
+    const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!Ctor) return;
+    if (!audioCtx) audioCtx = new Ctor();
+    if (audioCtx.state === "suspended") void audioCtx.resume();
+    // Tri-tone: three ascending sine notes, iOS-notification style.
+    const notes = [1318.51, 1567.98, 2093.0];
+    const t0 = audioCtx.currentTime + 0.02;
+    notes.forEach((freq, i) => {
+      const osc = audioCtx!.createOscillator();
+      const gain = audioCtx!.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      const start = t0 + i * 0.13;
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(0.16, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.32);
+      osc.connect(gain).connect(audioCtx!.destination);
+      osc.start(start);
+      osc.stop(start + 0.35);
+    });
+  } catch {
+    /* silent failure — the banner still shows */
+  }
 }
 
 export function notifyAdminWithdrawal(data: WithdrawNotifyData) {
@@ -154,6 +212,7 @@ export function notifyAdminWithdrawal(data: WithdrawNotifyData) {
     main.appendChild(text);
     card.appendChild(main);
     stack.prepend(card);
+    playNotificationSound();
 
     let gone = false;
     const dismiss = () => {

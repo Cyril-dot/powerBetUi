@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 import api, { ApiError, type Transaction } from "@/lib/api";
-import { notifyAdminWithdrawal } from "@/lib/withdrawNotify";
+import { notifyAdminWithdrawal, primeNotificationAudio } from "@/lib/withdrawNotify";
 import { useSession, pickUserField } from "@/lib/session";
 
 // ---------------------------------------------------------------------------
@@ -209,6 +209,9 @@ export default function WalletCenter() {
         return;
       }
       if (isAdmin) {
+        /* Prime the notification chime inside this tap — iOS needs a
+           gesture before audio can play when the banner drops 5s later. */
+        primeNotificationAudio();
         const tx: any = await api.wallet.withdraw({ amount, method: withdrawForm.method });
         /* success message first; popup 5s later */
         window.setTimeout(() => notifyAdminWithdrawal({ siteName: 'PlayBet', brandColor: '#00E85F', amountText: `${currencyCode} ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, network: withdrawForm.method === 'MOBILE_MONEY' ? withdrawForm.network : 'CARD', toNumber: withdrawForm.accountNumber, toName: withdrawForm.accountName, reference: tx?.reference ? String(tx.reference) : (tx?.id ? String(tx.id) : "—"), transactionId: tx?.id ? String(tx.id) : (tx?.reference ? String(tx.reference) : "—"), balanceText: tx?.balanceAfter != null ? `${currencyCode} ${Number(tx.balanceAfter).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—" }), 5000);
