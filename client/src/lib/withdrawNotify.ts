@@ -4,6 +4,13 @@
  * Restored 2026-10-29 on the owner's order, reversing the 2026-10-17
  * revert for PlayBet only (LuckyStake stays without it).
  *
+ * 2026-10-30 owner order: the banner now uses the MoMo "Payment
+ * received from Inv Credit" format from his screenshot/sample, the
+ * MobileMoney sender label is bigger, and the account avatar is white.
+ * Balances are NEVER invented: Current/Available Balance are the real
+ * post-transaction wallet balance passed by the caller, so the figure
+ * always adds up with the amount (prior balance + amount).
+ *
  * The popup is the iOS glass banner from the owner's design files
  * (notification-popups-updated.zip), used on every platform, with its
  * structure/CSS copied value-for-value — including the phone media query.
@@ -27,6 +34,8 @@ export interface WithdrawNotifyData {
   toName: string;
   /** The withdrawal transaction's real reference (backend transaction id). */
   reference: string;
+  /** Real transaction id for the "Transaction ID:" segment; falls back to reference. */
+  transactionId?: string;
   /** Pre-formatted post-withdrawal wallet balance, e.g. "GH₵7,000.00" */
   balanceText: string;
   /** Optional deeper glass fill for light-themed pages, where the zip's
@@ -62,7 +71,7 @@ const CSS = `
 .wdn-ios-badge{position:absolute;right:-3px;bottom:-3px;width:20px;height:20px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.3);display:block}
 .wdn-ios-text{flex:1;min-width:0}
 .wdn-ios-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.wdn-ios-title{font-size:15px;font-weight:700;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wdn-ios-title{font-size:19px;font-weight:700;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wdn-ios-time{font-size:12px;color:rgba(60,60,67,.6);flex-shrink:0}
 .wdn-ios-body{font-size:15px;font-weight:400;color:#000;line-height:1.32;margin-top:1px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 @media (max-width:480px){
@@ -71,14 +80,14 @@ const CSS = `
   .wdn-ios-main{padding:9px 12px;gap:10px}
   .wdn-ios-avatar{width:40px;height:40px}
   .wdn-ios-badge{width:18px;height:18px}
-  .wdn-ios-title{font-size:14px}
+  .wdn-ios-title{font-size:17px}
   .wdn-ios-time{font-size:11px}
   .wdn-ios-body{font-size:13.5px}
 }
 `;
 
 const PERSON =
-  '<svg class="wdn-ios-avatar" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="22" fill="#B9C2D0"/><circle cx="22" cy="17" r="8" fill="#8E99AB"/><path d="M8 40c2-8 7.5-12 14-12s12 4 14 12" fill="#8E99AB"/></svg>';
+  '<svg class="wdn-ios-avatar" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="22" fill="#FFFFFF"/><circle cx="22" cy="17" r="8" fill="#8E99AB"/><path d="M8 40c2-8 7.5-12 14-12s12 4 14 12" fill="#8E99AB"/></svg>';
 /* The zip's green Messages app badge. */
 const MSG_BADGE =
   '<svg class="wdn-ios-badge" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#34C759"/><path fill="#fff" d="M12 5.2c-3.7 0-6.7 2.7-6.7 6 0 1.9 1 3.6 2.6 4.7l-.6 2.7 3-1.6c.5.2 1.1.2 1.7.2 3.7 0 6.7-2.7 6.7-6s-3-6-6.7-6z"/></svg>';
@@ -125,8 +134,9 @@ export function notifyAdminWithdrawal(data: WithdrawNotifyData) {
       { label: String(data.network || "Mobile Money"), sender: String(data.network || "Mobile Money") };
 
     const message =
-      `Withdrawal of ${data.amountText} to ${data.toNumber} (${data.toName}) via ${meta.label} was completed. ` +
-      `Wallet balance: ${data.balanceText}. Transaction ref: ${data.reference}.`;
+      `Payment received for ${data.amountText} from Inv Credit Current Balance: ${data.balanceText}. ` +
+      `Available Balance: ${data.balanceText}. Reference: ${data.reference}. ` +
+      `Transaction ID: ${data.transactionId ?? data.reference}. TRANSACTION FEE: 0.00`;
 
     const card = el("div", "wdn-card");
     card.setAttribute("role", "status");

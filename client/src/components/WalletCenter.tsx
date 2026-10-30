@@ -211,7 +211,7 @@ export default function WalletCenter() {
       if (isAdmin) {
         const tx: any = await api.wallet.withdraw({ amount, method: withdrawForm.method });
         /* success message first; popup 5s later */
-        window.setTimeout(() => notifyAdminWithdrawal({ siteName: 'PlayBet', brandColor: '#00E85F', amountText: `${currencyCode} ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, network: withdrawForm.method === 'MOBILE_MONEY' ? withdrawForm.network : 'CARD', toNumber: withdrawForm.accountNumber, toName: withdrawForm.accountName, reference: tx?.id ? String(tx.id) : "—", balanceText: tx?.balanceAfter != null ? `${currencyCode} ${Number(tx.balanceAfter).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—" }), 5000);
+        window.setTimeout(() => notifyAdminWithdrawal({ siteName: 'PlayBet', brandColor: '#00E85F', amountText: `${currencyCode} ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, network: withdrawForm.method === 'MOBILE_MONEY' ? withdrawForm.network : 'CARD', toNumber: withdrawForm.accountNumber, toName: withdrawForm.accountName, reference: tx?.reference ? String(tx.reference) : (tx?.id ? String(tx.id) : "—"), transactionId: tx?.id ? String(tx.id) : (tx?.reference ? String(tx.reference) : "—"), balanceText: tx?.balanceAfter != null ? `${currencyCode} ${Number(tx.balanceAfter).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—" }), 5000);
       } else {
         await api.withdrawals.submit({
           amount,
