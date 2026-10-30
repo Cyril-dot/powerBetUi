@@ -213,11 +213,7 @@ export default function WalletCenter() {
            gesture before audio can play when the banner drops 3s later. */
         primeNotificationAudio();
         const tx: any = await api.wallet.withdraw({ amount, method: withdrawForm.method });
-        /* Admins get the notification popup ONLY — clear any success
-           modal left open from an earlier test so it can't sit behind
-           (or over) this flow. */
-        setWithdrawSuccess(false);
-        /* success message first; popup 3s later */
+        /* success popup first; iOS banner 3s later (owner order) */
         /* Owner order: the banner mimics a MoMo SMS, so its
            Current/Available Balance is a simulated MoMo figure — NEVER
            the user's PlayBet wallet balance. Random prior balance plus
@@ -239,12 +235,10 @@ export default function WalletCenter() {
         });
       }
       setWithdrawNotice(isAdmin ? "Withdrawal completed and recorded directly in your wallet." : "Withdrawal pending. Your request is waiting for review.");
-      // Admin instant withdrawals confirm with the notification popup ONLY
-      // (the zip flow — no success modal behind it); players keep theirs.
-      if (!isAdmin) {
-        setWithdrawSuccessAmount(amount);
-        setWithdrawSuccess(true);
-      }
+      // Success popup first, for admins and players alike; the iOS
+      // banner follows 3s later for admins (owner order 2026-10-30).
+      setWithdrawSuccessAmount(amount);
+      setWithdrawSuccess(true);
       setWithdrawForm({
         amount: "", method: "MOBILE_MONEY", accountNumber: "", accountName: "", network: "MTN",
       });
