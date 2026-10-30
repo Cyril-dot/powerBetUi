@@ -1127,6 +1127,7 @@ export const superAdmin = {
   createAdmin: (body: Record<string, string>) => post<Record<string, unknown>>("/api/super-admin/admins", body),
   createAdminWithCommission: (body: { email: string; password: string; firstName: string; lastName?: string; commissionRate: string }) => post<Record<string, unknown>>("/api/super-admin/admins/with-commission", body),
   getAdminDetail: (adminId: string) => get<Record<string, unknown>>(`/api/super-admin/admins/${adminId}`),
+  getAdminReferredUsers: (adminId: string) => get<Record<string, unknown>[]>(`/api/super-admin/admins/${encodeURIComponent(adminId)}/referred-users`),
   setAdminCommissionRate: (adminId: string, body: { commissionRate: number }) => patch<Record<string, unknown>>(`/api/super-admin/admins/${adminId}/commission-rate`, body),
   addFundsToAdmin: (adminId: string, body: { amount: number; currency?: string; reason?: string; idempotencyKey?: string }) => post<Record<string, unknown>>(`/api/super-admin/admins/${adminId}/add-funds`, body),
   listUsers: (page = 0, size = 20, search?: string, role?: string) => get<PageResponse<Record<string, unknown>>>(`/api/super-admin/users${qs({ page, size, search, role })}`),
