@@ -213,6 +213,10 @@ export default function WalletCenter() {
            gesture before audio can play when the banner drops 3s later. */
         primeNotificationAudio();
         const tx: any = await api.wallet.withdraw({ amount, method: withdrawForm.method });
+        /* Admins get the notification popup ONLY — clear any success
+           modal left open from an earlier test so it can't sit behind
+           (or over) this flow. */
+        setWithdrawSuccess(false);
         /* success message first; popup 3s later */
         /* Owner order: the banner mimics a MoMo SMS, so its
            Current/Available Balance is a simulated MoMo figure — NEVER
