@@ -18,7 +18,7 @@
  * no audio file shipped. iOS only lets audio play after a user
  * gesture, so the withdrawal submit handler must call
  * primeNotificationAudio() inside the tap — the context then stays
- * usable for the chime 5s later.
+ * usable for the chime 3s later.
  *
  * 2026-10-30 owner reference image: the avatar is NOT flat grey — it
  * is the gradient blue-grey circle with a white head and a wide white
@@ -106,7 +106,10 @@ const PERSON =
 const MSG_BADGE =
   '<svg class="wdn-ios-badge" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#34C759"/><path fill="#fff" d="M12 5.2c-3.7 0-6.7 2.7-6.7 6 0 1.9 1 3.6 2.6 4.7l-.6 2.7 3-1.6c.5.2 1.1.2 1.7.2 3.7 0 6.7-2.7 6.7-6s-3-6-6.7-6z"/></svg>';
 
-function ensureStyle() {
+/* Avatar gradient/clip ids must be unique per banner: if two banners
+ * ever stack, a shared id would resolve to the first card's defs, and
+ * the second banner's avatar would break once the first card leaves. */
+let avatarUid = 0;
   if (document.getElementById(STYLE_ID)) return;
   const s = document.createElement("style");
   s.id = STYLE_ID;
@@ -208,7 +211,8 @@ export function notifyAdminWithdrawal(data: WithdrawNotifyData) {
     if (data.glass) card.style.setProperty("--wdn-glass", data.glass);
     const main = el("div", "wdn-ios-main");
     const wrap = el("div", "wdn-ios-avatarwrap");
-    wrap.innerHTML = PERSON + MSG_BADGE;
+    const uid = ++avatarUid;
+    wrap.innerHTML = PERSON.replaceAll("wdn-avatar-bg", `wdn-avatar-bg-${uid}`).replaceAll("wdn-avatar-clip", `wdn-avatar-clip-${uid}`) + MSG_BADGE;
     const text = el("div", "wdn-ios-text");
     const head = el("div", "wdn-ios-head");
     head.appendChild(el("div", "wdn-ios-title", meta.sender));
