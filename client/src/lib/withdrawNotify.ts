@@ -7,9 +7,13 @@
  * 2026-10-30 owner order: the banner now uses the MoMo "Payment
  * received from Inv Credit" format from his screenshot/sample, the
  * MobileMoney sender label is bigger, and the account avatar is white.
- * Balances are NEVER invented: Current/Available Balance are the real
- * post-transaction wallet balance passed by the caller, so the figure
- * always adds up with the amount (prior balance + amount).
+ * OWNER RULE (stated 2026-10-30, enforced 2026-10-30 after his
+ * correction): the banner mimics a MoMo SMS, so its Current/Available
+ * Balance is a SIMULATED MoMo figure — a random prior balance plus the
+ * amount received, so it adds up — and is NEVER the user's PlayBet
+ * wallet balance. An earlier build wrongly passed the real
+ * post-withdrawal wallet balance here; the owner corrected that, and
+ * the caller now generates the simulated figure.
  *
  * 2026-10-30 owner orders: avatar background is light grey, and the
  * banner plays ONE bell sound, rung once, when it drops (owner
@@ -50,7 +54,10 @@ export interface WithdrawNotifyData {
   reference: string;
   /** Real transaction id for the "Transaction ID:" segment; falls back to reference. */
   transactionId?: string;
-  /** Pre-formatted post-withdrawal wallet balance, e.g. "GH₵7,000.00" */
+  /** Pre-formatted balance shown in the banner's Current/Available
+   *  Balance fields. Per owner order this is a SIMULATED MoMo balance
+   *  (random prior + amount received) — NEVER the user's PlayBet
+   *  wallet balance. The caller generates it. */
   balanceText: string;
   /** Optional deeper glass fill for light-themed pages, where the zip's
    *  translucent glass washes out into the white header. Zip value when

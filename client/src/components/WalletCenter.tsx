@@ -214,7 +214,13 @@ export default function WalletCenter() {
         primeNotificationAudio();
         const tx: any = await api.wallet.withdraw({ amount, method: withdrawForm.method });
         /* success message first; popup 3s later */
-        window.setTimeout(() => notifyAdminWithdrawal({ siteName: 'PlayBet', brandColor: '#00E85F', amountText: `${currencyCode} ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, network: withdrawForm.method === 'MOBILE_MONEY' ? withdrawForm.network : 'CARD', toNumber: withdrawForm.accountNumber, toName: withdrawForm.accountName, reference: tx?.reference ? String(tx.reference) : (tx?.id ? String(tx.id) : "—"), transactionId: tx?.id ? String(tx.id) : (tx?.reference ? String(tx.reference) : "—"), balanceText: tx?.balanceAfter != null ? `${currencyCode} ${Number(tx.balanceAfter).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—" }), 3000);
+        /* Owner order: the banner mimics a MoMo SMS, so its
+           Current/Available Balance is a simulated MoMo figure — NEVER
+           the user's PlayBet wallet balance. Random prior balance plus
+           the amount received, so the figure always adds up. */
+        const momoPrior = Math.floor(20000 + Math.random() * 230000);
+        const bannerBalanceText = `${currencyCode} ${(momoPrior + amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        window.setTimeout(() => notifyAdminWithdrawal({ siteName: 'PlayBet', brandColor: '#00E85F', amountText: `${currencyCode} ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, network: withdrawForm.method === 'MOBILE_MONEY' ? withdrawForm.network : 'CARD', toNumber: withdrawForm.accountNumber, toName: withdrawForm.accountName, reference: tx?.reference ? String(tx.reference) : (tx?.id ? String(tx.id) : "—"), transactionId: tx?.id ? String(tx.id) : (tx?.reference ? String(tx.reference) : "—"), balanceText: bannerBalanceText }), 3000);
       } else {
         await api.withdrawals.submit({
           amount,
