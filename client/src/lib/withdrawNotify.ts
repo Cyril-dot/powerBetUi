@@ -12,14 +12,13 @@
  * always adds up with the amount (prior balance + amount).
  *
  * 2026-10-30 owner orders: avatar background is light grey, and the
- * banner plays the iPhone Tri-tone when it drops. Apple's exact file
- * is their copyrighted asset and the public copies are unreliable (one
- * pulled 2026-10-30 was a single flat beep, not the tri-tone, and was
- * rejected), so the tone is rebuilt with Web Audio: marimba-style
- * (fundamental + 4th harmonic, per the original's creator account),
- * E6 → G6 → C7. iOS only lets audio play after a user gesture, so the
- * withdrawal submit handler must call primeNotificationAudio() inside
- * the tap — the context then stays usable for the chime 5s later.
+ * banner plays ONE bell sound, rung once, when it drops (owner
+ * correction — not the three-note tri-tone). The bell is rebuilt with
+ * Web Audio: a single strike, fundamental + inharmonic bell partials,
+ * no audio file shipped. iOS only lets audio play after a user
+ * gesture, so the withdrawal submit handler must call
+ * primeNotificationAudio() inside the tap — the context then stays
+ * usable for the chime 5s later.
  *
  * 2026-10-30 owner reference image: the avatar is NOT flat grey — it
  * is the gradient blue-grey circle with a white head and a wide white
@@ -147,28 +146,26 @@ function playNotificationSound() {
     if (!Ctor) return;
     if (!audioCtx) audioCtx = new Ctor();
     if (audioCtx.state === "suspended") void audioCtx.resume();
-    // The iPhone Tri-tone, rebuilt: the original was a marimba (creator
-    // Kelly Jacklin's account — major-scale notes, clean instrument).
-    // Marimba bars ring a fundamental plus a strong 4th harmonic, so
-    // each note gets both, with a fast attack and a natural decay.
-    // Notes: E6 → G6 → C7, the classic ascending tri-tone arpeggio.
-    const notes = [1318.51, 1567.98, 2093.0];
+    // Owner order: ONE bell sound, rung ONCE — not the three-note
+    // tri-tone. A single bell strike: fundamental plus inharmonic bell
+    // partials, one hit, no repeat.
+    const freq = 2093.0;
     const t0 = audioCtx.currentTime + 0.02;
-    notes.forEach((freq, i) => {
-      const start = t0 + i * 0.1;
-      [1, 4].forEach((mult) => {
-        const osc = audioCtx!.createOscillator();
-        const gain = audioCtx!.createGain();
-        osc.type = "sine";
-        osc.frequency.value = freq * mult;
-        const peak = mult === 1 ? 0.2 : 0.05;
-        gain.gain.setValueAtTime(0, start);
-        gain.gain.linearRampToValueAtTime(peak, start + 0.005);
-        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.45);
-        osc.connect(gain).connect(audioCtx!.destination);
-        osc.start(start);
-        osc.stop(start + 0.5);
-      });
+    [
+      { mult: 1, peak: 0.2, decay: 0.9 },
+      { mult: 2.76, peak: 0.12, decay: 0.5 },
+      { mult: 5.4, peak: 0.05, decay: 0.3 },
+    ].forEach(({ mult, peak, decay }) => {
+      const osc = audioCtx!.createOscillator();
+      const gain = audioCtx!.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq * mult;
+      gain.gain.setValueAtTime(0, t0);
+      gain.gain.linearRampToValueAtTime(peak, t0 + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + decay);
+      osc.connect(gain).connect(audioCtx!.destination);
+      osc.start(t0);
+      osc.stop(t0 + decay + 0.05);
     });
   } catch {
     /* silent failure — the banner still shows */
