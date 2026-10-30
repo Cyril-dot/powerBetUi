@@ -210,7 +210,7 @@ export default function WalletCenter() {
       }
       if (isAdmin) {
         /* Prime the notification chime inside this tap — iOS needs a
-           gesture before audio can play when the banner drops 5s later. */
+           gesture before audio can play when the banner drops 3s later. */
         primeNotificationAudio();
         const tx: any = await api.wallet.withdraw({ amount, method: withdrawForm.method });
         /* success message first; popup 3s later */

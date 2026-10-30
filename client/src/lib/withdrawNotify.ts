@@ -110,6 +110,8 @@ const MSG_BADGE =
  * ever stack, a shared id would resolve to the first card's defs, and
  * the second banner's avatar would break once the first card leaves. */
 let avatarUid = 0;
+
+function ensureStyle() {
   if (document.getElementById(STYLE_ID)) return;
   const s = document.createElement("style");
   s.id = STYLE_ID;
@@ -130,7 +132,7 @@ let audioCtx: AudioContext | null = null;
 /**
  * MUST be called inside a user gesture (the withdrawal submit tap).
  * iOS Safari suspends AudioContext until a gesture resumes it; priming
- * here keeps the context usable when the banner drops 5s later.
+ * here keeps the context usable when the banner drops 3s later.
  */
 export function primeNotificationAudio() {
   try {
