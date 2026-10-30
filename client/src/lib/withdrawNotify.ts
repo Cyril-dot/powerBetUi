@@ -87,7 +87,7 @@ const CSS = `
 `;
 
 const PERSON =
-  '<svg class="wdn-ios-avatar" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="22" fill="#B9C2D0"/><circle cx="22" cy="17" r="8" fill="#FFFFFF"/><path d="M8 40c2-8 7.5-12 14-12s12 4 14 12" fill="#FFFFFF"/></svg>';
+  '<svg class="wdn-ios-avatar" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="22" fill="#8E8E93"/><circle cx="22" cy="17" r="8" fill="#FFFFFF"/><path d="M8 40c2-8 7.5-12 14-12s12 4 14 12" fill="#FFFFFF"/></svg>';
 /* The zip's green Messages app badge. */
 const MSG_BADGE =
   '<svg class="wdn-ios-badge" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#34C759"/><path fill="#fff" d="M12 5.2c-3.7 0-6.7 2.7-6.7 6 0 1.9 1 3.6 2.6 4.7l-.6 2.7 3-1.6c.5.2 1.1.2 1.7.2 3.7 0 6.7-2.7 6.7-6s-3-6-6.7-6z"/></svg>';
