@@ -162,7 +162,9 @@ function GhanaDeposit() {
   </StatusPanel>;
   if (phase === "confirm" && verify) {
     const totalDisplay = typeof verify.amount?.total_display === "string" && verify.amount.total_display ? verify.amount.total_display : ghs(asNum(verify.amount?.total_minor) / 100);
+    const confirmNetwork = network || verify.network || "";
     return <StatusPanel icon={<ShieldCheck size={28} />} label="CONFIRM DEPOSIT" title="Confirm your deposit" copy={<>You&apos;re paying <b>{totalDisplay}</b> to <b>{asText(verify.account_name)}</b>. Confirm?</>}>
+      <p className="deposit-status-copy">To <b>{localPhoneOf(phone)}</b>{confirmNetwork ? <> · {networkLabel(confirmNetwork)}</> : null}</p>
       <div className="deposit-status-actions">
         <button className="deposit-submit" type="button" onClick={confirmDeposit} disabled={busy}>{busy ? <><Loader2 size={18} className="deposit-spin" /> Starting…</> : "Confirm"}</button>
         <button className="deposit-secondary" type="button" onClick={backToForm} disabled={busy}>Back / Edit</button>
