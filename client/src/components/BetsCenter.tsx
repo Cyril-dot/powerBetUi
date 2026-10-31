@@ -43,6 +43,10 @@ function dayLabel(key: string): { day: string; mon: string } {
   const d = new Date(`${key}T00:00:00`);
   return { day: d.toLocaleDateString(undefined, { day: "2-digit" }), mon: d.toLocaleDateString(undefined, { month: "short" }) };
 }
+/** KingzBet-style market label: CORRECT_SCORE → Correct Score. */
+function prettyMarket(market: string): string {
+  return market.split(/[_\s]+/).filter(Boolean).map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
+}
 
 
 function isOpenMatchLive(match: Match | undefined): boolean {
@@ -150,9 +154,9 @@ function OpenBetCard({ bet, scores, onCashoutDone }: { bet: Bet; scores: Record<
                   <span className="bh-leg-check">✓</span>
                 )}
                 <div className="bh-leg-info">
-                  <div className="bh-open-leg-head"><b>{s.market || "1X2"} · {s.homeTeam ?? scores[s.matchId]?.homeTeam ?? "Home"} vs {s.awayTeam ?? scores[s.matchId]?.awayTeam ?? "Away"}</b>{isOpenMatchLive(scores[s.matchId]) && <span className="bh-live-match"><i /><small>live</small><b>{openMatchClock(scores[s.matchId])}</b></span>}</div>
+                  <div className="bh-open-leg-head"><b>{prettyMarket(s.market || "1X2")} · {s.homeTeam ?? scores[s.matchId]?.homeTeam ?? "Home"} v {s.awayTeam ?? scores[s.matchId]?.awayTeam ?? "Away"}</b>{isOpenMatchLive(scores[s.matchId]) && <span className="bh-live-match"><i /><small>live</small><b>{openMatchClock(scores[s.matchId])}</b></span>}</div>
                   {openMatchStartTime(scores[s.matchId]) && <small className="bh-open-kickoff">{openMatchStartTime(scores[s.matchId])}</small>}
-                  <small>{s.selection} @ {s.oddsLocked?.toFixed(2)}</small>
+                  <small><span className="bh-odds-pill">{s.selection} @ {s.oddsLocked?.toFixed(2)}</span></small>
                   <div className="bh-open-team-row"><span>{s.homeTeam ?? scores[s.matchId]?.homeTeam ?? "Home"}</span>{isOpenMatchLive(scores[s.matchId]) && scores[s.matchId]?.scoreHome != null && <strong>{scores[s.matchId].scoreHome}</strong>}</div>
                   <div className="bh-open-team-row"><span>{s.awayTeam ?? scores[s.matchId]?.awayTeam ?? "Away"}</span>{isOpenMatchLive(scores[s.matchId]) && scores[s.matchId]?.scoreAway != null && <strong>{scores[s.matchId].scoreAway}</strong>}</div>
                 </div>
@@ -592,7 +596,7 @@ function BetsCenterStyles() {
 
 	      /* Final history-card cleanup: action in header, no side stripe, clear win/loss surfaces. */
 	      .bh-card::before{ display:none!important; }
-	      .bh-card.bh-won{ border:2px solid #00a651!important; }
+	      .bh-card.bh-won{ border:2px solid #0b4a2b!important; }
 	      .bh-card.bh-cashed{ border:2px solid #16854b!important; }
 	      .bh-card.bh-lost{ border:1px solid #efb0b4!important; }
 	      .bh-card.bh-won .bh-card-top{ padding-right:16px!important; }
@@ -701,10 +705,10 @@ function BetsCenterStyles() {
 	        box-shadow:none!important;
 	      }
 	      .bh-card .bh-totals .bh-payout-row span,
-	      .bh-card.bh-won .bh-totals .bh-payout-row span{ color:#7BDCA8!important; }
+	      .bh-card.bh-won .bh-totals .bh-payout-row span{ color:#14532D!important; }
 	      .bh-card .bh-totals .bh-payout-row b,
 	      .bh-card.bh-won .bh-totals .bh-payout-row b,
-	      .bh-card.bh-won .bh-return-won{ color:#00E85F!important; text-shadow:none!important; }
+	      .bh-card.bh-won .bh-return-won{ color:#0B7A43!important; text-shadow:none!important; }
 	      .bh-match{ color:#fff; }
 	      .bh-dot{ background:#00A651; box-shadow:none; }
 	      .bh-more{ color:rgba(255,255,255,.55); }
