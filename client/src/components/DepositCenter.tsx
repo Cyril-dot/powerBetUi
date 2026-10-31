@@ -8,7 +8,7 @@ import {
   ShieldCheck,
   Smartphone,
 } from "lucide-react";
-import api, { ApiError } from "@/lib/api";
+import api, { ApiError, type ShinobiPayVerifyResponse } from "@/lib/api";
 import { useSession } from "@/lib/session";
 
 /* Deposit centre — ShinobiPay, GHANA ONLY (owner direction
@@ -16,6 +16,9 @@ import { useSession } from "@/lib/session";
    Mobile Money in Ghana, full stop — the Nigeria option was removed
    2026-10-15 and Flutterwave v4 held the Ghana rail for a day.)
    Ghana: direct MoMo prompt + in-page status polling.
+   Verify-first (2026-10-31): the form verifies the number via
+   /api/wallet/deposit/akwapay/verify BEFORE any prompt; the prompt
+   only goes out after the player confirms the account name + total.
    Crediting is webhook-only on the backend; the wait state polls the
    intent status read-only — the wallet credit lands when the signed
    ShinobiPay webhook settles the payment. */
@@ -64,14 +67,22 @@ function StatusPanel({ tone, icon, label, title, copy, children }: { tone?: stri
 
 /* ─── Ghana — ShinobiPay Mobile Money (direct prompt) ─────────────── */
 function GhanaDeposit() {
-  const [phase, setPhase] = useState<"form" | "waiting" | "done" | "stalled">("form");
+  const [phase, setPhase] = useState<"form" | "confirm" | "waiting" | "done" | "stalled">("form");
   const [amount, setAmount] = useState("50");
   const [phone, setPhone] = useState("");
   const [network, setNetwork] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [intentId, setIntentId] = useState("");
+  const [verify, setVerify] = useState<ShinobiPayVerifyResponse | null>(null);
   const value = parseFloat(amount);
+
+  // The backend's prefix table expects the local 0-prefixed format.
+  const localPhoneOf = (raw: string) => {
+    const digits = raw.replace(/[^0-9]/g, "");
+    return digits.startsWith("233") && digits.length === 12 ? "0" + digits.slice(3) : digits;
+  };
+  const networkLabel = (n: string) => n === "AIRTELTIGO" ? "AirtelTigo" : n === "TELECEL" ? "Telecel" : "MTN";
 
   const start = async (e: FormEvent) => {
     e.preventDefault();
@@ -81,19 +92,41 @@ function GhanaDeposit() {
     if (!phone.trim()) { setError("Enter your MoMo number to receive the payment prompt."); return; }
     const chosen = network || detectNetwork(phone);
     if (!chosen) { setError("Choose your network — MTN, Telecel or AirtelTigo."); return; }
-    // The backend's prefix table expects the local 0-prefixed format.
-    const digits = phone.replace(/[^0-9]/g, "");
-    const localPhone = digits.startsWith("233") && digits.length === 12 ? "0" + digits.slice(3) : digits;
+    const localPhone = localPhoneOf(phone);
     setBusy(true);
     try {
-      const res = await api.deposits.shinobiPayInit({ amount: value, phone: localPhone, network: chosen as "MTN" | "TELECEL" | "AIRTELTIGO" });
-      const id = String(res?.id ?? "");
-      if (!id) { setError("The payment could not be started. Try again."); return; }
-      setIntentId(id);
-      setPhase("waiting");
+      // Verify FIRST, once per attempt — no prompt goes out unless the
+      // envelope comes back verified:true.
+      const res = await api.deposits.shinobiPayVerify({ amount: value, phone: localPhone, network: chosen as "MTN" | "TELECEL" | "AIRTELTIGO" });
+      if (res?.verified === true) { setVerify(res); setPhase("confirm"); return; }
+      const reason = String(res?.reason ?? "");
+      const serverMessage = typeof res?.message === "string" && res.message.trim() ? res.message : "";
+      if (serverMessage) setError(serverMessage);
+      else if (reason === "no_account") setError(`This number has no MoMo account on ${networkLabel(String(res?.network ?? chosen))}. Check the number and try again.`);
+      else if (reason === "unavailable") setError("The check could not run — wait a few minutes and try again. No prompt has been sent.");
+      else setError("Number verification is not available right now. Please try again shortly.");
     } catch (err) { setError(friendlyError(err)); }
     finally { setBusy(false); }
   };
+
+  // Confirm reuses the verify result — it NEVER re-verifies, and it is
+  // the only path that calls init, so no prompt is sent unverified.
+  const confirmDeposit = async () => {
+    const chosen = network || detectNetwork(phone);
+    if (!chosen) { setError("Choose your network — MTN, Telecel or AirtelTigo."); setPhase("form"); return; }
+    setBusy(true);
+    try {
+      const res = await api.deposits.shinobiPayInit({ amount: value, phone: localPhoneOf(phone), network: chosen as "MTN" | "TELECEL" | "AIRTELTIGO" });
+      const id = String(res?.id ?? "");
+      if (!id) { setError("The payment could not be started. Try again."); setPhase("form"); return; }
+      setIntentId(id);
+      setPhase("waiting");
+    } catch (err) { setError(friendlyError(err)); setPhase("form"); }
+    finally { setBusy(false); }
+  };
+
+  // Back/Edit returns to the form with the typed values kept.
+  const backToForm = () => { setVerify(null); setError(""); setPhase("form"); };
 
   useEffect(() => {
     if (phase !== "waiting" || !intentId) return;
@@ -116,7 +149,7 @@ function GhanaDeposit() {
     return () => { cancelled = true; };
   }, [phase, intentId]);
 
-  const reset = () => { setPhase("form"); setAmount("50"); setPhone(""); setNetwork(""); setError(""); setIntentId(""); };
+  const reset = () => { setPhase("form"); setAmount("50"); setPhone(""); setNetwork(""); setError(""); setIntentId(""); setVerify(null); };
 
   if (phase === "done") return <StatusPanel icon={<CheckCircle2 size={28} />} label="DEPOSIT CONFIRMED" title="Deposit successful" copy={<>{ghs(value)} has been added to your wallet.</>}>
     <div className="deposit-status-actions"><button className="deposit-secondary" type="button" onClick={reset}>Make another deposit</button><Link href="/wallet" className="deposit-secondary" style={{ textDecoration: "none" }}>Go to wallet</Link></div>
@@ -127,6 +160,15 @@ function GhanaDeposit() {
   if (phase === "waiting") return <StatusPanel tone="pending" icon={<Loader2 size={28} className="deposit-spin" />} label="AWAITING APPROVAL" title="Check your phone" copy={<>A MoMo prompt is on its way to <b>{phone}</b> — enter your PIN to approve <b>{ghs(value)}</b>. This page updates on its own when the payment lands.</>}>
     <div className="deposit-status-actions"><button className="deposit-secondary" type="button" onClick={reset}>Cancel deposit</button></div>
   </StatusPanel>;
+  if (phase === "confirm" && verify) {
+    const totalDisplay = typeof verify.amount?.total_display === "string" && verify.amount.total_display ? verify.amount.total_display : ghs(asNum(verify.amount?.total_minor) / 100);
+    return <StatusPanel icon={<ShieldCheck size={28} />} label="CONFIRM DEPOSIT" title="Confirm your deposit" copy={<>You&apos;re paying <b>{totalDisplay}</b> to <b>{asText(verify.account_name)}</b>. Confirm?</>}>
+      <div className="deposit-status-actions">
+        <button className="deposit-submit" type="button" onClick={confirmDeposit} disabled={busy}>{busy ? <><Loader2 size={18} className="deposit-spin" /> Starting…</> : "Confirm"}</button>
+        <button className="deposit-secondary" type="button" onClick={backToForm} disabled={busy}>Back / Edit</button>
+      </div>
+    </StatusPanel>;
+  }
 
   return <form className="deposit-panel" onSubmit={start}>
     {error && <div className="deposit-error" role="alert"><AlertCircle size={15} />{error}</div>}
@@ -137,7 +179,7 @@ function GhanaDeposit() {
     <div className="deposit-quick-row">{GH_QUICK.map((v) => <button type="button" key={v} className={amount === String(v) ? "selected" : ""} onClick={() => setAmount(String(v))}>GH₵{v.toLocaleString()}</button>)}</div>
     <label className="deposit-field"><span>MoMo number</span><input value={phone} onChange={(ev) => { setPhone(ev.target.value.replace(/[^0-9+]/g, "")); const d = detectNetwork(ev.target.value); if (d) setNetwork(d); }} inputMode="tel" placeholder="024 123 4567" /></label>
     <div className="deposit-quick-row">{(["MTN", "TELECEL", "AIRTELTIGO"] as const).map((n) => <button type="button" key={n} className={network === n ? "selected" : ""} onClick={() => setNetwork(n)}>{n === "AIRTELTIGO" ? "AirtelTigo" : n === "MTN" ? "MTN" : "Telecel"}</button>)}</div>
-    <button className="deposit-submit" type="submit" disabled={busy || !Number.isFinite(value) || value < MIN_GHS}>{busy ? <><Loader2 size={18} className="deposit-spin" /> Starting…</> : <><Smartphone size={18} /> Deposit</>}</button>
+    <button className="deposit-submit" type="submit" disabled={busy || !Number.isFinite(value) || value < MIN_GHS}>{busy ? <><Loader2 size={18} className="deposit-spin" /> Verifying…</> : <><Smartphone size={18} /> Deposit</>}</button>
     <p className="deposit-facts"><ShieldCheck size={13} /> Instant deposits · ShinobiPay · Min GH₵{MIN_GHS} · Max GH₵{MAX_GHS.toLocaleString()}</p>
   </form>;
 }

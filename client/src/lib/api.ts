@@ -349,6 +349,24 @@ export interface ShinobiPayStatusResponse {
   status?: string;
   [key: string]: unknown;
 }
+export interface ShinobiPayVerifyAmount {
+  requested_minor?: number;
+  customer_fee_minor?: number;
+  total_minor?: number;
+  total_display?: string;
+  currency?: string;
+}
+export interface ShinobiPayVerifyResponse {
+  verified?: boolean;
+  account_name?: string | null;
+  can_prompt?: boolean;
+  phone?: string;
+  network?: string;
+  amount?: ShinobiPayVerifyAmount | null;
+  reason?: "ok" | "no_account" | "unavailable" | "not_configured" | "error";
+  message?: string | null;
+  [key: string]: unknown;
+}
 export type WebRabbitNetwork = "MTN" | "TELECEL" | "AT" | "GMONEY";
 export interface WebRabbitTransaction {
   transaction_id?: string;
@@ -364,6 +382,8 @@ export interface WebRabbitTransaction {
 export const deposits = {
   shinobiPayInit: (body: { amount: number; phone: string; network: ShinobiPayNetwork }) =>
     post<ShinobiPayInitResponse>("/api/wallet/deposit/akwapay/init", body),
+  shinobiPayVerify: (body: { amount: number; phone: string; network: ShinobiPayNetwork }) =>
+    post<ShinobiPayVerifyResponse>("/api/wallet/deposit/akwapay/verify", body),
   shinobiPayStatus: (intentId: string) =>
     get<ShinobiPayStatusResponse>(`/api/wallet/deposit/akwapay/status/${encodeURIComponent(intentId)}`),
   myBankDeposits: (page = 0, size = 10) =>
