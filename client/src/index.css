@@ -3832,93 +3832,79 @@ html,body{background:#f5f6f7!important}
    page becomes KingzBet's light theme — sampled from the owner's
    KingzBet screenshot: header green #0b4a2b, gold #f6c451, page #eef1f6,
    white cards, yellow cashout. Appended last so it wins over the navy
-   workspace layer above; scoped to .bc-page only, the rest of the site
+   workspace layer above; scoped to .bc-page:not(.bc-history) only, the rest of the site
    is untouched. Team rows are plain text here — no border, no
    background, per the owner's order. */
-.bc-page{background:#eef1f6!important;color:#111827!important}
-.bc-page .bc-tabs{border-bottom:1px solid #e5e7eb!important}
-.bc-page .bc-tabs button{color:#6b7280!important}
-.bc-page .bc-tabs button.active{color:#0b4a2b!important;border-bottom:3px solid #f6c451!important}
-.bc-page .bc-toolbar{background:transparent!important;border:0!important}
-.bc-page.bc-history .bc-toolbar{background:#fff!important;border:1px solid #e5e7eb!important;border-radius:12px!important}
-.bc-page .bh-filter{background:#fff!important;border-color:#e5e7eb!important;color:#374151!important}
-.bc-page .bh-filter select{color:#111827!important}
-.bc-page .bc-icon-btn{background:#fff!important;border:1px solid #e5e7eb!important;color:#0b4a2b!important}
-.bc-page .bc-auto-banner{background:#e1f3e7!important;border:1px solid #bfe3cd!important;color:#0b7a43!important}
-.bc-page .bc-chip{background:#fff!important;border:1px solid #e5e7eb!important;color:#6b7280!important}
-.bc-page .bc-chip.active{background:#0b4a2b!important;border-color:#0b4a2b!important;color:#fff!important}
-.bc-page .bc-body{background:transparent!important}
-.bc-page .bc-pad,.bc-page .ob-empty{background:transparent!important;color:#6b7280!important}
-.bc-page .ob-empty svg{color:#9ca3af!important}
-.bc-page .ob-empty h3{color:#111827!important}
-.bc-page .bc-body .muted{color:#6b7280!important}
-.bc-page .bh-day-label{color:#6b7280!important}
-.bc-page .bh-day-label b{color:#111827!important}
-.bc-page .bh-card{background:#fff!important;border:1px solid #e5e7eb!important;box-shadow:0 2px 8px rgba(15,23,42,.06)!important;color:#111827!important}
-.bc-page .bh-card:hover{box-shadow:0 4px 14px rgba(15,23,42,.10)!important}
-.bc-page .bh-card-head,.bc-page .bh-card-head.bh-open-head{background:#fff!important;color:#111827!important;border-bottom:1px solid #f1f5f9!important}
-.bc-page .bh-type{color:#111827!important}
-.bc-page .bh-type em{color:#6b7280!important}
-.bc-page .bh-ticket-link{background:#eef1f6!important;border-color:#e5e7eb!important;color:#0b4a2b!important}
-.bc-page .bh-totals{border-color:#f1f5f9!important}
-.bc-page .bh-totals span{color:#6b7280!important}
-.bc-page .bh-totals b{color:#111827!important}
-.bc-page .bh-card .bh-totals .bh-payout-row{background:#dcfce7!important;border-color:#86efac!important;box-shadow:none!important}
-.bc-page .bh-card .bh-totals .bh-payout-row span{color:#14532d!important}
-.bc-page .bh-card .bh-totals .bh-payout-row b{color:#0b7a43!important;text-shadow:none!important}
-.bc-page .bh-card.bh-won .bh-totals .bh-payout-row span{color:#14532d!important}
-.bc-page .bh-card.bh-won .bh-totals .bh-payout-row b{color:#0b7a43!important;text-shadow:none!important}
-.bc-page .bh-match{color:#111827!important}
-.bc-page .bh-dot{background:#0b4a2b!important;box-shadow:none!important}
-.bc-page .bh-more{color:#6b7280!important}
-.bc-page .bh-card-foot{border-top-color:#f1f5f9!important;color:#0b7a43!important}
-.bc-page .bh-open-totals{border-top:0!important}
-.bc-page .bh-open-totals>div{background:#e9ecf1!important;border-radius:10px!important;padding:10px 12px!important}
-.bc-page .bh-leg-info b{color:#111827!important}
-.bc-page .bh-leg-info small{color:#6b7280!important}
-.bc-page .bh-leg-info .bh-open-kickoff{color:#6b7280!important}
-.bc-page .bh-toggle-details{color:#0b7a43!important}
-.bc-page .bh-cashout-btn{background:#f6c451!important;border-color:#f6c451!important;color:#1a1a1a!important}
-.bc-page .bh-cashout-btn:hover{background:#eab308!important}
-.bc-page .bh-leg-pending{color:#f59e0b!important}
-.bc-page .bh-pill.bh-pending{background:#f6c451!important;color:#1a1a1a!important}
-.bc-page .bh-pill.bh-won{background:#0b7a43!important}
-.bc-page .bh-pill.bh-lost{background:#9ca3af!important}
-.bc-page .bh-pill.bh-cashed{background:#16854b!important}
-.bc-page .bh-pill.bh-void{background:#9ca3af!important}
-.bc-page .bh-card.bh-cashed{border:2px solid #16854b!important}
-.bc-page .bh-card.bh-lost{border:1px solid #e5e7eb!important}
-.bc-page .bh-card.bh-lost .bh-pill{background:#eef1f6!important;color:#6b7280!important;border:1px solid #e5e7eb!important}
-.bc-page .bh-return-won{color:#0b7a43!important}
-.bc-page .bh-open-leg-head>b{color:#111827!important}
-.bc-page .bh-open-mapped-leg .bh-leg-info{color:#111827!important}
-.bc-page .bh-open-mapped-leg .bh-leg-info>small{color:#6b7280!important}
-.bc-page .bh-open-mapped-leg .bh-live-match{color:#b4232d!important}
-.bc-page .bh-open-mapped-leg .bh-live-match small{color:#b4232d!important}
-.bc-page .bh-open-mapped-leg .bh-live-match b{color:#111827!important}
-.bc-page .bh-open-mapped-leg .bh-live-match i{background:#ef4e5f!important;box-shadow:0 0 0 2px rgba(239,78,95,.12)!important}
-.bc-page .co-panel{background:#fff!important;border-color:#e5e7eb!important;color:#111827!important}
-.bc-page .bc-placement-success{background:#e1f3e7!important;border-color:#bfe3cd!important;color:#0b4a2b!important}
-.bc-page .bc-placement-success strong{color:#111827!important}
-.bc-page .bc-placement-success div span{color:#4f7763!important}
-.bc-page .bc-placement-success button{color:#4f7763!important}
-.bc-page .gold-button{background:#0b4a2b!important;color:#fff!important}
-/* History tab needs the same overrides at bc-history specificity: the
-   navy layer scopes its history rules to .bc-page.bc-history (0,3,x),
-   which beats the generic (0,2,x) rules above — so restate them here. */
-.bc-page.bc-history .bc-toolbar{background:#fff!important;border:1px solid #e5e7eb!important;border-radius:12px!important}
-.bc-page.bc-history .bh-filter{background:#fff!important;border-color:#e5e7eb!important;color:#374151!important}
-.bc-page.bc-history .bh-filter select{color:#111827!important}
-.bc-page.bc-history .bc-icon-btn{background:#fff!important;border:1px solid #e5e7eb!important;color:#0b4a2b!important}
-.bc-page.bc-history .bh-day-label{color:#6b7280!important}
-.bc-page.bc-history .bh-day-label b{color:#111827!important}
-.bc-page.bc-history .bc-body{background:transparent!important}
-.bc-page.bc-history .ob-empty,.bc-page.bc-history .bc-pad{background:transparent!important;color:#6b7280!important}
-.bc-page.bc-history .ob-empty svg{color:#9ca3af!important}
-.bc-page.bc-history .bc-body .muted{color:#6b7280!important}
+.bc-page:not(.bc-history){background:#eef1f6!important;color:#111827!important}
+.bc-page:not(.bc-history) .bc-tabs{border-bottom:1px solid #e5e7eb!important}
+.bc-page:not(.bc-history) .bc-tabs button{color:#6b7280!important}
+.bc-page:not(.bc-history) .bc-tabs button.active{color:#0b4a2b!important;border-bottom:3px solid #f6c451!important}
+.bc-page:not(.bc-history) .bc-toolbar{background:transparent!important;border:0!important}
+.bc-page:not(.bc-history) .bh-filter{background:#fff!important;border-color:#e5e7eb!important;color:#374151!important}
+.bc-page:not(.bc-history) .bh-filter select{color:#111827!important}
+.bc-page:not(.bc-history) .bc-icon-btn{background:#fff!important;border:1px solid #e5e7eb!important;color:#0b4a2b!important}
+.bc-page:not(.bc-history) .bc-auto-banner{background:#e1f3e7!important;border:1px solid #bfe3cd!important;color:#0b7a43!important}
+.bc-page:not(.bc-history) .bc-chip{background:#fff!important;border:1px solid #e5e7eb!important;color:#6b7280!important}
+.bc-page:not(.bc-history) .bc-chip.active{background:#0b4a2b!important;border-color:#0b4a2b!important;color:#fff!important}
+.bc-page:not(.bc-history) .bc-body{background:transparent!important}
+.bc-page:not(.bc-history) .bc-pad,.bc-page:not(.bc-history) .ob-empty{background:transparent!important;color:#6b7280!important}
+.bc-page:not(.bc-history) .ob-empty svg{color:#9ca3af!important}
+.bc-page:not(.bc-history) .ob-empty h3{color:#111827!important}
+.bc-page:not(.bc-history) .bc-body .muted{color:#6b7280!important}
+.bc-page:not(.bc-history) .bh-day-label{color:#6b7280!important}
+.bc-page:not(.bc-history) .bh-day-label b{color:#111827!important}
+.bc-page:not(.bc-history) .bh-card{background:#fff!important;border:1px solid #e5e7eb!important;box-shadow:0 2px 8px rgba(15,23,42,.06)!important;color:#111827!important}
+.bc-page:not(.bc-history) .bh-card:hover{box-shadow:0 4px 14px rgba(15,23,42,.10)!important}
+.bc-page:not(.bc-history) .bh-card-head,.bc-page:not(.bc-history) .bh-card-head.bh-open-head{background:#fff!important;color:#111827!important;border-bottom:1px solid #f1f5f9!important}
+.bc-page:not(.bc-history) .bh-type{color:#111827!important}
+.bc-page:not(.bc-history) .bh-type em{color:#6b7280!important}
+.bc-page:not(.bc-history) .bh-ticket-link{background:#eef1f6!important;border-color:#e5e7eb!important;color:#0b4a2b!important}
+.bc-page:not(.bc-history) .bh-totals{border-color:#f1f5f9!important}
+.bc-page:not(.bc-history) .bh-totals span{color:#6b7280!important}
+.bc-page:not(.bc-history) .bh-totals b{color:#111827!important}
+.bc-page:not(.bc-history) .bh-card .bh-totals .bh-payout-row{background:#dcfce7!important;border-color:#86efac!important;box-shadow:none!important}
+.bc-page:not(.bc-history) .bh-card .bh-totals .bh-payout-row span{color:#14532d!important}
+.bc-page:not(.bc-history) .bh-card .bh-totals .bh-payout-row b{color:#0b7a43!important;text-shadow:none!important}
+.bc-page:not(.bc-history) .bh-card.bh-won .bh-totals .bh-payout-row span{color:#14532d!important}
+.bc-page:not(.bc-history) .bh-card.bh-won .bh-totals .bh-payout-row b{color:#0b7a43!important;text-shadow:none!important}
+.bc-page:not(.bc-history) .bh-match{color:#111827!important}
+.bc-page:not(.bc-history) .bh-dot{background:#0b4a2b!important;box-shadow:none!important}
+.bc-page:not(.bc-history) .bh-more{color:#6b7280!important}
+.bc-page:not(.bc-history) .bh-card-foot{border-top-color:#f1f5f9!important;color:#0b7a43!important}
+.bc-page:not(.bc-history) .bh-open-totals{border-top:0!important}
+.bc-page:not(.bc-history) .bh-open-totals>div{background:#e9ecf1!important;border-radius:10px!important;padding:10px 12px!important}
+.bc-page:not(.bc-history) .bh-leg-info b{color:#111827!important}
+.bc-page:not(.bc-history) .bh-leg-info small{color:#6b7280!important}
+.bc-page:not(.bc-history) .bh-leg-info .bh-open-kickoff{color:#6b7280!important}
+.bc-page:not(.bc-history) .bh-toggle-details{color:#0b7a43!important}
+.bc-page:not(.bc-history) .bh-cashout-btn{background:#f6c451!important;border-color:#f6c451!important;color:#1a1a1a!important}
+.bc-page:not(.bc-history) .bh-cashout-btn:hover{background:#eab308!important}
+.bc-page:not(.bc-history) .bh-leg-pending{color:#f59e0b!important}
+.bc-page:not(.bc-history) .bh-pill.bh-pending{background:#f6c451!important;color:#1a1a1a!important}
+.bc-page:not(.bc-history) .bh-pill.bh-won{background:#0b7a43!important}
+.bc-page:not(.bc-history) .bh-pill.bh-lost{background:#9ca3af!important}
+.bc-page:not(.bc-history) .bh-pill.bh-cashed{background:#16854b!important}
+.bc-page:not(.bc-history) .bh-pill.bh-void{background:#9ca3af!important}
+.bc-page:not(.bc-history) .bh-card.bh-cashed{border:2px solid #16854b!important}
+.bc-page:not(.bc-history) .bh-card.bh-lost{border:1px solid #e5e7eb!important}
+.bc-page:not(.bc-history) .bh-card.bh-lost .bh-pill{background:#eef1f6!important;color:#6b7280!important;border:1px solid #e5e7eb!important}
+.bc-page:not(.bc-history) .bh-return-won{color:#0b7a43!important}
+.bc-page:not(.bc-history) .bh-open-leg-head>b{color:#111827!important}
+.bc-page:not(.bc-history) .bh-open-mapped-leg .bh-leg-info{color:#111827!important}
+.bc-page:not(.bc-history) .bh-open-mapped-leg .bh-leg-info>small{color:#6b7280!important}
+.bc-page:not(.bc-history) .bh-open-mapped-leg .bh-live-match{color:#b4232d!important}
+.bc-page:not(.bc-history) .bh-open-mapped-leg .bh-live-match small{color:#b4232d!important}
+.bc-page:not(.bc-history) .bh-open-mapped-leg .bh-live-match b{color:#111827!important}
+.bc-page:not(.bc-history) .bh-open-mapped-leg .bh-live-match i{background:#ef4e5f!important;box-shadow:0 0 0 2px rgba(239,78,95,.12)!important}
+.bc-page:not(.bc-history) .co-panel{background:#fff!important;border-color:#e5e7eb!important;color:#111827!important}
+.bc-page:not(.bc-history) .bc-placement-success{background:#e1f3e7!important;border-color:#bfe3cd!important;color:#0b4a2b!important}
+.bc-page:not(.bc-history) .bc-placement-success strong{color:#111827!important}
+.bc-page:not(.bc-history) .bc-placement-success div span{color:#4f7763!important}
+.bc-page:not(.bc-history) .bc-placement-success button{color:#4f7763!important}
+.bc-page:not(.bc-history) .gold-button{background:#0b4a2b!important;color:#fff!important}
 /* Team rows, plain: no border, no background, no shadow — the owner's order. */
-.bc-page .bh-open-team-row{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:5px 0!important;color:#111827!important}
-.bc-page .bh-open-team-row>span:not(.sb-crest){color:#111827!important;text-shadow:none!important}
-.bc-page .bh-open-team-row strong{background:transparent!important;border:0!important;box-shadow:none!important;color:#111827!important;padding:0!important}
+.bc-page:not(.bc-history) .bh-open-team-row{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:5px 0!important;color:#111827!important}
+.bc-page:not(.bc-history) .bh-open-team-row>span:not(.sb-crest){color:#111827!important;text-shadow:none!important}
+.bc-page:not(.bc-history) .bh-open-team-row strong{background:transparent!important;border:0!important;box-shadow:none!important;color:#111827!important;padding:0!important}
 /* Odds pill, KingzBet-style: score + odds in a light-grey pill. */
-.bc-page .bh-odds-pill{display:inline-block!important;padding:2px 9px!important;border-radius:999px!important;background:#eef1f6!important;color:#111827!important;font-weight:800!important}
+.bc-page:not(.bc-history) .bh-odds-pill{display:inline-block!important;padding:2px 9px!important;border-radius:999px!important;background:#eef1f6!important;color:#111827!important;font-weight:800!important}

@@ -596,7 +596,7 @@ function BetsCenterStyles() {
 
 	      /* Final history-card cleanup: action in header, no side stripe, clear win/loss surfaces. */
 	      .bh-card::before{ display:none!important; }
-	      .bh-card.bh-won{ border:2px solid #0b4a2b!important; }
+	      .bh-card.bh-won{ border:2px solid #00a651!important; }
 	      .bh-card.bh-cashed{ border:2px solid #16854b!important; }
 	      .bh-card.bh-lost{ border:1px solid #efb0b4!important; }
 	      .bh-card.bh-won .bh-card-top{ padding-right:16px!important; }
@@ -705,10 +705,10 @@ function BetsCenterStyles() {
 	        box-shadow:none!important;
 	      }
 	      .bh-card .bh-totals .bh-payout-row span,
-	      .bh-card.bh-won .bh-totals .bh-payout-row span{ color:#14532D!important; }
+	      .bh-card.bh-won .bh-totals .bh-payout-row span{ color:#7BDCA8!important; }
 	      .bh-card .bh-totals .bh-payout-row b,
 	      .bh-card.bh-won .bh-totals .bh-payout-row b,
-	      .bh-card.bh-won .bh-return-won{ color:#0B7A43!important; text-shadow:none!important; }
+	      .bh-card.bh-won .bh-return-won{ color:#00E85F!important; text-shadow:none!important; }
 	      .bh-match{ color:#fff; }
 	      .bh-dot{ background:#00A651; box-shadow:none; }
 	      .bh-more{ color:rgba(255,255,255,.55); }
