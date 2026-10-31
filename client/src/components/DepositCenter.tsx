@@ -23,7 +23,7 @@ import { useSession } from "@/lib/session";
    intent status read-only — the wallet credit lands when the signed
    ShinobiPay webhook settles the payment. */
 
-const MIN_GHS = 50;
+const MIN_GHS = 1;
 const MAX_GHS = 5000;
 const GH_QUICK = [50, 100, 250, 500, 1000];
 
