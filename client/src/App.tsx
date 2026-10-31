@@ -326,7 +326,12 @@ function BetSlip({ picks, setPicks, onPlace }: { picks: Pick[]; setPicks: (p: Pi
  * bottom nav. It is ALWAYS visible (even with zero selections) on every
  * route; the white pill carries the live selection count when there is at
  * least one pick — the count lives here only, the bottom nav carries none.
- * A tap takes the user to the booking-code page. It can be dragged to a
+ * A tap takes the user to the STAKE page (/betslip) when there is at
+ * least one selection — that is where the picked games are staked — and
+ * to the booking-code page only when the slip is empty (load a code).
+ * (Owner correction 2026-10-31: tapping with picks used to go to the
+ * booking-code page, which was wrong — the count pill means "your
+ * picks", so it must open the stake page.) It can be dragged to a
  * new spot (the position persists across visits), and the stored offset
  * is clamped into the CURRENT viewport on load and on resize — a position
  * saved on a wider/taller screen must never leave it off-screen on a
@@ -397,6 +402,9 @@ function BetslipFAB({ count }: { count: number }) {
     if (d.moved) {
       const clamped = clampOffset(offset.x, offset.y);
       try { window.localStorage.setItem(SLIP_FAB_POS_KEY, JSON.stringify(clamped)); } catch { /* ignore */ }
+    } else if (count > 0) {
+      // Picks on the slip: open the stake page, not the booking-code page.
+      setLocation("/betslip");
     } else {
       setLocation("/booking-code");
     }
@@ -407,7 +415,7 @@ function BetslipFAB({ count }: { count: number }) {
     <button
       type="button"
       className={`pb-slip-fab${dragging ? " dragging" : ""}`}
-      aria-label={count > 0 ? `Load a booking code — ${count} selection${count === 1 ? "" : "s"} in betslip` : "Load a booking code"}
+      aria-label={count > 0 ? `Place your bet — ${count} selection${count === 1 ? "" : "s"} in betslip` : "Load a booking code"}
       style={{
         transform: `translate(${offset.x}px, ${offset.y}px)`,
         animation: offset.x !== 0 || offset.y !== 0 ? "none" : undefined,

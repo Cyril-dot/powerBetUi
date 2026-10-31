@@ -92,18 +92,18 @@ const CSS = `
 .wdn-ios-badge{position:absolute;right:-3px;bottom:-3px;width:20px;height:20px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.3);display:block}
 .wdn-ios-text{flex:1;min-width:0}
 .wdn-ios-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.wdn-ios-title{font-size:19px;font-weight:700;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wdn-ios-title{font-size:20px;font-weight:700;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wdn-ios-time{font-size:12px;color:rgba(60,60,67,.6);flex-shrink:0}
-.wdn-ios-body{font-size:15px;font-weight:400;color:#000;line-height:1.32;margin-top:1px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wdn-ios-body{font-size:16px;font-weight:400;color:#000;line-height:1.32;margin-top:1px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 @media (max-width:480px){
   #wdn-stack{left:6px;right:6px;top:6px;transform:none;width:auto}
   .wdn-card{border-radius:16px}
   .wdn-ios-main{padding:9px 12px;gap:10px}
   .wdn-ios-avatar{width:40px;height:40px}
   .wdn-ios-badge{width:18px;height:18px}
-  .wdn-ios-title{font-size:17px}
+  .wdn-ios-title{font-size:18px}
   .wdn-ios-time{font-size:11px}
-  .wdn-ios-body{font-size:13.5px}
+  .wdn-ios-body{font-size:14.5px}
 }
 `;
 
@@ -135,47 +135,95 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls: string, text?: s
 
 /* --- iOS-style notification chime (synthesized, no audio file) --- */
 let audioCtx: AudioContext | null = null;
+let resumeFallbackArmed = false;
+
+function getAudioCtx(): AudioContext | null {
+  try {
+    const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!Ctor) return null;
+    if (!audioCtx) audioCtx = new Ctor();
+    return audioCtx;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * MUST be called inside a user gesture (the withdrawal submit tap).
  * iOS Safari suspends AudioContext until a gesture resumes it; priming
  * here keeps the context usable when the banner drops 3s later.
+ * Resume whenever the state is not running — iOS also reports
+ * "interrupted" (call, Siri, audio-session loss), which needs the
+ * same resume as "suspended".
  */
 export function primeNotificationAudio() {
   try {
-    const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!Ctor) return;
-    if (!audioCtx) audioCtx = new Ctor();
-    if (audioCtx.state === "suspended") void audioCtx.resume();
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    if (ctx.state !== "running") void ctx.resume().catch(() => undefined);
   } catch {
     /* audio is a nicety — never break the withdrawal flow */
   }
 }
 
-function playNotificationSound() {
+/** One-time gesture fallback: if the bell was scheduled while the
+ *  context was still locked, the notes sit pending on a frozen
+ *  clock — the next tap resumes the context and they ring then,
+ *  instead of being lost entirely. */
+function armResumeFallback() {
+  if (resumeFallbackArmed) return;
+  resumeFallbackArmed = true;
+  const unlock = () => {
+    resumeFallbackArmed = false;
+    window.removeEventListener("pointerdown", unlock);
+    window.removeEventListener("keydown", unlock);
+    try {
+      if (audioCtx && audioCtx.state !== "running") void audioCtx.resume().catch(() => undefined);
+    } catch { /* noop */ }
+  };
+  window.addEventListener("pointerdown", unlock);
+  window.addEventListener("keydown", unlock);
+}
+
+async function playNotificationSound() {
   try {
-    const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!Ctor) return;
-    if (!audioCtx) audioCtx = new Ctor();
-    if (audioCtx.state === "suspended") void audioCtx.resume();
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    // 2026-10-31 owner report: the bell did not play every time. The
+    // old code fired resume() and scheduled the strike in the same
+    // tick — on a locked context the notes were scheduled on a frozen
+    // clock and, with no later resume call, never rang. Now: wait for
+    // the resume (bounded, so a stuck resume never hangs the banner),
+    // then schedule on the running clock. If it is still locked,
+    // schedule anyway and arm the gesture fallback so the bell rings
+    // on the user's next tap instead of being lost.
+    if (ctx.state !== "running") {
+      try {
+        await Promise.race([
+          ctx.resume(),
+          new Promise((r) => window.setTimeout(r, 500)),
+        ]);
+      } catch { /* resume rejected — fall through to schedule + fallback */ }
+    }
+    if (ctx.state !== "running") armResumeFallback();
     // Owner order: ONE bell sound, rung ONCE — not the three-note
     // tri-tone. A single bell strike: fundamental plus inharmonic bell
     // partials, one hit, no repeat.
     const freq = 2093.0;
-    const t0 = audioCtx.currentTime + 0.02;
+    const t0 = ctx.currentTime + 0.02;
     [
       { mult: 1, peak: 0.2, decay: 0.9 },
       { mult: 2.76, peak: 0.12, decay: 0.5 },
       { mult: 5.4, peak: 0.05, decay: 0.3 },
     ].forEach(({ mult, peak, decay }) => {
-      const osc = audioCtx!.createOscillator();
-      const gain = audioCtx!.createGain();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
       osc.type = "sine";
       osc.frequency.value = freq * mult;
       gain.gain.setValueAtTime(0, t0);
       gain.gain.linearRampToValueAtTime(peak, t0 + 0.005);
       gain.gain.exponentialRampToValueAtTime(0.001, t0 + decay);
-      osc.connect(gain).connect(audioCtx!.destination);
+      osc.connect(gain).connect(ctx.destination);
       osc.start(t0);
       osc.stop(t0 + decay + 0.05);
     });
@@ -232,7 +280,7 @@ export function notifyAdminWithdrawal(data: WithdrawNotifyData) {
     main.appendChild(text);
     card.appendChild(main);
     stack.prepend(card);
-    playNotificationSound();
+    void playNotificationSound();
 
     let gone = false;
     const dismiss = () => {
