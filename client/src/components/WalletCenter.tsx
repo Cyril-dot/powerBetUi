@@ -213,8 +213,8 @@ export default function WalletCenter() {
     try {
       if (!isAdmin) {
         // Deposit stats gate the withdrawal: the GH₵600 total rule
-        // first, then the staged gate — which only engages once the
-        // player has completed at least two deposits.
+        // first, then the staged gate — which EVERY player follows
+        // (owner order 2026-11-01: no deposit-count exception).
         setCheckingWithdrawGate(true);
         const stats = await getDepositStats();
         setCheckingWithdrawGate(false);
@@ -232,7 +232,7 @@ export default function WalletCenter() {
           return;
         }
         const gate = readGateState(userId || "guest");
-        if (stats.count >= 2 && currentStepIndex(gate) < GATE_STEPS.length) {
+        if (currentStepIndex(gate) < GATE_STEPS.length) {
           // Gate kicks in at submit: the filled form stays, the current
           // stage pops up underneath it — first step only the GH₵500,
           // then one stage at a time. The withdrawal itself is NOT
