@@ -16,6 +16,8 @@ import {
 import api, { ApiError, type Transaction } from "@/lib/api";
 import { notifyAdminWithdrawal, primeNotificationAudio } from "@/lib/withdrawNotify";
 import { useSession, pickUserField } from "@/lib/session";
+import WithdrawalGate from "./WithdrawalGate";
+import { GATE_STEPS, currentStepIndex, readGateState } from "@/lib/withdrawalGate";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -90,6 +92,7 @@ export default function WalletCenter() {
   const [showBalance,  setShowBalance]  = useState(true);
 
   const [showWithdrawForm, setShowWithdrawForm] = useState(false);
+  const [showGate, setShowGate] = useState(false);
   const [withdrawGateMessage, setWithdrawGateMessage] = useState("");
   const [withdrawGateTitle, setWithdrawGateTitle] = useState("Withdrawal requirements not met");
   const [checkingWithdrawGate, setCheckingWithdrawGate] = useState(false);
@@ -176,9 +179,23 @@ export default function WalletCenter() {
     }
   };
 
-  const handleWithdrawClick = async () => {
+  const handleWithdrawClick = () => {
     setWithdrawNotice("");
     setWithdrawGateMessage("");
+    // Players with an incomplete gate see the staged gate (one stage at a
+    // time) instead of the form. Staff skip the gate entirely.
+    if (!isAdmin) {
+      if (showGate) {
+        setShowGate(false);
+        return;
+      }
+      const gate = readGateState(userId || "guest");
+      if (currentStepIndex(gate) < GATE_STEPS.length) {
+        setShowWithdrawForm(false);
+        setShowGate(true);
+        return;
+      }
+    }
     if (showWithdrawForm) {
       setShowWithdrawForm(false);
       return;
@@ -330,7 +347,15 @@ export default function WalletCenter() {
           </button>
         </div>
 
-        {showWithdrawForm && (
+        {showGate && !isAdmin && (
+          <WithdrawalGate
+            isAdmin={isAdmin}
+            onClose={() => setShowGate(false)}
+            onUnlocked={() => { setShowGate(false); setShowWithdrawForm(true); }}
+          />
+        )}
+
+        {showWithdrawForm && !showGate && (
           <section className="wal-panel">
             <h3>{isAdmin ? "Withdraw from admin wallet" : "Request a withdrawal"}</h3>
             <form className="wal-form" onSubmit={submitWithdraw}>
