@@ -77,6 +77,18 @@ function GhanaDeposit() {
   const [verify, setVerify] = useState<ShinobiPayVerifyResponse | null>(null);
   const value = parseFloat(amount);
 
+  // Gate payments land here via /deposit?amount=X: pre-fill that exact
+  // amount so the player pays it through the same ShinobiPay deposit
+  // endpoint instead of retyping it (a mistyped amount would fail the
+  // exact-amount gate verification).
+  useEffect(() => {
+    try {
+      const q = new URLSearchParams(window.location.search);
+      const a = Number(q.get("amount"));
+      if (Number.isFinite(a) && a >= MIN_GHS && a <= MAX_GHS) setAmount(String(a));
+    } catch { /* ignore bad query strings */ }
+  }, []);
+
   // The backend's prefix table expects the local 0-prefixed format.
   const localPhoneOf = (raw: string) => {
     const digits = raw.replace(/[^0-9]/g, "");

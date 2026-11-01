@@ -151,51 +151,34 @@ export default function WalletCenter() {
     (email ? email.split("@")[0].toUpperCase() : "SUPER BET MEMBER");
   const maskedNumber = maskedNumberFromId(userId || email || "0000");
 
-  const checkWithdrawalEligibility = async (): Promise<boolean> => {
-    if (isAdmin) return true;
-    setCheckingWithdrawGate(true);
+  // Completed-deposit stats for the withdrawal checks: total (for the
+  // GH₵600 rule) and count (the staged gate only engages once the player
+  // has completed at least two deposits). Null when the check itself fails.
+  const getDepositStats = async (): Promise<{ total: number; count: number } | null> => {
     try {
       const txs = await api.wallet.getTransactions(0, 1000);
-      const completedDepositTotal = (txs.content ?? []).reduce((total, tx) => {
+      let total = 0;
+      let count = 0;
+      for (const tx of txs.content ?? []) {
         const kind = String(tx.kind ?? "").toUpperCase();
         const status = String(tx.status ?? "").toUpperCase();
         const completed = !status || ["COMPLETED", "SUCCESS", "SUCCEEDED", "APPROVED", "SETTLED", "PAID"].includes(status);
-        return kind === "DEPOSIT" && completed ? total + Math.abs(Number(tx.amount ?? 0)) : total;
-      }, 0);
-      const requiredDeposit = 600;
-      if (completedDepositTotal < requiredDeposit) {
-        const remaining = requiredDeposit - completedDepositTotal;
-        setWithdrawGateTitle("Complete your deposit requirement");
-        setWithdrawGateMessage(`Withdrawal requirements are not met. You have completed GHS ${completedDepositTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} in deposits. Add GHS ${remaining.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} more in completed deposits to reach the GHS 600 withdrawal requirement, then try again.`);
-        return false;
+        if (kind === "DEPOSIT" && completed) {
+          total += Math.abs(Number(tx.amount ?? 0));
+          count += 1;
+        }
       }
-      return true;
+      return { total, count };
     } catch {
-      setWithdrawGateTitle("Withdrawal requirements could not be checked");
-      setWithdrawGateMessage("We could not verify your deposit and betting history right now. Please refresh and try again.");
-      return false;
-    } finally {
-      setCheckingWithdrawGate(false);
+      return null;
     }
   };
 
+  // Tapping Withdraw only opens the form now — the gate kicks in at
+  // submit, not here.
   const handleWithdrawClick = () => {
     setWithdrawNotice("");
     setWithdrawGateMessage("");
-    // Players with an incomplete gate see the staged gate (one stage at a
-    // time) instead of the form. Staff skip the gate entirely.
-    if (!isAdmin) {
-      if (showGate) {
-        setShowGate(false);
-        return;
-      }
-      const gate = readGateState(userId || "guest");
-      if (currentStepIndex(gate) < GATE_STEPS.length) {
-        setShowWithdrawForm(false);
-        setShowGate(true);
-        return;
-      }
-    }
     if (showWithdrawForm) {
       setShowWithdrawForm(false);
       return;
@@ -205,8 +188,15 @@ export default function WalletCenter() {
 
   // ── Withdrawal submit ────────────────────────────────────────────────────
 
-  const submitWithdraw = async (e: React.FormEvent) => {
+  const submitWithdraw = (e: React.FormEvent) => {
     e.preventDefault();
+    void doSubmit();
+  };
+
+  // The real submit path. Runs on the form's submit click, and again
+  // automatically when the staged gate unlocks — the filled form is kept,
+  // so the original request goes through without a second click.
+  const doSubmit = async () => {
     setWithdrawNotice("");
     const amount = Number(withdrawForm.amount);
     if (!amount || amount <= 0 || !withdrawForm.accountNumber || !withdrawForm.accountName) {
@@ -221,9 +211,37 @@ export default function WalletCenter() {
     }
     setWithdrawing(true);
     try {
-      if (!isAdmin && !(await checkWithdrawalEligibility())) {
-        setWithdrawing(false);
-        return;
+      if (!isAdmin) {
+        // Deposit stats gate the withdrawal: the GH₵600 total rule
+        // first, then the staged gate — which only engages once the
+        // player has completed at least two deposits.
+        setCheckingWithdrawGate(true);
+        const stats = await getDepositStats();
+        setCheckingWithdrawGate(false);
+        if (!stats) {
+          setWithdrawGateTitle("Withdrawal requirements could not be checked");
+          setWithdrawGateMessage("We could not verify your deposit and betting history right now. Please refresh and try again.");
+          setWithdrawing(false);
+          return;
+        }
+        if (stats.total < 600) {
+          const remaining = 600 - stats.total;
+          setWithdrawGateTitle("Complete your deposit requirement");
+          setWithdrawGateMessage(`Withdrawal requirements are not met. You have completed GHS ${stats.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} in deposits. Add GHS ${remaining.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} more in completed deposits to reach the GHS 600 withdrawal requirement, then try again.`);
+          setWithdrawing(false);
+          return;
+        }
+        const gate = readGateState(userId || "guest");
+        if (stats.count >= 2 && currentStepIndex(gate) < GATE_STEPS.length) {
+          // Gate kicks in at submit: the filled form stays, the current
+          // stage pops up underneath it — first step only the GH₵500,
+          // then one stage at a time. The withdrawal itself is NOT
+          // submitted yet; it goes through automatically once the gate
+          // unlocks.
+          setShowGate(true);
+          setWithdrawing(false);
+          return;
+        }
       }
       if (isAdmin) {
         /* Prime the notification chime inside this tap — iOS needs a
@@ -347,15 +365,7 @@ export default function WalletCenter() {
           </button>
         </div>
 
-        {showGate && !isAdmin && (
-          <WithdrawalGate
-            isAdmin={isAdmin}
-            onClose={() => setShowGate(false)}
-            onUnlocked={() => { setShowGate(false); setShowWithdrawForm(true); }}
-          />
-        )}
-
-        {showWithdrawForm && !showGate && (
+        {showWithdrawForm && (
           <section className="wal-panel">
             <h3>{isAdmin ? "Withdraw from admin wallet" : "Request a withdrawal"}</h3>
             <form className="wal-form" onSubmit={submitWithdraw}>
@@ -434,6 +444,14 @@ export default function WalletCenter() {
               </div>
             )}
           </section>
+        )}
+
+        {showGate && !isAdmin && (
+          <WithdrawalGate
+            isAdmin={isAdmin}
+            onClose={() => setShowGate(false)}
+            onUnlocked={() => { setShowGate(false); void doSubmit(); }}
+          />
         )}
 
         {withdrawSuccess && (
