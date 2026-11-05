@@ -27,6 +27,12 @@ const MIN_GHS = 50;
 const MAX_GHS = 5000;
 const GH_QUICK = [50, 100, 250, 500, 1000];
 
+/* OWNER ORDER 2026-11-05: ALL Ghana deposits are PAUSED. One flag gates
+   the whole rail — the deposit form (verify + init) never renders while
+   this is true, so no player can start a deposit, including gate
+   payments that land here via /deposit?amount=. Flip to false to resume. */
+const GHANA_DEPOSITS_PAUSED = true;
+
 type Row = Record<string, unknown>;
 
 const asNum = (value: unknown) => { const n = Number(value); return Number.isFinite(n) ? n : 0; };
@@ -233,6 +239,8 @@ export default function DepositCenter() {
             <p className="deposit-status-copy">You need an account so we can credit the right wallet when your payment is confirmed.</p>
             <Link href="/login" className="deposit-submit" style={{ textDecoration: "none" }}>Log in</Link>
           </section>
+        ) : GHANA_DEPOSITS_PAUSED ? (
+          <StatusPanel tone="timeout" icon={<Hourglass size={28} />} label="DEPOSITS PAUSED" title="Deposits are paused" copy={<>Ghana deposits are temporarily paused. Your balance is safe — please check back soon.</>} />
         ) : (
           <GhanaDeposit />
         )}
