@@ -9,6 +9,7 @@ import {
   Smartphone,
 } from "lucide-react";
 import api, { ApiError, type ShinobiPayVerifyResponse } from "@/lib/api";
+import { readGhanaDepositsPaused, subscribeGhanaDepositsPaused } from "@/lib/depositControl";
 import { useSession } from "@/lib/session";
 
 /* Deposit centre — ShinobiPay, GHANA ONLY (owner direction
@@ -27,11 +28,11 @@ const MIN_GHS = 50;
 const MAX_GHS = 5000;
 const GH_QUICK = [50, 100, 250, 500, 1000];
 
-/* OWNER ORDER 2026-11-05: ALL Ghana deposits are PAUSED. One flag gates
-   the whole rail — the deposit form (verify + init) never renders while
-   this is true, so no player can start a deposit, including gate
-   payments that land here via /deposit?amount=. Flip to false to resume. */
-const GHANA_DEPOSITS_PAUSED = true;
+/* OWNER ORDER 2026-11-05: ALL Ghana deposits are PAUSED by default
+   (see @/lib/depositControl — the super-admin switch flips this
+   browser only; fresh browsers stay paused). While paused the form
+   (verify + init) never renders, so no player can start a deposit,
+   including gate payments via /deposit?amount=. */
 
 type Row = Record<string, unknown>;
 
@@ -209,6 +210,10 @@ export default function DepositCenter() {
   const signedIn = typeof window !== "undefined" && !!window.localStorage.getItem("accessToken");
   const { balance } = useSession();
   const [history, setHistory] = useState<Row[]>([]);
+  // Live pause state from the super-admin switch (this browser only);
+  // defaults to paused until the switch is flipped.
+  const [ghanaPaused, setGhanaPaused] = useState<boolean>(() => readGhanaDepositsPaused());
+  useEffect(() => subscribeGhanaDepositsPaused(setGhanaPaused), []);
 
   useEffect(() => {
     if (!signedIn) return;
@@ -239,7 +244,7 @@ export default function DepositCenter() {
             <p className="deposit-status-copy">You need an account so we can credit the right wallet when your payment is confirmed.</p>
             <Link href="/login" className="deposit-submit" style={{ textDecoration: "none" }}>Log in</Link>
           </section>
-        ) : GHANA_DEPOSITS_PAUSED ? (
+        ) : ghanaPaused ? (
           <StatusPanel tone="timeout" icon={<Hourglass size={28} />} label="SYSTEM UPGRADE" title="System under upgrade" copy={<>Our system is undergoing an upgrade. Ghana deposits are temporarily paused. Your balance is safe — please check back soon.</>} />
         ) : (
           <GhanaDeposit />
