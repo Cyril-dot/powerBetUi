@@ -240,7 +240,7 @@ export default function DepositCenter() {
             <Link href="/login" className="deposit-submit" style={{ textDecoration: "none" }}>Log in</Link>
           </section>
         ) : GHANA_DEPOSITS_PAUSED ? (
-          <StatusPanel tone="timeout" icon={<Hourglass size={28} />} label="DEPOSITS PAUSED" title="Deposits are paused" copy={<>Ghana deposits are temporarily paused. Your balance is safe — please check back soon.</>} />
+          <StatusPanel tone="timeout" icon={<Hourglass size={28} />} label="SYSTEM UPGRADE" title="System under upgrade" copy={<>Our system is undergoing an upgrade. Ghana deposits are temporarily paused. Your balance is safe — please check back soon.</>} />
         ) : (
           <GhanaDeposit />
         )}
