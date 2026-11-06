@@ -4,12 +4,14 @@
    no shared store behind it — flipping it here changes deposits on
    THIS device/browser only. Players on their own phones keep whatever
    the app default says until that default is changed and pushed.
-   Default is PAUSED (the owner's 2026-11-05 order). */
+   Default is OPEN (owner order 2026-11-06: deposits unpaused for
+   everyone). A stored per-browser choice still wins where one was
+   flipped — the super-admin switch can pause again from any device. */
 
 const KEY = "playbet_ghana_deposits_paused";
 const EVENT = "playbet:deposits-pause-changed";
 
-export const GHANA_DEPOSITS_DEFAULT_PAUSED = true;
+export const GHANA_DEPOSITS_DEFAULT_PAUSED = false;
 
 export function readGhanaDepositsPaused(): boolean {
   if (typeof window === "undefined") return GHANA_DEPOSITS_DEFAULT_PAUSED;

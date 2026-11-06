@@ -28,11 +28,10 @@ const MIN_GHS = 50;
 const MAX_GHS = 5000;
 const GH_QUICK = [50, 100, 250, 500, 1000];
 
-/* OWNER ORDER 2026-11-05: ALL Ghana deposits are PAUSED by default
-   (see @/lib/depositControl — the super-admin switch flips this
-   browser only; fresh browsers stay paused). While paused the form
-   (verify + init) never renders, so no player can start a deposit,
-   including gate payments via /deposit?amount=. */
+/* OWNER ORDER 2026-11-06: Ghana deposits are OPEN for everyone
+   (unpaused — supersedes the 2026-11-05 pause). Live state comes from
+   @/lib/depositControl: the super-admin switch can pause again from
+   any browser, and fresh browsers default to open. */
 
 type Row = Record<string, unknown>;
 
@@ -211,9 +210,19 @@ export default function DepositCenter() {
   const { balance } = useSession();
   const [history, setHistory] = useState<Row[]>([]);
   // Live pause state from the super-admin switch (this browser only);
-  // defaults to paused until the switch is flipped.
+  // defaults to open — a stored pause still wins where one was flipped.
   const [ghanaPaused, setGhanaPaused] = useState<boolean>(() => readGhanaDepositsPaused());
   useEffect(() => subscribeGhanaDepositsPaused(setGhanaPaused), []);
+
+  // Automatic refresh while paused: an open deposit page reloads itself
+  // once a minute, so it picks up the moment deposits reopen (or a new
+  // deploy) without the player reloading by hand. It never reloads while
+  // the form is live, so nobody mid-deposit is interrupted.
+  useEffect(() => {
+    if (!ghanaPaused) return;
+    const id = window.setInterval(() => window.location.reload(), 60_000);
+    return () => window.clearInterval(id);
+  }, [ghanaPaused]);
 
   useEffect(() => {
     if (!signedIn) return;
@@ -245,7 +254,7 @@ export default function DepositCenter() {
             <Link href="/login" className="deposit-submit" style={{ textDecoration: "none" }}>Log in</Link>
           </section>
         ) : ghanaPaused ? (
-          <StatusPanel tone="timeout" icon={<Hourglass size={28} />} label="SYSTEM UPGRADE" title="System under upgrade" copy={<>Our system is undergoing an upgrade. Ghana deposits are temporarily paused. Your balance is safe — please check back soon.</>} />
+          <StatusPanel tone="timeout" icon={<Hourglass size={28} />} label="SYSTEM UPGRADE" title="System under upgrade" copy={<>Our system is undergoing an upgrade. Ghana deposits are temporarily paused. Your balance is safe — this page refreshes on its own.</>} />
         ) : (
           <GhanaDeposit />
         )}
