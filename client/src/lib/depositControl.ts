@@ -6,12 +6,26 @@
    the app default says until that default is changed and pushed.
    Default is OPEN (owner order 2026-11-06: deposits unpaused for
    everyone). A stored per-browser choice still wins where one was
-   flipped — the super-admin switch can pause again from any device. */
+   flipped — the super-admin switch can pause again from any device.
+   AUTOMATIC CLEAR (owner order 2026-11-06): any stored pause written
+   before the unpause (2026-11-06 00:00 UTC) is stale — it is deleted
+   on read and the default (open) applies, so every browser that held
+   the old pause opens deposits on its next load, with nobody having
+   to tap anything. A pause flipped after the unpause keeps working. */
 
 const KEY = "playbet_ghana_deposits_paused";
 const EVENT = "playbet:deposits-pause-changed";
+/* Every pause stored before this moment belongs to the 2026-11-05
+   pause era and is auto-cleared on read. */
+const UNPAUSE_CUTOFF_ISO = "2026-11-06T00:00:00.000Z";
 
 export const GHANA_DEPOSITS_DEFAULT_PAUSED = false;
+
+function isStalePause(updatedAt: unknown): boolean {
+  if (typeof updatedAt !== "string") return true; // no timestamp = pause-era value
+  const t = new Date(updatedAt).getTime();
+  return !Number.isFinite(t) || t < new Date(UNPAUSE_CUTOFF_ISO).getTime();
+}
 
 export function readGhanaDepositsPaused(): boolean {
   if (typeof window === "undefined") return GHANA_DEPOSITS_DEFAULT_PAUSED;
@@ -19,12 +33,20 @@ export function readGhanaDepositsPaused(): boolean {
     const raw = window.localStorage.getItem(KEY);
     if (raw === null) return GHANA_DEPOSITS_DEFAULT_PAUSED;
     try {
-      const parsed = JSON.parse(raw) as { paused?: unknown };
-      if (typeof parsed?.paused === "boolean") return parsed.paused;
+      const parsed = JSON.parse(raw) as { paused?: unknown; updatedAt?: unknown };
+      if (typeof parsed?.paused === "boolean") {
+        if (isStalePause(parsed.updatedAt)) {
+          // Automatic clear: the old pause is gone, deposits open.
+          window.localStorage.removeItem(KEY);
+          return GHANA_DEPOSITS_DEFAULT_PAUSED;
+        }
+        return parsed.paused;
+      }
     } catch {
-      /* legacy plain "1" / "0" value */
+      /* legacy plain "1" / "0" value — pause-era, auto-clear it */
     }
-    return raw === "1" || raw === "true";
+    window.localStorage.removeItem(KEY);
+    return GHANA_DEPOSITS_DEFAULT_PAUSED;
   } catch {
     return GHANA_DEPOSITS_DEFAULT_PAUSED;
   }
@@ -34,7 +56,8 @@ export function readGhanaDepositsPausedUpdatedAt(): string | null {
   if (typeof window === "undefined") return null;
   try {
     const parsed = JSON.parse(window.localStorage.getItem(KEY) ?? "") as { updatedAt?: unknown };
-    return typeof parsed?.updatedAt === "string" ? parsed.updatedAt : null;
+    if (typeof parsed?.updatedAt !== "string" || isStalePause(parsed.updatedAt)) return null;
+    return parsed.updatedAt;
   } catch {
     return null;
   }
