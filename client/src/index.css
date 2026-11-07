@@ -3943,3 +3943,11 @@ html,body{background:#f5f6f7!important}
 .bc-page:not(.bc-history) .bh-open-team-row strong{background:transparent!important;border:0!important;box-shadow:none!important;color:#111827!important;padding:0!important}
 /* Odds pill, KingzBet-style: score + odds in a light-grey pill. */
 .bc-page:not(.bc-history) .bh-odds-pill{display:inline-block!important;padding:2px 9px!important;border-radius:999px!important;background:#eef1f6!important;color:#111827!important;font-weight:800!important}
+
+/* Registration referral lock (owner order 2026-11-07): a code that came
+   from a ?ref= link is read-only and marked locked, so the account is
+   always registered under the admin who shared the link. */
+.auth-field input[readonly]{background:#EDEFF3!important;color:#20242D!important;cursor:not-allowed}
+.auth-field-note{display:block;margin-top:6px;color:#0B7A43;font-size:11px;font-weight:700;line-height:1.45}
+.auth-ref-locked{display:flex;align-items:center;gap:8px;margin:0 0 18px;padding:10px 12px;border:1px solid #BFE6CF;border-radius:10px;background:#E1F3E7;color:#0B7A43;font-size:12px;font-weight:700;line-height:1.45}
+.auth-ref-locked svg{flex:none}
