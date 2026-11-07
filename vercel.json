@@ -1,7 +1,21 @@
 {
-  "buildCommand": "pnpm exec vite build",
+  "buildCommand": "pnpm exec node scripts/write-deployment-version.mjs && pnpm exec vite build",
   "installCommand": "pnpm install",
   "outputDirectory": "dist/public",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]

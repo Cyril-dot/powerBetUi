@@ -7,6 +7,7 @@ const PRESERVED_LOCAL_KEYS = new Set([
   "powerbet_rg_limits_v1",
   "sidebar_state",
   "powerbet_entry_reload_v1",
+  "powerbet_version_reload_v1",
 ]);
 
 const TRANSIENT_LOCAL_KEYS = new Set([

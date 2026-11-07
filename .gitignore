@@ -120,3 +120,6 @@ client/public/__manus__/version.json
 
 # Vercel
 .vercel
+
+# Generated at build time by scripts/write-deployment-version.mjs — never commit.
+client/public/app-version.json
