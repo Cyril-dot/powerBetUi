@@ -250,7 +250,7 @@ const NG_METHODS: Array<{ key: NgMethod; icon: React.ReactNode; name: string; de
   { key: "card", icon: <CreditCard size={20} />, name: "Card", desc: "Pay with your card or bank account" },
   { key: "bank", icon: <Wallet size={20} />, name: "Bank Account", desc: "Approve a direct debit from your bank" },
   { key: "ussd", icon: <Hash size={20} />, name: "USSD", desc: "Dial a code on your phone to pay" },
-  { key: "opay", icon: <Smartphone size={20} />, name: "OPay", desc: "Approve in your OPay app" },
+  { key: "opay", icon: <Smartphone size={20} />, name: "Wallet", desc: "Approve in your wallet app" },
 ];
 
 type NgVa = { accountNumber: string; bankName: string; expiresAt?: string; note?: string; amount?: number };
@@ -433,9 +433,9 @@ function NigeriaDeposit({ onInFlight }: { onInFlight: (inFlight: boolean) => voi
       : method === "bank"
         ? "You will be taken to your bank to approve a direct debit, then returned here."
         : method === "opay"
-          ? "You will be taken to OPay to approve the payment, then returned here."
+          ? "You will be taken to your wallet app to approve the payment, then returned here."
           : "You will be taken to a secure page to pay with your card or bank account, then returned here.";
-  const ctaLabel = method === "transfer" ? "Get transfer account" : method === "ussd" ? "Get USSD code" : method === "bank" ? "Continue to my bank" : method === "opay" ? "Continue with OPay" : "Continue to card payment";
+  const ctaLabel = method === "transfer" ? "Get transfer account" : method === "ussd" ? "Get USSD code" : method === "bank" ? "Continue to my bank" : method === "opay" ? "Continue with Wallet" : "Continue to card payment";
   const ctaIcon = NG_METHODS.find((m) => m.key === method)?.icon;
 
   if (phase === "done") return <StatusPanel icon={<CheckCircle2 size={28} />} label="DEPOSIT CONFIRMED" title="Deposit successful" copy={<>{ngn(value)} has been added to your wallet.</>}>
