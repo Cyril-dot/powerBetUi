@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
-import { useSession } from "@/lib/session";
+import { useSession, isAdminUser, isSuperAdminUser } from "@/lib/session";
 import { COUNTRY_LIST, normalizeCountry, type CountryCode } from "@/lib/country";
 
 /**
@@ -10,7 +10,9 @@ import { COUNTRY_LIST, normalizeCountry, type CountryCode } from "@/lib/country"
  * saved to the account (PATCH /api/users/me), and the whole app
  * (currency, deposit rail) follows it. Only a POSITIVE read of an
  * empty country triggers the gate — if the profile can't be read we
- * never lock anyone out on a guess.
+ * never lock anyone out on a guess. Staff (ADMIN / SUPER_ADMIN) are
+ * never gated: the popup must never block an admin from their own
+ * commission and control pages.
  */
 let gateChecked = false;
 let gateNeeded = false;
@@ -23,6 +25,16 @@ async function checkGate() {
   if (!window.localStorage.getItem("accessToken")) return;
   try {
     const me = await api.user.me();
+    // Staff are exempt — an admin with no country set must never be
+    // locked out of their own commission and control pages.
+    const meObj = me as { role?: unknown; roles?: unknown; user?: { role?: unknown; roles?: unknown } };
+    const roleValues: unknown[] = [meObj?.role, meObj?.roles, meObj?.user?.role, meObj?.user?.roles];
+    const isStaff = roleValues.some((v) => {
+      if (typeof v === "string") return v.toUpperCase().includes("ADMIN");
+      if (Array.isArray(v)) return v.some((x) => String(x).toUpperCase().includes("ADMIN"));
+      return false;
+    });
+    if (isStaff) return;
     const raw = (me as { country?: unknown })?.country ??
       (me as { user?: { country?: unknown } })?.user?.country;
     if (raw == null || String(raw).trim() === "") {
@@ -35,7 +47,7 @@ async function checkGate() {
 }
 
 export default function CountryGate() {
-  const { refresh } = useSession();
+  const { refresh, user } = useSession();
   const [, setTick] = useState(0);
   const [selected, setSelected] = useState<CountryCode | "">("");
   const [saving, setSaving] = useState(false);
@@ -58,6 +70,8 @@ export default function CountryGate() {
   }, [needed]);
 
   if (!needed) return null;
+  // Belt and braces with the checkGate exemption above: staff never see it.
+  if (isAdminUser(user) || isSuperAdminUser(user)) return null;
 
   async function save() {
     if (!selected || saving) return;

@@ -41,7 +41,7 @@ import { useSession } from "@/lib/session";
    page polls the verify endpoint of whichever rail issued the
    reference until it confirms. */
 
-const MIN_GHS = 50;
+const MIN_GHS = 1;
 const MAX_GHS = 5000;
 const GH_QUICK = [50, 100, 250, 500, 1000];
 

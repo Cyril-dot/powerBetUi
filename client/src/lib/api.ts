@@ -1237,6 +1237,9 @@ export const superAdmin = {
   setUserStatus: (userId: string, action: "activate" | "deactivate" | "toggle-status") => post<Record<string, unknown>>(`/api/v1/super-admin/users/${encodeURIComponent(userId)}/${action}`),
   metrics: () => get<Record<string, unknown>>("/api/super-admin/metrics"),
   depositMetrics: () => get<Record<string, unknown>>("/api/super-admin/metrics/deposits"),
+  // Platform-wide deposits by country: a MAP {"GH": {amount, count, currency}, "NG": {...}},
+  // not the affiliate list shape — the Dashboard parses it in place.
+  depositsByCountryTotals: (days = 365) => get<Record<string, Record<string, unknown>>>(`/api/super-admin/deposits/by-country/totals${qs({ days })}`),
   listTransactions: (page = 0, size = 50, kind?: string, status?: string, walletId?: string, from?: string, to?: string) =>
     get<PageResponse<Record<string, unknown>>>(`/api/super-admin/transactions${qs({ page, size, kind, status, walletId, from, to })}`),
   auditLog: (page = 0, size = 50) => get<PageResponse<Record<string, unknown>>>(`/api/super-admin/audit-log${qs({ page, size })}`),

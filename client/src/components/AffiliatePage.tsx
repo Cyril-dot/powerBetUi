@@ -11,6 +11,11 @@ const SYMBOLS: Record<string, string> = { GHS: "₵", NGN: "₦" };
 const money = (value: unknown, currency?: unknown) => { const code = typeof currency === "string" && currency ? currency.toUpperCase() : "GHS"; const symbol = SYMBOLS[code] ?? `${code} `; return `${symbol}${asNum(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; };
 const formatDate = (value: unknown) => { const d = new Date(asText(value, "")); return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }); };
 const referralUrlFor = (row: Row) => { const code = asText(row.code, ""); return code ? `${window.location.origin}/register?ref=${encodeURIComponent(code)}` : ""; };
+// A referred user's deposits sit in their own currency (NGN for Nigerian
+// users, GHS for Ghanaian users); their lifetime commission is always
+// GHS — commission is converted to cedis at credit time. Never render
+// one with the other's currency.
+const rowDepositCurrency = (u: Row) => { const c = String(u.country ?? "").toUpperCase().trim(); return ["NG", "NGA", "NIGERIA", "234"].includes(c) ? "NGN" : "GHS"; };
 
 export default function AffiliatePage() {
   const signedIn = typeof window !== "undefined" && !!window.localStorage.getItem("accessToken");
@@ -119,14 +124,17 @@ export default function AffiliatePage() {
         <input className="aff-input" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="New link label (optional) e.g. WhatsApp group" maxLength={100} />
         <button className="ghost-button" onClick={createLink} disabled={creating}><Plus size={15} /> {creating ? "Creating…" : "Create link"}</button>
       </div>
-      {links.length > 1 && <p className="aff-sub" style={{ marginTop: 10 }}>{links.length} links created · primary link above earns at {asText(primary?.commissionPercent, "—")}% commission.</p>}
+      {links.length > 0 && <div className="aff-table-wrap" style={{ marginTop: 14 }}><table className="aff-table"><thead><tr><th>Code</th><th>Rate</th><th>Status</th></tr></thead><tbody>
+        {links.map((l, i) => <tr key={asText(l.id, String(i))}><td><code>{asText(l.code)}</code></td><td>{l.commissionPercent === undefined || l.commissionPercent === null ? "—" : `${l.commissionPercent}%`}</td><td>{l.active === false ? "Inactive" : "Active"}</td></tr>)}
+      </tbody></table></div>}
+      {primary && primary.active === false && <p className="aff-sub" role="alert" style={{ marginTop: 10, color: "#b3261e", fontWeight: 700 }}>Your primary link is inactive — new signups through it will not be credited to you.</p>}
     </section>
 
     <section className="panel aff-panel">
       <h2><Users size={18} /> Referred users</h2>
       {users.length === 0 ? <p className="aff-sub">{loading ? "Loading…" : "No referred users yet. Share your link to start earning."}</p> :
         <div className="aff-table-wrap"><table className="aff-table"><thead><tr><th>Name</th><th>Email</th><th>Joined</th><th>Deposited</th><th>Commission</th></tr></thead><tbody>
-          {users.map((u, i) => <tr key={i}><td>{[asText(u.firstName, ""), asText(u.lastName, "")].filter(Boolean).join(" ") || "—"}</td><td>{asText(u.email)}</td><td>{formatDate(u.joinedAt)}</td><td>{money(u.totalDeposited, currency)}</td><td>{money(u.lifetimeCommission, currency)}</td></tr>)}
+          {users.map((u, i) => <tr key={i}><td>{[asText(u.firstName, ""), asText(u.lastName, "")].filter(Boolean).join(" ") || "—"}</td><td>{asText(u.email)}</td><td>{formatDate(u.joinedAt)}</td><td>{money(u.totalDeposited, rowDepositCurrency(u))}</td><td>{money(u.lifetimeCommission, "GHS")}</td></tr>)}
         </tbody></table></div>}
     </section>
 
