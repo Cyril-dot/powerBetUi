@@ -379,6 +379,44 @@ export interface WebRabbitTransaction {
   settled_at?: string;
   [key: string]: unknown;
 }
+
+/* Nigeria — Flutterwave v3 (owner order 2026-11-07). Same endpoints
+   LuckyStake's NigeriaDeposit is wired to (futballBackend
+   FlutterwaveNgV3DepositController): bank transfer issues a one-time
+   virtual account, USSD issues a dial string, card/OPay go through
+   Flutterwave's hosted checkout and return to /deposit?method=ngv3,
+   and GET ng/verify credits only on a confirmed successful charge. */
+export interface FlutterwaveNgBankTransferResponse {
+  reference?: string;
+  accountNumber?: string;
+  bankName?: string;
+  expiresAt?: string;
+  note?: string;
+  amount?: number | string;
+  [key: string]: unknown;
+}
+export interface FlutterwaveNgUssdResponse {
+  reference?: string;
+  chargeId?: string;
+  note?: string;
+  [key: string]: unknown;
+}
+export interface FlutterwaveNgHostedResponse {
+  reference?: string;
+  redirectUrl?: string;
+  [key: string]: unknown;
+}
+export interface FlutterwaveNgVerifyResponse {
+  status?: string;
+  credited?: boolean;
+  [key: string]: unknown;
+}
+export interface FlutterwaveNgBank {
+  name?: string;
+  code?: string | number;
+  id?: string | number;
+  [key: string]: unknown;
+}
 export const deposits = {
   shinobiPayInit: (body: { amount: number; phone: string; network: ShinobiPayNetwork }) =>
     post<ShinobiPayInitResponse>("/api/wallet/deposit/akwapay/init", body),
@@ -392,6 +430,16 @@ export const deposits = {
     post<WebRabbitTransaction>("/api/wallet/deposit/webrabbit-momo/init", body),
   webRabbitMomoVerify: (transactionId: string) =>
     get<WebRabbitTransaction>(`/api/wallet/deposit/webrabbit-momo/verify/${encodeURIComponent(transactionId)}`),
+  flutterwaveNgBankTransferInit: (body: { amount: number }) =>
+    post<FlutterwaveNgBankTransferResponse>("/api/wallet/deposit/flutterwave/ng-bank/init/bank-transfer", body),
+  flutterwaveNgUssdInit: (body: { amount: number; bankCode: string; phoneNumber?: string }) =>
+    post<FlutterwaveNgUssdResponse>("/api/wallet/deposit/flutterwave/ng-ussd/init", body),
+  flutterwaveNgUssdBanks: () =>
+    get<FlutterwaveNgBank[] | { data?: FlutterwaveNgBank[] }>("/api/wallet/deposit/flutterwave/ng-ussd/banks"),
+  flutterwaveNgHostedInit: (body: { amount: number; method: "card" | "opay" }) =>
+    post<FlutterwaveNgHostedResponse>("/api/wallet/deposit/flutterwave/ng-hosted/init", body),
+  flutterwaveNgVerify: (ref: string) =>
+    get<FlutterwaveNgVerifyResponse>(`/api/wallet/deposit/flutterwave/ng/verify?ref=${encodeURIComponent(ref)}`),
 };
 
 // ---------------------------------------------------------------------------

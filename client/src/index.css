@@ -2814,6 +2814,24 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .deposit-log-success b{color:#4ade80!important}.deposit-log-warn b{color:#ffd77a!important}.deposit-log-error b{color:#ff9a9a!important}
 @media(max-width:560px){.deposit-hero{align-items:flex-start;padding:22px 16px}.deposit-hero-icon{width:42px;height:42px}.deposit-hero-trust{align-self:center;padding:7px 8px;font-size:9px}.deposit-hero-trust svg{width:13px}.deposit-shell{width:min(720px,calc(100% - 22px));margin-top:17px}.deposit-panel{padding:19px 16px}.deposit-status-panel{padding:30px 16px}.deposit-rail{font-size:9px}.deposit-diagnostics li{grid-template-columns:auto 1fr}.deposit-diagnostics li span,.deposit-diagnostics li code,.deposit-diagnostics li small{grid-column:1/-1}.deposit-diagnostics-actions{flex-wrap:wrap}}
 
+/* Nigeria — Flutterwave v3 deposit (owner order 2026-11-07). Country
+   switcher above the form, method pills, and the virtual-account
+   card shown while a bank-transfer payment waits. Same dark panel
+   language as the Ghana form; nothing here touches Ghana. */
+.deposit-country-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.deposit-country-row button{padding:11px 10px;border:1px solid #ffffff1a;border-radius:10px;background:#202020;color:#bbb;font:800 12px 'DM Sans',sans-serif;cursor:pointer}
+.deposit-country-row button.selected{background:#ffd84d;border-color:#ffd84d;color:#121212}
+.deposit-country-row button:disabled{opacity:.55;cursor:not-allowed}
+.deposit-method-row button{display:inline-flex;align-items:center;gap:5px}
+.deposit-note{margin:12px 0 0;color:#969696;font-size:11px;line-height:1.55}
+.deposit-va-card{display:grid;margin-top:18px;border:1px solid #ffffff1f;border-radius:12px;background:#1d1d1d;text-align:left;overflow:hidden}
+.deposit-va-card>div{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #ffffff14}
+.deposit-va-card>div:last-child{border-bottom:0}
+.deposit-va-card span{color:#969696;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.deposit-va-card b{margin-left:auto;color:#fff;font-size:13px}
+.deposit-va-number{font-family:ui-monospace,monospace;letter-spacing:.04em}
+.deposit-copy-btn{display:inline-flex;align-items:center;gap:4px;margin-left:8px;padding:5px 9px;border:1px solid #ffffff26;border-radius:999px;background:#202020;color:#ffd84d;font:800 10px 'DM Sans',sans-serif;cursor:pointer}
+
 /* ============================================================================
    LIVE SECTION LAYOUT (owner, 2026-10-09): inside the Live Matches section
    only, live cards stack the teams on top of each other with the score next
