@@ -6,7 +6,7 @@ import { parseKickoff } from "@/lib/sportsbook";
 import { buildMatchLabel, extractOdds, selectionState, selectionToPick } from "@/lib/bookingCode";
 import type { Pick } from "./Sportsbook";
 import { useSession } from "../lib/session";
-import { currencyCode, useAccountCountry } from "@/lib/country";
+import { currencyCode, stakeLimits, useAccountCountry } from "@/lib/country";
 import { resolveIsAdmin } from "./WalletCenter";
 import BookingCodeReceipt from "./BookingCodeReceipt";
 
@@ -22,9 +22,6 @@ function formatCountdown(kickoffAt?: string): string {
   if (days > 0) return `${days}d ${h % 24}h`;
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
-
-const MIN_STAKE = 200;
-const MAX_STAKE = 20000;
 
 // ---------------------------------------------------------------------------
 // Admin receipt code (owner, 2026-10-29): after an admin/super-admin places
@@ -302,6 +299,12 @@ export default function BetslipPage({
   picks, setPicks, onPlace,
 }: { picks: Pick[]; setPicks: (p: Pick[]) => void; onPlace: (stake: number) => Promise<void> }) {
   const [, setLocation] = useLocation();
+  const { user } = useSession();
+  const accountCountry = useAccountCountry();
+  const cc = currencyCode(accountCountry);
+  // Stake limits follow the account country: Ghana GH₵200–20,000,
+  // Nigeria ₦30,000–3,000,000 (lib/country stakeLimits).
+  const { min: MIN_STAKE, max: MAX_STAKE } = stakeLimits(accountCountry);
   const [stake, setStake] = useState(String(MIN_STAKE));
   const [stakeEdited, setStakeEdited] = useState(false);
   const [placing, setPlacing] = useState(false);
@@ -310,11 +313,8 @@ export default function BetslipPage({
     stake: number; totalOdds: number; potentialReturn: number; count: number;
     selections: Pick[]; bookingCode: string | null; codeState: "ready" | "generating" | "failed"; isAdmin: boolean;
   } | null>(null);
-  const { user } = useSession();
-  const accountCountry = useAccountCountry();
-  const cc = currencyCode(accountCountry);
-  const isAdmin = resolveIsAdmin(user);
   const [balance, setBalance] = useState<number | null>(null);
+  const isAdmin = resolveIsAdmin(user);
 
   useEffect(() => {
     api.wallet.getWallet()
@@ -395,7 +395,7 @@ export default function BetslipPage({
             
             <div className="bp-summary-row"><span>Total odds</span><b>{totalOdds.toFixed(2)}</b></div>
             <label className="bp-stake-field">
-              <span>Stake (GHS)</span>
+              <span>Stake ({cc})</span>
               <input type="number" min={MIN_STAKE} max={MAX_STAKE} value={stake} placeholder="Enter amount" onChange={(e) => { setStakeEdited(true); setStake(e.target.value); }} />
             </label>
             <div className="bp-stake-hint">Min {cc} {MIN_STAKE} · Max {cc} {MAX_STAKE}{balance !== null && ` · Balance ${cc} ${balance.toFixed(2)}`}</div>

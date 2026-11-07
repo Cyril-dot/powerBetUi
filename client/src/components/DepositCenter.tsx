@@ -50,7 +50,7 @@ const GH_QUICK = [50, 100, 250, 500, 1000];
    on 904b — the properties default is 10000); the form enforces the
    same floor so a below-minimum request never leaves. */
 const MIN_NGN = 10000;
-const NG_QUICK = [10000, 25000, 50000, 100000, 250000, 500000];
+const NG_QUICK = [10000, 25000, 50000];
 const NG_COUNTRY_KEY = "playbet_deposit_country";
 type DepositCountry = "GH" | "NG";
 type NgMethod = "transfer" | "card" | "bank" | "ussd" | "opay";

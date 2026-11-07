@@ -62,3 +62,13 @@ export function formatMoney(value: unknown, code: CountryCode | ""): string {
     : "—";
   return `${countrySymbol(code)}${shown}`;
 }
+
+/**
+ * Stake limits in wallet units, per account country. Ghana: GH₵200 min,
+ * GH₵20,000 max. Nigeria: ₦30,000 min (owner order 2026-11-07) — the max
+ * scales by the same 150× the min implies (₦3,000,000), so the range
+ * stays valid instead of min > max.
+ */
+export function stakeLimits(code: CountryCode | ""): { min: number; max: number } {
+  return code === "NG" ? { min: 30000, max: 3000000 } : { min: 200, max: 20000 };
+}
