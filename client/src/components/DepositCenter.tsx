@@ -44,11 +44,12 @@ const MIN_GHS = 50;
 const MAX_GHS = 5000;
 const GH_QUICK = [50, 100, 250, 500, 1000];
 
-/* Nigeria — Flutterwave v3. Backend minimum is NGN 2,000
-   (app.platform.min-deposit-amount-ngn, default 2000); the form
-   enforces the same floor so a below-minimum request never leaves. */
-const MIN_NGN = 2000;
-const NG_QUICK = [2000, 5000, 10000, 20000, 50000, 100000];
+/* Nigeria — Flutterwave v3 + v4. Backend minimum is NGN 10,000
+   (app.platform.min-deposit-amount-ngn; set MIN_DEPOSIT_AMOUNT_NGN=10000
+   on 904b — the properties default is 10000); the form enforces the
+   same floor so a below-minimum request never leaves. */
+const MIN_NGN = 10000;
+const NG_QUICK = [10000, 25000, 50000, 100000, 250000, 500000];
 const NG_COUNTRY_KEY = "playbet_deposit_country";
 type DepositCountry = "GH" | "NG";
 type NgMethod = "transfer" | "card" | "bank" | "ussd" | "opay";
