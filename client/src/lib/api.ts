@@ -417,6 +417,26 @@ export interface FlutterwaveNgBank {
   id?: string | number;
   [key: string]: unknown;
 }
+
+/* Nigeria — Flutterwave v4 (owner order 2026-11-07, alongside v3).
+   Same four methods on the v4 rail (FlutterwaveNgBankV4DepositController,
+   OAuth client credentials): Mono bank-account direct debit (v4-only —
+   v3 has no equivalent), PWBT virtual account, USSD, OPay. v4 verify
+   returns the same {status, credited} shape as v3. v4 bank lists come
+   back double-wrapped ({data: {data: [...]}}) — parse defensively. */
+export interface FlutterwaveNgV4BankAccountResponse {
+  reference?: string;
+  chargeId?: string;
+  redirectUrl?: string;
+  nextActionType?: string;
+  [key: string]: unknown;
+}
+export interface FlutterwaveNgV4VerifyResponse {
+  status?: string;
+  credited?: boolean;
+  message?: string;
+  [key: string]: unknown;
+}
 export const deposits = {
   shinobiPayInit: (body: { amount: number; phone: string; network: ShinobiPayNetwork }) =>
     post<ShinobiPayInitResponse>("/api/wallet/deposit/akwapay/init", body),
@@ -440,6 +460,18 @@ export const deposits = {
     post<FlutterwaveNgHostedResponse>("/api/wallet/deposit/flutterwave/ng-hosted/init", body),
   flutterwaveNgVerify: (ref: string) =>
     get<FlutterwaveNgVerifyResponse>(`/api/wallet/deposit/flutterwave/ng/verify?ref=${encodeURIComponent(ref)}`),
+  flutterwaveNgV4BankAccountInit: (body: { amount: number }) =>
+    post<FlutterwaveNgV4BankAccountResponse>("/api/wallet/deposit/flutterwave/v4/ng-bank/init", body),
+  flutterwaveNgV4BankTransferInit: (body: { amount: number }) =>
+    post<FlutterwaveNgBankTransferResponse>("/api/wallet/deposit/flutterwave/v4/ng-bank/init/bank-transfer", body),
+  flutterwaveNgV4UssdInit: (body: { amount: number; bankCode: string; phoneNumber?: string }) =>
+    post<FlutterwaveNgUssdResponse>("/api/wallet/deposit/flutterwave/v4/ng-ussd/init", body),
+  flutterwaveNgV4UssdBanks: () =>
+    get<unknown>("/api/wallet/deposit/flutterwave/v4/ng-ussd/banks"),
+  flutterwaveNgV4OpayInit: (body: { amount: number }) =>
+    post<FlutterwaveNgHostedResponse>("/api/wallet/deposit/flutterwave/v4/ng-opay/init", body),
+  flutterwaveNgV4Verify: (ref: string) =>
+    get<FlutterwaveNgV4VerifyResponse>(`/api/wallet/deposit/flutterwave/v4/ng/verify?ref=${encodeURIComponent(ref)}`),
 };
 
 // ---------------------------------------------------------------------------

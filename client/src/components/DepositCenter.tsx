@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Copy,
   CreditCard,
+  Hash,
   Hourglass,
   Landmark,
   Loader2,
@@ -28,12 +29,16 @@ import { useSession } from "@/lib/session";
    Crediting is webhook-only on the backend; the wait state polls the
    intent status read-only — the wallet credit lands when the signed
    ShinobiPay webhook settles the payment.
-   Nigeria (owner order 2026-11-07): Flutterwave v3 — bank transfer
-   (one-time virtual account), Card/Bank + OPay via hosted checkout,
-   USSD — all on futballBackend's FlutterwaveNgV3DepositController,
-   the same endpoints LuckyStake's NigeriaDeposit uses. Credit is
-   verify/webhook-only server-side; the page polls
-   /api/wallet/deposit/flutterwave/ng/verify until it confirms. */
+   Nigeria (owner order 2026-11-07): full Flutterwave — BOTH v3 and
+   v4 live at once, on futballBackend's FlutterwaveNgV3DepositController
+   and FlutterwaveNgBankV4DepositController (the same endpoints
+   LuckyStake's NigeriaDeposit uses). The player sees ONE method list
+   and no gateway or version names anywhere: Bank Transfer, Card, Bank
+   Account (direct debit), USSD, OPay. Underneath, each method uses
+   its best rail and falls back to the other automatically if the
+   first init fails. Credit is verify/webhook-only server-side; the
+   page polls the verify endpoint of whichever rail issued the
+   reference until it confirms. */
 
 const MIN_GHS = 50;
 const MAX_GHS = 5000;
@@ -46,7 +51,8 @@ const MIN_NGN = 2000;
 const NG_QUICK = [2000, 5000, 10000, 20000, 50000, 100000];
 const NG_COUNTRY_KEY = "playbet_deposit_country";
 type DepositCountry = "GH" | "NG";
-type NgMethod = "transfer" | "bank" | "ussd" | "opay";
+type NgMethod = "transfer" | "card" | "bank" | "ussd" | "opay";
+type NgRail = "v3" | "v4";
 
 /* OWNER ORDER 2026-11-06: Ghana deposits are OPEN for everyone
    (unpaused — supersedes the 2026-11-05 pause). Live state comes from
@@ -221,19 +227,34 @@ function GhanaDeposit() {
     <label className="deposit-field"><span>MoMo number</span><input value={phone} onChange={(ev) => { setPhone(ev.target.value.replace(/[^0-9+]/g, "")); const d = detectNetwork(ev.target.value); if (d) setNetwork(d); }} inputMode="tel" placeholder="024 123 4567" /></label>
     <div className="deposit-quick-row">{(["MTN", "TELECEL", "AIRTELTIGO"] as const).map((n) => <button type="button" key={n} className={network === n ? "selected" : ""} onClick={() => setNetwork(n)}>{n === "AIRTELTIGO" ? "AirtelTigo" : n === "MTN" ? "MTN" : "Telecel"}</button>)}</div>
     <button className="deposit-submit" type="submit" disabled={busy || !Number.isFinite(value) || value < MIN_GHS}>{busy ? <><Loader2 size={18} className="deposit-spin" /> Verifying…</> : <><Smartphone size={18} /> Deposit</>}</button>
-    <p className="deposit-facts"><ShieldCheck size={13} /> Instant deposits · ShinobiPay · Min GH₵{MIN_GHS} · Max GH₵{MAX_GHS.toLocaleString()}</p>
+    <p className="deposit-facts"><ShieldCheck size={13} /> Instant deposits · Min GH₵{MIN_GHS} · Max GH₵{MAX_GHS.toLocaleString()}</p>
   </form>;
 }
 
-/* ─── Nigeria — Flutterwave v3 ────────────────────────────────────────
-   Same four methods LuckyStake's NigeriaDeposit offers, on the same
-   backend endpoints: bank transfer (one-time virtual account), Card /
-   Bank and OPay (hosted checkout — the browser leaves for
-   Flutterwave's page and returns to /deposit?method=ngv3), USSD
-   (dial string for the player's bank). Transfer + USSD poll
-   ng/verify until the backend confirms the credit; the redirect
-   params are never trusted — the return page polls the same verify
-   endpoint (see NigeriaReturn below). */
+/* ─── Nigeria — Flutterwave v3 + v4 ───────────────────────────────────
+   Full Flutterwave for Nigeria, both rails live at once. The player
+   sees ONE method list — no gateway or version names anywhere:
+   Bank Transfer, Card, Bank Account (direct debit), USSD, OPay.
+   Underneath, each method uses its best rail and falls back to the
+   other automatically if the first init fails (a 4xx validation
+   error never falls back — it is shown as-is). v3 is the default
+   for transfer / USSD / OPay; Bank Account is v4-only (Mono direct
+   debit, which v3 has no equivalent for); Card is the v3 hosted
+   checkout. Transfer + USSD poll the verify endpoint of whichever
+   rail issued the reference; hosted methods return to
+   /deposit?method=… and the return page polls the matching verify
+   endpoint (see NigeriaReturn). Redirect params are never trusted
+   for crediting. */
+const NG_METHODS: Array<{ key: NgMethod; icon: React.ReactNode; name: string; desc: string }> = [
+  { key: "transfer", icon: <Landmark size={20} />, name: "Bank Transfer", desc: "We give you an account number to send to" },
+  { key: "card", icon: <CreditCard size={20} />, name: "Card", desc: "Pay with your card or bank account" },
+  { key: "bank", icon: <Wallet size={20} />, name: "Bank Account", desc: "Approve a direct debit from your bank" },
+  { key: "ussd", icon: <Hash size={20} />, name: "USSD", desc: "Dial a code on your phone to pay" },
+  { key: "opay", icon: <Smartphone size={20} />, name: "OPay", desc: "Approve in your OPay app" },
+];
+
+type NgVa = { accountNumber: string; bankName: string; expiresAt?: string; note?: string; amount?: number };
+
 function NigeriaDeposit({ onInFlight }: { onInFlight: (inFlight: boolean) => void }) {
   const { refresh } = useSession();
   const [phase, setPhase] = useState<"form" | "waiting" | "done" | "stalled">("form");
@@ -241,9 +262,9 @@ function NigeriaDeposit({ onInFlight }: { onInFlight: (inFlight: boolean) => voi
   const [method, setMethod] = useState<NgMethod>("transfer");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [va, setVa] = useState<{ accountNumber: string; bankName: string; expiresAt?: string; note?: string; amount?: number } | null>(null);
+  const [va, setVa] = useState<NgVa | null>(null);
   const [ussdNote, setUssdNote] = useState("");
-  const [banks, setBanks] = useState<FlutterwaveNgBank[]>([]);
+  const [banks, setBanks] = useState<Array<{ name: string; code: string }>>([]);
   const [bankCode, setBankCode] = useState("");
   const [banksFailed, setBanksFailed] = useState(false);
   const [reference, setReference] = useState("");
@@ -257,36 +278,118 @@ function NigeriaDeposit({ onInFlight }: { onInFlight: (inFlight: boolean) => voi
   // If this unmounts mid-payment (navigation), release the country lock.
   useEffect(() => () => onInFlight(false), [onInFlight]);
 
-  function pollVerify(ref: string) {
+  // A 4xx from init is a real validation error (below minimum, missing
+  // bank) — show it, never fall back on it. Anything else (provider
+  // down, 5xx, network) is a rail problem, so the other rail gets a turn.
+  const isValidationError = (err: unknown) => err instanceof ApiError && err.status >= 400 && err.status < 500;
+
+  function pollVerify(ref: string, rail: NgRail) {
     stopPoll();
     let tries = 0;
     timer.current = window.setInterval(async () => {
       tries += 1;
       try {
-        const res = await api.deposits.flutterwaveNgVerify(ref);
+        const res = rail === "v4" ? await api.deposits.flutterwaveNgV4Verify(ref) : await api.deposits.flutterwaveNgVerify(ref);
         const s = String(res?.status ?? "").toLowerCase();
         if (res?.credited || s === "succeeded") { stopPoll(); onInFlight(false); setPhase("done"); refresh(); return; }
         if (s === "failed") { stopPoll(); onInFlight(false); setError("That payment failed. Please try again."); setPhase("form"); return; }
-      } catch { /* a failed check is not a failed payment — keep polling */ }
+      } catch (err) {
+        // v4 reports an unknown session as 400 — that payment is gone,
+        // so stop polling and say so instead of waiting out 30 tries.
+        if (err instanceof ApiError && err.status === 400) {
+          stopPoll(); onInFlight(false);
+          setError(err.message || "That payment session is no longer valid. Please start a new deposit.");
+          setPhase("form"); return;
+        }
+        // Any other failed check is not a failed payment — keep polling.
+      }
       if (tries >= 30) { stopPoll(); onInFlight(false); setPhase("stalled"); }
     }, 5000);
   }
 
-  // USSD needs the bank list from Flutterwave (via the backend).
+  function parseBanks(res: unknown): Array<{ name: string; code: string }> {
+    const rows = Array.isArray(res) ? res
+      : Array.isArray((res as { data?: unknown })?.data) ? (res as { data: unknown[] }).data
+      : Array.isArray((res as { data?: { data?: unknown } })?.data?.data) ? (res as { data: { data: unknown[] } }).data.data : [];
+    return (rows as Array<Record<string, unknown>>)
+      .map((b) => ({ name: String(b?.name ?? "Bank"), code: String(b?.code ?? b?.id ?? "") }))
+      .filter((b) => b.code);
+  }
+
+  // USSD needs the bank list — v3 first, v4 if v3 cannot serve it.
   useEffect(() => {
     if (method !== "ussd" || banks.length || banksFailed) return;
-    api.deposits.flutterwaveNgUssdBanks().then((res) => {
-      const rows = Array.isArray(res) ? res : (res?.data ?? []);
-      const list = (Array.isArray(rows) ? rows : [])
-        .map((b) => ({ name: String(b?.name ?? "Bank"), code: String(b?.code ?? b?.id ?? "") }))
-        .filter((b) => b.code);
-      setBanks(list);
-      if (list.length) setBankCode((current) => current || list[0].code);
-      else setBanksFailed(true);
-    }).catch(() => setBanksFailed(true));
+    let cancelled = false;
+    (async () => {
+      for (const load of [() => api.deposits.flutterwaveNgUssdBanks(), () => api.deposits.flutterwaveNgV4UssdBanks()]) {
+        try {
+          const list = parseBanks(await load());
+          if (list.length && !cancelled) { setBanks(list); setBankCode((c) => c || list[0].code); return; }
+        } catch { /* try the other rail */ }
+      }
+      if (!cancelled) setBanksFailed(true);
+    })();
+    return () => { cancelled = true; };
   }, [method, banks.length, banksFailed]);
 
   const reset = () => { stopPoll(); onInFlight(false); setPhase("form"); setVa(null); setUssdNote(""); setError(""); setAmount(String(MIN_NGN)); setReference(""); setCopied(false); };
+
+  const vaFrom = (res: { reference?: string; accountNumber?: string; bankName?: string; expiresAt?: string; note?: string; amount?: number | string } | null): NgVa | null => {
+    if (!res?.reference || !res?.accountNumber) return null;
+    return {
+      accountNumber: String(res.accountNumber),
+      bankName: String(res.bankName ?? ""),
+      expiresAt: res.expiresAt ? String(res.expiresAt) : undefined,
+      note: res.note ? String(res.note) : undefined,
+      amount: res.amount != null && Number.isFinite(Number(res.amount)) ? Number(res.amount) : undefined,
+    };
+  };
+
+  // Bank transfer: v3 virtual account first, v4 virtual account if v3
+  // cannot issue one. Both return the same shape, so the waiting view
+  // is identical — only the reference prefix tells them apart.
+  const initTransfer = async (): Promise<{ va: NgVa; ref: string; rail: NgRail }> => {
+    try {
+      const res = await api.deposits.flutterwaveNgBankTransferInit({ amount: value });
+      const va = vaFrom(res);
+      if (!va) throw new Error("empty");
+      return { va, ref: String(res.reference), rail: "v3" };
+    } catch (err) {
+      if (isValidationError(err)) throw err;
+      const res = await api.deposits.flutterwaveNgV4BankTransferInit({ amount: value });
+      const va = vaFrom(res);
+      if (!va) throw new Error("Could not create a transfer account. Please try again.");
+      return { va, ref: String(res.reference), rail: "v4" };
+    }
+  };
+
+  const initUssd = async (): Promise<{ note: string; ref: string; rail: NgRail }> => {
+    try {
+      const res = await api.deposits.flutterwaveNgUssdInit({ amount: value, bankCode });
+      if (!res?.reference) throw new Error("empty");
+      return { note: String(res?.note ?? "Dial your bank's USSD code to complete payment"), ref: String(res.reference), rail: "v3" };
+    } catch (err) {
+      if (isValidationError(err)) throw err;
+      const res = await api.deposits.flutterwaveNgV4UssdInit({ amount: value, bankCode });
+      if (!res?.reference) throw new Error("Could not start that payment. Please try again.");
+      return { note: String(res?.note ?? "Dial your bank's USSD code to complete payment"), ref: String(res.reference), rail: "v4" };
+    }
+  };
+
+  const initOpayRedirect = async (): Promise<string> => {
+    try {
+      const res = await api.deposits.flutterwaveNgHostedInit({ amount: value, method: "opay" });
+      const url = String(res?.redirectUrl ?? "");
+      if (!url) throw new Error("empty");
+      return url;
+    } catch (err) {
+      if (isValidationError(err)) throw err;
+      const res = await api.deposits.flutterwaveNgV4OpayInit({ amount: value });
+      const url = String(res?.redirectUrl ?? "");
+      if (!url) throw new Error("Could not start that payment. Please try again.");
+      return url;
+    }
+  };
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -295,32 +398,25 @@ function NigeriaDeposit({ onInFlight }: { onInFlight: (inFlight: boolean) => voi
     setBusy(true);
     try {
       if (method === "transfer") {
-        const res = await api.deposits.flutterwaveNgBankTransferInit({ amount: value });
-        const ref = String(res?.reference ?? "");
-        if (!ref || !res?.accountNumber) throw new Error("Flutterwave did not return transfer account details. Please try again.");
-        setVa({
-          accountNumber: String(res.accountNumber),
-          bankName: String(res.bankName ?? ""),
-          expiresAt: res.expiresAt ? String(res.expiresAt) : undefined,
-          note: res.note ? String(res.note) : undefined,
-          amount: res.amount != null && Number.isFinite(Number(res.amount)) ? Number(res.amount) : undefined,
-        });
-        setReference(ref);
-        setPhase("waiting");
-        onInFlight(true);
-        pollVerify(ref);
+        const { va: issued, ref, rail } = await initTransfer();
+        setVa(issued); setReference(ref); setPhase("waiting"); onInFlight(true); pollVerify(ref, rail);
       } else if (method === "ussd") {
         if (!bankCode) { setError("Choose your bank first."); return; }
-        const res = await api.deposits.flutterwaveNgUssdInit({ amount: value, bankCode });
-        const ref = String(res?.reference ?? "");
-        if (!ref) throw new Error("Could not start that payment. Please try again.");
-        setUssdNote(String(res?.note ?? "Dial your bank's USSD code to complete payment"));
-        setReference(ref);
-        setPhase("waiting");
-        onInFlight(true);
-        pollVerify(ref);
+        const { note, ref, rail } = await initUssd();
+        setUssdNote(note); setReference(ref); setPhase("waiting"); onInFlight(true); pollVerify(ref, rail);
+      } else if (method === "bank") {
+        // Bank Account is v4-only: Mono direct debit.
+        const res = await api.deposits.flutterwaveNgV4BankAccountInit({ amount: value });
+        const url = String(res?.redirectUrl ?? "");
+        if (!url) throw new Error("Could not start that payment. Please try again.");
+        window.location.assign(url);
+        return;
+      } else if (method === "opay") {
+        window.location.assign(await initOpayRedirect());
+        return;
       } else {
-        const res = await api.deposits.flutterwaveNgHostedInit({ amount: value, method: method === "opay" ? "opay" : "card" });
+        // Card — hosted checkout.
+        const res = await api.deposits.flutterwaveNgHostedInit({ amount: value, method: "card" });
         const url = String(res?.redirectUrl ?? "");
         if (!url) throw new Error("Could not start that payment. Please try again.");
         window.location.assign(url);
@@ -330,14 +426,17 @@ function NigeriaDeposit({ onInFlight }: { onInFlight: (inFlight: boolean) => voi
     finally { setBusy(false); }
   };
 
-  const ctaLabel = method === "transfer" ? "Get transfer account" : method === "ussd" ? "Get USSD code" : method === "opay" ? "Continue with OPay" : "Continue to my bank";
   const methodNote = method === "transfer"
     ? "We will generate a one-time account number for this exact amount — transfer to it and your wallet credits automatically."
     : method === "ussd"
       ? "We will give you a code to dial on your phone — approve it with your bank and your wallet credits automatically."
-      : method === "opay"
-        ? "You will be taken to OPay to approve the payment, then returned here."
-        : "You will be taken to your bank to approve the payment, then returned here.";
+      : method === "bank"
+        ? "You will be taken to your bank to approve a direct debit, then returned here."
+        : method === "opay"
+          ? "You will be taken to OPay to approve the payment, then returned here."
+          : "You will be taken to a secure page to pay with your card or bank account, then returned here.";
+  const ctaLabel = method === "transfer" ? "Get transfer account" : method === "ussd" ? "Get USSD code" : method === "bank" ? "Continue to my bank" : method === "opay" ? "Continue with OPay" : "Continue to card payment";
+  const ctaIcon = NG_METHODS.find((m) => m.key === method)?.icon;
 
   if (phase === "done") return <StatusPanel icon={<CheckCircle2 size={28} />} label="DEPOSIT CONFIRMED" title="Deposit successful" copy={<>{ngn(value)} has been added to your wallet.</>}>
     <div className="deposit-status-actions"><button className="deposit-secondary" type="button" onClick={reset}>Make another deposit</button><Link href="/wallet" className="deposit-secondary" style={{ textDecoration: "none" }}>Go to wallet</Link></div>
@@ -365,37 +464,43 @@ function NigeriaDeposit({ onInFlight }: { onInFlight: (inFlight: boolean) => voi
 
   return <form className="deposit-panel" onSubmit={submit}>
     {error && <div className="deposit-error" role="alert"><AlertCircle size={15} />{error}</div>}
-    <div className="deposit-quick-row deposit-method-row" role="group" aria-label="Nigeria payment method">
-      {(["transfer", "bank", "ussd", "opay"] as const).map((m) => (
-        <button type="button" key={m} className={method === m ? "selected" : ""} onClick={() => setMethod(m)}>
-          {m === "transfer" ? <><Landmark size={14} /> Bank Transfer</> : m === "bank" ? <><CreditCard size={14} /> Card / Bank</> : m === "ussd" ? <><Smartphone size={14} /> USSD</> : <><Wallet size={14} /> OPay</>}
-        </button>
-      ))}
-    </div>
-    <div className="deposit-field deposit-field-first">
+    <div className="deposit-field deposit-field-first deposit-amount-hero">
       <label htmlFor="ng-amount">Amount to deposit</label>
       <div className="deposit-amount-wrap"><b>₦</b><input id="ng-amount" value={amount} onChange={(ev) => setAmount(ev.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" placeholder="2,000" /></div>
     </div>
     <div className="deposit-quick-row">{NG_QUICK.map((v) => <button type="button" key={v} className={amount === String(v) ? "selected" : ""} onClick={() => setAmount(String(v))}>₦{v.toLocaleString()}</button>)}</div>
+    <div className="deposit-method-list" role="group" aria-label="How do you want to pay?">
+      <span className="deposit-method-label">How do you want to pay?</span>
+      {NG_METHODS.map((m) => (
+        <button type="button" key={m.key} className={`deposit-method${method === m.key ? " selected" : ""}`} onClick={() => setMethod(m.key)} aria-pressed={method === m.key}>
+          <span className="deposit-method-icon">{m.icon}</span>
+          <span className="deposit-method-text"><b>{m.name}</b><small>{m.desc}</small></span>
+          <span className="deposit-method-check"><Check size={13} strokeWidth={3.5} /></span>
+        </button>
+      ))}
+    </div>
     {method === "ussd" && <label className="deposit-field"><span>Your bank</span>
       {banksFailed
         ? <p className="deposit-note">Could not load the bank list — check your connection and try again.</p>
         : <select value={bankCode} onChange={(ev) => setBankCode(ev.target.value)}>{banks.length ? banks.map((b) => <option key={b.code} value={b.code}>{b.name}</option>) : <option value="">Loading banks…</option>}</select>}
     </label>}
     <p className="deposit-note">{methodNote}</p>
-    <button className="deposit-submit" type="submit" disabled={busy || !valid}>{busy ? <><Loader2 size={18} className="deposit-spin" /> Starting…</> : <><Smartphone size={18} /> {ctaLabel}</>}</button>
-    <p className="deposit-facts"><ShieldCheck size={13} /> Instant deposits · Flutterwave · Min ₦{MIN_NGN.toLocaleString()}</p>
+    <button className="deposit-submit" type="submit" disabled={busy || !valid}>{busy ? <><Loader2 size={18} className="deposit-spin" /> Starting…</> : <>{ctaIcon} {ctaLabel}</>}</button>
+    <p className="deposit-facts"><ShieldCheck size={13} /> Instant deposits · Min ₦{MIN_NGN.toLocaleString()}</p>
   </form>;
 }
 
-/* Flutterwave sends hosted-checkout payers back to
-   {FRONTEND_URL}/deposit?method=ngv3 with ?status&tx_ref&
-   transaction_id appended. This confirms the charge against the
-   verify endpoint — never the redirect params themselves — and
-   lands the player in the wallet. */
-function NigeriaReturn({ reference, onBack }: { reference: string; onBack: () => void }) {
+/* The hosted flows send the player back to {FRONTEND_URL}/deposit
+   with a method that says which rail issued the payment — ngv3 for
+   the v3 hosted checkout, ngbank-v4 / ngopay-v4 for the v4 redirects
+   (the backend's own redirect callbacks land here with ?reference=).
+   This confirms the charge against the matching verify endpoint —
+   never the redirect params themselves — and lands the player in
+   the wallet. */
+function NigeriaReturn({ reference, rail, onBack }: { reference: string; rail: NgRail; onBack: () => void }) {
   const { refresh } = useSession();
   const [state, setState] = useState<"checking" | "done" | "failed" | "timeout">("checking");
+  const [failNote, setFailNote] = useState("");
   useEffect(() => {
     let tries = 0;
     let timer = 0;
@@ -403,32 +508,40 @@ function NigeriaReturn({ reference, onBack }: { reference: string; onBack: () =>
     const tick = async () => {
       tries += 1;
       try {
-        const res = await api.deposits.flutterwaveNgVerify(reference);
+        const res = rail === "v4" ? await api.deposits.flutterwaveNgV4Verify(reference) : await api.deposits.flutterwaveNgVerify(reference);
         if (cancelled) return;
         const s = String(res?.status ?? "").toLowerCase();
         if (res?.credited || s === "succeeded") { setState("done"); refresh(); return; }
         if (s === "failed") { setState("failed"); return; }
-      } catch { /* a failed check is not a failed payment — keep checking */ }
+      } catch (err) {
+        // v4 reports an unknown session as 400 — that payment is gone.
+        if (err instanceof ApiError && err.status === 400) {
+          if (!cancelled) { setFailNote(err.message || ""); setState("failed"); }
+          return;
+        }
+        // Any other failed check is not a failed payment — keep checking.
+      }
       if (cancelled) return;
       if (tries < 22) timer = window.setTimeout(tick, 4000);
       else setState("timeout");
     };
     timer = window.setTimeout(tick, 1000);
     return () => { cancelled = true; window.clearTimeout(timer); };
-  }, [reference, refresh]);
+  }, [reference, rail, refresh]);
   if (state === "done") return <StatusPanel icon={<CheckCircle2 size={28} />} label="DEPOSIT CONFIRMED" title="Deposit confirmed" copy={<>Your money is in your wallet. Good luck!</>}>
     <div className="deposit-status-actions"><Link href="/wallet" className="deposit-secondary" style={{ textDecoration: "none" }}>Go to wallet</Link><button className="deposit-secondary" type="button" onClick={onBack}>Make another deposit</button></div>
   </StatusPanel>;
-  if (state === "failed") return <StatusPanel tone="failed" icon={<AlertCircle size={28} />} label="PAYMENT NOT COMPLETED" title="Payment not completed" copy={<>That payment did not go through, so nothing was added to your wallet. You can try again from the deposit page.</>}>
+  if (state === "failed") return <StatusPanel tone="failed" icon={<AlertCircle size={28} />} label="PAYMENT NOT COMPLETED" title="Payment not completed" copy={<>That payment did not go through, so nothing was added to your wallet. You can try again from the deposit page.{failNote ? <> {failNote}</> : null}</>}>
     <div className="deposit-status-actions"><button className="deposit-secondary" type="button" onClick={onBack}>Try again</button></div>
   </StatusPanel>;
   if (state === "timeout") return <StatusPanel tone="timeout" icon={<Hourglass size={28} />} label="STILL CONFIRMING" title="Still confirming" copy={<>Your payment is taking a little longer to confirm. If it completed, your wallet will credit automatically — check your balance in a few minutes.</>}>
     <div className="deposit-status-actions"><button className="deposit-secondary" type="button" onClick={onBack}>Done</button></div>
   </StatusPanel>;
-  return <StatusPanel tone="pending" icon={<Loader2 size={28} className="deposit-spin" />} label="CONFIRMING PAYMENT" title="Confirming your payment…" copy={<>We are checking your Flutterwave payment. This page updates on its own — your wallet follows the moment it lands.</>}>
+  return <StatusPanel tone="pending" icon={<Loader2 size={28} className="deposit-spin" />} label="CONFIRMING PAYMENT" title="Confirming your payment…" copy={<>We are checking your payment. This page updates on its own — your wallet follows the moment it lands.</>}>
     <p className="deposit-reference">Reference <code>{reference}</code></p>
   </StatusPanel>;
 }
+
 
 /* ─── Page shell ──────────────────────────────────────────────────── */
 export default function DepositCenter() {
@@ -459,17 +572,23 @@ export default function DepositCenter() {
   // should see the result. Cancel / Done releases the lock.
   const [ngInFlight, setNgInFlight] = useState(false);
 
-  // Hosted-checkout return: Flutterwave sends the player back to
-  // /deposit?method=ngv3&tx_ref=... — confirm it, then clear the
-  // query so a refresh does not re-run the return flow.
-  const [returnRef, setReturnRef] = useState<string>(() => {
+  // Hosted-checkout return: the player comes back to
+  // /deposit?method=…&tx_ref=… (v3) or ?method=…&reference=… (v4) —
+  // confirm it against the matching rail's verify endpoint, then
+  // clear the query so a refresh does not re-run the return flow.
+  const [returnInfo, setReturnInfo] = useState<{ ref: string; rail: NgRail } | null>(() => {
     try {
       const q = new URLSearchParams(window.location.search);
-      return q.get("method") === "ngv3" ? (q.get("tx_ref") || q.get("reference") || "") : "";
-    } catch { return ""; }
+      const m = q.get("method") || "";
+      const ref = q.get("tx_ref") || q.get("reference") || "";
+      if (!ref) return null;
+      if (m === "ngv3") return { ref, rail: "v3" };
+      if (m === "ngbank-v4" || m === "ngopay-v4") return { ref, rail: "v4" };
+      return null;
+    } catch { return null; }
   });
   const clearReturn = () => {
-    setReturnRef("");
+    setReturnInfo(null);
     try { window.history.replaceState(null, "", "/deposit"); } catch { /* ignore */ }
   };
 
@@ -514,13 +633,13 @@ export default function DepositCenter() {
             <p className="deposit-status-copy">You need an account so we can credit the right wallet when your payment is confirmed.</p>
             <Link href="/login" className="deposit-submit" style={{ textDecoration: "none" }}>Log in</Link>
           </section>
-        ) : returnRef ? (
-          <NigeriaReturn reference={returnRef} onBack={clearReturn} />
+        ) : returnInfo ? (
+          <NigeriaReturn reference={returnInfo.ref} rail={returnInfo.rail} onBack={clearReturn} />
         ) : (
           <>
             <div className="deposit-country-row" role="group" aria-label="Deposit country">
-              <button type="button" className={country === "GH" ? "selected" : ""} disabled={ngInFlight} onClick={() => pickCountry("GH")}>🇬🇭 Ghana · MoMo</button>
-              <button type="button" className={country === "NG" ? "selected" : ""} disabled={ngInFlight} onClick={() => pickCountry("NG")}>🇳🇬 Nigeria · Flutterwave</button>
+              <button type="button" className={country === "GH" ? "selected" : ""} disabled={ngInFlight} onClick={() => pickCountry("GH")}>🇬🇭 Ghana</button>
+              <button type="button" className={country === "NG" ? "selected" : ""} disabled={ngInFlight} onClick={() => pickCountry("NG")}>🇳🇬 Nigeria</button>
             </div>
             {country === "NG" ? (
               <NigeriaDeposit onInFlight={setNgInFlight} />

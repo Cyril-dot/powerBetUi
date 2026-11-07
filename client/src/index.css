@@ -2814,15 +2814,31 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .deposit-log-success b{color:#4ade80!important}.deposit-log-warn b{color:#ffd77a!important}.deposit-log-error b{color:#ff9a9a!important}
 @media(max-width:560px){.deposit-hero{align-items:flex-start;padding:22px 16px}.deposit-hero-icon{width:42px;height:42px}.deposit-hero-trust{align-self:center;padding:7px 8px;font-size:9px}.deposit-hero-trust svg{width:13px}.deposit-shell{width:min(720px,calc(100% - 22px));margin-top:17px}.deposit-panel{padding:19px 16px}.deposit-status-panel{padding:30px 16px}.deposit-rail{font-size:9px}.deposit-diagnostics li{grid-template-columns:auto 1fr}.deposit-diagnostics li span,.deposit-diagnostics li code,.deposit-diagnostics li small{grid-column:1/-1}.deposit-diagnostics-actions{flex-wrap:wrap}}
 
-/* Nigeria — Flutterwave v3 deposit (owner order 2026-11-07). Country
-   switcher above the form, method pills, and the virtual-account
-   card shown while a bank-transfer payment waits. Same dark panel
-   language as the Ghana form; nothing here touches Ghana. */
-.deposit-country-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.deposit-country-row button{padding:11px 10px;border:1px solid #ffffff1a;border-radius:10px;background:#202020;color:#bbb;font:800 12px 'DM Sans',sans-serif;cursor:pointer}
-.deposit-country-row button.selected{background:#ffd84d;border-color:#ffd84d;color:#121212}
+/* Nigeria — Flutterwave v3 + v4 deposit (owner order 2026-11-07).
+   Segmented country switch (countries only — no gateway names),
+   a big amount hero, and a method list: one row per way to pay,
+   icon tile + name + one line, gold check when picked. Same dark
+   panel language as the Ghana form; nothing here touches Ghana. */
+.deposit-country-row{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:14px;padding:4px;border:1px solid #ffffff14;border-radius:12px;background:#121212}
+.deposit-country-row button{padding:10px;border:0;border-radius:9px;background:transparent;color:#bbb;font:800 12px 'DM Sans',sans-serif;cursor:pointer}
+.deposit-country-row button.selected{background:#ffd84d;color:#121212}
 .deposit-country-row button:disabled{opacity:.55;cursor:not-allowed}
-.deposit-method-row button{display:inline-flex;align-items:center;gap:5px}
+.deposit-amount-hero .deposit-amount-wrap b{font-size:15px}
+.deposit-amount-hero input{font-size:20px;font-weight:800;padding:14px}
+.deposit-method-label{display:block;margin:18px 0 8px;color:#b9b9b9;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.deposit-method-list{display:grid;gap:8px}
+.deposit-method{display:flex;align-items:center;gap:12px;width:100%;padding:12px 13px;border:1px solid #ffffff1a;border-radius:12px;background:#1d1d1d;color:#fff;text-align:left;cursor:pointer}
+.deposit-method.selected{border-color:#ffd84d;background:#ffd84d;color:#121212}
+.deposit-method.selected .deposit-method-text b{color:#121212}
+.deposit-method.selected .deposit-method-text small{color:#4d4210}
+.deposit-method.selected .deposit-method-icon{background:#121212;color:#ffd84d}
+.deposit-method.selected .deposit-method-check{border-color:#121212;background:#121212;color:#ffd84d}
+.deposit-method-icon{display:grid;place-items:center;flex:none;width:40px;height:40px;border-radius:10px;background:#ffd84d1f;color:#ffd84d}
+.deposit-method-text{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.deposit-method-text b{font-size:13px}
+.deposit-method-text small{color:#969696;font-size:11px;line-height:1.4}
+.deposit-method-check{display:grid;place-items:center;flex:none;width:20px;height:20px;border-radius:50%;border:1px solid #ffffff2e;color:transparent}
+.deposit-method.selected .deposit-method-check{border-color:#ffd84d;background:#ffd84d;color:#121212}
 .deposit-note{margin:12px 0 0;color:#969696;font-size:11px;line-height:1.55}
 .deposit-va-card{display:grid;margin-top:18px;border:1px solid #ffffff1f;border-radius:12px;background:#1d1d1d;text-align:left;overflow:hidden}
 .deposit-va-card>div{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #ffffff14}
