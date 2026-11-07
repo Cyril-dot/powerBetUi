@@ -246,9 +246,9 @@ function GhanaDeposit() {
    endpoint (see NigeriaReturn). Redirect params are never trusted
    for crediting. */
 const NG_METHODS: Array<{ key: NgMethod; icon: React.ReactNode; name: string; desc: string }> = [
-  { key: "transfer", icon: <Landmark size={20} />, name: "Bank Transfer", desc: "We give you an account number to send to" },
+  { key: "transfer", icon: <Landmark size={20} />, name: "Bank Transfer", desc: "We give you an account to send to" },
   { key: "card", icon: <CreditCard size={20} />, name: "Card", desc: "Pay with your card or bank account" },
-  { key: "bank", icon: <Wallet size={20} />, name: "Bank Account", desc: "Approve a direct debit from your bank" },
+  { key: "bank", icon: <Wallet size={20} />, name: "Bank Account", desc: "Direct debit from your bank" },
   { key: "ussd", icon: <Hash size={20} />, name: "USSD", desc: "Dial a code on your phone to pay" },
   { key: "opay", icon: <Smartphone size={20} />, name: "Wallet", desc: "Approve in your wallet app" },
 ];
