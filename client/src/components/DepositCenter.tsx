@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import api, { ApiError, type FlutterwaveNgBank, type ShinobiPayVerifyResponse } from "@/lib/api";
 import { readGhanaDepositsPaused, subscribeGhanaDepositsPaused } from "@/lib/depositControl";
+import { formatMoney, useAccountCountry } from "@/lib/country";
 import { useSession } from "@/lib/session";
 
 /* Deposit centre — Ghana: ShinobiPay MoMo (owner direction 2026-10-16:
@@ -556,11 +557,16 @@ export default function DepositCenter() {
   useEffect(() => subscribeGhanaDepositsPaused(setGhanaPaused), []);
 
   // Deposit country — Ghana (ShinobiPay MoMo) or Nigeria (Flutterwave
-  // v3). The choice sticks on this browser; Ghana is the default so
-  // existing players see exactly what they saw before.
+  // v3). The rail follows the ACCOUNT country, not a browser toggle: a
+  // Ghana account sees MoMo only, a Nigeria account sees Flutterwave
+  // only. No country on the account yet (the CountryGate popup covers
+  // it) → the switcher stays, as before.
+  const accountCountry = useAccountCountry();
+  const lockedCountry = accountCountry || null;
   const [country, setCountry] = useState<DepositCountry>(() => {
     try { return window.localStorage.getItem(NG_COUNTRY_KEY) === "NG" ? "NG" : "GH"; } catch { return "GH"; }
   });
+  const effectiveCountry = lockedCountry ?? country;
   const pickCountry = (c: DepositCountry) => {
     setCountry(c);
     try { window.localStorage.setItem(NG_COUNTRY_KEY, c); } catch { /* private mode */ }
@@ -600,10 +606,10 @@ export default function DepositCenter() {
   // is interrupted — and it never runs for Nigeria, which the Ghana
   // pause does not cover.
   useEffect(() => {
-    if (!ghanaPaused || country !== "GH") return;
+    if (!ghanaPaused || effectiveCountry !== "GH") return;
     const id = window.setInterval(() => window.location.reload(), 60_000);
     return () => window.clearInterval(id);
-  }, [ghanaPaused, country]);
+  }, [ghanaPaused, effectiveCountry]);
 
   useEffect(() => {
     if (!signedIn) return;
@@ -622,7 +628,7 @@ export default function DepositCenter() {
         <div className="deposit-title-row">
           <h1>Deposit</h1>
           {signedIn && balance !== null && (
-            <span className="deposit-title-balance">Balance <b>{ghs(balance)}</b></span>
+            <span className="deposit-title-balance">Balance <b>{formatMoney(balance, accountCountry)}</b></span>
           )}
         </div>
 
@@ -638,11 +644,15 @@ export default function DepositCenter() {
           <NigeriaReturn reference={returnInfo.ref} rail={returnInfo.rail} onBack={clearReturn} />
         ) : (
           <>
-            <div className="deposit-country-row" role="group" aria-label="Deposit country">
-              <button type="button" className={country === "GH" ? "selected" : ""} disabled={ngInFlight} onClick={() => pickCountry("GH")}>🇬🇭 Ghana</button>
-              <button type="button" className={country === "NG" ? "selected" : ""} disabled={ngInFlight} onClick={() => pickCountry("NG")}>🇳🇬 Nigeria</button>
-            </div>
-            {country === "NG" ? (
+            {lockedCountry ? (
+              <div className="deposit-country-row deposit-country-locked" aria-label="Deposit country"><span>{lockedCountry === "NG" ? "🇳🇬 Nigeria" : "🇬🇭 Ghana"}</span></div>
+            ) : (
+              <div className="deposit-country-row" role="group" aria-label="Deposit country">
+                <button type="button" className={country === "GH" ? "selected" : ""} disabled={ngInFlight} onClick={() => pickCountry("GH")}>🇬🇭 Ghana</button>
+                <button type="button" className={country === "NG" ? "selected" : ""} disabled={ngInFlight} onClick={() => pickCountry("NG")}>🇳🇬 Nigeria</button>
+              </div>
+            )}
+            {effectiveCountry === "NG" ? (
               <NigeriaDeposit onInFlight={setNgInFlight} />
             ) : ghanaPaused ? (
               <StatusPanel tone="timeout" icon={<Hourglass size={28} />} label="SYSTEM UPGRADE" title="System under upgrade" copy={<>Our system is undergoing an upgrade. Ghana deposits are temporarily paused. Your balance is safe — this page refreshes on its own.</>} />
@@ -658,7 +668,7 @@ export default function DepositCenter() {
             {history.map((row, i) => {
               const status = asText(row.status, "PENDING");
               return <div className="deposit-request-row" key={asText(row.id, String(i))}>
-                <div><b>{ghs(row.ngnAmountSent)}</b><small>{formatDate(row.createdAt)} · Ref {asText(row.transferReference)}{typeof row.screenshotUrl === "string" && row.screenshotUrl.startsWith("http") && <> · <a className="proof-link" href={row.screenshotUrl} target="_blank" rel="noreferrer">View proof</a></>}</small>{status === "REJECTED" && asText(row.adminNote, "") !== "—" && <small className="rej">Reason: {asText(row.adminNote)}</small>}</div>
+                <div><b>{formatMoney(row.ngnAmountSent, "NG")}</b><small>{formatDate(row.createdAt)} · Ref {asText(row.transferReference)}{typeof row.screenshotUrl === "string" && row.screenshotUrl.startsWith("http") && <> · <a className="proof-link" href={row.screenshotUrl} target="_blank" rel="noreferrer">View proof</a></>}</small>{status === "REJECTED" && asText(row.adminNote, "") !== "—" && <small className="rej">Reason: {asText(row.adminNote)}</small>}</div>
                 <span className={`deposit-chip ${chipClass(status)}`}>{status}</span>
               </div>;
             })}

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { Bookmark, ChevronRight, Clock3, RefreshCw, Share2, TrendingUp } from "lucide-react";
 import api, { ApiError, type Bet } from "@/lib/api";
+import { formatMoney, normalizeCountry, useAccountCountry } from "@/lib/country";
 
 /**
  * "Recommended Football Codes" — the popular-code rail shown on the empty
@@ -76,6 +77,7 @@ function RecommendedCodeCard({ code, onRedeem, redeeming }: { code: RecommendedC
 }
 
 export default function OpenBetsPage() {
+  const accountCountry = useAccountCountry();
   const [bets, setBets] = useState<Bet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -144,9 +146,9 @@ export default function OpenBetsPage() {
                     <small style={{ marginLeft: 8 }}>{s.market} · {s.selection} @ {s.oddsLocked?.toFixed(2)}</small>
                   </div>
                 ))}
-                <small>Placed {new Date(bet.placedAt).toLocaleString()} · Stake GHS {bet.stake.toFixed(2)}</small>
+                <small>Placed {new Date(bet.placedAt).toLocaleString()} · Stake {formatMoney(bet.stake, normalizeCountry(bet.currency) || accountCountry)}</small>
               </div>
-              <strong style={{ color: "var(--gold-hi)" }}>GHS {bet.potentialReturn.toFixed(2)}</strong>
+              <strong style={{ color: "var(--gold-hi)" }}>{formatMoney(bet.potentialReturn, normalizeCountry(bet.currency) || accountCountry)}</strong>
             </div>
           ))
         )}

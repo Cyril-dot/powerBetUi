@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { ChevronLeft, Headphones, Home, Trophy, CheckCircle2 } from "lucide-react";
 import api, { ApiError, type Bet, type Match } from "@/lib/api";
+import { formatMoney, normalizeCountry, useAccountCountry } from "@/lib/country";
 import TrophyCelebration from "./TrophyCelebration";
 
 const HIDDEN_TICKETS_KEY = "powerbet_hidden_tickets";
@@ -107,6 +108,7 @@ const STATUS_LABEL: Record<Bet["status"], string> = {
 
 export default function TicketDetailsPage({ id }: { id: string }) {
   const [, setLocation] = useLocation();
+  const accountCountry = useAccountCountry();
   const [bet, setBet] = useState<Bet | null>(null);
   const [matches, setMatchesById] = useState<Record<string, Match>>({});
   const [loading, setLoading] = useState(true);
@@ -177,7 +179,7 @@ export default function TicketDetailsPage({ id }: { id: string }) {
               </span>
             </div>
             <div className="td-stat"><span>Total Return</span><b className={bet.status === "WON" || bet.status === "CASHED_OUT" ? "td-return-won" : ""}>{(bet.status === "WON" || bet.status === "CASHED_OUT" ? bet.potentialReturn : 0).toFixed(2)}</b></div>
-            <div className="td-stat"><span>Total Stake</span><b>GHS {bet.stake.toFixed(2)}</b></div>
+            <div className="td-stat"><span>Total Stake</span><b>{formatMoney(bet.stake, normalizeCountry(bet.currency) || accountCountry)}</b></div>
             <div className="td-stat"><span>Total Odds</span><b>{bet.totalOdds.toFixed(2)}</b></div>
             <div className="td-verify-strip">Verify Code: <b>{verifyCode(bet)}</b></div>
           </section>

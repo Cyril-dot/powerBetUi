@@ -87,13 +87,26 @@ function Panel({ title, children, action }: { title: string; children: React.Rea
 function Notice({ text: value, error = false }: { text: string; error?: boolean }) { return value ? <div className={`sa-notice ${error ? "error" : "ok"}`}>{error ? <ShieldAlert size={14} /> : <Check size={14} />}{value}</div> : null; }
 
 function Dashboard({ go }: { go: (page: Page) => void }) {
-  const [metrics, setMetrics] = useState<Row>({}); const [deposits, setDeposits] = useState<Row>({}); const [error, setError] = useState(""); const [loading, setLoading] = useState(true);
-  const load = async () => { setLoading(true); const [m, d] = await Promise.allSettled([api.superAdmin.metrics(), api.superAdmin.depositMetrics()]); if (m.status === "fulfilled") setMetrics(m.value); else setError("Could not load platform metrics."); if (d.status === "fulfilled") setDeposits(d.value); else setError("Could not load deposit metrics."); setLoading(false); };
+  const [metrics, setMetrics] = useState<Row>({}); const [deposits, setDeposits] = useState<Row>({}); const [countryDeposits, setCountryDeposits] = useState<Row[]>([]); const [error, setError] = useState(""); const [loading, setLoading] = useState(true);
+  const load = async () => { setLoading(true); const [m, d, c] = await Promise.allSettled([api.superAdmin.metrics(), api.superAdmin.depositMetrics(), api.adminAffiliateInsights.depositsTotals(365)]); if (m.status === "fulfilled") setMetrics(m.value); else setError("Could not load platform metrics."); if (d.status === "fulfilled") setDeposits(d.value); else setError("Could not load deposit metrics."); if (c.status === "fulfilled") setCountryDeposits(list(c.value)); setLoading(false); };
   useEffect(() => { load(); }, []);
+  // Payments split by the depositor's country — cedis and naira are
+  // never added together, so each country's total stands on its own.
+  const countryTotals = useMemo(() => {
+    const totals: Record<string, { amount: number; count: number }> = { GH: { amount: 0, count: 0 }, NG: { amount: 0, count: 0 } };
+    for (const r of countryDeposits) {
+      const v = String(r.country ?? "").toUpperCase();
+      const key = ["GH", "GHA", "GHANA", "GHS"].includes(v) ? "GH" : ["NG", "NGA", "NIGERIA", "NGN"].includes(v) ? "NG" : "";
+      if (!key) continue;
+      totals[key].amount += numberValue(r.amount);
+      totals[key].count += numberValue(r.depositCount ?? r.count);
+    }
+    return totals;
+  }, [countryDeposits]);
   const cards = [["Registered users", metrics.totalUsers ?? metrics.userCount, Users, "users"], ["Administrators", metrics.totalAdmins ?? metrics.adminCount, ShieldCheck, "admins"], ["Deposited all time", deposits.totalDepositsAllTime ?? deposits.totalDeposits, Coins, "user-deposits"], ["Withdrawn all time", deposits.totalWithdrawalsAllTime ?? metrics.totalWithdrawals ?? metrics.withdrawals, WalletCards, "withdrawals"]] as const;
   const depositRows = [["All-time deposits", money(deposits.totalDepositsAllTime)], ["This month", money(deposits.totalDepositsThisMonth)], ["Today", money(deposits.totalDepositsToday)], ["Deposit count", text(deposits.totalDepositCount, "0")]];
   const platformRows = [["Users", text(metrics.totalUsers, "0")], ["Administrators", text(metrics.totalAdmins, "0")], ["Withdrawals all time", money(deposits.totalWithdrawalsAllTime)], ["Withdrawal count", text(deposits.totalWithdrawalCount, "0")]];
-  return <div className="sa-stack"><div className="sa-page-intro"><div><span>PLAYBET · EXECUTIVE CONTROL</span><h1>Platform dashboard</h1><p>Live platform health, finance controls, and administration overview.</p></div><button className="sa-icon" onClick={load}><RefreshCw size={16} className={loading ? "sa-spin" : ""} /></button></div><Notice text={error} error /><div className="sa-stat-grid">{cards.map(([label, value, Icon, page]) => <button type="button" key={label} className="sa-stat" onClick={() => go(page)}><Icon size={18} /><small>{label}</small><strong>{loading ? "…" : label.includes("deposit") || label.includes("Withdrawn") ? money(value) : text(value, "0")}</strong><ChevronRight size={15} /></button>)}</div><Panel title="Open deposit queues"><div className="sa-quick-links"><button onClick={() => go("binance")}><Coins size={15} /> Binance deposits</button><button onClick={() => go("simple-deposits")}><CreditCard size={15} /> Simple deposits</button><button onClick={() => go("bank-deposits")}><Building2 size={15} /> Bank / MoMo deposits</button><button onClick={() => go("user-deposits")}><Database size={15} /> User deposit history</button></div></Panel><div className="sa-two-col"><Panel title="Deposit performance"><div className="sa-summary-list">{depositRows.map(([label, value]) => <div key={label}><span>{label}</span><b>{loading ? "…" : value}</b></div>)}</div></Panel><Panel title="Platform overview"><div className="sa-summary-list">{platformRows.map(([label, value]) => <div key={label}><span>{label}</span><b>{loading ? "…" : value}</b></div>)}</div><div className="sa-platform-badge">Data source: {text(metrics.platform, "PlayBet")}</div></Panel></div></div>;
+  return <div className="sa-stack"><div className="sa-page-intro"><div><span>PLAYBET · EXECUTIVE CONTROL</span><h1>Platform dashboard</h1><p>Live platform health, finance controls, and administration overview.</p></div><button className="sa-icon" onClick={load}><RefreshCw size={16} className={loading ? "sa-spin" : ""} /></button></div><Notice text={error} error /><div className="sa-stat-grid">{cards.map(([label, value, Icon, page]) => <button type="button" key={label} className="sa-stat" onClick={() => go(page)}><Icon size={18} /><small>{label}</small><strong>{loading ? "…" : label.includes("deposit") || label.includes("Withdrawn") ? money(value) : text(value, "0")}</strong><ChevronRight size={15} /></button>)}</div><Panel title="Open deposit queues"><div className="sa-quick-links"><button onClick={() => go("binance")}><Coins size={15} /> Binance deposits</button><button onClick={() => go("simple-deposits")}><CreditCard size={15} /> Simple deposits</button><button onClick={() => go("bank-deposits")}><Building2 size={15} /> Bank / MoMo deposits</button><button onClick={() => go("user-deposits")}><Database size={15} /> User deposit history</button></div></Panel><div className="sa-two-col"><Panel title="Deposit performance"><div className="sa-summary-list">{depositRows.map(([label, value]) => <div key={label}><span>{label}</span><b>{loading ? "…" : value}</b></div>)}</div></Panel><Panel title="Platform overview"><div className="sa-summary-list">{platformRows.map(([label, value]) => <div key={label}><span>{label}</span><b>{loading ? "…" : value}</b></div>)}</div><div className="sa-platform-badge">Data source: {text(metrics.platform, "PlayBet")}</div></Panel></div><Panel title="Payments by country"><div className="sa-summary-list"><div><span>🇬🇭 Ghana deposits</span><b>{loading ? "…" : money(countryTotals.GH.amount, "GHS")}</b></div><div><span>Ghana deposit count</span><b>{loading ? "…" : countryTotals.GH.count.toLocaleString()}</b></div><div><span>🇳🇬 Nigeria deposits</span><b>{loading ? "…" : money(countryTotals.NG.amount, "NGN")}</b></div><div><span>Nigeria deposit count</span><b>{loading ? "…" : countryTotals.NG.count.toLocaleString()}</b></div></div><p className="sa-note">Cedis and naira are never added together — each country’s total stands on its own. Full per-country commission sits under Commission analytics.</p></Panel></div>;
 }
 function Admins() {
   const [rows, setRows] = useState<Row[]>([]); const [form, setForm] = useState({ email: "", password: "", name: "", commissionRate: "" }); const [error, setError] = useState(""); const [message, setMessage] = useState("");
@@ -153,7 +166,13 @@ function UsersPage() {
   const userAction = async (row: Row, action: "activate" | "deactivate" | "toggle-status" | "funds" | "deposits") => { const id = idOf(row); if (!id) return; try { if (action === "deposits") setDeposits(pageRows(await api.superAdmin.userDeposits(id))); else if (action === "funds") { const amount = window.prompt("Funds amount"); if (amount !== null) await api.superAdmin.addFundsToUser(id, { amount: Number(amount), currency: "GHS", reason: "Super Bet Super Admin adjustment", idempotencyKey: crypto.randomUUID() }); } else await api.superAdmin.setUserStatus(id, action); setDetail(action === "deposits" ? row : await api.superAdmin.getUserDetail(id)); setMessage("User operation completed."); await load(); } catch (e) { setError(e instanceof Error ? e.message : "User operation failed"); } };
   return <div className="sa-stack"><Intro title="Users" text="Search accounts, inspect profiles and deposits, change status, and adjust balances." onRefresh={load} /><Notice text={message} /><Notice text={error} error /><div className="sa-search"><Search size={15} /><input value={search} placeholder="Search by name, email, or ID" onChange={e => setSearch(e.target.value)} onKeyDown={e => e.key === "Enter" && load()} /><button onClick={load}>Search</button></div><Panel title="User accounts"><Table rows={rows} columns={["id", "email", "name", "role", "status", "balance", "createdAt"]} onRow={row => <div className="sa-actions"><button onClick={() => userAction(row, "deposits")}>Deposits</button><button onClick={() => userAction(row, "funds")}>Funds</button><button onClick={() => userAction(row, "toggle-status")}>Toggle</button></div>} /></Panel>{detail && <Panel title={`User detail · ${idOf(detail)}`} action={<button className="sa-icon" onClick={() => setDetail(null)}><X size={15} /></button>}><pre className="sa-json">{JSON.stringify(detail, null, 2)}</pre>{deposits.length > 0 && <Table rows={deposits} columns={["id", "amount", "currency", "status", "createdAt"]} />}</Panel>}</div>;
 }
-function Transactions() { const [rows, setRows] = useState<Row[]>([]); const [error, setError] = useState(""); const load = async () => { try { setRows(pageRows(await api.superAdmin.listTransactions(0, 100))); } catch (e) { setError(e instanceof Error ? e.message : "Could not load transactions"); } }; useEffect(() => { load(); }, []); return <div className="sa-stack"><Intro title="Transactions" text="Review the platform-wide transaction ledger." onRefresh={load} /><Notice text={error} error /><Panel title="Transaction ledger"><Table rows={rows} columns={["id", "kind", "type", "amount", "currency", "status", "walletId", "createdAt"]} /></Panel></div>; }
+function Transactions() { const [rows, setRows] = useState<Row[]>([]); const [error, setError] = useState(""); const [countryFilter, setCountryFilter] = useState<"ALL" | "GH" | "NG">("ALL"); const load = async () => { try { setRows(pageRows(await api.superAdmin.listTransactions(0, 100))); } catch (e) { setError(e instanceof Error ? e.message : "Could not load transactions"); } }; useEffect(() => { load(); }, []);
+  // The ledger rows carry a currency — GHS rows are Ghana payments,
+  // NGN rows are Nigeria payments. Rows with no currency show under All only.
+  const rowCountry = (r: Row) => { const c = String(r.currency ?? "").toUpperCase(); if (c === "GHS" || c === "GH") return "GH"; if (c === "NGN" || c === "NG") return "NG"; return ""; };
+  const counts = useMemo(() => ({ ALL: rows.length, GH: rows.filter((r) => rowCountry(r) === "GH").length, NG: rows.filter((r) => rowCountry(r) === "NG").length }), [rows]);
+  const visibleRows = countryFilter === "ALL" ? rows : rows.filter((r) => rowCountry(r) === countryFilter);
+  return <div className="sa-stack"><Intro title="Transactions" text="Review the platform-wide transaction ledger." onRefresh={load} /><Notice text={error} error /><Panel title="Transaction ledger"><div className="sa-toggle" role="tablist" aria-label="Payments by country">{(["ALL", "GH", "NG"] as const).map((c) => <button key={c} type="button" role="tab" aria-selected={countryFilter === c} className={countryFilter === c ? "active" : ""} onClick={() => setCountryFilter(c)}>{c === "ALL" ? `All payments (${counts.ALL})` : c === "GH" ? `🇬🇭 Ghana (${counts.GH})` : `🇳🇬 Nigeria (${counts.NG})`}</button>)}</div><Table rows={visibleRows} columns={["id", "kind", "type", "amount", "currency", "status", "walletId", "createdAt"]} /></Panel></div>; }
 function DepositQueue({ kind }: { kind: "binance" | "bank" | "simple" }) { const [rows, setRows] = useState<Row[]>([]); const [pending, setPending] = useState(true); const [error, setError] = useState(""); const [message, setMessage] = useState(""); const load = async () => { try { setRows(pageRows(await api.superAdminDeposits[kind](0, 100, pending))); } catch (e) { setError(e instanceof Error ? e.message : "Could not load deposits"); } }; useEffect(() => { load(); }, [pending]); const action = async (row: Row, approve: boolean) => { const id = idOf(row); try { if (approve) await api.superAdminDeposits.approve(kind, id); else await api.superAdminDeposits.reject(kind, id, { reason: window.prompt("Rejection reason") || "Rejected by Super Admin" }); setMessage(approve ? "Deposit approved." : "Deposit rejected."); await load(); } catch (e) { setError(e instanceof Error ? e.message : "Deposit operation failed"); } }; return <div className="sa-stack"><Intro title={`${kind[0].toUpperCase()}${kind.slice(1)} deposits`} text="Review, approve, or reject deposit requests." onRefresh={load} /><Notice text={message} /><Notice text={error} error /><div className="sa-toggle"><button className={pending ? "active" : ""} onClick={() => setPending(true)}>Pending</button><button className={!pending ? "active" : ""} onClick={() => setPending(false)}>All records</button></div><Panel title="Deposit queue"><Table rows={rows} columns={["id", "userId", "email", "amount", "currency", "status", "createdAt"]} onRow={row => <div className="sa-actions"><button onClick={() => action(row, true)}><Check size={12} /> Approve</button><button onClick={() => action(row, false)}><X size={12} /> Reject</button></div>} /></Panel></div>; }
 function BankMomoDeposits() {
   const MOMO_MAX = 30000;
@@ -380,10 +399,41 @@ function CommissionAnalytics() {
   const [success, setSuccess] = useState("");
   const [updatedAt, setUpdatedAt] = useState("");
   const [payDate, setPayDate] = useState(today);
-  const [mobileTab, setMobileTab] = useState<"overview" | "bydate" | "byadmin" | "payclear">("overview");
+  const [mobileTab, setMobileTab] = useState<"overview" | "bydate" | "byadmin" | "payclear" | "bycountry" | "nigeria">("overview");
   const [payRows, setPayRows] = useState<Row[]>([]);
   const [payLoading, setPayLoading] = useState(false);
   const [actingAdmin, setActingAdmin] = useState("");
+  // Country split — from the super-admin country-report endpoints
+  // (daily = last 30 days, weekly = last 12 weeks). Its window is
+  // independent of the range presets above; cedis and naira are never
+  // added together.
+  const [countryPeriod, setCountryPeriod] = useState<"daily" | "weekly">("daily");
+  const [countryReport, setCountryReport] = useState<Row | null>(null);
+  const [countryLoading, setCountryLoading] = useState(true);
+  const [countryError, setCountryError] = useState("");
+  const loadCountryReport = async (period: "daily" | "weekly") => {
+    setCountryLoading(true); setCountryError("");
+    try {
+      const raw = period === "daily" ? await api.superAdmin.commissionDaily(30) : await api.superAdmin.commissionWeekly(12);
+      setCountryReport((raw as Row) ?? {});
+    } catch (e) { setCountryError(e instanceof Error ? e.message : "Could not load the country report"); }
+    finally { setCountryLoading(false); }
+  };
+  useEffect(() => { void loadCountryReport(countryPeriod); }, [countryPeriod]);
+  const countrySummaries = useMemo(() => list(countryReport?.summaries), [countryReport]);
+  const ngSummary = countrySummaries.find((s) => String(s.country ?? "").toUpperCase() === "NG");
+  const ngByAdmin = useMemo(() => {
+    const map = new Map<string, { email: string; commission: number; entries: number }>();
+    for (const r of list(countryReport?.commissionByAdmin)) {
+      if (String(r.country ?? "").toUpperCase() !== "NG") continue;
+      const id = text(r.adminId, text(r.adminEmail, "unknown"));
+      const cur = map.get(id) ?? { email: text(r.adminEmail, "Email unavailable"), commission: 0, entries: 0 };
+      cur.commission += numberValue(r.amount);
+      cur.entries += numberValue(r.count);
+      map.set(id, cur);
+    }
+    return [...map.values()].sort((a, b) => b.commission - a.commission);
+  }, [countryReport]);
   const rangeToken = useRef(0);
   const payToken = useRef(0);
 
@@ -522,7 +572,7 @@ function CommissionAnalytics() {
   return <div className="sa-stack sa-ca-root" data-mobile-tab={mobileTab}>
     <Intro title="Commission analytics" text="Per-admin commission and deposits for any day or range, straight from the daily commission report." onRefresh={() => { if (applied) void loadRange(applied.start, applied.end); void loadPayDay(payDate); }} />
     <Notice text={error} error /><Notice text={success} />
-    {showGuide && <div className="sa-analytics-guide"><strong>How to read this report</strong><button type="button" onClick={() => setShowGuide(false)} aria-label="Close analytics explanation"><X size={14} /></button><p><b>Pick a preset</b> (Today, Yesterday, Last 7 days, Last 30 days) or a <b>Custom range</b> of up to 31 days, then press Load. <b>Commission earned</b> is what each administrator is owed for the range; <b>Total deposits</b> is the deposit value attributed to them. Figures are grouped per currency — cedis and naira are never added together. <b>Pay &amp; clear</b> below settles one single day.</p><small>Values are reported by the backend and change when you load a different range.</small></div>}
+    {showGuide && <div className="sa-analytics-guide"><strong>How to read this report</strong><button type="button" onClick={() => setShowGuide(false)} aria-label="Close analytics explanation"><X size={14} /></button><p><b>Pick a preset</b> (Today, Yesterday, Last 7 days, Last 30 days) or a <b>Custom range</b> of up to 31 days, then press Load. <b>Commission earned</b> is what each administrator is owed for the range; <b>Total deposits</b> is the deposit value attributed to them. Figures are grouped per currency — cedis and naira are never added together. <b>Pay &amp; clear</b> below settles one single day. The <b>By country</b> tab splits the same commission by the depositor’s country (last 30 days or last 12 weeks), and the <b>Nigeria</b> tab shows only what Nigerian deposits owe, per admin.</p><small>Values are reported by the backend and change when you load a different range.</small></div>}
 
     <section className="sa-datebar" aria-label="Date range">
       <div className="sa-datebar-row">
@@ -546,7 +596,7 @@ function CommissionAnalytics() {
     </section>
 
     <nav className="sa-ca-tabs" role="tablist" aria-label="Commission sections">
-      {(["overview", "bydate", "byadmin", "payclear"] as const).map((t) => <button key={t} type="button" role="tab" aria-selected={mobileTab === t} className={mobileTab === t ? "active" : ""} onClick={() => setMobileTab(t)}>{t === "overview" ? "Overview" : t === "bydate" ? "By date" : t === "byadmin" ? "By admin" : "Pay & clear"}</button>)}
+      {(["overview", "bydate", "byadmin", "bycountry", "nigeria", "payclear"] as const).map((t) => <button key={t} type="button" role="tab" aria-selected={mobileTab === t} className={mobileTab === t ? "active" : ""} onClick={() => setMobileTab(t)}>{t === "overview" ? "Overview" : t === "bydate" ? "By date" : t === "byadmin" ? "By admin" : t === "bycountry" ? "By country" : t === "nigeria" ? "Nigeria" : "Pay & clear"}</button>)}
     </nav>
 
     <div className="sa-admin-filter sa-ca-sec-filter">
@@ -570,6 +620,25 @@ function CommissionAnalytics() {
         <div className="sa-ca-sec-byadmin"><Panel title="By administrator"><div className="sa-table-wrap"><table className="sa-table"><thead><tr><th>Admin</th><th>Rate</th><th>Commission</th><th>Deposits</th><th>Entries</th></tr></thead><tbody>{visibleAdmins.length === 0 ? <tr><td colSpan={5} className="sa-empty">No administrators match this filter.</td></tr> : visibleAdmins.map((item) => <tr key={item.id}><td>{item.email}</td><td>{rateDisplay(item.rate)}</td><td>{item.commission}</td><td>{item.deposits}</td><td>{item.entries.toLocaleString()}</td></tr>)}</tbody></table></div></Panel></div>
       </>}
     </> : null}
+
+    <div className="sa-ca-sec-bycountry"><Panel title={`Commission by country · ${countryPeriod === "daily" ? "last 30 days" : "last 12 weeks"}`} action={<div className="sa-toggle"><button type="button" className={countryPeriod === "daily" ? "active" : ""} disabled={countryLoading} onClick={() => setCountryPeriod("daily")}>Last 30 days</button><button type="button" className={countryPeriod === "weekly" ? "active" : ""} disabled={countryLoading} onClick={() => setCountryPeriod("weekly")}>Last 12 weeks</button></div>}>
+      {countryLoading ? <SkelTable cols={4} /> : countryError ? <div className="sa-empty">{countryError}</div> : countrySummaries.length === 0 ? <div className="sa-empty">No country-level commission yet in this window.</div> : <>
+        <div className="sa-analytics-stat-grid">{countrySummaries.map((s) => <div className="sa-analytics-stat" key={text(s.country, "unknown")}><small>{text(s.countryName, s.country)} commission</small><strong>{money(s.commissionTotal, s.currency)}</strong><span>{money(s.depositTotal, s.currency)} deposits · {numberValue(s.depositCount).toLocaleString()} entries</span></div>)}</div>
+        <div className="sa-table-wrap"><table className="sa-table"><thead><tr><th>Country</th><th>Deposits</th><th>Deposit count</th><th>Commission</th><th>Commission entries</th><th>Effective rate</th></tr></thead><tbody>{countrySummaries.map((s) => <tr key={text(s.country, "unknown")}><td>{text(s.countryName, s.country)}</td><td>{money(s.depositTotal, s.currency)}</td><td>{numberValue(s.depositCount).toLocaleString()}</td><td>{money(s.commissionTotal, s.currency)}</td><td>{numberValue(s.commissionCount).toLocaleString()}</td><td>{Number(s.effectiveCommissionRate ?? 0).toFixed(1)}%</td></tr>)}</tbody></table></div>
+        <div className="sa-table-wrap"><table className="sa-table"><thead><tr><th>Period</th><th>Admin</th><th>Country</th><th>Commission</th><th>Entries</th></tr></thead><tbody>{list(countryReport?.commissionByAdmin).map((r, i) => <tr key={`${text(r.adminId, "admin")}-${text(r.periodLabel, "")}-${i}`}><td className="sa-nowrap">{text(r.periodLabel)}</td><td>{text(r.adminEmail)}</td><td>{text(r.countryName, r.country)}</td><td>{money(r.amount, r.currency)}</td><td>{numberValue(r.count).toLocaleString()}</td></tr>)}</tbody></table></div>
+      </>}
+    </Panel></div>
+
+    <div className="sa-ca-sec-nigeria"><Panel title="Nigeria — commission owed">
+      {countryLoading ? <SkelTable cols={3} /> : countryError ? <div className="sa-empty">{countryError}</div> : !ngSummary ? <div className="sa-empty">No Nigerian commission yet in this window.</div> : <>
+        <div className="sa-analytics-stat-grid">
+          <div className="sa-analytics-stat"><small>Nigeria commission owed</small><strong>{money(ngSummary.commissionTotal, ngSummary.currency)}</strong><span>{countryPeriod === "daily" ? "Last 30 days" : "Last 12 weeks"}</span></div>
+          <div className="sa-analytics-stat"><small>Nigeria deposits</small><strong>{money(ngSummary.depositTotal, ngSummary.currency)}</strong><span>{numberValue(ngSummary.depositCount).toLocaleString()} deposits · avg {money(ngSummary.averageDeposit, ngSummary.currency)}</span></div>
+          <div className="sa-analytics-stat"><small>Commission entries</small><strong>{numberValue(ngSummary.commissionCount).toLocaleString()}</strong><span>Effective rate {Number(ngSummary.effectiveCommissionRate ?? 0).toFixed(1)}%</span></div>
+        </div>
+        <div className="sa-table-wrap"><table className="sa-table"><thead><tr><th>Admin</th><th>Commission owed</th><th>Entries</th></tr></thead><tbody>{ngByAdmin.length === 0 ? <tr><td colSpan={3} className="sa-empty">No Nigerian commission entries in this window.</td></tr> : ngByAdmin.map((item) => <tr key={item.email}><td>{item.email}</td><td>{money(item.commission, "NGN")}</td><td>{item.entries.toLocaleString()}</td></tr>)}</tbody></table></div>
+      </>}
+    </Panel></div>
 
     <div className="sa-ca-sec-payclear"><Panel title={`Pay & clear · ${fmtDayLong(payDate)}`} action={<div className="sa-pay-date"><button type="button" className={payDate === today ? "sa-primary" : "sa-secondary"} disabled={payLoading} onClick={() => setPayDate(today)}>Today</button><input type="date" value={payDate} disabled={payLoading} onChange={(e) => setPayDate(e.target.value)} aria-label="Settlement day" /></div>}>
       {payLoading ? <SkelTable cols={5} /> : <div className="sa-table-wrap"><table className="sa-table"><thead><tr><th>Admin</th><th>Commission rate</th><th>Commission</th><th>Status</th><th>Action</th></tr></thead><tbody>{activePayRows.length === 0 ? <tr><td colSpan={5} className="sa-empty">No unpaid commission for this day.</td></tr> : activePayRows.map((row) => <tr key={text(row.adminId)}><td>{text(row.adminEmail)}</td><td>{text(row.commissionPercent)}%</td><td>{money(row.commissionEarned, row.commissionCurrency)}</td><td>{numberValue(row.commissionEarned) > 0 ? "Unpaid" : "Paid / cleared"}</td><td><button className="sa-link" onClick={() => payAdmin(text(row.adminId))} disabled={actingAdmin !== "" || numberValue(row.commissionEarned) <= 0}>{actingAdmin === text(row.adminId) ? "Paying…" : "Mark paid"}</button></td></tr>)}</tbody></table></div>}
@@ -729,12 +798,14 @@ const superAdminStyles = `
 .sa-ca-tabs button.active{background:#00A651;border-color:#00A651;color:#fff}
 .sa-ca-root .sa-chip-7d,.sa-ca-root .sa-chip-30d,.sa-ca-root .sa-chip-custom,.sa-ca-root .sa-range{display:none}
 .sa-ca-root .sa-chips button{flex:1;min-height:44px}
-.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-filter,.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-bydate,.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-byadmin,.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-payclear,.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-table{display:none}
-.sa-ca-root[data-mobile-tab="bydate"] .sa-ca-sec-filter,.sa-ca-root[data-mobile-tab="bydate"] .sa-ca-sec-overview,.sa-ca-root[data-mobile-tab="bydate"] .sa-ca-sec-byadmin,.sa-ca-root[data-mobile-tab="bydate"] .sa-ca-sec-payclear{display:none}
-.sa-ca-root[data-mobile-tab="byadmin"] .sa-ca-sec-overview,.sa-ca-root[data-mobile-tab="byadmin"] .sa-ca-sec-bydate,.sa-ca-root[data-mobile-tab="byadmin"] .sa-ca-sec-payclear,.sa-ca-root[data-mobile-tab="byadmin"] .sa-ca-sec-table{display:none}
-.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-filter,.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-overview,.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-bydate,.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-byadmin,.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-table{display:none}
+.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-filter,.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-bydate,.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-byadmin,.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-bycountry,.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-nigeria,.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-payclear,.sa-ca-root[data-mobile-tab="overview"] .sa-ca-sec-table{display:none}
+.sa-ca-root[data-mobile-tab="bydate"] .sa-ca-sec-filter,.sa-ca-root[data-mobile-tab="bydate"] .sa-ca-sec-overview,.sa-ca-root[data-mobile-tab="bydate"] .sa-ca-sec-byadmin,.sa-ca-root[data-mobile-tab="bydate"] .sa-ca-sec-bycountry,.sa-ca-root[data-mobile-tab="bydate"] .sa-ca-sec-nigeria,.sa-ca-root[data-mobile-tab="bydate"] .sa-ca-sec-payclear{display:none}
+.sa-ca-root[data-mobile-tab="byadmin"] .sa-ca-sec-overview,.sa-ca-root[data-mobile-tab="byadmin"] .sa-ca-sec-bydate,.sa-ca-root[data-mobile-tab="byadmin"] .sa-ca-sec-bycountry,.sa-ca-root[data-mobile-tab="byadmin"] .sa-ca-sec-nigeria,.sa-ca-root[data-mobile-tab="byadmin"] .sa-ca-sec-payclear,.sa-ca-root[data-mobile-tab="byadmin"] .sa-ca-sec-table{display:none}
+.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-filter,.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-overview,.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-bydate,.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-byadmin,.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-bycountry,.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-nigeria,.sa-ca-root[data-mobile-tab="payclear"] .sa-ca-sec-table{display:none}
+.sa-ca-root[data-mobile-tab="bycountry"] .sa-ca-sec-filter,.sa-ca-root[data-mobile-tab="bycountry"] .sa-ca-sec-overview,.sa-ca-root[data-mobile-tab="bycountry"] .sa-ca-sec-bydate,.sa-ca-root[data-mobile-tab="bycountry"] .sa-ca-sec-byadmin,.sa-ca-root[data-mobile-tab="bycountry"] .sa-ca-sec-nigeria,.sa-ca-root[data-mobile-tab="bycountry"] .sa-ca-sec-payclear,.sa-ca-root[data-mobile-tab="bycountry"] .sa-ca-sec-table{display:none}
+.sa-ca-root[data-mobile-tab="nigeria"] .sa-ca-sec-filter,.sa-ca-root[data-mobile-tab="nigeria"] .sa-ca-sec-overview,.sa-ca-root[data-mobile-tab="nigeria"] .sa-ca-sec-bydate,.sa-ca-root[data-mobile-tab="nigeria"] .sa-ca-sec-byadmin,.sa-ca-root[data-mobile-tab="nigeria"] .sa-ca-sec-bycountry,.sa-ca-root[data-mobile-tab="nigeria"] .sa-ca-sec-payclear,.sa-ca-root[data-mobile-tab="nigeria"] .sa-ca-sec-table{display:none}
 .sa-ca-root .sa-ca-help-label{display:none}
-.sa-ca-root .sa-ca-tabs,.sa-ca-root .sa-datebar,.sa-ca-root .sa-ca-sec-overview,.sa-ca-root .sa-ca-sec-bydate,.sa-ca-root .sa-ca-sec-byadmin,.sa-ca-root .sa-ca-sec-payclear,.sa-ca-root .sa-ca-sec-filter,.sa-ca-root .sa-ca-sec-table,.sa-ca-root .sa-panel{min-width:0}
+.sa-ca-root .sa-ca-tabs,.sa-ca-root .sa-datebar,.sa-ca-root .sa-ca-sec-overview,.sa-ca-root .sa-ca-sec-bydate,.sa-ca-root .sa-ca-sec-byadmin,.sa-ca-root .sa-ca-sec-bycountry,.sa-ca-root .sa-ca-sec-nigeria,.sa-ca-root .sa-ca-sec-payclear,.sa-ca-root .sa-ca-sec-filter,.sa-ca-root .sa-ca-sec-table,.sa-ca-root .sa-panel{min-width:0}
 .sa-ca-root .sa-panel-head{flex-wrap:wrap;gap:10px}
 .sa-ca-root .sa-analytics-stat{padding:14px}
 .sa-ca-root .sa-panel-head{padding:13px 14px}

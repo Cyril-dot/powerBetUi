@@ -6,6 +6,7 @@ import { parseKickoff } from "@/lib/sportsbook";
 import { buildMatchLabel, extractOdds, selectionState, selectionToPick } from "@/lib/bookingCode";
 import type { Pick } from "./Sportsbook";
 import { useSession } from "../lib/session";
+import { currencyCode, useAccountCountry } from "@/lib/country";
 import { resolveIsAdmin } from "./WalletCenter";
 import BookingCodeReceipt from "./BookingCodeReceipt";
 
@@ -310,6 +311,8 @@ export default function BetslipPage({
     selections: Pick[]; bookingCode: string | null; codeState: "ready" | "generating" | "failed"; isAdmin: boolean;
   } | null>(null);
   const { user } = useSession();
+  const accountCountry = useAccountCountry();
+  const cc = currencyCode(accountCountry);
   const isAdmin = resolveIsAdmin(user);
   const [balance, setBalance] = useState<number | null>(null);
 
@@ -338,7 +341,7 @@ export default function BetslipPage({
   const place = async () => {
     setNotice(null);
     if (picks.length === 0) return;
-    if (stakeInvalid) { setNotice({ type: "error", text: stake === "" ? "Enter your stake amount to continue." : balance !== null && stakeValue > balance ? "Stake exceeds your available balance." : `Stake must be between GHS ${MIN_STAKE} and GHS ${MAX_STAKE}.` }); return; }
+    if (stakeInvalid) { setNotice({ type: "error", text: stake === "" ? "Enter your stake amount to continue." : balance !== null && stakeValue > balance ? "Stake exceeds your available balance." : `Stake must be between ${cc} ${MIN_STAKE} and ${cc} ${MAX_STAKE}.` }); return; }
     setPlacing(true);
     const placedPicks = picks;
     try {
@@ -395,9 +398,9 @@ export default function BetslipPage({
               <span>Stake (GHS)</span>
               <input type="number" min={MIN_STAKE} max={MAX_STAKE} value={stake} placeholder="Enter amount" onChange={(e) => { setStakeEdited(true); setStake(e.target.value); }} />
             </label>
-            <div className="bp-stake-hint">Min GHS {MIN_STAKE} · Max GHS {MAX_STAKE}{balance !== null && ` · Balance GHS ${balance.toFixed(2)}`}</div>
-            {stakeEdited && stake !== "" && Number.isFinite(stakeValue) && stakeValue < MIN_STAKE && <small className="bp-stake-error" role="alert">Deposit an additional GHS {Math.max(0, MIN_STAKE - stakeValue).toFixed(2)} to place this bet.</small>}
-            <div className="bp-summary-row highlight"><span>Potential return</span><b>GHS {potentialReturn.toFixed(2)}</b></div>
+            <div className="bp-stake-hint">Min {cc} {MIN_STAKE} · Max {cc} {MAX_STAKE}{balance !== null && ` · Balance ${cc} ${balance.toFixed(2)}`}</div>
+            {stakeEdited && stake !== "" && Number.isFinite(stakeValue) && stakeValue < MIN_STAKE && <small className="bp-stake-error" role="alert">Deposit an additional {cc} {Math.max(0, MIN_STAKE - stakeValue).toFixed(2)} to place this bet.</small>}
+            <div className="bp-summary-row highlight"><span>Potential return</span><b>{cc} {potentialReturn.toFixed(2)}</b></div>
             <button className={`gold-button full${stakeInvalid ? " stake-button-disabled" : ""}`} onClick={place} disabled={placing || stakeInvalid}>{placing ? "Placing…" : "Place Bet"}</button>
             {notice && <small className={notice.type === "error" ? "auth-notice" : "auth-notice bp-success"}>{notice.text}</small>}
           </aside>
@@ -427,9 +430,9 @@ export default function BetslipPage({
             <p>Your bet is in. Good luck!</p>
             <div className="pb-success-rows">
               <div><span>Selections</span><b>{placedInfo.count}</b></div>
-              <div><span>Stake</span><b>GHS {placedInfo.stake.toFixed(2)}</b></div>
+              <div><span>Stake</span><b>{cc} {placedInfo.stake.toFixed(2)}</b></div>
               <div><span>Total odds</span><b>{placedInfo.totalOdds.toFixed(2)}</b></div>
-              <div className="ret"><span>Potential return</span><b>GHS {placedInfo.potentialReturn.toFixed(2)}</b></div>
+              <div className="ret"><span>Potential return</span><b>{cc} {placedInfo.potentialReturn.toFixed(2)}</b></div>
             </div>
             <button className="gold-button full" onClick={() => setLocation("/open-bets")}>View my bets</button>
             <button className="ghost-button full" onClick={() => setPlacedInfo(null)}>Done</button>

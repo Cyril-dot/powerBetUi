@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { RefreshCw, Wallet } from "lucide-react";
 import api, { ApiError, type Transaction } from "@/lib/api";
+import { formatMoney, useAccountCountry } from "@/lib/country";
 
 const FILTERS: { key: string; label: string; kinds: string[] }[] = [
   { key: "all", label: "All", kinds: [] },
@@ -23,6 +24,7 @@ const CREDIT_KINDS = new Set(["DEPOSIT", "BET_WIN", "REFERRAL_COMMISSION", "WITH
 const PAGE_SIZE = 20;
 
 export default function TransactionsPage() {
+  const accountCountry = useAccountCountry();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -85,7 +87,7 @@ export default function TransactionsPage() {
                   <small>{new Date(tx.createdAt).toLocaleString()} {tx.status ? `· ${tx.status}` : ""} {tx.providerRef ? `· Ref ${tx.providerRef}` : ""}</small>
                 </div>
                 <strong style={{ color: isCredit ? "var(--nature)" : "var(--gold-hi)" }}>
-                  {isCredit ? "+" : "-"}GHS {Math.abs(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {isCredit ? "+" : "-"}{formatMoney(Math.abs(tx.amount), accountCountry)}
                 </strong>
               </div>
             );

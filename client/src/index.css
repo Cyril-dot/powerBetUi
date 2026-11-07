@@ -2823,6 +2823,8 @@ body:has(.match-details-page){background:#eef0f4!important;background-image:none
 .deposit-country-row button{padding:10px;border:0;border-radius:9px;background:transparent;color:#bbb;font:800 12px 'DM Sans',sans-serif;cursor:pointer}
 .deposit-country-row button.selected{background:#ffd84d;color:#121212}
 .deposit-country-row button:disabled{opacity:.55;cursor:not-allowed}
+.deposit-country-row.deposit-country-locked{grid-template-columns:1fr}
+.deposit-country-row.deposit-country-locked span{display:block;text-align:center;padding:10px;color:#ffd84d;font:800 12px 'DM Sans',sans-serif}
 .deposit-amount-hero label{font-size:13px;font-weight:700;letter-spacing:0;text-transform:none;color:#20242D}
 .deposit-amount-hero .deposit-amount-wrap b{font-size:17px}
 .deposit-amount-hero input{font-size:24px;font-weight:800;padding:12px 14px}

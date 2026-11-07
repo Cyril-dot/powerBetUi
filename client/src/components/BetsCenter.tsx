@@ -4,6 +4,7 @@ import {
   CalendarDays, CheckCircle2, ChevronDown, ChevronRight, Clock3, Info, RefreshCw, Trash2, Trophy, X,
 } from "lucide-react";
 import api, { ApiError, type Bet, type Match } from "@/lib/api";
+import { formatMoney, normalizeCountry, useAccountCountry } from "@/lib/country";
 import { resolveIsAdmin } from "./WalletCenter";
 import { BET_PLACED_NOTICE_KEY } from "./BetslipPage";
 import { useSession } from "../lib/session";
@@ -118,9 +119,9 @@ function HistoryCard({ bet, scores }: { bet: Bet; scores: Record<string, Match> 
 	          {rest > 0 && <div className="bh-more">…and {rest} other match{rest > 1 ? "es" : ""}</div>}
 	        </div>
 	        <div className="bh-totals">
-	          <div><span>Stake</span><b>GHS {bet.stake.toFixed(2)}</b></div>
+	          <div><span>Stake</span><b>{formatMoney(bet.stake, normalizeCountry(bet.currency) || accountCountry)}</b></div>
 	          <div><span>Odds</span><b>{bet.totalOdds.toFixed(2)}×</b></div>
-	          <div className="bh-payout-row"><span>{won || bet.status === "CASHED_OUT" ? "Amount won" : "Potential return"}</span><b className={won ? "bh-return-won" : ""}>GHS {totalReturn.toFixed(2)}</b></div>
+	          <div className="bh-payout-row"><span>{won || bet.status === "CASHED_OUT" ? "Amount won" : "Potential return"}</span><b className={won ? "bh-return-won" : ""}>{formatMoney(totalReturn, normalizeCountry(bet.currency) || accountCountry)}</b></div>
 	        </div>
 	      </div>
     </div>
@@ -199,6 +200,7 @@ export default function BetsCenter({ defaultTab = "history" }: { defaultTab?: "o
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [placedNotice, setPlacedNotice] = useState(false);
   const { user } = useSession();
+  const accountCountry = useAccountCountry();
   const isAdmin = resolveIsAdmin(user);
   const [matchScores, setMatchScores] = useState<Record<string, Match>>({}); const [, repaint] = useState(0);
   const hiddenTickets = useMemo(readHiddenTickets, []);

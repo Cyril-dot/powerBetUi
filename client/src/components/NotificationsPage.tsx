@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { Award, Bell, CheckCheck, RefreshCw, Wallet } from "lucide-react";
 import api, { ApiError, type Bet, type Transaction } from "@/lib/api";
+import { formatMoney, normalizeCountry, useAccountCountry } from "@/lib/country";
 
 interface Notice { id: string; icon: "wallet" | "bet"; title: string; detail: string; at: string; }
 
@@ -16,6 +17,7 @@ const KIND_LABEL: Record<string, string> = {
 };
 
 export default function NotificationsPage() {
+  const accountCountry = useAccountCountry();
   const [txs, setTxs] = useState<Transaction[]>([]);
   const [bets, setBets] = useState<Bet[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,12 +43,12 @@ export default function NotificationsPage() {
   const notices: Notice[] = useMemo(() => {
     const fromTx: Notice[] = txs.map((t) => ({
       id: `tx-${t.id}`, icon: "wallet", title: KIND_LABEL[t.kind] ?? t.kind,
-      detail: `GHS ${Math.abs(t.amount).toFixed(2)}${t.status ? ` · ${t.status}` : ""}`, at: t.createdAt,
+      detail: `${formatMoney(Math.abs(t.amount), accountCountry)}${t.status ? ` · ${t.status}` : ""}`, at: t.createdAt,
     }));
     const fromBets: Notice[] = bets.map((b) => ({
       id: `bet-${b.id}`, icon: "bet",
       title: b.status === "WON" ? "Bet won" : b.status === "LOST" ? "Bet lost" : b.status === "VOID" ? "Bet voided" : "Bet cashed out",
-      detail: `Stake GHS ${b.stake.toFixed(2)} · ${b.selections.length} selection${b.selections.length === 1 ? "" : "s"}`,
+      detail: `Stake ${formatMoney(b.stake, normalizeCountry(b.currency) || accountCountry)} · ${b.selections.length} selection${b.selections.length === 1 ? "" : "s"}`,
       at: b.settledAt ?? b.placedAt,
     }));
     return [...fromTx, ...fromBets].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());

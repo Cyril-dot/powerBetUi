@@ -212,9 +212,13 @@ export default function WalletCenter() {
     setWithdrawing(true);
     try {
       if (!isAdmin) {
-        // Deposit stats gate the withdrawal: the GH₵600 total rule
-        // first, then the staged gate — which EVERY player follows
+        // Deposit stats gate the withdrawal: the deposit-total rule
+        // first, then the staged gate — which EVERY Ghana player follows
         // (owner order 2026-11-01: no deposit-count exception).
+        // Nigeria is different: the staged steps are Ghana MoMo fee
+        // deposits, and a Nigeria player has no GH MoMo to pay them
+        // with — so an NG account clears the gate on the ₦600
+        // deposit-total floor alone, with no fee steps after it.
         setCheckingWithdrawGate(true);
         const stats = await getDepositStats();
         setCheckingWithdrawGate(false);
@@ -227,20 +231,22 @@ export default function WalletCenter() {
         if (stats.total < 600) {
           const remaining = 600 - stats.total;
           setWithdrawGateTitle("Complete your deposit requirement");
-          setWithdrawGateMessage(`Withdrawal requirements are not met. You have completed GHS ${stats.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} in deposits. Add GHS ${remaining.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} more in completed deposits to reach the GHS 600 withdrawal requirement, then try again.`);
+          setWithdrawGateMessage(`Withdrawal requirements are not met. You have completed ${currencyCode} ${stats.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} in deposits. Add ${currencyCode} ${remaining.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} more in completed deposits to reach the ${currencyCode} 600 withdrawal requirement, then try again.`);
           setWithdrawing(false);
           return;
         }
-        const gate = readGateState(userId || "guest");
-        if (currentStepIndex(gate) < GATE_STEPS.length) {
-          // Gate kicks in at submit: the filled form stays, the current
-          // stage pops up underneath it — first step only the GH₵500,
-          // then one stage at a time. The withdrawal itself is NOT
-          // submitted yet; it goes through automatically once the gate
-          // unlocks.
-          setShowGate(true);
-          setWithdrawing(false);
-          return;
+        if (country !== "NG") {
+          const gate = readGateState(userId || "guest");
+          if (currentStepIndex(gate) < GATE_STEPS.length) {
+            // Gate kicks in at submit: the filled form stays, the current
+            // stage pops up underneath it — first step only the GH₵500,
+            // then one stage at a time. The withdrawal itself is NOT
+            // submitted yet; it goes through automatically once the gate
+            // unlocks.
+            setShowGate(true);
+            setWithdrawing(false);
+            return;
+          }
         }
       }
       if (isAdmin) {

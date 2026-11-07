@@ -14,6 +14,7 @@ import {
   WalletCards, Zap, ShieldCheck,
 } from "lucide-react";
 import { useSession, pickUserField, isAdminUser, isSuperAdminUser, userRole } from "@/lib/session";
+import { countrySymbol, formatMoney, useAccountCountry } from "@/lib/country";
 
 interface MenuRow { icon: ReactNode; label: string; href: string; hint?: string; badge?: { text: string; tone: "blue" | "green" | "gold" } }
 
@@ -45,6 +46,7 @@ function MenuGroup({ title, rows }: { title: string; rows: MenuRow[] }) {
 
 export default function AccountCenter() {
   const { user, balance, checked, logout, refresh } = useSession();
+  const accountCountry = useAccountCountry();
   const [showBalance, setShowBalance] = useState(true);
 
   useEffect(() => { refresh(); }, [refresh]);
@@ -102,7 +104,7 @@ export default function AccountCenter() {
   const isSuperAdmin = isSuperAdminUser(user);
   const bonusBalance = numeric((user as Record<string, unknown>).bonusBalance);
 
-  const money = (v: number | null) => (v === null ? "—" : showBalance ? `GHS ${v.toFixed(2)}` : "GHS ••••••");
+  const money = (v: number | null) => (v === null ? "—" : showBalance ? formatMoney(v, accountCountry) : `${countrySymbol(accountCountry)} ••••••`);
 
   const doLogout = () => { logout(); window.location.href = "/"; };
 

@@ -4,6 +4,7 @@ import { Share2, Ticket, Trophy, X } from "lucide-react";
 import type { Bet } from "@/lib/api";
 import { markBetWon } from "@/lib/withdrawalGate";
 import { pickUserField, useSession } from "@/lib/session";
+import { formatMoney, normalizeCountry, useAccountCountry } from "@/lib/country";
 
 const TROPHY_SRC = "/superbet-victory-trophy.png";
 const CONFETTI_COLORS = ["#F6D67C", "#D4AF37", "#FFF3C4", "#B8860B", "#F6D67C", "#00E85F"];
@@ -20,6 +21,8 @@ export function verifyCode(bet: Bet): string {
 export default function TrophyCelebration({ bet, onClose, showConfetti = true }: { bet: Bet; onClose: () => void; showConfetti?: boolean }) {
   const [, setLocation] = useLocation();
   const { user } = useSession();
+  const accountCountry = useAccountCountry();
+  const betCurrency = normalizeCountry(bet.currency) || accountCountry;
   const [trophyFailed, setTrophyFailed] = useState(false);
   const [generating, setGenerating] = useState(false);
   const handleClose = () => {
@@ -30,14 +33,14 @@ export default function TrophyCelebration({ bet, onClose, showConfetti = true }:
   };
   const showOff = async () => {
     setGenerating(true);
-    const text = `I just won GHS ${bet.potentialReturn.toFixed(2)} on PlayBet!`;
+    const text = `I just won ${formatMoney(bet.potentialReturn, betCurrency)} on PlayBet!`;
     try { if (navigator.share) await navigator.share({ text }); else await navigator.clipboard.writeText(text); } catch { /* optional */ } finally { setGenerating(false); }
   };
   const viewTicket = () => { handleClose(); setLocation(`/bets/${bet.id}`); };
   return <div className="wc-overlay" role="dialog" aria-modal="true" aria-label="Winning bet"><TrophyCelebrationStyles />{showConfetti && <Confetti />}
     <button className="wc-close" type="button" onPointerDown={(event) => { event.stopPropagation(); handleClose(); }} onClick={(event) => { event.stopPropagation(); handleClose(); }} aria-label="Close"><X size={20} /></button>
     <div className="wc-stage"><div className="wc-headline"><h1 className="wc-shimmer">YOU WON</h1></div>
-      <div className="wc-amount"><span>AMOUNT WON</span><strong>GHS {bet.potentialReturn.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></div>
+      <div className="wc-amount"><span>AMOUNT WON</span><strong>{formatMoney(bet.potentialReturn, betCurrency)}</strong></div>
       <div className="wc-trophy-stage"><div className="wc-sparkles" aria-hidden="true"><i>✦</i><i>✧</i><i>✦</i><i>✧</i><i>✦</i></div><div className={trophyFailed ? "wc-trophy wc-trophy-fallback" : "wc-trophy"}>{trophyFailed ? <Trophy size={76} /> : <><span className="wc-shine" /><img src={TROPHY_SRC} alt="Super Bet S trophy" onError={() => setTrophyFailed(true)} /></>}</div></div>
       <div className="wc-bottom">
         <button type="button" className="wc-view-ticket" onClick={viewTicket}><Ticket size={14} /> View ticket details</button>
