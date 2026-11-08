@@ -51,7 +51,7 @@ export default function AffiliatePage() {
   useEffect(() => { if (signedIn) void load(); else setLoading(false); }, []);
 
   const currency = asText(stats.currency, "GHS");
-  const available = asNum(stats.availableBalance);
+  const available = asNum(stats.commissionBalance ?? stats.availableBalance);
   const primary = links.find((l) => l.active !== false) ?? links[0];
   const primaryUrl = primary ? referralUrlFor(primary) : "";
 
@@ -112,7 +112,7 @@ export default function AffiliatePage() {
       <section className="panel aff-stat"><Users size={18} /><small>Total referrals</small><strong>{loading ? "…" : asText(stats.totalReferrals, "0")}</strong></section>
       <section className="panel aff-stat"><Coins size={18} /><small>Commission earned</small><strong>{loading ? "…" : money(stats.lifetimeCommission, currency)}</strong></section>
       <section className="panel aff-stat"><BarChart3 size={18} /><small>Referred stakes</small><strong>{loading ? "…" : money(stats.lifetimeStake, currency)}</strong></section>
-      <section className="panel aff-stat"><WalletCards size={18} /><small>Available balance</small><strong>{loading ? "…" : money(stats.availableBalance, currency)}</strong></section>
+      <section className="panel aff-stat"><WalletCards size={18} /><small>Available balance</small><strong>{loading ? "…" : money(available, currency)}</strong></section>
     </div>
 
     <section className="panel aff-panel">
