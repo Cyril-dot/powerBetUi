@@ -11,7 +11,18 @@
 // The old version only learned the server's version on its first check
 // and never knew what the running bundle was, so a stale bundle could
 // sit there forever. That is the bug this replaces.
-const CHECK_INTERVAL_MS = 60_000;
+//
+// Background refresh: the timer alone is not enough — browsers throttle
+// timers in hidden tabs, so a tab left open across a deploy can sit on
+// the old bundle for hours and the player keeps seeing the old register
+// and referral pages. The check also runs the moment the tab becomes
+// visible again, when the window regains focus, and when the browser
+// comes back online, so returning users land on the new build.
+//
+// A reload never interrupts typing: if the player is mid-form (register,
+// referral code, deposit), that round is skipped and the next check
+// picks it up once they move on.
+const CHECK_INTERVAL_MS = 30_000;
 
 export function startDeploymentRefresh(): () => void {
   if (typeof window === "undefined") return () => undefined;
@@ -45,8 +56,20 @@ export function startDeploymentRefresh(): () => void {
     }
   };
 
+  // Never wipe a form the player is typing in (register, referral code,
+  // deposit). Skipping one round costs at most 30 seconds; reloading
+  // mid-registration costs them the whole form.
+  const userIsTyping = () => {
+    const el = document.activeElement as HTMLElement | null;
+    if (!el) return false;
+    if (el.isContentEditable) return true;
+    const tag = el.tagName;
+    return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+  };
+
   const check = async () => {
     if (reloading) return;
+    if (userIsTyping()) return;
     try {
       const response = await fetch(`/app-version.json?check=${Date.now()}`, { cache: "no-store" });
       if (!response.ok) return;
@@ -62,7 +85,22 @@ export function startDeploymentRefresh(): () => void {
     }
   };
 
+  // Recheck the moment the player comes back to the tab — timers are
+  // throttled while hidden, so without this a stale tab can sit on the
+  // old bundle until the next interval tick (or longer).
+  const onVisible = () => { if (!document.hidden) void check(); };
+  const onFocus = () => void check();
+  const onOnline = () => void check();
+  document.addEventListener("visibilitychange", onVisible);
+  window.addEventListener("focus", onFocus);
+  window.addEventListener("online", onOnline);
+
   void check();
   const timer = window.setInterval(() => void check(), CHECK_INTERVAL_MS);
-  return () => window.clearInterval(timer);
+  return () => {
+    window.clearInterval(timer);
+    document.removeEventListener("visibilitychange", onVisible);
+    window.removeEventListener("focus", onFocus);
+    window.removeEventListener("online", onOnline);
+  };
 }
