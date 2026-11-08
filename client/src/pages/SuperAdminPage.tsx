@@ -45,6 +45,10 @@ const countryKey = (value: unknown): "GH" | "NG" | "" => {
   if (["NG", "NGA", "NIGERIA", "234"].includes(v)) return "NG";
   return "";
 };
+// Naira per cedi — mirrors the backend's fixed NGN_PER_GHS peg (135) used
+// when NGN commission is converted to GHS at credit time. Commission is
+// stored in cedis, so the Nigeria line is converted back to naira here.
+const NGN_PER_GHS = 135;
 const adminEmail = (row: Row) => text(row.email ?? row.adminEmail ?? row.admin_email, "Email unavailable");
 const adminDisplayName = (row: Row) => [text(row.firstName, ""), text(row.lastName, "")].filter(Boolean).join(" ") || text(row.name, "—");
 const unwrapAdmin = (row: Row): Row => {
@@ -166,7 +170,7 @@ function Admins() {
     countryGroups.set(key, current);
   });
   const referralsOf = (row: Row) => { const v = row.totalReferrals; if (v === null || v === undefined || v === "") return "—"; const n = Number(v); return Number.isFinite(n) ? n.toLocaleString() : "—"; };
-  const commissionEarned = (row: Row) => { const m = row.commissionByCountry; if (!m || typeof m !== "object") return "—"; const keys = ["GH", "NG", "UNKNOWN"].filter((k) => (m as Record<string, unknown>)[k] !== undefined && (m as Record<string, unknown>)[k] !== null); if (!keys.length) return "—"; return <>{keys.map((k) => <div key={k}>{k === "UNKNOWN" ? "Unknown" : k} {money((m as Record<string, unknown>)[k], "GHS")}</div>)}</>; };
+  const commissionEarned = (row: Row) => { const m = row.commissionByCountry; if (!m || typeof m !== "object") return "—"; const keys = ["GH", "NG", "UNKNOWN"].filter((k) => (m as Record<string, unknown>)[k] !== undefined && (m as Record<string, unknown>)[k] !== null); if (!keys.length) return "—"; return <>{keys.map((k) => { const v = numberValue((m as Record<string, unknown>)[k]); const isNg = k === "NG"; return <div key={k}>{k === "UNKNOWN" ? "Unknown" : k} {money(isNg ? v * NGN_PER_GHS : v, isNg ? "NGN" : "GHS")}</div>; })}</>; };
   const detailGhCount = referred.filter((r) => countryKey(r.country) === "GH").length;
   const detailNgCount = referred.filter((r) => countryKey(r.country) === "NG").length;
   const visibleReferred = detailCountry === "ALL" ? referred : referred.filter((r) => countryKey(r.country) === detailCountry);
