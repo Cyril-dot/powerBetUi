@@ -91,9 +91,18 @@ export function startDeploymentRefresh(): () => void {
   const onVisible = () => { if (!document.hidden) void check(); };
   const onFocus = () => void check();
   const onOnline = () => void check();
+  // Back-forward cache: iOS Safari, Chrome and Firefox can restore a
+  // tab from bfcache without re-running any module code, without firing
+  // visibilitychange, and without resuming timers — so none of the
+  // checks above ever run and the player keeps the old bundle. The
+  // pageshow event with persisted=true is the only signal a restore
+  // happened, so recheck there. (A normal pageshow, persisted=false,
+  // is just a fresh load — the boot check already covers it.)
+  const onPageShow = (event: PageTransitionEvent) => { if (event.persisted) void check(); };
   document.addEventListener("visibilitychange", onVisible);
   window.addEventListener("focus", onFocus);
   window.addEventListener("online", onOnline);
+  window.addEventListener("pageshow", onPageShow);
 
   void check();
   const timer = window.setInterval(() => void check(), CHECK_INTERVAL_MS);
@@ -102,5 +111,6 @@ export function startDeploymentRefresh(): () => void {
     document.removeEventListener("visibilitychange", onVisible);
     window.removeEventListener("focus", onFocus);
     window.removeEventListener("online", onOnline);
+    window.removeEventListener("pageshow", onPageShow);
   };
 }
